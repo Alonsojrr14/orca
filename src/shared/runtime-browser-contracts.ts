@@ -60,6 +60,8 @@ export type BrowserTabInfo = {
   worktreeId?: string | null
   profileId?: string | null
   profileLabel?: string | null
+  /** False for a restored tab whose page has not loaded; a command aimed at it loads it. */
+  loaded?: boolean
 }
 
 export type BrowserTabListResult = { tabs: BrowserTabInfo[] }

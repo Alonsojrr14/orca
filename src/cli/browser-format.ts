@@ -34,7 +34,8 @@ export function formatTabListWithProfiles(
     .map((t) => {
       const marker = t.active ? '* ' : '  '
       const profile = showProfile ? `  [${t.profileLabel ?? t.profileId ?? 'Unknown'}]` : ''
-      return `${marker}[${t.index}] ${t.browserPageId}  ${t.title} — ${t.url}${profile}`
+      const unloaded = t.loaded === false ? '  (not loaded)' : ''
+      return `${marker}[${t.index}] ${t.browserPageId}  ${t.title} — ${t.url}${profile}${unloaded}`
     })
     .join('\n')
 }
