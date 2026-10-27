@@ -13,6 +13,7 @@ import { AgentDashboardExperimentalSetting } from './AgentDashboardExperimentalS
 import { EphemeralVmsExperimentalSetting } from './EphemeralVmsExperimentalSetting'
 import { BrowserExtensionsExperimentalSetting } from './BrowserExtensionsExperimentalSetting'
 import { WslHostsExperimentalSetting } from './WslHostsExperimentalSetting'
+import { FitTabsToTitlesExperimentalSetting } from './FitTabsToTitlesExperimentalSetting'
 import { wslHostsAvailable } from '../sidebar/use-wsl-hosts-enabled'
 import {
   MAX_AGENT_HIBERNATION_IDLE_MS,
@@ -52,6 +53,9 @@ export function ExperimentalPane({
   ])
   const showNewWorktreeCardStyle = matchesSettingsSearch(searchQuery, [
     getExperimentalSearchEntry().newWorktreeCardStyle
+  ])
+  const showFitTabsToTitles = matchesSettingsSearch(searchQuery, [
+    getExperimentalSearchEntry().fitTabsToTitles
   ])
   const agentHibernationEnabled = settings.experimentalAgentHibernation === true
   const newWorktreeCardStyleEnabled = settings.experimentalNewWorktreeCardStyle === true
@@ -264,6 +268,10 @@ export function ExperimentalPane({
             />
           </div>
         </SearchableSetting>
+      ) : null}
+
+      {showFitTabsToTitles ? (
+        <FitTabsToTitlesExperimentalSetting settings={settings} updateSettings={updateSettings} />
       ) : null}
 
       <EphemeralVmsExperimentalSetting settings={settings} updateSettings={updateSettings} />
