@@ -189,7 +189,7 @@ export function useSourceControlCommitAction({
           'auto.components.right.sidebar.source.control.commit.completeMergeFailed',
           'Complete merge failed'
         ),
-        { description: result.error ?? 'Commit failed' }
+        { description: result.error }
       )
       return
     }
