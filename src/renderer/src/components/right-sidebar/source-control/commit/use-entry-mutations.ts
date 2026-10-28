@@ -5,6 +5,7 @@ import type { GitStatusEntry } from '../../../../../../shared/git-status-types'
 import type { ConflictResolution } from '../../../../../../shared/source-control-entry-actions'
 import { editorFileHoldKey, editorPathHoldKey } from '@/components/editor/editor-autosave-holds'
 import {
+  getOpenFilesForExternalFileChange,
   notifyEditorExternalFileChange,
   requestEditorFileSave,
   requestEditorSaveQuiesce
@@ -109,20 +110,22 @@ export function useSourceControlEntryMutations({
       const runtimeEnvironmentId =
         activeRepoTarget?.kind === 'environment' ? activeRepoTarget.environmentId : null
       if (resolution !== 'keep_deletion') {
-        // Match the physical file so a dirty tab opened from another workspace is saved too.
+        // Match by physical file so views from other workspaces count and another host's twin path does not.
         const physicalKey = editorPathHoldKey(
           state,
           { worktreeId: activeWorktreeId, runtimeEnvironmentId },
           joinPath(worktreePath, entry.path)
         )
-        const dirtyFileIds = state.openFiles
-          .filter(
-            (file) =>
-              file.isDirty &&
-              ((file.worktreeId === activeWorktreeId && file.relativePath === entry.path) ||
-                (physicalKey !== null && editorFileHoldKey(state, file) === physicalKey))
-          )
-          .map((file) => file.id)
+        const views =
+          physicalKey === null
+            ? getOpenFilesForExternalFileChange(state.openFiles, {
+                worktreeId: activeWorktreeId,
+                worktreePath,
+                relativePath: entry.path,
+                runtimeEnvironmentId
+              })
+            : state.openFiles.filter((file) => editorFileHoldKey(state, file) === physicalKey)
+        const dirtyFileIds = views.filter((file) => file.isDirty).map((file) => file.id)
         return runEntryMutation('stage', entry.path, async (context, filePath) => {
           // Stage what the user sees: an unsaved resolution must reach disk before git add reads it.
           await Promise.all(dirtyFileIds.map((fileId) => requestEditorFileSave({ fileId })))
