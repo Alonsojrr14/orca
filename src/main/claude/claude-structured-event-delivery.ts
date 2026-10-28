@@ -66,7 +66,11 @@ export function emitClaudeStructuredSessionEvent({
       deps.logger?.warn('Claude event observer failed', { scope: 'claude-event', error })
     }
   }
+  let notification: ChildWorkAdmission | undefined
   const display = (): ChildWorkAdmission => {
+    if (notification?.accepted) {
+      return notification
+    }
     if (session?.events?.tryAppendTransition) {
       const result = session.events.tryAppendTransition({
         steps: [],
@@ -74,26 +78,41 @@ export function emitClaudeStructuredSessionEvent({
         publish: false,
         onPublished: notify
       })
-      return result.accepted ? result : { ...result, retry: display }
+      notification = result.accepted ? result : { ...result, retry: display }
+      return notification
     }
     notify()
-    return { accepted: true }
+    notification = { accepted: true }
+    return notification
   }
-  let notification: ChildWorkAdmission | undefined
+  const retain = (result: ChildWorkAdmission): ChildWorkAdmission => {
+    const retry = result.retry
+    if (session && event.type !== 'ended') {
+      session.retryChildWork = !result.accepted && retry ? () => retain(retry()) : undefined
+      if (!result.accepted && result.reason === 'backpressure') {
+        session.connection.pauseReading?.()
+      }
+    }
+    return result
+  }
   if (!admission.accepted && session?.retryChildWork) {
     const retry = session.retryChildWork
+    let childWork = admission
     const resume = (): ChildWorkAdmission => {
-      const result = retry()
-      if (result.accepted) {
-        session.retryChildWork = undefined
-        notification = display()
+      if (!childWork.accepted) {
+        childWork = retry()
       }
-      return result
+      if (childWork.accepted) {
+        session.retryChildWork = undefined
+        const displayed = retain(display())
+        return event.type === 'ended' ? childWork : displayed
+      }
+      return retain({ ...childWork, retry: resume })
     }
     session.retryChildWork = resume
     admission = { ...admission, retry: resume }
   } else if (admission.accepted) {
-    notification = display()
+    retain(display())
   }
   if (event.type === 'ended') {
     // Physical exit must survive a refused semantic suffix; successful delivery keeps queue order.

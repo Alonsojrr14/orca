@@ -6,8 +6,7 @@ import {
   buildOrcadEntry,
   buildOrcadCli,
   buildOrcadLauncher,
-  externalNativeAddons,
-  ORCAD_EXTERNAL_MODULES,
+  buildOrcadChild,
   ORCAD_CHILD_ENTRY_POINTS,
   ORCAD_COMMONJS_MODULE_OPTIONS,
   orcadChildOutputFilename
@@ -217,34 +216,9 @@ for (const artifact of ORCAD_COMPUTER_USE_RUNTIME_ARTIFACTS) {
 }
 stageOrcadMobileWebBundle(OUT_DIR)
 
-/** Why one call per child and not one `outdir` build: esbuild mirrors each entry's source
- *  directory under `outdir`, and both children must land flat beside orcad.js — that is where
- *  their runtime resolvers look for them. */
-function buildForkedChild(entryPoint, outfile) {
-  return build({
-    ...ORCAD_COMMONJS_MODULE_OPTIONS,
-    entryPoints: [entryPoint],
-    bundle: true,
-    platform: 'node',
-    target: 'node18',
-    format: 'cjs',
-    outfile,
-    external: ORCAD_EXTERNAL_MODULES,
-    plugins: [externalNativeAddons],
-    metafile: true,
-    minify: true,
-    sourcemap: false,
-    define: {
-      ...ORCAD_COMMONJS_MODULE_OPTIONS.define,
-      'process.env.NODE_ENV': '"production"'
-    },
-    logLevel: 'error'
-  })
-}
-
 const childResults = await Promise.all(
   Object.values(ORCAD_CHILD_ENTRY_POINTS).map((entryPoint) =>
-    buildForkedChild(join(ROOT, entryPoint), join(OUT_DIR, orcadChildOutputFilename(entryPoint)))
+    buildOrcadChild(join(ROOT, entryPoint), join(OUT_DIR, orcadChildOutputFilename(entryPoint)))
   )
 )
 

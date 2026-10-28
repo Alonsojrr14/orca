@@ -17,6 +17,8 @@ export const ORCAD_CHILD_ENTRY_POINTS = {
   backup: 'src/main/persistence/profile-state/profile-state-backup-worker-entry.ts',
   foreignSqliteReader: 'src/main/foreign-sqlite-readers/foreign-sqlite-reader-entry.ts',
   portScanCommandWorker: 'src/main/ports/port-scan-command-worker-entry.ts',
+  journalLegacyRestWorker:
+    'src/main/native-chat/agent-session-journal/journal-legacy-rest-worker-entry.ts',
   sessionScanner: 'src/main/ai-vault/session-scanner-service-entry.ts',
   workerThreadChildProcess:
     'src/main/worker-thread-child-process/worker-thread-child-process-entry.ts',
@@ -118,6 +120,29 @@ async function nonAsciiModule(outfile) {
   } finally {
     rmSync(unminified, { force: true })
   }
+}
+
+// Each child must land flat beside orcad.js for the runtime filename resolvers.
+export function buildOrcadChild(entryPoint, outfile) {
+  return build({
+    ...ORCAD_COMMONJS_MODULE_OPTIONS,
+    entryPoints: [entryPoint],
+    bundle: true,
+    platform: 'node',
+    target: 'node18',
+    format: 'cjs',
+    outfile,
+    external: ORCAD_EXTERNAL_MODULES,
+    plugins: [externalNativeAddons],
+    metafile: true,
+    minify: true,
+    sourcemap: false,
+    define: {
+      ...ORCAD_COMMONJS_MODULE_OPTIONS.define,
+      'process.env.NODE_ENV': '"production"'
+    },
+    logLevel: 'error'
+  })
 }
 
 export async function buildOrcadEntry(outfile) {

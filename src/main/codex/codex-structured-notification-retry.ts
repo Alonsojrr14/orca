@@ -37,6 +37,32 @@ export function createCodexStructuredNotificationRetry(deps: {
 }) {
   const states = new Map<string, RetryState>()
 
+  const clear = (sessionId: string, connection: CodexAppServerConnection | null): void => {
+    const state = states.get(sessionId)
+    if (!state || (connection && state.connection !== connection)) {
+      return
+    }
+    if (state.timer) {
+      clearTimeout(state.timer)
+    }
+    state.events.length = 0
+    state.bytes = 0
+    states.delete(sessionId)
+    state.connection.resumeReading?.()
+  }
+
+  const stateForConnection = (
+    sessionId: string,
+    connection: CodexAppServerConnection | undefined
+  ): RetryState | undefined => {
+    const state = states.get(sessionId)
+    if (state && connection && state.connection !== connection) {
+      clear(sessionId, state.connection)
+      return undefined
+    }
+    return state
+  }
+
   const retry = (sessionId: string, connection: CodexAppServerConnection): void => {
     const state = states.get(sessionId)
     if (!state || state.connection !== connection || state.running || state.failed) {
@@ -86,7 +112,7 @@ export function createCodexStructuredNotificationRetry(deps: {
         state.events.shift()
         state.bytes = Math.max(0, state.bytes - pending.bytes)
       }
-      if (state.events.length === 0) {
+      if (!state.failed && state.events.length === 0) {
         states.delete(sessionId)
         connection.resumeReading?.()
       }
@@ -130,8 +156,8 @@ export function createCodexStructuredNotificationRetry(deps: {
     continuation?: () => CodexJournalTranslationAdmission
   ): boolean => {
     const bytes = Buffer.byteLength(JSON.stringify({ method, params }), 'utf8')
-    let state = states.get(sessionId)
-    if (!state || state.connection !== connection) {
+    let state = stateForConnection(sessionId, connection)
+    if (!state) {
       state = { connection, events: [], bytes: 0, timer: null, running: false, failed: false }
       states.set(sessionId, state)
     }
@@ -164,7 +190,7 @@ export function createCodexStructuredNotificationRetry(deps: {
       if (landed && !landed.ok) {
         return landed
       }
-      const state = states.get(sessionId)
+      const state = stateForConnection(sessionId, deps.sessionFor(sessionId)?.connection)
       if (state) {
         retry(sessionId, state.connection)
       }
@@ -205,7 +231,7 @@ export function createCodexStructuredNotificationRetry(deps: {
       if (!session) {
         return { accepted: true }
       }
-      const state = states.get(sessionId)
+      const state = stateForConnection(sessionId, session.connection)
       if (state?.failed) {
         return { accepted: false, reason: 'failed' }
       }
@@ -242,19 +268,7 @@ export function createCodexStructuredNotificationRetry(deps: {
       return admission
     },
     retry,
-    clear: (sessionId: string, connection: CodexAppServerConnection | null): void => {
-      const state = states.get(sessionId)
-      if (!state || (connection && state.connection !== connection)) {
-        return
-      }
-      if (state.timer) {
-        clearTimeout(state.timer)
-      }
-      state.events.length = 0
-      state.bytes = 0
-      state.connection.resumeReading?.()
-      states.delete(sessionId)
-    }
+    clear
   }
 }
 
