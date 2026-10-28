@@ -10,6 +10,7 @@ import { githubRepoIdentityKey } from '../../../../shared/github/repository-iden
 import type { MainWorkItem } from './../map/work-item-field-coercion'
 import {
   fetchIssueWorkItem,
+  fetchWorkItemPreview,
   fetchPullRequestWorkItem,
   fetchPullRequestWorkItemFromCandidates
 } from './work-item-fetch'
@@ -126,7 +127,8 @@ export async function getWorkItemByOwnerRepo(
   number: number,
   type: 'issue' | 'pr',
   connectionId?: string | null,
-  localGitOptions: LocalGitExecOptions = {}
+  localGitOptions: LocalGitExecOptions = {},
+  options: { preview?: boolean } = {}
 ): Promise<MainWorkItem | null> {
   const requestedHost = ownerRepo.host?.trim().toLowerCase()
   const requestedRepository = requestedHost
@@ -150,6 +152,16 @@ export async function getWorkItemByOwnerRepo(
   }
   await acquire()
   try {
+    if (options.preview) {
+      return await fetchWorkItemPreview(
+        repoPath,
+        matchedRepository,
+        number,
+        type,
+        connectionId,
+        localGitOptions
+      )
+    }
     if (type === 'issue') {
       return await fetchIssueWorkItem(
         repoPath,

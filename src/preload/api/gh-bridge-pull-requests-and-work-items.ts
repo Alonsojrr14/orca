@@ -65,6 +65,7 @@ export const ghPullRequestsAndWorkItemsApi = {
     host?: string
     number: number
     type: 'issue' | 'pr'
+    preview?: boolean
   }) => ipcRenderer.invoke('gh:workItemByOwnerRepo', args),
   workItemDetails: (args: {
     repoPath: string

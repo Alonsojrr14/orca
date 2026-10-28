@@ -2,6 +2,7 @@ import {
   Children,
   cloneElement,
   isValidElement,
+  useContext,
   useEffect,
   useMemo,
   useState,
@@ -23,6 +24,8 @@ import {
   NativeChatMarkdownImageLinkContext
 } from './NativeChatMarkdownImage'
 import { remarkNativeChatFileDestinations } from './native-chat-markdown-file-destinations'
+import { NativeChatGitHubLinkPeek } from './NativeChatGitHubLinkPeek'
+import { NativeChatGitHubRepoContext } from './native-chat-github-repo'
 import './native-chat-markdown.css'
 
 /** Existing words stay opaque when a reply first starts growing. */
@@ -64,6 +67,20 @@ function withFileDestinations(
 
 type MarkdownElementProps = { node?: { tagName: string }; children?: ReactNode }
 
+function NativeChatPeekableLink({
+  href,
+  children
+}: {
+  href: string | undefined
+  children: ReactNode
+}): ReactNode {
+  return (
+    <NativeChatGitHubLinkPeek githubRepo={useContext(NativeChatGitHubRepoContext)} href={href}>
+      {children}
+    </NativeChatGitHubLinkPeek>
+  )
+}
+
 function containsImage(children: ReactNode): boolean {
   return Children.toArray(children).some(
     (child) =>
@@ -86,12 +103,15 @@ function createNativeChatImageExtension(
         <NativeChatMarkdownImage src={src} alt={alt} onLinkClick={onLinkClick} />
       ),
       a: (props) => {
-        const renderAnchor = (children: ReactNode): ReactNode =>
-          typeof Anchor === 'function' ? (
-            <Anchor {...props}>{children}</Anchor>
-          ) : (
-            <a href={props.href}>{children}</a>
-          )
+        const renderAnchor = (children: ReactNode): ReactNode => (
+          <NativeChatPeekableLink href={props.href}>
+            {typeof Anchor === 'function' ? (
+              <Anchor {...props}>{children}</Anchor>
+            ) : (
+              <a href={props.href}>{children}</a>
+            )}
+          </NativeChatPeekableLink>
+        )
         const renderChild = (child: ReactNode): ReactNode => {
           if (!isValidElement<MarkdownElementProps>(child) || !containsImage(child)) {
             return renderAnchor(child)
@@ -135,11 +155,14 @@ export function NativeChatMarkdown({
     [onLinkClick, variant, visualExtension]
   )
   const fileLinkExists = useNativeChatFileLinkExists(linkifyFilePaths, streaming)
+  const githubRepo = useContext(NativeChatGitHubRepoContext)
   return (
     <NativeChatMarkdownRowKeyContext.Provider value={rowKey}>
       <CommentMarkdown
         {...props}
         variant={variant}
+        // Only the document variant's links can peek; bare #123 links follow it.
+        githubRepo={variant === 'document' ? githubRepo?.referenceRepo : undefined}
         onLinkClick={onLinkClick}
         content={
           visualExtension && streaming

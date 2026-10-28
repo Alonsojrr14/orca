@@ -5,6 +5,7 @@ import {
   type NativeChatImageRuntimeContext
 } from './native-chat-image-runtime-context'
 import { useNativeChatFileLinkContext } from './use-native-chat-file-link-context'
+import { NativeChatGitHubRepoProvider } from './native-chat-github-repo'
 
 export const NativeChatMarkdownImageOwnerContext = createContext<{
   fileLinkContext: NativeChatFileLinkContext | null
@@ -32,7 +33,9 @@ export function NativeChatMarkdownImageOwnerProvider({
   )
   return (
     <NativeChatMarkdownImageOwnerContext.Provider value={value}>
-      {children}
+      <NativeChatGitHubRepoProvider worktreeId={fileLinkContext?.worktreeId}>
+        {children}
+      </NativeChatGitHubRepoProvider>
     </NativeChatMarkdownImageOwnerContext.Provider>
   )
 }

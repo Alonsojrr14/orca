@@ -18669,6 +18669,13 @@
         "opus": "Best for everyday, complex tasks",
         "sonnet": "Efficient for routine tasks",
         "haiku": "Fastest for quick answers"
+      },
+      "githubPeek": {
+        "updated": "updated {{time}}",
+        "oneComment": "1 comment",
+        "comments": "{{count}} comments",
+        "unavailable": "Preview unavailable.",
+        "retry": "Retry"
       }
     },
     "tab": {
