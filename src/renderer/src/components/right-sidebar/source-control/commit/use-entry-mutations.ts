@@ -13,6 +13,7 @@ import { getConnectionId } from '@/lib/connection-context'
 import { basename, joinPath } from '@/lib/path'
 import { useAppStore } from '@/store'
 import { deleteRuntimePath } from '@/runtime/runtime-file-mutation-client'
+import { statRuntimePath } from '@/runtime/runtime-file-metadata-client'
 import {
   bulkDiscardRuntimeGitPaths,
   bulkUnstageRuntimeGitPaths,
@@ -103,9 +104,8 @@ export function useSourceControlEntryMutations({
       if (!activeWorktreeId || !worktreePath || !entry.conflictKind) {
         return Promise.resolve()
       }
-      const state = useAppStore.getState()
       // Staging drops Git's u record; tracking keeps the row's Resolved locally continuity.
-      state.trackConflictPath(activeWorktreeId, entry.path, entry.conflictKind)
+      useAppStore.getState().trackConflictPath(activeWorktreeId, entry.path, entry.conflictKind)
       const editorTarget = {
         worktreeId: activeWorktreeId,
         worktreePath,
@@ -114,14 +114,17 @@ export function useSourceControlEntryMutations({
           activeRepoTarget?.kind === 'environment' ? activeRepoTarget.environmentId : null
       }
       if (resolution !== 'keep_deletion') {
-        // Same view match as autosave holds: every workspace's view of this physical file, not another host's.
-        const keys = pathMutationHoldKeys(state, editorTarget)
-        const dirtyFileIds = state.openFiles
-          .filter((file) => file.isDirty && keys.has(editorFileHoldKey(state, file)))
-          .map((file) => file.id)
         return runEntryMutation('stage', entry.path, async (context, filePath) => {
+          // Same view match as autosave holds: every workspace's view of this physical file, not another host's.
+          const current = useAppStore.getState()
+          const keys = pathMutationHoldKeys(current, editorTarget)
+          const dirtyFiles = current.openFiles.filter(
+            (file) => file.isDirty && keys.has(editorFileHoldKey(current, file))
+          )
           // Stage what the user sees: an unsaved resolution must reach disk before git add reads it.
-          await Promise.all(dirtyFileIds.map((fileId) => requestEditorFileSave({ fileId })))
+          await Promise.all(dirtyFiles.map((file) => requestEditorFileSave({ fileId: file.id })))
+          // git add on a vanished file stages its deletion, the opposite of keeping it.
+          await statRuntimePath(context, joinPath(worktreePath, filePath))
           await stageRuntimeGitPath(context, filePath)
         })
       }
