@@ -26,6 +26,15 @@ describe('readLinkPreviewMetadata', () => {
     })
   })
 
+  it('keeps a > inside a quoted attribute value as part of the value', () => {
+    const html = `<meta content="Home > Docs" property="og:description"><meta property="og:title" content="A > B">`
+
+    expect(readLinkPreviewMetadata(html, PAGE_URL)).toMatchObject({
+      title: 'A > B',
+      description: 'Home > Docs'
+    })
+  })
+
   it('falls back to <title>, the meta description and /favicon.ico, and caps long text', () => {
     const html = `<title>Plain\n title</title><meta name="description" content="${'word '.repeat(200)}">`
 

@@ -1,11 +1,34 @@
 // Tag scans only move forward: rescanning from every unclosed opener is quadratic on
 // a malformed page, and this parse blocks the main or runtime event loop.
 
+/** Index of the `>` closing a tag, skipping any inside quoted attribute values; -1 when none closes it. */
+function findTagEnd(html: string, from: number): number {
+  let afterEquals = false
+  for (let i = from; i < html.length; i++) {
+    const ch = html[i]
+    if (afterEquals && (ch === '"' || ch === "'")) {
+      const close = html.indexOf(ch, i + 1)
+      if (close === -1) {
+        return -1
+      }
+      i = close
+      afterEquals = false
+    } else if (ch === '>') {
+      return i
+    } else if (ch === '=') {
+      afterEquals = true
+    } else if (!/\s/.test(ch)) {
+      afterEquals = false
+    }
+  }
+  return -1
+}
+
 /** Attributes of each `<tagName ...>` in document order; stops at the first unclosed tag. */
 export function* htmlTagAttributes(html: string, tagName: string): Generator<Map<string, string>> {
   const open = new RegExp(`<${tagName}\\b`, 'gi')
   while (open.test(html)) {
-    const end = html.indexOf('>', open.lastIndex)
+    const end = findTagEnd(html, open.lastIndex)
     if (end === -1) {
       return
     }
