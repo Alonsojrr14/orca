@@ -18502,7 +18502,8 @@
         "reconnecting": "{{hostName}} is reconnecting…",
         "reconnect": "Reconnect",
         "stopped": "{{distro}} is stopped",
-        "start": "Start"
+        "start": "Start",
+        "startFailed": "Couldn’t start {{distro}}. Check it in Settings → Remote Orca Servers."
       },
       "interruptedContinue": {
         "continue": "Continue",
