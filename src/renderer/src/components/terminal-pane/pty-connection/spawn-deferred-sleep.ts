@@ -1,5 +1,3 @@
-import { releaseDeferredCwdFence } from './fresh-spawn-start'
-import { mainResumedSleepPane } from './main-resumed-sleep-pane'
 import { useAppStore } from '@/store'
 import { writeTerminalOutput } from '@/lib/pane-manager/pane-terminal-output-scheduler'
 import type { SpawnDeferralReason } from '../../../../../shared/host-spawn-admission'
@@ -45,13 +43,7 @@ type DeferredSpawn = {
 function isColdRestoreStartup(
   startup: PendingStartupCommand | null | undefined
 ): startup is ColdRestoreAgentResumeStartup {
-  return Boolean(
-    startup &&
-    'agent' in startup &&
-    'resumeProviderSession' in startup &&
-    'useLiveEntry' in startup &&
-    'sleepingRecordEntry' in startup
-  )
+  return Boolean(startup && 'launchConfig' in startup && 'resumeProviderSession' in startup)
 }
 
 /** The record a deferred restore leaves behind, so the session stays listed and resumable even if
@@ -176,7 +168,6 @@ export function installSpawnDeferredSleep(session: ConnectPanePtySession): void 
     options: FreshSpawnOptions,
     visibleAtSpawn: boolean
   ): void => {
-    releaseDeferredCwdFence(session)
     session.keepUnrunResumeHandle(startupOverride)
     session.deferredSpawn = { reason, startupOverride, options }
     const deferral = { reason, resume: () => void session.resumeDeferredSpawn() }
@@ -191,7 +182,6 @@ export function installSpawnDeferredSleep(session: ConnectPanePtySession): void 
         async () => (await session.resumeDeferredSpawn().catch(() => null)) !== null
       )
     }
-    session.settlePaneAttachAttempt?.('failed')
     if (!visibleAtSpawn) {
       // Why: a pane opened while its hidden restore was in flight resumes as the user's own.
       queueMicrotask(() => session.resumeDeferredSpawnOnReveal())
@@ -226,18 +216,9 @@ export function installSpawnDeferredSleep(session: ConnectPanePtySession): void 
         clearPaneSpawnDeferral(session.cacheKey)
       }
     }
-    const startup = deferred.startupOverride
-    const spawned: Promise<string | null> =
-      isColdRestoreStartup(startup) && mainResumedSleepPane(session, startup)
-        ? session.spawnColdRestoreAgentResume(
-            startup,
-            deferred.options,
-            session.deps.isVisibleRef.current !== true
-          )
-        : startPaneThroughMainThenAttach(session, () =>
-            session.startFreshSpawn(startup, deferred.options)
-          )
-    return spawned.then(
+    return startPaneThroughMainThenAttach(session, () =>
+      session.startFreshSpawn(deferred.startupOverride, deferred.options)
+    ).then(
       (ptyId: string | null) => {
         settle()
         return ptyId

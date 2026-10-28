@@ -43,10 +43,7 @@ export type WorkspaceSleepRuntime = {
   notifyWorkspaceSleep: (notice: WorkspaceSleepNotice) => void
   wakeRecordsForWorktree: (worktreeId: string) => SleepingAgentSessionRecord[]
   resumeSleptWorkspaceAgents: (worktreeId: string) => Promise<void>
-  ensureRestoredPaneStarted: (
-    pane: RestoredPane,
-    trigger?: { automatic?: boolean }
-  ) => Promise<StartedPty | null>
+  ensureRestoredPaneStarted: (pane: RestoredPane) => Promise<StartedPty | null>
   /** The window's wake of its own completed-agent hibernation, which main does not hold. */
   wakeWindowHibernatedAgents: (worktreeId: string) => void
 }
@@ -136,13 +133,11 @@ export class WorkspaceSleepCoordinator {
   }
 
   /** A slept pane was opened: main resumes it, queued like any wake, and the opener attaches. */
-  resumePane(pane: RestoredPane, automatic = false): Promise<boolean> {
-    if (!automatic) {
-      this.noteReopened(pane.worktreeId)
-    }
+  resumePane(pane: RestoredPane): Promise<boolean> {
+    this.noteReopened(pane.worktreeId)
     return queueTerminalWorkspaceCommand(this.runtime, `id:${pane.worktreeId}`, {
       kind: 'wake',
-      run: async () => (await this.runtime.ensureRestoredPaneStarted(pane, { automatic })) !== null
+      run: async () => (await this.runtime.ensureRestoredPaneStarted(pane)) !== null
     })
   }
 

@@ -44,8 +44,7 @@ export const worktreesApi = {
 
   sleep: (request) => ipcRenderer.invoke('worktrees:sleep', request),
   sleepReopened: (worktreeId) => ipcRenderer.invoke('worktrees:sleepReopened', worktreeId),
-  resumeSleptPane: (pane, automatic) =>
-    ipcRenderer.invoke('worktrees:resumeSleptPane', pane, automatic),
+  resumeSleptPane: (pane) => ipcRenderer.invoke('worktrees:resumeSleptPane', pane),
   retireStrandedSleepRecord: (args) =>
     ipcRenderer.invoke('worktrees:retireStrandedSleepRecord', args),
 

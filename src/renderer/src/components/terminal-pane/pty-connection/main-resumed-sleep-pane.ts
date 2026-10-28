@@ -1,10 +1,6 @@
 // A slept workspace's pane: main resumes its agent, and this window only attaches to that terminal.
 
 import { useAppStore } from '@/store'
-import { hasWorktreeTeardownStarted } from '@/store/slices/worktree-delete-state-types'
-import { readTerminalSpawnDeferral } from '../../../../../shared/host-spawn-admission'
-import { releaseDeferredCwdFence } from './fresh-spawn-start'
-import { findTerminalTabForPane } from './terminal-tab-id'
 import { isHostMirroredSleepingRecord } from '@/lib/host-mirrored-pane-liveness'
 import { parsePaneKey } from '../../../../../shared/stable-pane-id'
 import { isWorkspaceSleepRecord } from '../../../../../shared/workspace-sleep'
@@ -35,52 +31,18 @@ export function mainResumedSleepPane(
 export async function attachToMainResumedSleepPane(
   session: ConnectPanePtySession,
   pane: { worktreeId: string; tabId: string; leafId: string },
-  startup: ColdRestoreAgentResumeStartup,
-  options: FreshSpawnOptions,
-  automatic?: boolean
+  paneKey: string,
+  options: FreshSpawnOptions
 ): Promise<string | null> {
-  const generation = session.transportStreamGeneration
-  const isCurrent = (): boolean =>
-    !session.disposed &&
-    !hasWorktreeTeardownStarted(
-      useAppStore.getState().deleteStateByWorktreeId?.[pane.worktreeId]
-    ) &&
-    !startup.resumeSource?.cancelled &&
-    (startup.isCurrent?.() ?? true) &&
-    (findTerminalTabForPane(useAppStore.getState(), pane.worktreeId, pane.tabId)?.generation ??
-      0) === session.tabGeneration
-  if (!isCurrent()) {
-    return null
-  }
-  const visibleAtSpawn = session.deps.isVisibleRef.current === true
-  let resumed = false
-  try {
-    resumed = await window.api.worktrees.resumeSleptPane(pane, automatic)
-  } catch (error: unknown) {
-    if (!isCurrent() || generation !== session.transportStreamGeneration) {
-      return null
-    }
-    const deferral = readTerminalSpawnDeferral(error)
-    if (deferral) {
-      session.enterSpawnDeferredSleep(deferral, startup, options, visibleAtSpawn)
-      return null
-    }
-  }
-  if (!isCurrent() || generation !== session.transportStreamGeneration) {
-    return null
-  }
-  if (automatic && !resumed) {
-    releaseDeferredCwdFence(session)
-    session.settlePaneAttachAttempt?.('failed')
+  const resumed = await window.api.worktrees.resumeSleptPane(pane).catch(() => false)
+  if (session.disposed) {
     return null
   }
   const ptyId = await session.startFreshSpawn(null, options)
-  if (isCurrent() && resumed && ptyId) {
+  if (resumed && ptyId) {
     session.showSessionRestoredBanner()
     // Main keeps its record; the window's mirror of it is spent.
-    if (startup.sleepingRecordEntry) {
-      useAppStore.getState().clearSleepingAgentSession(startup.sleepingRecordEntry.paneKey)
-    }
+    useAppStore.getState().clearSleepingAgentSession(paneKey)
   }
   return ptyId
 }

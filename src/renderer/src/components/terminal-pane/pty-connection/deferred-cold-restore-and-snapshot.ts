@@ -85,15 +85,19 @@ export function bindDeferredColdRestoreAndSnapshot(session: ConnectPanePtySessio
   // Why ungated: a reveal, a restart replacement on show, or a phone wake already chose to run now.
   session.spawnColdRestoreAgentResume = (
     startup: ColdRestoreAgentResumeStartup | null = session.buildColdRestoreAgentResumeStartup(),
-    options: FreshSpawnOptions = {},
-    automatic?: boolean
+    options: FreshSpawnOptions = {}
   ): Promise<string | null> => {
     if (startup?.resumeSource?.cancelled) {
       return Promise.resolve(null)
     }
     const mainPane = mainResumedSleepPane(session, startup)
     if (mainPane && startup?.sleepingRecordEntry) {
-      return attachToMainResumedSleepPane(session, mainPane, startup, options, automatic)
+      return attachToMainResumedSleepPane(
+        session,
+        mainPane,
+        startup.sleepingRecordEntry.paneKey,
+        options
+      )
     }
     return startPaneThroughMainThenAttach(session, () => {
       session.applyColdRestoreAgentResumeStartup(startup)
