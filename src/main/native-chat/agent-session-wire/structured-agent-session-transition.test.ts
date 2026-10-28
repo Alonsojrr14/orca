@@ -122,7 +122,8 @@ describe('structured agent-session transitions', () => {
                 {
                   kind: 'item',
                   identity: id,
-                  body: tool('x'.repeat(overflow ? 20_000 : 8_000), 'failed')
+                  body: tool('x'.repeat(overflow ? 20_000 : 8_000), 'failed'),
+                  turnScope: AGENT_JOURNAL_THREAD_SCOPE
                 }
               ]
             }
@@ -134,7 +135,10 @@ describe('structured agent-session transitions', () => {
         accepted: false,
         reason: 'backpressure'
       })
-      await journal.appendItem(id, tool('latest', 'running'), { fence: 1 })
+      await journal.appendItem(id, tool('latest', 'running'), {
+        fence: 1,
+        turnScope: AGENT_JOURNAL_THREAD_SCOPE
+      })
       bind()
       const written = await sink.written?.()
       expect(written?.ok).toBe(!overflow)

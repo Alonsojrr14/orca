@@ -88,7 +88,7 @@ describe('provider timeline session end', () => {
     await rig.journal.appendItem(
       identity,
       { ...runningTool('read'), input: { input } },
-      { fence: 1 }
+      { fence: 1, turnScope: { kind: 'turn', turnItemId: providerTurnItemId('restored') } }
     )
     await expect(bind()).resolves.toEqual({ ok: true })
     expect(rig.journal.itemBody(itemId)).toMatchObject({
