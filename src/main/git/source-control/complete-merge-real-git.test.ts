@@ -66,4 +66,18 @@ describe('delete/modify merge resolved through stage and completeMerge', () => {
     expect(git('log', '-1', '--format=%P').trim().split(' ')).toHaveLength(2)
     await expect(detectConflictOperation(repoPath)).resolves.toBe('unknown')
   })
+
+  it('refuses without a merge in progress instead of committing staged changes', async () => {
+    const { repoPath, git } = createDeleteModifyConflict()
+    git('merge', '--abort')
+    writeFileSync(join(repoPath, 'staged.txt'), 'staged\n')
+    git('add', 'staged.txt')
+    const head = git('rev-parse', 'HEAD')
+
+    await expect(completeMerge(repoPath)).resolves.toEqual({
+      success: false,
+      error: 'There is no merge in progress.'
+    })
+    expect(git('rev-parse', 'HEAD')).toBe(head)
+  })
 })

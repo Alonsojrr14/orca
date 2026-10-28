@@ -166,7 +166,7 @@ export function OperationBanner({
             variant="default"
             size="sm"
             className="h-7 w-full text-xs"
-            disabled={isCompletingMerge || isAbortingOperation}
+            disabled={isCompletingMerge || isAbortingOperation || isRecoveryBusy}
             onClick={onCompleteMerge}
           >
             {isCompletingMerge ? (

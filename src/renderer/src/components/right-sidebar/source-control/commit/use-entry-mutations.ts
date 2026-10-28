@@ -5,6 +5,7 @@ import type { GitStatusEntry } from '../../../../../../shared/git-status-types'
 import type { ConflictResolution } from '../../../../../../shared/source-control-entry-actions'
 import {
   notifyEditorExternalFileChange,
+  requestEditorFileSave,
   requestEditorSaveQuiesce
 } from '@/components/editor/editor-autosave'
 import { getConnectionId } from '@/lib/connection-context'
@@ -101,10 +102,23 @@ export function useSourceControlEntryMutations({
       if (!activeWorktreeId || !worktreePath || !entry.conflictKind) {
         return Promise.resolve()
       }
+      const state = useAppStore.getState()
       // Staging drops Git's u record; tracking keeps the row's Resolved locally continuity.
-      useAppStore.getState().trackConflictPath(activeWorktreeId, entry.path, entry.conflictKind)
-      if (resolution !== 'keep_deletion' || entry.status === 'deleted') {
-        return runEntryMutation('stage', entry.path, stageRuntimeGitPath)
+      state.trackConflictPath(activeWorktreeId, entry.path, entry.conflictKind)
+      if (resolution !== 'keep_deletion') {
+        const dirtyFileIds = state.openFiles
+          .filter(
+            (file) =>
+              file.isDirty &&
+              file.worktreeId === activeWorktreeId &&
+              file.relativePath === entry.path
+          )
+          .map((file) => file.id)
+        return runEntryMutation('stage', entry.path, async (context, filePath) => {
+          // Stage what the user sees: an unsaved resolution must reach disk before git add reads it.
+          await Promise.all(dirtyFileIds.map((fileId) => requestEditorFileSave({ fileId })))
+          await stageRuntimeGitPath(context, filePath)
+        })
       }
       const runtimeEnvironmentId =
         activeRepoTarget?.kind === 'environment' ? activeRepoTarget.environmentId : null
@@ -118,7 +132,7 @@ export function useSourceControlEntryMutations({
         // Hold autosave so an open tab cannot recreate the file after it is removed.
         const releaseAutoSave = await requestEditorSaveQuiesce(editorTarget)
         try {
-          // Permanent: the deleted side's content stays in Git history.
+          // Delete even if status said absent so a since-restored file is never staged; Git history keeps it.
           await deleteRuntimePath(context, joinPath(worktreePath, filePath), false, {
             permanent: true
           })

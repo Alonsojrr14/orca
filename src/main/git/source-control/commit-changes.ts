@@ -1,6 +1,7 @@
 import type { GitRuntimeOptions } from '../git-runtime-options'
 import { gitOptionsForWorktree } from '../git-runtime-options'
 import { gitExecFileAsync } from '../runner'
+import { detectConflictOperation } from './git-conflict-operation'
 import { invalidateGitReadCaches } from './git-read-cache-invalidation'
 
 export function commitChanges(
@@ -12,10 +13,14 @@ export function commitChanges(
 }
 
 /** Concludes a paused merge with Git's MERGE_MSG; strip drops its "# Conflicts:" comments like an editor commit would. */
-export function completeMerge(
+export async function completeMerge(
   worktreePath: string,
   options: GitRuntimeOptions = {}
 ): Promise<{ success: boolean; error?: string }> {
+  // Without MERGE_HEAD, --no-edit would commit staged changes under commit.template text.
+  if ((await detectConflictOperation(worktreePath, options)) !== 'merge') {
+    return { success: false, error: 'There is no merge in progress.' }
+  }
   return runCommit(worktreePath, ['commit', '--no-edit', '--cleanup=strip'], options)
 }
 

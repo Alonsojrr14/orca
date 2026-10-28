@@ -24,7 +24,7 @@ export type ConflictResolution = 'mark_resolved' | 'keep_file' | 'keep_deletion'
 
 /** Staging the worktree is Git's resolution; a missing worktree file can only resolve as a deletion. */
 export function getConflictResolutions(entry: GitStatusEntry): ConflictResolution[] {
-  if (entry.conflictStatus !== 'unresolved' || !entry.conflictKind) {
+  if (entry.conflictStatus !== 'unresolved' || !entry.conflictKind || entry.submoduleRoot) {
     return []
   }
   if (entry.status === 'deleted') {

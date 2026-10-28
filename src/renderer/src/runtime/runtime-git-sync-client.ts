@@ -3,6 +3,7 @@ import type { GitUpstreamStatus } from '../../../shared/git-status-types'
 import { REBASE_FROM_BASE_RPC_TIMEOUT_MS } from '../../../shared/git-rebase-source'
 import type { GitPushTarget } from '../../../shared/worktree/types'
 import { resolveLocalWorktreePath, type RuntimeGitContext } from './runtime-git-client-context'
+import { translate } from '@/i18n/i18n'
 import { callRuntimeRpc } from './runtime-rpc-client'
 import { RuntimeRpcCallError } from './runtime-rpc-result'
 import { toRuntimeWorktreeSelector } from './runtime-worktree-selector'
@@ -250,7 +251,10 @@ export async function completeRuntimeGitMerge(
     if (error instanceof RuntimeRpcCallError && error.code === 'method_not_found') {
       return {
         success: false,
-        error: 'Completing a merge needs a newer Orca on this host. Update Orca on that host.'
+        error: translate(
+          'auto.runtime.runtimeGitSyncClient.completeMergeNeedsNewerHost',
+          'Completing a merge needs a newer Orca on this host. Update Orca on that host.'
+        )
       }
     }
     throw error
