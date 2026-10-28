@@ -182,6 +182,13 @@ export function useSourceControlCommitAction({
       setCommitInFlightByWorktree((prev) => ({ ...prev, [activeWorktreeId]: false }))
       commitInFlightRef.current[activeWorktreeId] = false
     }
+    if (!error && compareBaseRef) {
+      beginGitBranchCompareRequest(
+        activeWorktreeId,
+        `${activeWorktreeId}:${compareBaseRef}:${Date.now()}:post-commit`,
+        compareBaseRef
+      )
+    }
     if (error) {
       toast.error(
         translate(
@@ -197,7 +204,9 @@ export function useSourceControlCommitAction({
   }, [
     activeRepoTarget,
     activeWorktreeId,
+    beginGitBranchCompareRequest,
     commitInFlightRef,
+    compareBaseRef,
     refreshActiveGitStatusAfterMutation,
     refreshBranchCompareRef,
     refreshGitHistoryRef,

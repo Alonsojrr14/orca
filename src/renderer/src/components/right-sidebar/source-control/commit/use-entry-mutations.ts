@@ -3,6 +3,7 @@ import { requireGitOwnerTarget } from '../../worktree-git-owner-target'
 import type { RuntimeClientTarget } from '../../../../../../shared/runtime-client-target'
 import type { GitStatusEntry } from '../../../../../../shared/git-status-types'
 import type { ConflictResolution } from '../../../../../../shared/source-control-entry-actions'
+import { editorFileHoldKey, editorPathHoldKey } from '@/components/editor/editor-autosave-holds'
 import {
   notifyEditorExternalFileChange,
   requestEditorFileSave,
@@ -105,13 +106,21 @@ export function useSourceControlEntryMutations({
       const state = useAppStore.getState()
       // Staging drops Git's u record; tracking keeps the row's Resolved locally continuity.
       state.trackConflictPath(activeWorktreeId, entry.path, entry.conflictKind)
+      const runtimeEnvironmentId =
+        activeRepoTarget?.kind === 'environment' ? activeRepoTarget.environmentId : null
       if (resolution !== 'keep_deletion') {
+        // Match the physical file so a dirty tab opened from another workspace is saved too.
+        const physicalKey = editorPathHoldKey(
+          state,
+          { worktreeId: activeWorktreeId, runtimeEnvironmentId },
+          joinPath(worktreePath, entry.path)
+        )
         const dirtyFileIds = state.openFiles
           .filter(
             (file) =>
               file.isDirty &&
-              file.worktreeId === activeWorktreeId &&
-              file.relativePath === entry.path
+              ((file.worktreeId === activeWorktreeId && file.relativePath === entry.path) ||
+                (physicalKey !== null && editorFileHoldKey(state, file) === physicalKey))
           )
           .map((file) => file.id)
         return runEntryMutation('stage', entry.path, async (context, filePath) => {
@@ -120,8 +129,6 @@ export function useSourceControlEntryMutations({
           await stageRuntimeGitPath(context, filePath)
         })
       }
-      const runtimeEnvironmentId =
-        activeRepoTarget?.kind === 'environment' ? activeRepoTarget.environmentId : null
       return runEntryMutation('stage', entry.path, async (context, filePath) => {
         const editorTarget = {
           worktreeId: activeWorktreeId,
@@ -136,9 +143,9 @@ export function useSourceControlEntryMutations({
           await deleteRuntimePath(context, joinPath(worktreePath, filePath), false, {
             permanent: true
           })
+          notifyEditorExternalFileChange(editorTarget)
           // With the worktree file gone, git add stages the removal and resolves the conflict.
           await stageRuntimeGitPath(context, filePath)
-          notifyEditorExternalFileChange(editorTarget)
         } finally {
           releaseAutoSave()
         }
