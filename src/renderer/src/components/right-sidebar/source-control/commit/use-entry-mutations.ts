@@ -13,7 +13,6 @@ import { getConnectionId } from '@/lib/connection-context'
 import { basename, joinPath } from '@/lib/path'
 import { useAppStore } from '@/store'
 import { deleteRuntimePath } from '@/runtime/runtime-file-mutation-client'
-import { statRuntimePath } from '@/runtime/runtime-file-metadata-client'
 import {
   bulkDiscardRuntimeGitPaths,
   bulkUnstageRuntimeGitPaths,
@@ -123,8 +122,6 @@ export function useSourceControlEntryMutations({
           )
           // Stage what the user sees: an unsaved resolution must reach disk before git add reads it.
           await Promise.all(dirtyFiles.map((file) => requestEditorFileSave({ fileId: file.id })))
-          // git add on a vanished file stages its deletion, the opposite of keeping it.
-          await statRuntimePath(context, joinPath(worktreePath, filePath))
           await stageRuntimeGitPath(context, filePath)
         })
       }
