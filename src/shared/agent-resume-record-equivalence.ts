@@ -63,6 +63,8 @@ export function recoveryRecordMatches(
     agentMainAgentVerdict(existing) === agentMainAgentVerdict(next) &&
     existing.restoredInterruption === next.restoredInterruption &&
     agentProviderSessionsEqual(existing.agent, existing.providerSession, next.providerSession) &&
+    // Why: effort is not session identity, but a stale level would resume at the wrong effort.
+    existing.providerSession.effort === next.providerSession.effort &&
     launchConfigsEqual(existing.launchConfig, next.launchConfig)
   )
 }

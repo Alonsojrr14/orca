@@ -13,7 +13,8 @@ it('runs uncached Bun checks like root CI and collects failures on pull requests
       )
     ).toBe(false)
     const install = steps.findIndex((step) => step.name === 'Install dependencies')
-    const wait = steps.find((step) => step.wait)
+    expect(install).toBeGreaterThanOrEqual(0)
+    const wait = steps.findLast((step) => step.wait)
     for (const id of ['production-types', 'test-types']) {
       const check = steps.find((step) => step.id === id)
       expect(check.if).toBeUndefined()

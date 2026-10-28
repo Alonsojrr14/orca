@@ -10,6 +10,7 @@ export function createJournalPublicReader() {
         sequence: number
         revision: string
         normalizationKey?: string
+        view?: ReturnType<typeof readJournalPublicView>
       }
     | undefined
   return (
@@ -28,7 +29,10 @@ export function createJournalPublicReader() {
       current = { raw, epoch, sequence, revision }
     }
     const source = current
-    return readJournalPublicView(display, () => (source.normalizationKey ??= normalizationKey()))
+    return (source.view ??= readJournalPublicView(
+      display,
+      () => (source.normalizationKey ??= normalizationKey())
+    ))
   }
 }
 

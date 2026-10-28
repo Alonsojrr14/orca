@@ -1,4 +1,5 @@
-import type { AgentSessionRecord } from '../../../shared/agent-session-record'
+import { structuredAgentSessionRuntimePermission } from './structured-agent-session-ran-options'
+import type { AgentSessionConversationView } from '../../../shared/agent-session-conversation-view'
 import type { AgentSessionStatusSummary } from '../../../shared/agent-session-wire'
 import { normalizeOptionalField } from '../../../shared/agent-status-field-normalization'
 import { AGENT_MODEL_MAX_LENGTH } from '../../../shared/agent-status-types'
@@ -11,7 +12,10 @@ import type {
 import { structuredAgentSessionProviderSessionMetadata } from './structured-agent-session-history-result'
 import { agentSessionPinnedLaunchDirectory } from '../../runtime/agent-session-record-launch-directory'
 import { isAgentChatPermissionMode } from '../../../shared/agent-chat-permission-mode'
-import type { StructuredAgentSessionStatusFeedDeps } from './structured-agent-session-status-feed-deps'
+import type {
+  StructuredAgentSessionStatusFeedDeps,
+  StatusPublication
+} from './structured-agent-session-status-feed-deps'
 import { structuredStatusSummariesEqual } from './structured-agent-session-status-summary-equality'
 import { structuredAgentSessionOwnerUnverifiable } from './structured-agent-session-current-work'
 
@@ -22,19 +26,24 @@ export function structuredAgentSessionStatusSummary({
   record,
   state,
   stopping,
+  starting,
   childWork,
   namingFailure,
   now
 }: {
   sessionId: string
   session: {
-    params: { location: AgentSessionRecord['location']; provider: AgentSessionRecord['provider'] }
-    child?: Pick<StructuredAgentSessionProviderChild, 'phase'> | null
+    params: {
+      location: AgentSessionConversationView['location']
+      provider: AgentSessionConversationView['provider']
+    }
+    child?: StructuredAgentSessionProviderChild | null
     restartResume?: AgentSessionStatusSummary['restartResume']
   }
   journal: AgentSessionJournal
-  record: AgentSessionRecord | null
+  record: AgentSessionConversationView | null
   state: StructuredAgentSessionStatusState
+  starting?: boolean
   stopping: boolean
   childWork: Pick<AgentSessionStatusSummary, 'children' | 'backgroundTasks'>
   namingFailure: StructuredChatNamingFailure | undefined
@@ -45,14 +54,16 @@ export function structuredAgentSessionStatusSummary({
     sessionId,
     workspaceId: session.params.location.workspaceId,
     agent: session.params.provider,
-    ...(session.child
+    ...(session.child || starting
       ? {
           hostExecutionOwned: true as const,
-          hostExecutionPhase: session.child.phase
+          hostExecutionPhase: session.child?.phase ?? 'starting'
         }
       : {}),
     ...(session.restartResume ? { restartResume: { phase: session.restartResume.phase } } : {}),
     ...projected,
+    runtimePermission: structuredAgentSessionRuntimePermission(session.child ?? undefined),
+    // Only a working session is still being stopped; any other status already ended that work.
     ...(stopping && projected.status === 'working' ? { stopping: true as const } : {}),
     ...structuredSummaryRecordFields(record, namingFailure),
     ...childWork,
@@ -72,7 +83,7 @@ export function withoutLiveExecution(
     restartResume: _restartResume,
     ...retained
   } = summary
-  return retained
+  return { ...retained, runtimePermission: null }
 }
 
 /** What a restart knows of a chat it has not opened (`atRestStructuredStatusSummary`). */
@@ -91,7 +102,7 @@ export type StructuredAgentSessionAtRest = {
  * turn's mark come with the journal's own row, on first open.
  */
 export function atRestStructuredStatusSummary(
-  record: AgentSessionRecord,
+  record: AgentSessionConversationView,
   rest: StructuredAgentSessionAtRest,
   deps: Pick<StructuredAgentSessionStatusFeedDeps, 'namingFailure' | 'now'>
 ): AgentSessionStatusSummary {
@@ -99,7 +110,7 @@ export function atRestStructuredStatusSummary(
   const unconfirmed =
     !rest.interrupted &&
     !!rest.openTurn &&
-    (record.lease.claimStatus === 'released' ||
+    (record.ownerObservation.claimStatus === 'released' ||
       structuredAgentSessionOwnerUnverifiable({ record, child: null }))
   const status =
     unconfirmed ||
@@ -126,7 +137,7 @@ export function atRestStructuredStatusSummary(
 
 /** What a row reads off the record, opened or not. */
 function structuredSummaryRecordFields(
-  record: AgentSessionRecord | null,
+  record: AgentSessionConversationView | null,
   namingFailure: StructuredChatNamingFailure | undefined
 ): Pick<
   AgentSessionStatusSummary,
@@ -158,8 +169,9 @@ function structuredSummaryRecordFields(
   }
 }
 
-function structuredSummaryConversationNaming(
-  record: AgentSessionRecord | null,
+/** The record's name, and the failure to replace it only while that is still the name. */
+export function structuredSummaryConversationNaming(
+  record: AgentSessionConversationView | null,
   failure: StructuredChatNamingFailure | undefined
 ): Pick<AgentSessionStatusSummary, 'conversationName' | 'namingError'> {
   const name = record?.conversationName
@@ -176,10 +188,10 @@ function structuredSummaryConversationNaming(
 
 export function renamedStructuredStatusSummary(
   previous: AgentSessionStatusSummary,
-  deps: Pick<StructuredAgentSessionStatusFeedDeps, 'getRecord' | 'namingFailure'>,
+  deps: Pick<StructuredAgentSessionStatusFeedDeps, 'getConversation' | 'namingFailure'>,
   sessionId: string
 ): AgentSessionStatusSummary | null {
-  const record = deps.getRecord(sessionId)
+  const record = deps.getConversation(sessionId)
   const { conversationName: _name, namingError: _error, sleptAt: _sleptAt, ...rest } = previous
   const summary = {
     ...rest,
@@ -187,4 +199,13 @@ export function renamedStructuredStatusSummary(
     ...(typeof record?.sleptAt === 'number' ? { sleptAt: record.sleptAt } : {})
   }
   return structuredStatusSummariesEqual(previous, summary) ? null : summary
+}
+
+export function retainedStructuredStatusSummaries(
+  publications: Iterable<StatusPublication>,
+  deps: StructuredAgentSessionStatusFeedDeps
+): AgentSessionStatusSummary[] {
+  return [...publications].map(
+    ({ summary }) => renamedStructuredStatusSummary(summary, deps, summary.sessionId) ?? summary
+  )
 }

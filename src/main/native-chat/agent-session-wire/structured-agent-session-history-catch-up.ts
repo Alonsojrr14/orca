@@ -97,9 +97,10 @@ export function createHistoryCatchUpBatch() {
       const content = expectedItems.length ? [digestOf, expectedItems, mutations] : digestOf
       const digest = createHash('sha256').update(JSON.stringify(content)).digest('hex')
       const settlementId = `${settlementPrefix}:${digest}`
-      // Include batch-envelope cost and the transition’s publication byte.
+      // Include per-mutation transition overhead, the batch envelope and the publication byte.
       const reservedBytes =
         Buffer.byteLength(JSON.stringify({ settlementId, mutations, ...expectations }), 'utf8') +
+        mutations.length * 512 +
         512
       if (reservedBytes + 1 > HISTORY_CATCH_UP_MAX_BYTES) {
         throw new Error('too-large')

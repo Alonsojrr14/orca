@@ -1,4 +1,5 @@
 import { registerStatusFeedRestorationContracts } from './structured-agent-session-status-feed-restoration.spec'
+import { agentSessionConversationView } from '../../../shared/agent-session-conversation-view'
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../../shared/agent-session-journal-types'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -97,7 +98,8 @@ export function feedFor(
         }
       }
     },
-    getRecord: () => (record ? { ...agentSessionRecordFixture(), ...record } : null),
+    getConversation: () =>
+      record ? agentSessionConversationView({ ...agentSessionRecordFixture(), ...record }) : null,
     now: () => (now += 1)
   })
   const events: AgentSessionStatusEvent[] = []
@@ -157,6 +159,7 @@ describe('StructuredAgentSessionStatusFeed', () => {
             agent: 'codex',
             status: null,
             latestPrompt: '',
+            runtimePermission: null,
             updatedAt: expect.any(Number)
           }
         ]

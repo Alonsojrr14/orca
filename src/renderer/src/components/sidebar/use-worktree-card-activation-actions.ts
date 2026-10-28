@@ -1,9 +1,19 @@
-import React, { useCallback, useLayoutEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 
 import { getRepoExecutionHostId } from '../../../../shared/execution-host'
 import { recordRendererCrashBreadcrumb } from '@/lib/crash-diagnostics'
 import { activateWorktreeFromSidebar } from '@/lib/sidebar-worktree-activation'
-import { isEventTargetInsideCurrentTarget } from './worktree-card-dom-events'
+import { isEditableTarget } from '@/lib/editable-target'
+import { hasVisibleOverlay } from '@/lib/visible-overlay'
+import {
+  afterPointerGestureEnds,
+  isEventTargetInsideCurrentTarget,
+  isPlainPrimaryMousePress,
+  isSelectableTextTarget
+} from './worktree-card-dom-events'
+import { canActivateWorktreeOnPress } from './worktree-press-activation-eligibility'
+import { isSidebarPointerDragBlocked } from './worktree-sidebar-pointer-drag-dom'
+import { noteWorktreeRowHoverEnd, noteWorktreeRowHoverStart } from './worktree-row-hover-prewarm'
 import type { WorktreeCardProps } from './worktree-card-model'
 import type { useWorktreeCardFoundation } from './use-worktree-card-foundation'
 import type { useWorktreeCardLinkedDetails } from './use-worktree-card-linked-details'
@@ -19,6 +29,7 @@ export function useWorktreeCardActivationActions({
   isActive,
   activationRowKey,
   onActivate,
+  activateOnPress,
   onWorktreeCardClick,
   onImmediateActivate,
   isDeleting,
@@ -35,6 +46,7 @@ export function useWorktreeCardActivationActions({
   | 'isActive'
   | 'activationRowKey'
   | 'onActivate'
+  | 'activateOnPress'
   | 'onWorktreeCardClick'
   | 'onImmediateActivate'
 > &
@@ -47,10 +59,45 @@ export function useWorktreeCardActivationActions({
   useLayoutEffect(() => {
     worktreeRef.current = worktree
   }, [worktree])
-  // Stable click handler – ignore clicks that are really text selections.
+  const pressActivatedRef = useRef(false)
+  const focusBeforePressRef = useRef<Element | null>(null)
+  const activate = useCallback(() => {
+    onWorktreeCardClick?.()
+    // Use shared activation so sidebar navigation participates in back/forward history.
+    recordRendererCrashBreadcrumb('sidebar_worktree_activate', {
+      worktreeId: worktree.id,
+      repoId: worktree.repoId,
+      wasActive: isActive,
+      sshDisconnected: isSshDisconnected
+    })
+    onImmediateActivate?.(worktree.id, activationRowKey)
+    void activateWorktreeFromSidebar(
+      worktree.id,
+      worktree.hostId ?? (repo ? getRepoExecutionHostId(repo) : undefined)
+    )
+    onActivate?.()
+  }, [
+    worktree.id,
+    worktree.repoId,
+    worktree.hostId,
+    repo,
+    isActive,
+    activationRowKey,
+    isSshDisconnected,
+    onActivate,
+    onWorktreeCardClick,
+    onImmediateActivate
+  ])
+
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (!isEventTargetInsideCurrentTarget(event.currentTarget, event.target)) {
+        return
+      }
+      const pressActivated = pressActivatedRef.current
+      pressActivatedRef.current = false
+      // Synthetic option-forwarded clicks report detail 0 and must still activate.
+      if (pressActivated && event.detail > 0) {
         return
       }
       const selection = window.getSelection()
@@ -79,41 +126,74 @@ export function useWorktreeCardActivationActions({
         event.stopPropagation()
         return
       }
-      onWorktreeCardClick?.()
-      // Why: route sidebar clicks through the shared activation path so the back/forward stack stays complete.
-      recordRendererCrashBreadcrumb('sidebar_worktree_activate', {
-        worktreeId: worktree.id,
-        repoId: worktree.repoId,
-        wasActive: isActive,
-        sshDisconnected: isSshDisconnected
-      })
-      onImmediateActivate?.(worktree.id, activationRowKey)
-      void activateWorktreeFromSidebar(
-        worktree.id,
-        worktree.hostId ?? (repo ? getRepoExecutionHostId(repo) : undefined)
-      )
-      onActivate?.()
+      activate()
     },
-    [
-      affiliateListMode,
-      worktree.id,
-      worktree.repoId,
-      worktree.hostId,
-      repo,
-      isActive,
-      isDeleting,
-      activationRowKey,
-      isSshDisconnected,
-      onActivate,
-      onWorktreeCardClick,
-      onImmediateActivate,
-      onSelectionGesture
-    ]
+    [affiliateListMode, isDeleting, onSelectionGesture, activate]
   )
 
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      pressActivatedRef.current = false
+      if (
+        !activateOnPress ||
+        isDeleting ||
+        !isPlainPrimaryMousePress(event) ||
+        !isEventTargetInsideCurrentTarget(event.currentTarget, event.target) ||
+        isSidebarPointerDragBlocked(event.target, event.currentTarget) ||
+        isSelectableTextTarget(event.target) ||
+        // The press prevents mousedown's focus move, so an open edit would keep the keystrokes.
+        isEditableTarget(document.activeElement) ||
+        // A closing menu or dialog restores focus after the press and would take it from the new workspace.
+        hasVisibleOverlay() ||
+        !canActivateWorktreeOnPress({
+          worktreeId: worktree.id,
+          rowHostId: worktree.hostId ?? (repo ? getRepoExecutionHostId(repo) : undefined)
+        })
+      ) {
+        return
+      }
+      // A plain press replaces the selection exactly as the click would before navigating.
+      if (onSelectionGesture?.(event, worktreeRef.current)) {
+        return
+      }
+      pressActivatedRef.current = true
+      focusBeforePressRef.current = document.activeElement
+      // Drag suppression can swallow this gesture's click; the flag must not outlive it and skip a later click.
+      afterPointerGestureEnds(() => {
+        pressActivatedRef.current = false
+        focusBeforePressRef.current = null
+      })
+      activate()
+    },
+    [activateOnPress, isDeleting, onSelectionGesture, activate, worktree.id, worktree.hostId, repo]
+  )
+
+  const handleMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    // When the press already focused the new workspace, the native default would move focus to the list.
+    if (pressActivatedRef.current && document.activeElement !== focusBeforePressRef.current) {
+      event.preventDefault()
+    }
+  }, [])
+
+  const handlePointerEnter = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      // Touch and pen have no hover intent; a disconnected SSH host cannot reattach a PTY.
+      if (event.pointerType !== 'mouse' || isActive || isDeleting || isSshDisconnected) {
+        return
+      }
+      noteWorktreeRowHoverStart(worktree.id)
+    },
+    [isActive, isDeleting, isSshDisconnected, worktree.id]
+  )
+
+  const handlePointerLeave = useCallback(() => {
+    noteWorktreeRowHoverEnd(worktree.id)
+  }, [worktree.id])
+  // A row unmounted under the pointer never receives pointerleave.
+  useEffect(() => () => noteWorktreeRowHoverEnd(worktree.id), [worktree.id])
+
   const handleRenameTitle = useCallback(
-    // Inline rename has no surface for the failure; the store already logs and
-    // refetches, which reverts the optimistic title in place.
+    // Store logging/refetch reverts failed optimistic renames; inline rename has no separate error surface.
     async (displayName: string): Promise<void> => {
       await updateWorktreeMeta(
         worktree.id,
@@ -164,5 +244,14 @@ export function useWorktreeCardActivationActions({
     [worktree.hostId, worktree.id, worktree.isUnread, setWorkspaceUnreadByUser]
   )
 
-  return { handleClick, handleRenameTitle, handleDoubleClick, handleToggleUnreadQuick }
+  return {
+    handleClick,
+    handlePointerDown,
+    handleMouseDown,
+    handlePointerEnter,
+    handlePointerLeave,
+    handleRenameTitle,
+    handleDoubleClick,
+    handleToggleUnreadQuick
+  }
 }

@@ -11,7 +11,7 @@ import type {
   ClaudeSession,
   ClaudeStructuredSessionAdapterDeps,
   ClaudeStructuredSessionEvent
-} from './claude-structured-session-state'
+} from './structured/claude-structured-session-state'
 
 type ClaudeEventDelivery = {
   session: ClaudeSession | null
@@ -97,7 +97,7 @@ export function emitClaudeStructuredSessionEvent({
   }
   if (!admission.accepted && session?.retryChildWork) {
     const retry = session.retryChildWork
-    let childWork = admission
+    let childWork: ChildWorkAdmission = admission
     const resume = (): ChildWorkAdmission => {
       if (!childWork.accepted) {
         childWork = retry()

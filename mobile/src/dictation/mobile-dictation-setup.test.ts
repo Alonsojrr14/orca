@@ -9,7 +9,7 @@ import {
   fetchDictationSetup,
   isDictationReady,
   isDictationSetupRequiredError,
-  isSpeechlessServerError,
+  dictationFailureMessage,
   isModelInFlight,
   setDictationConfig,
   type MobileSpeechModel,
@@ -186,10 +186,10 @@ describe('rpc wrappers', () => {
   })
 
   it('recognizes an old server refusing a dictation start', () => {
-    expect(isSpeechlessServerError('speech_unavailable: this host has no speech services')).toBe(
-      true
+    expect(dictationFailureMessage('speech_unavailable: this host has no speech services')).toBe(
+      'Update Orca on this server to use voice dictation.'
     )
-    expect(isSpeechlessServerError('voice_dictation_disabled')).toBe(false)
+    expect(dictationFailureMessage('voice_dictation_disabled')).toBe('voice_dictation_disabled')
   })
 
   it('keeps unrelated speech model failures specific', async () => {

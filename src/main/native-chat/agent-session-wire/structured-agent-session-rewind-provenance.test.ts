@@ -1,3 +1,4 @@
+import { agentSessionConversationView } from '../../../shared/agent-session-conversation-view'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -309,7 +310,9 @@ it('restores the original quit cut after actual rewind under a newer live owner'
     { kind: 'turn', turnId: 'turn-undone', state: 'completed', outcome: 'success' },
     { turnScope: AGENT_JOURNAL_THREAD_SCOPE, fence: replacementFence }
   )
-  expect(projection.read(journal, record, seen).state.summary.turnOutcome).toBe('success')
+  expect(
+    projection.read(journal, agentSessionConversationView(record), seen).state.summary.turnOutcome
+  ).toBe('success')
   const epoch = journal.epoch
   const cut = structuredRewindCut(journal, {
     itemId: agentJournalItemKey(UNDONE),
@@ -332,7 +335,7 @@ it('restores the original quit cut after actual rewind under a newer live owner'
   expect(journal.itemFence(turnItemId)).toBe(2)
   expect(journal.itemFence(agentJournalItemKey(stop))).toBe(3)
   expect(record.lease.deathEvidence).toBeNull()
-  const restored = projection.read(journal, record, seen)
+  const restored = projection.read(journal, agentSessionConversationView(record), seen)
   expect(restored.liveFence).toBe(replacementFence)
   expect(restored.state.summary).toMatchObject({
     status: 'idle',
@@ -340,7 +343,7 @@ it('restores the original quit cut after actual rewind under a newer live owner'
     restoredInterruption: true,
     statusStartedAt: since
   })
-  expect(projection.read(journal, record, seen)).toBe(restored)
+  expect(projection.read(journal, agentSessionConversationView(record), seen)).toBe(restored)
   expect(journal.restFact()).toEqual(fact)
   const next = codexItem('later-live', 0)
   await journal.appendItem(
@@ -348,13 +351,15 @@ it('restores the original quit cut after actual rewind under a newer live owner'
     { kind: 'turn', turnId: 'later-live', state: 'running', startedAt: rewindAt + 1 },
     { turnScope: AGENT_JOURNAL_THREAD_SCOPE, fence: replacementFence }
   )
-  expect(projection.read(journal, record, seen).state.summary.status).toBe('working')
+  expect(
+    projection.read(journal, agentSessionConversationView(record), seen).state.summary.status
+  ).toBe('working')
   await journal.appendItem(
     next,
     { kind: 'turn', turnId: 'later-live', state: 'interrupted', startedAt: rewindAt + 1 },
     { turnScope: AGENT_JOURNAL_THREAD_SCOPE, fence: replacementFence }
   )
-  const fault = projection.read(journal, record, seen).state.summary
+  const fault = projection.read(journal, agentSessionConversationView(record), seen).state.summary
   expect(fault.turnOutcome).toBe('interruption')
   expect(fault.restoredInterruption).toBeUndefined()
 })

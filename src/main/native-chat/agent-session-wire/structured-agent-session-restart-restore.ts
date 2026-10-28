@@ -12,7 +12,7 @@
 // one. Nor does it owe a provider child: a child exists because work asked for it.
 
 import { setImmediate as yieldToEventLoop } from 'node:timers/promises'
-import type { AgentSessionRecord } from '../../../shared/agent-session-record'
+import type { AgentSessionConversationView } from '../../../shared/agent-session-conversation-view'
 import { mapWithConcurrency } from '../../../shared/map-with-concurrency'
 import type { AgentSessionRecordStore } from '../../runtime/agent-session-record-store'
 import type { JournalHostDatabase } from '../agent-session-journal/journal-host-database'
@@ -32,7 +32,10 @@ const LISTING_YIELD_EVERY = 32
 const UNWRITTEN = Symbol('unwritten')
 
 export type StructuredAgentSessionRestartListingDeps = {
-  store: Pick<AgentSessionRecordStore, 'listRecords' | 'getRecord' | 'replacedRuntime'>
+  store: Pick<
+    AgentSessionRecordStore,
+    'listConversations' | 'getConversation' | 'getRecord' | 'replacedRuntime'
+  >
   journalDatabase: Pick<JournalHostDatabase, 'db' | 'readOnly'>
   logger: StructuredAgentSessionLogger
   // Lease bookkeeping. Neither throws: listing grants no writer, so bookkeeping must not block it.
@@ -48,7 +51,7 @@ export type StructuredAgentSessionRestartListingDeps = {
   /** A restored chat with a record. `rest` is null when no row is owed here: an open already
    *  published the journal's own, or the journal could not be read, whose first read says why. */
   onListed: (
-    record: AgentSessionRecord,
+    record: AgentSessionConversationView,
     rest: (JournalRestFacts & { interrupted: boolean }) | null
   ) => void
 }
@@ -60,7 +63,7 @@ export async function listStructuredAgentSessionsOnRestart(
 ): Promise<void> {
   const order = sessionIds ? new Map(sessionIds.map((id, index) => [id, index])) : null
   const records = input.store
-    .listRecords()
+    .listConversations()
     .filter((record) => !order || order.has(record.sessionId))
   if (order) {
     records.sort((left, right) => order.get(left.sessionId)! - order.get(right.sessionId)!)
@@ -74,6 +77,7 @@ export async function listStructuredAgentSessionsOnRestart(
     // A session latched in recovery exits here at startup, without waiting for a client.
     if (
       settled &&
+      input.store.getRecord(sessionId) &&
       !((await input.reconcile(sessionId)) && (await input.resolveRecovery(sessionId)))
     ) {
       settled = false
@@ -85,7 +89,7 @@ export async function listStructuredAgentSessionsOnRestart(
     if (index % LISTING_YIELD_EVERY === 0) {
       await yieldToEventLoop()
     }
-    const record = input.store.getRecord(listed.sessionId)
+    const record = input.store.getConversation(listed.sessionId)
     if (!record) {
       continue
     }
@@ -102,7 +106,7 @@ export async function listStructuredAgentSessionsOnRestart(
 /** The chat's rest facts; null when they cannot be read, which keeps its tab for a read to explain. */
 function readRest(
   input: StructuredAgentSessionRestartListingDeps,
-  record: AgentSessionRecord,
+  record: AgentSessionConversationView,
   workingAtTeardown: ReadonlySet<string>
 ): (JournalRestFacts & { interrupted: boolean }) | null | typeof UNWRITTEN {
   // A newer Orca's database: its chats are only that build's to read.
@@ -117,7 +121,7 @@ function readRest(
           ...rest,
           interrupted:
             structuredAgentSessionOwnerEnded(
-              record.lease,
+              { ...record.ownerObservation, runtimeFence: record.currentFence },
               input.store.replacedRuntime(sessionId)
             ) &&
             (rest.openTurn !== null || (!rest.known && workingAtTeardown.has(sessionId)))

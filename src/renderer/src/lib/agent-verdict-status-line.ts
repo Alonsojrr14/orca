@@ -43,8 +43,7 @@ export function agentVerdictStatusLine(
   }
 }
 
-// Why programs only: a program's error message is its own one-line account of what failed (e.g.
-// "rsync failed"), while an agent's last reply is prose that could be anything.
+// Only program errors are reliable one-line failure summaries; agent replies may be unrelated prose.
 function failedLine(entry: VerdictLineSource): string {
   if (!isProgramStatusRow(entry)) {
     return 'Failed'

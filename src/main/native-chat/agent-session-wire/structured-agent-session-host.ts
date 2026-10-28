@@ -1,4 +1,5 @@
 import * as rest from './structured-agent-session-host-legacy-rest'
+import { continuationContextReader as contextReader } from './structured-agent-session-continuation-context'
 import type { AgentSessionRewindParams } from '../../../shared/agent-session-rewind'
 import { rewindStructuredAgentSession } from './structured-agent-session-rewind'
 import { StructuredConversationCommandController } from './structured-conversation-command-controller'
@@ -25,10 +26,10 @@ import { StructuredAgentSessionEventRecovery } from './structured-agent-session-
 import { StructuredAgentSessionBackgroundTaskChannel } from './structured-agent-session-background-task-channel'
 import { StructuredAgentSessionClientDelivery } from './structured-agent-session-client-delivery'
 import { StructuredAgentSessionConversations } from './structured-agent-session-conversations'
-import { createStructuredAgentSessionRestartResume } from './structured-agent-session-restart-resume-host'
+import * as resume from './structured-agent-session-restart-resume-host'
 import { structuredAgentSessionRestartResumeSurfaces } from './structured-agent-session-restart-resume-wiring'
 import * as conversation from './structured-agent-session-host-delivery'
-import { wireStructuredAgentSessionQueuedMessages } from './structured-agent-session-queued-wiring'
+import { wireStructuredAgentSessionQueuedMessages as wireQueuedMessages } from './structured-agent-session-queued-wiring'
 import * as sessionLogger from './structured-agent-session-logger'
 import { sleepStructuredAgentSessionHostWorkspace } from './structured-agent-session-workspace-sleep'
 export type { StructuredAgentSessionHostDeps } from './structured-agent-session-host-types'
@@ -52,9 +53,7 @@ export class StructuredAgentSessionHost {
     onOpened: (id) => this.queued.onOpened(id),
     now: () => this.now()
   })
-  private readonly queued = wireStructuredAgentSessionQueuedMessages(this.sessions, () =>
-    this.mutationContext()
-  )
+  private readonly queued = wireQueuedMessages(this.sessions, () => this.mutationContext())
   // Journal publication renews idle activity.
   private readonly clientDelivery = new StructuredAgentSessionClientDelivery(
     this.sessions,
@@ -66,7 +65,8 @@ export class StructuredAgentSessionHost {
       this.backgroundTasks.publish(sessionId)
       this.lifetime?.residency.released(sessionId)
     },
-    (sessionId) => this.backgroundTasks.read(sessionId)
+    (sessionId) => this.backgroundTasks.read(sessionId),
+    (sessionId) => this.runtimeState?.startFlights.projectsStarting(sessionId) ?? false
   )
   private readonly subscribers = this.clientDelivery.subscribers
   private readonly tasks = new StructuredAgentSessionTaskQueue(() => this.lifetime?.residency)
@@ -78,8 +78,7 @@ export class StructuredAgentSessionHost {
   private readonly conversationDelivery: conversation.StructuredAgentSessionConversationDelivery
   private readonly eventRecovery: StructuredAgentSessionEventRecovery
   private readonly backgroundTasks: StructuredAgentSessionBackgroundTaskChannel
-  /** Public because the RPC surface addresses it directly; see the restart-resume collaborator. */
-  readonly restartResume: ReturnType<typeof createStructuredAgentSessionRestartResume>
+  readonly restartResume: resume.StructuredAgentSessionRestartResume
 
   constructor(readonly deps: HostTypes.StructuredAgentSessionHostDeps) {
     // Collaborators share a logger wrapper that cannot fail the operation it reports.
@@ -113,13 +112,11 @@ export class StructuredAgentSessionHost {
       // Quit drains tracked starts before eviction so their children are stopped.
       trackStart: (start) => this.tasks.trackAttach(start),
       cacheReacquisition: (id) => this.lifetime?.residency.cacheReacquisition(id),
-      onDeathEvidence: (id) => {
-        this.legacyRest?.reconsider(id)
-        this.advanceLegacyRest()
-      },
+      onDeathEvidence: (id) => rest.advanceHostLegacyRest(this.legacyRest, id),
       startProviderChild: (sessionId, startedFor) =>
         agentStart.claimStructuredAgentSessionAgent(this.attachContext(), sessionId, startedFor),
       deliveryOrder: this.runtimeState.deliveryOrder,
+      startFlights: this.runtimeState.startFlights,
       readiness: (id, child) => this.runtimeState.startupAttempts.readiness(id, child),
       // Retire at rest; the next start refreshes login and permission mode.
       stopOutgrownAgent: (id) => this.lifetime.stopAgent(id, { cause: 'evict', resting: true }),
@@ -148,7 +145,7 @@ export class StructuredAgentSessionHost {
       failStartingChild: (...args) => this.lifetime.failStartingChild(...args),
       trackOpen: (open) => this.tasks.trackAttach(open)
     })
-    this.restartResume = createStructuredAgentSessionRestartResume(deps, this.sessions, {
+    this.restartResume = resume.createStructuredAgentSessionRestartResume(deps, this.sessions, {
       ...structuredAgentSessionRestartResumeSurfaces(this, this.now),
       readChildWork: this.clientDelivery.readChildWork,
       childWorkOpen: this.clientDelivery.childWorkOpen,
@@ -168,6 +165,7 @@ export class StructuredAgentSessionHost {
       childWorkOpen: this.clientDelivery.childWorkOpen
     })
     this.legacyRest = rest.createHostLegacyRestInitializer(deps, this.sessions, this.clientDelivery)
+    this.continuationContext = contextReader(deps, this.lifetime.conversation)
     this.runtimeState.startLeaseRenewal()
     this.lifetime.idleSweep.start()
   }
@@ -178,7 +176,7 @@ export class StructuredAgentSessionHost {
   loadedSessionIds = (): string[] =>
     [...this.sessions].flatMap(([sessionId, { child }]) => (child ? [sessionId] : []))
   hasLoadedProviders = (): boolean => this.loadedSessionIds().length > 0
-  sessionAgent = (sessionId: string) => this.deps.store.getRecord(sessionId)?.provider ?? null
+  sessionAgent = (sessionId: string) => this.deps.store.getConversation(sessionId)?.provider ?? null
 
   handleAdapterEvent = (event: Parameters<StructuredAgentSessionEventRecovery['handle']>[0]) =>
     this.eventRecovery.handle(event)
@@ -244,10 +242,8 @@ export class StructuredAgentSessionHost {
 
   reconcileRestartLeases = (): Promise<void> => this.restore.reconcileRestartLeases()
 
-  restoreReadableSessions = async (sessionIds?: readonly string[]): Promise<void> => {
-    await this.restore.restoreReadableSessions(sessionIds)
-    this.advanceLegacyRest()
-  }
+  restoreReadableSessions = (ids?: readonly string[]) =>
+    this.restore.restoreReadableSessions(ids).then(this.advanceLegacyRest)
 
   advanceLegacyRest = (): void => rest.advanceHostLegacyRest(this.legacyRest)
 
@@ -299,6 +295,7 @@ export class StructuredAgentSessionHost {
 
   queuedMessageSend = this.queued.queuedMessageSend
   queuedMessageDelete = this.queued.queuedMessageDelete
+  queuedMessageMove = this.queued.queuedMessageMove
   queuedMessagesResume = this.queued.queuedMessagesResume
   queuedMessageUpdate = this.queued.queuedMessageUpdate
   queuedMessageEditHold = this.queued.queuedMessageEditHold
@@ -325,13 +322,16 @@ export class StructuredAgentSessionHost {
   history: StructuredAgentSessionBackgroundTaskChannel['history'] = (...args) =>
     this.backgroundTasks.history(...args)
 
+  readonly continuationContext: ReturnType<typeof contextReader>
+
   /** Full reduction: absence from a bounded page cannot prove a revised/tombstoned item is absent. */
-  journalSnapshot = async (sessionId: string) =>
-    (await this.lifetime.conversation(sessionId)).journal.snapshot()
+  journalSnapshot = async (id: string) => (await this.lifetime.conversation(id)).journal.snapshot()
 
   currentWork = this.clientDelivery.readCurrentWork
   readCurrentRequests: StructuredAgentSessionBackgroundTaskChannel['currentRequests'] = (...args) =>
     this.backgroundTasks.currentRequests(...args)
+
+  observeJournalPublications = this.clientDelivery.observeJournalPublications
 
   subscribe = (input: AgentSessionSubscribeInput) => this.backgroundTasks.subscribe(input)
 
@@ -349,6 +349,8 @@ export class StructuredAgentSessionHost {
   publishConversationName = this.clientDelivery.publishConversationName
   regenerateConversationName = (sessionId: string): boolean =>
     this.deps.conversationNaming?.regenerate(sessionId) ?? false
+  setUserConversationName: HostTypes.SetUserConversationName = (...args) =>
+    this.deps.conversationNaming?.setUserName(...args) ?? Promise.resolve(null)
 
   /** Live-only completion/prompt events; missed events are never replayed. */
   subscribeTurnCompletions = this.clientDelivery.subscribeTurnCompletions

@@ -68,7 +68,13 @@ export function createHostLegacyRestInitializer(
   )
 }
 
-export function advanceHostLegacyRest(initializer: JournalLegacyRestInitializer | undefined): void {
+export function advanceHostLegacyRest(
+  initializer: JournalLegacyRestInitializer | undefined,
+  sessionId?: string
+): void {
+  if (sessionId !== undefined) {
+    initializer?.reconsider(sessionId)
+  }
   initializer?.advance(structuredJournalBackgroundReady)
 }
 

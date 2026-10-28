@@ -5,7 +5,7 @@ import {
 import type {
   ClaudeSession,
   ClaudeStructuredSessionAdapterDeps
-} from './claude-structured-session-state'
+} from './structured/claude-structured-session-state'
 import { drainClaudeChildWork } from './claude-child-work-evidence'
 
 export function publishClaudeChildWork(

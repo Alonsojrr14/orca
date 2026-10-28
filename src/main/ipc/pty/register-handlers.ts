@@ -58,7 +58,7 @@ import { bindProviderListeners } from './provider/bind-listeners'
 import { installPtySerializeBufferIpc } from './ipc/serialize-buffer'
 import { installPtyResizeVisibilityIpc } from './ipc/resize-visibility'
 import { adoptStablePane } from './pane/adopt-stable'
-import { getPtyIpc } from '../pty-host-bindings'
+import { getPtyIpc } from './pty-host-bindings'
 import {
   noCodexResumeLaunch,
   prepareCodexResumeHome,
@@ -217,8 +217,9 @@ export function registerPtyHandlers(
 
   const assertWorkspaceAcceptsNewPty = (
     worktreeId: string | undefined,
-    sessionId?: string
-  ): Promise<void> | void => assertWorkspaceAcceptsNewPtyImpl(store, worktreeId, sessionId)
+    sessionId?: string,
+    cwd?: string
+  ): Promise<void> | void => assertWorkspaceAcceptsNewPtyImpl(store, worktreeId, sessionId, cwd)
   const resolvePtySpawnStartupCwd = (
     worktreeId: string | undefined,
     cwd: string | undefined,

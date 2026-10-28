@@ -1,3 +1,4 @@
+import { isRenderableImageUri } from '../visual/mobile-native-chat-image-preview'
 import {
   ActivityIndicator,
   Image,
@@ -7,15 +8,16 @@ import {
   Text,
   View
 } from 'react-native'
-import { FileText, X } from 'lucide-react-native'
+import { FileText, Image as ImageIcon, X } from 'lucide-react-native'
 import { colors, radii, spacing } from '../../../theme/mobile-theme'
+import { themedStyleSheet } from '../../../theme/themed-styles'
+import { useMobileColorScheme } from '../../../theme/use-mobile-color-scheme'
 import { formatPreviewByteLength } from '../../../files/mobile-file-preview-response'
 import type { PendingNativeChatImage } from './mobile-native-chat-image-attachment'
 import type { PendingNativeChatFile } from './mobile-native-chat-file-attachment'
 
 const THUMB_SIZE = 58
 
-/** The card's second line: the file's type, then its size. */
 function composerFileMeta(file: Pick<PendingNativeChatFile, 'name' | 'mime' | 'byteLength'>) {
   const extension = /\.([a-z0-9]{1,8})$/i.exec(file.name)?.[1]
   const subtype = /^[^/]+\/([a-z0-9]{1,8})$/i.exec(file.mime)?.[1]
@@ -23,7 +25,6 @@ function composerFileMeta(file: Pick<PendingNativeChatFile, 'name' | 'mime' | 'b
   return `${type} · ${formatPreviewByteLength(file.byteLength)}`
 }
 
-/** Everything riding on the next send, inside the composer box above the text. */
 export function MobileNativeChatComposerAttachments({
   images,
   files,
@@ -35,6 +36,7 @@ export function MobileNativeChatComposerAttachments({
   onRemoveImage?: (id: string) => void
   onRemoveFile?: (id: string) => void
 }): React.JSX.Element | null {
+  useMobileColorScheme()
   if (images.length === 0 && files.length === 0) {
     return null
   }
@@ -48,7 +50,21 @@ export function MobileNativeChatComposerAttachments({
     >
       {images.map((image) => (
         <View key={image.id} style={styles.thumb}>
-          <Image source={{ uri: image.previewUri }} style={styles.thumbImage} resizeMode="cover" />
+          {isRenderableImageUri(image.previewUri) ? (
+            <Image
+              source={{ uri: image.previewUri }}
+              style={styles.thumbImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View
+              style={styles.fileIcon}
+              accessible
+              accessibilityLabel={image.path.split(/[\\/]/).at(-1) || 'Attached image'}
+            >
+              <ImageIcon size={17} color={colors.textSecondary} strokeWidth={2} />
+            </View>
+          )}
           {onRemoveImage ? (
             <RemoveBadge label="Remove image" onPress={() => onRemoveImage(image.id)} />
           ) : null}
@@ -69,7 +85,7 @@ export function MobileNativeChatComposerAttachments({
           </View>
           {file.path === null ? (
             <View style={styles.uploading} accessibilityLabel={`Uploading ${file.name}`}>
-              <ActivityIndicator size="small" color={colors.textPrimary} />
+              <ActivityIndicator size="small" color={colors.onAccent} />
             </View>
           ) : null}
           {onRemoveFile ? (
@@ -82,6 +98,7 @@ export function MobileNativeChatComposerAttachments({
 }
 
 function RemoveBadge({ label, onPress }: { label: string; onPress: () => void }) {
+  useMobileColorScheme()
   return (
     <Pressable accessibilityLabel={label} style={styles.remove} onPress={onPress} hitSlop={8}>
       <X size={11} color={colors.textPrimary} strokeWidth={3} />
@@ -89,7 +106,7 @@ function RemoveBadge({ label, onPress }: { label: string; onPress: () => void })
   )
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyleSheet(() => ({
   strip: {
     flexGrow: 0,
     marginBottom: 10
@@ -153,8 +170,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.45)'
   },
-  // Most of the badge sits inside its item, which Android needs to deliver the tap; the strip's
-  // padding keeps the 5pt overhang from being clipped.
+  // Keep most of the badge inside its item for Android touch delivery; strip padding protects the overhang.
   remove: {
     position: 'absolute',
     top: -5,
@@ -168,4 +184,4 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.composerSurface
   }
-})
+}))

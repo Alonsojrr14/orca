@@ -1,3 +1,4 @@
+import { agentSessionConversationView } from '../../../shared/agent-session-conversation-view'
 import { agentJournalItemKey } from '../../../shared/agent-session-journal-item-key'
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../../shared/agent-session-journal-types'
 import { expect, it, vi } from 'vitest'
@@ -65,16 +66,18 @@ export function registerStatusFeedRestorationContracts({
           runtimeEnd: cause
         }
       }
-      expect(projection.read(journal, record).state.summary.turnOutcome).toBe(
-        cause === 'live' ? 'interruption' : 'cancellation'
-      )
+      expect(
+        projection.read(journal, agentSessionConversationView(record)).state.summary.turnOutcome
+      ).toBe(cause === 'live' ? 'interruption' : 'cancellation')
       expect(readAgentJournalTurn(journal.snapshot().items[0]?.body)?.outcome).toBeUndefined()
       await journal.appendItem(
         { ...TURN_IDENTITY, turnId: 'new-turn' },
         { kind: 'turn', turnId: 'new-turn', state: 'completed', outcome: 'success' },
         { turnScope: AGENT_JOURNAL_THREAD_SCOPE, fence: 2 }
       )
-      expect(projection.read(journal, record).state.summary.turnOutcome).toBe('success')
+      expect(
+        projection.read(journal, agentSessionConversationView(record)).state.summary.turnOutcome
+      ).toBe('success')
       record.lease.deathEvidence = null
       record.lease.claimStatus = 'live'
       await journal.appendItem(
@@ -82,7 +85,9 @@ export function registerStatusFeedRestorationContracts({
         { kind: 'turn', turnId: 'live-fault', state: 'interrupted' },
         { turnScope: AGENT_JOURNAL_THREAD_SCOPE, fence: 2 }
       )
-      expect(projection.read(journal, record).state.summary.turnOutcome).toBe('interruption')
+      expect(
+        projection.read(journal, agentSessionConversationView(record)).state.summary.turnOutcome
+      ).toBe('interruption')
     }
   })
 

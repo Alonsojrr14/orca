@@ -1,5 +1,5 @@
-// Pure aggregation for the daily `wsl_usage_snapshot` event. Inputs carry distro names only so
-// distinct distros can be counted; nothing but buckets and booleans reaches the payload.
+// Count distro identities locally; only buckets/booleans reach the telemetry payload.
+import type { WslHostsGateState } from '../../shared/wsl-host-internal-gate'
 import type { Repo } from '../../shared/repo-types'
 import type { ProjectExecutionRuntimeResolution } from '../../shared/project-execution-runtime'
 import { isDrvfsLinuxPath, parseWslUncPath } from '../../shared/wsl-paths'
@@ -33,6 +33,7 @@ export type WslUsageSnapshotInput = {
   /** Of the Windows-drive WSL git repos, those with a linked worktree WSL Git made. */
   windowsDriveReposWithWslWorktrees: number
   wslHostsGateOpen: boolean
+  wslHostsGateState?: WslHostsGateState
 }
 
 /** `2.4.13.0` → `2.4`; anything else is dropped rather than sent. */
@@ -90,7 +91,7 @@ function count<T>(items: readonly T[], predicate: (item: T) => boolean): number 
 export function buildWslUsageSnapshot(input: WslUsageSnapshotInput): WslUsageSnapshotProps {
   const { projects, userDistros } = input
   const version = toWslMajorMinor(input.wslPackageVersion)
-  // WSL folds distro names case-insensitively; a null distro is "the default", one more key.
+  // Fold distro identity case-insensitively; null denotes the default.
   const projectDistros = new Set(projects.map((project) => project.distro?.toLowerCase() ?? ''))
   return {
     wsl_installed:
@@ -114,6 +115,7 @@ export function buildWslUsageSnapshot(input: WslUsageSnapshotInput): WslUsageSna
       input.windowsDriveReposWithWslWorktrees
     ),
     project_distros_used: bucketWslUsageCount(projectDistros.size),
-    wsl_hosts_gate_open: input.wslHostsGateOpen
+    wsl_hosts_gate_open: input.wslHostsGateOpen,
+    ...(input.wslHostsGateState ? { wsl_hosts_gate_state: input.wslHostsGateState } : {})
   }
 }

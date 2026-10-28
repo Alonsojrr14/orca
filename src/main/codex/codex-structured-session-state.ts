@@ -1,16 +1,11 @@
-import type {
-  StructuredAgentSessionSinkBarrier,
-  StructuredAgentSessionEventSink
-} from '../native-chat/agent-session-wire/structured-agent-session-event-sink'
+import type * as sink from '../native-chat/agent-session-wire/structured-agent-session-event-sink'
 import type { ChildWorkAdmission } from '../native-chat/agent-session-wire/structured-agent-session-accepted-child-work'
+import type { CodexAppliedSettings } from './codex-structured-applied-settings'
 import type { StructuredAgentSessionChildWorkProducer } from '../native-chat/agent-session-wire/structured-agent-session-subagent-rows'
 import type { StructuredAgentSessionLogger } from '../native-chat/agent-session-wire/structured-agent-session-logger'
 import type { StructuredAgentSessionAtRestCommands } from '../native-chat/agent-session-wire/structured-agent-session-at-rest-commands'
 import type { AgentSessionAccountKind } from '../../shared/agent-session-availability'
-import type {
-  AgentJournalAnsweredTurnIdentity,
-  AgentJournalItemIdentity
-} from '../../shared/agent-session-journal-types'
+import type * as journal from '../../shared/agent-session-journal-types'
 import { randomUUID } from 'node:crypto'
 import type { AgentJournalDispatchRejection } from '../../shared/agent-session-failure-words'
 import { cancelProcessAcquisition } from '@orca/process-host/cancel-process-acquisition'
@@ -27,7 +22,7 @@ import type { CodexBackgroundTaskTracker } from './codex-background-task-tracker
 import type { CodexSkillReport } from './codex-structured-skill-report'
 import type { CodexJournalTranslator } from './codex-structured-journal-translation'
 import type { StructuredAgentSessionLifecycleEvent } from '../native-chat/agent-session-wire/structured-agent-session-adapter'
-import type { CodexStructuredPermissionPolicy } from './codex-structured-permission-policy'
+import type { CodexStructuredPermissionPolicy } from '../../shared/codex-permission-policy'
 import type { StructuredLaunchRequest } from '../runtime/structured-agent-launch-composition'
 import type {
   AgentModelCatalogSessionAccess,
@@ -35,6 +30,8 @@ import type {
 } from '../native-chat/agent-model-catalog/agent-model-catalog-store'
 import type { StructuredAgentSessionProviderOpen } from '../native-chat/agent-session-wire/structured-agent-session-provider-open-contract'
 import type { NativeChatVisualsLaunch } from '../native-chat/native-chat-visuals-delivery'
+import type { AgentChatPermissionChoice } from '../../shared/agent-chat-permission-mode'
+import type { CodexSandboxPolicy } from './codex-structured-sandbox-policy'
 
 export type CodexSessionCatalogAccess = AgentModelCatalogSessionAccess & {
   read?: (verifiedOnly?: boolean) => ReturnType<AgentModelCatalogStore['get']>
@@ -111,10 +108,10 @@ export type CodexStructuredSessionAdapterDeps = {
    *  Codex answered it into ended without taking it. */
   onDispatchSettledLate?: (
     input: { sessionId: string; clientMessageId: string } & (
-      | { providerIdentity: AgentJournalItemIdentity }
+      | { providerIdentity: journal.AgentJournalItemIdentity }
       | ({
           state: 'rejected'
-          answeredInTurn?: AgentJournalAnsweredTurnIdentity
+          answeredInTurn?: journal.AgentJournalAnsweredTurnIdentity
         } & AgentJournalDispatchRejection)
     )
   ) => void
@@ -140,7 +137,7 @@ export type CodexStructuredSessionAdapterDeps = {
 }
 
 export type CodexSession = {
-  events?: StructuredAgentSessionEventSink
+  events?: sink.StructuredAgentSessionEventSink
   account?: AgentSessionAccountKind
   connection: CodexAppServerConnection
   ended: boolean
@@ -152,6 +149,16 @@ export type CodexSession = {
   acquisitionGeneration: string
   threadId: string
   historyMode?: 'legacy' | 'paginated'
+  /** Provider facts from this acquisition, not another copy of the chat's selected mode. */
+  permissions?: {
+    acquiredMode: AgentChatPermissionChoice
+    acquiredSandbox?: CodexSandboxPolicy
+    launchSandboxIntact: boolean
+    cwd: string
+    visualsFolder?: string
+    preparedMode?: AgentChatPermissionChoice
+    preparedAuto?: CodexSandboxPolicy
+  }
   /** Wire-observed open primary turns; rewind and untargeted Stop use these before journal admission. */
   activeTurnIds?: Set<string>
   /** Interrupt-acknowledged turns cannot accept steers while awaiting turn/completed. */
@@ -160,7 +167,9 @@ export type CodexSession = {
   dispatchPending?: boolean
   prompts: CodexAcquisitionWindow['prompts']
   options: Map<string, string>
+  /** Startup reports and accepted fresh-turn policies describe this child, never saved intent. */
   reportedOptions: {
+    reportedPermissionMode?: string | null
     model?: string
     effort?: string
     serviceTier?: string | null
@@ -170,13 +179,14 @@ export type CodexSession = {
   nativeDefaults?: { personality?: string; serviceTier?: string }
   /** Overrides actually attempted on this child, independently of future saved picks. */
   appliedTurnOptions?: Readonly<Record<string, string>>
+  appliedSettings?: CodexAppliedSettings
   /** Optional for adapters without a host catalog store. */
   catalogAccess?: CodexSessionCatalogAccess
   dispatchEchoes: CodexDispatchEchoes
   translator: CodexJournalTranslator | null
   /** Ephemeral roster behind the background-tasks strip; never durable state. */
   workProducer?: StructuredAgentSessionChildWorkProducer
-  endWritten?: Promise<StructuredAgentSessionSinkBarrier>
+  endWritten?: Promise<sink.StructuredAgentSessionSinkBarrier>
   backgroundTasks: CodexBackgroundTaskTracker
   skillReport?: CodexSkillReport
   unbindReadingControl?: () => void

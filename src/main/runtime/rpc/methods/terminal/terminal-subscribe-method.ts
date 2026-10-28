@@ -11,7 +11,6 @@ import type { TerminalSubscriptionArgs } from './terminal-subscribe-types'
 import { registerTerminalSubscription } from './terminal-subscription-registration'
 
 export const TERMINAL_SUBSCRIBE_METHODS = [
-  // Streams live terminal output over WebSocket; mobile clients pass client+viewport for server-side auto-fit.
   defineStreamingMethod({
     name: 'terminal.subscribe',
     permission: 'workspace',

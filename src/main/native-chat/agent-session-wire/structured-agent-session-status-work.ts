@@ -117,7 +117,7 @@ export class StructuredAgentSessionStatusWork extends StructuredAgentSessionStat
           journal: session.journal,
           scope: () =>
             structuredAgentSessionCurrentWork(session.journal, {
-              record: this.deps().getRecord(sessionId),
+              record: this.deps().getConversation(sessionId),
               child: session.child ?? null,
               ended: session.lastEndedChild,
               replaced: this.deps().replacedRuntime?.(sessionId)

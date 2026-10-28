@@ -7,12 +7,12 @@ import { createDeferredStructuredAgentSessionEventSink } from '../native-chat/ag
 import { testEventSinkLogging } from '../native-chat/agent-session-wire/structured-agent-session-logger-test-support'
 import type { ChildWorkAdmission } from '../native-chat/agent-session-wire/structured-agent-session-accepted-child-work'
 import { ClaudePromptRegistry } from './claude-prompt-registry'
-import { createClaudeInitProof } from './claude-structured-init-proof'
-import { createClaudeSessionPublication } from './claude-structured-session-publication'
+import { createClaudeInitProof } from './structured/claude-structured-init-proof'
+import { createClaudeSessionPublication } from './structured/claude-structured-session-publication'
 import { bindClaudeJournalReadingControl } from './claude-structured-session-journal-control'
 import { publishClaudeChildWork } from './claude-structured-child-work-delivery'
 import { emitClaudeStructuredSessionEvent } from './claude-structured-event-delivery'
-import type { ClaudeStructuredSessionAdapterDeps } from './claude-structured-session-state'
+import type { ClaudeStructuredSessionAdapterDeps } from './structured/claude-structured-session-state'
 import {
   fakeClaude,
   identityFor,

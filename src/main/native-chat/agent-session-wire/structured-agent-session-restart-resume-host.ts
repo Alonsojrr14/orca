@@ -69,7 +69,7 @@ export function createStructuredAgentSessionRestartResume(
 
   const witnesses = createStructuredAgentSessionRestartWitnesses({
     sessions,
-    getRecord: deps.store.getRecord,
+    getRecord: deps.store.getConversation,
     childWork: surfaces.readChildWork,
     childWorkOpen: surfaces.childWorkOpen,
     ...(deps.recoveryCapsule ? { capsule: deps.recoveryCapsule } : {}),
@@ -95,7 +95,7 @@ export function createStructuredAgentSessionRestartResume(
   })
   const failures = createStructuredAgentSessionRestartFailureLedger({
     ...(deps.recoveryCapsule ? { capsule: deps.recoveryCapsule } : {}),
-    getRecord: deps.store.getRecord,
+    getRecord: deps.store.getConversation,
     retryable: (marker) => derive([marker], 'may-be-held').candidates.length === 1,
     savedByNewerOrca: newerOrca.has,
     logger: deps.logger,
