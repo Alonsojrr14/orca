@@ -151,6 +151,7 @@ vi.mock('../runtime/orca-runtime', () => ({
       return null
     }
     syncWindowGraph() {}
+    noteHeadlessStartupReady() {}
     setMobilePushRegistrar(
       registrar: Parameters<RuntimeMobileNotificationController['setPushRegistrar']>[0]
     ) {
