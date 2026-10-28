@@ -70,6 +70,9 @@ describe('delete/modify merge resolved through stage and completeMerge', () => {
   it('refuses without a merge in progress instead of committing staged changes', async () => {
     const { repoPath, git } = createDeleteModifyConflict()
     git('merge', '--abort')
+    // A commit template gives --no-edit a message, so only the merge check stops a stray commit.
+    writeFileSync(join(repoPath, '.git', 'template.txt'), 'template subject\n')
+    git('config', 'commit.template', join(repoPath, '.git', 'template.txt'))
     writeFileSync(join(repoPath, 'staged.txt'), 'staged\n')
     git('add', 'staged.txt')
     const head = git('rev-parse', 'HEAD')
