@@ -16,11 +16,14 @@ export type RunningWslMove = {
 }
 
 const runningMoves = new Map<string, RunningWslMove>()
+// Undo runs by distro key; counted, as Restore may run beside a project's own undo.
+const undoRuns = new Map<string, number>()
 
-/** Null when a move of the distro already runs here. */
+/** Null when a move of the distro already runs here, or the distro's move is being undone. */
 export function claimWslMoveRun(distro: string): RunningWslMove | null {
   const key = wslMoveJournalKey(distro)
-  if (runningMoves.has(key)) {
+  // A run claimed mid-undo makes the undo refuse after it stopped the host's terminals.
+  if (runningMoves.has(key) || undoRuns.has(key)) {
     return null
   }
   const running: RunningWslMove = { controller: new AbortController(), commitRequested: false }
@@ -58,6 +61,34 @@ export function isWslMoveUnderwayOnHost(userDataPath: string, distro: string): b
       (cutover) => cutover.migrationId === migrationId && !isWslMoveCutoverFinished(cutover)
     )
   )
+}
+
+/**
+ * Marks "Use on this computer again" (or Restore) of the distro as running until the returned end
+ * runs; no move or preview of the distro may claim a run meanwhile. Kept out of the move registry:
+ * the quit prompt, Cancel and undo's own guards must not read an undo as a move.
+ */
+export function beginWslMoveUndoRun(distro: string): () => void {
+  const key = wslMoveJournalKey(distro)
+  undoRuns.set(key, (undoRuns.get(key) ?? 0) + 1)
+  let ended = false
+  return () => {
+    if (ended) {
+      return
+    }
+    ended = true
+    const left = (undoRuns.get(key) ?? 1) - 1
+    if (left > 0) {
+      undoRuns.set(key, left)
+    } else {
+      undoRuns.delete(key)
+    }
+  }
+}
+
+/** True while this process brings a moved project of any distro back. */
+export function isWslMoveUndoRunning(): boolean {
+  return undoRuns.size > 0
 }
 
 /** Cancels a run that has not asked the host to commit yet; true when one was running. */

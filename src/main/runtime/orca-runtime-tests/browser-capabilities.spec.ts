@@ -34,6 +34,29 @@ import { runtimeAdvertisesBrowserClientHosting } from '../../../shared/browser-c
 import { hostWorktreeTarget } from '../../../shared/worktree/host-qualified-identity'
 
 describe('OrcaRuntimeService', () => {
+  it('advertises Google clear only for a live supporting executor, independently of client hosting', async () => {
+    for (const supported of [undefined, false, true]) {
+      let available = true
+      setRuntimeBrowserCommandsFactory((host) => new RuntimeBrowserCommands(host), {
+        headless: true,
+        clientHostingWithoutEngine: true,
+        isAvailable: () => available,
+        supportsGoogleCookieClear: supported === undefined ? undefined : () => supported
+      })
+      const runtime = createRuntime()
+      const capabilities = runtime.getStatus().capabilities ?? []
+      expect(capabilities.includes('browser.google-cookie-clear.v1')).toBe(supported === true)
+      available = false
+      expect(runtime.getStatus().capabilities).not.toContain('browser.google-cookie-clear.v1')
+      expect(runtimeAdvertisesBrowserClientHosting(runtime.getStatus().capabilities)).toBe(true)
+    }
+    const { installElectronBrowserCommands } = await import('../../host/electron-browser-commands')
+    installElectronBrowserCommands()
+    expect(createRuntime().getStatus().capabilities).toContain('browser.google-cookie-clear.v1')
+    setRuntimeBrowserCommandsFactory(null)
+    expect(createRuntime().getStatus().capabilities).not.toContain('browser.google-cookie-clear.v1')
+  })
+
   it('advertises client hosting when its factory implements client page creation', () => {
     const capabilities = createRuntime().getStatus().capabilities
     expect(runtimeAdvertisesBrowserClientHosting(capabilities)).toBe(true)

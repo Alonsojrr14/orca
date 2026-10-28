@@ -108,6 +108,7 @@ export function MobileNativeChatComposer({
   isAttaching = false,
   onMicPress,
   micActive = false,
+  micStarting,
   micProcessing,
   dictationMode,
   onMicPressIn,
@@ -332,6 +333,7 @@ export function MobileNativeChatComposer({
               <MobileNativeChatComposerMic
                 onMicPress={onMicPress}
                 micActive={micActive}
+                micStarting={micStarting}
                 micProcessing={micProcessing}
                 dictationMode={dictationMode}
                 onMicPressIn={onMicPressIn}

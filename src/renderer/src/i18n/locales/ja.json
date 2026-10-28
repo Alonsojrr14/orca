@@ -350,7 +350,8 @@
       "permissionOverrideMore": "ほか {{count}} 件",
       "permissionOverrideMore_one": "ほか {{count}} 件",
       "permissionOverrideMore_other": "ほか {{count}} 件",
-      "permissionOverridesUse": "{{mode}} を使用"
+      "permissionOverridesUse": "{{mode}} を使用",
+      "approveForMe": "代わりに承認"
     },
     "followSymlinkedDirectoriesKeywords": {
       "symlink": "シンボリックリンク",
@@ -381,6 +382,34 @@
       "actionPermissions": {
         "sameAsAgent": "{{agent}} と同じ"
       }
+    },
+    "ssh": {
+      "status": {
+        "disconnected": "切断済み",
+        "connecting": "接続中…",
+        "auth-failed": "認証に失敗しました",
+        "connected": "接続済み",
+        "reconnection-failed": "再接続に失敗しました",
+        "deploying-relay": "リレーをデプロイ中…",
+        "reconnecting": "再接続中…"
+      }
+    },
+    "mcp": {
+      "workspace": "ワークスペース",
+      "inspectFailed": "{{directory}} を確認できません。",
+      "unreadable": "読み取り不可",
+      "notFound": "見つかりません",
+      "invalidJson": "無効な JSON",
+      "noServers": "サーバーなし",
+      "httpServer": "HTTP サーバー",
+      "stdioServer": "stdio サーバー",
+      "invalidServer": "無効なサーバー",
+      "serverCount_one": "サーバー {{count}} 件",
+      "serverCount_other": "サーバー {{count}} 件",
+      "claudeWorkspace": "Claude ワークスペース"
+    },
+    "shortcuts": {
+      "parseFailed": "ショートカットを解析できません。"
     }
   },
   "menu": {
@@ -1567,7 +1596,6 @@
         "d1fa2cf888": "PR ヘッドの SHA がないとコメントできません。",
         "829674460a": "PR commit SHA が欠落しているため、差分は利用できません。",
         "af924014f8": "閲覧済み",
-        "2d89a38d9d": "{{value0}} {{value1}} 表示",
         "70e84e3d0b": "一致するレビュアーがいません。",
         "1ffce94a8b": "他のみんな",
         "c2b21818e1": "提案",
@@ -1784,7 +1812,6 @@
       "LinearIssueTextEditor": {
         "947ba2d6f4": "保存する",
         "04d73b72dc": "Issue のタイトル",
-        "e8ff595db3": "{{value0}} を更新できませんでした",
         "1e08a1ec80": "タイトルは必須です"
       },
       "LinearIssueWorkspace": {
@@ -2107,10 +2134,6 @@
         "9e97f08d0f": "開くファイルを検索する",
         "ec31e058f7": "ファイルに移動",
         "73b44e7bde": "インストールコマンドのコピー",
-        "1cf8561ab4": "リモートで、gitignore 対応の高速リストを有効にします。",
-        "5d80dc39bb": "ripgrep",
-        "2ca749c15d": "インストール",
-        "4725b0e931": "クイックオープンスキャンが大きすぎます (",
         "b227d88520": "{{value0}} ファイルが見つかりました",
         "995be8ea22": "コピー",
         "cf144856dc": "コピーしました"
@@ -2181,9 +2204,6 @@
         "7f3f7b4c18": "説明 (オプション、markdown)",
         "9f2b4c03a6": "提出する",
         "d3d0998b7d": "GitHub の新規 Issue",
-        "d1e243795c": "Issue",
-        "be8cf68d9f": "Issue を表示",
-        "67662ade50": "プロジェクトの Issue",
         "6244a02f46": "Linear で開く",
         "606a85c774": "オープン",
         "5e8061b088": "{{value0}} {{value1}} からワークスペースを開始します",
@@ -2203,11 +2223,9 @@
         "af377b13b1": "{{value0}} ビュー",
         "d47248df4d": "Linear ビューモード",
         "f397d513e3": "戻る",
-        "b39fe6511d": "プロジェクト",
         "8675cd6188": "Linear",
         "733b8f2421": "Linear / ビュー",
         "bc06ed0fb0": "ビューに戻る",
-        "3cb855080f": "ビュー",
         "b4e10f096e": "オーナー",
         "a04fe7ba73": "可視性",
         "0aa8525950": "モデル",
@@ -2878,8 +2896,6 @@
               "7616c986c6": "{{value0}} Issue を開く",
               "openInLinear": "Linear で {{value0}} を開く",
               "93e1f6bfca": "読み込み中",
-              "98730088a6": "。フルセットについては、Linear を検索するか開きます。",
-              "06b887d622": "最初に表示しています",
               "linearLoginUnreadable": "保存された Linear のログイン情報を読み取れません。設定で再接続してください。",
               "f2cc1e0ff6": "Linear / プロジェクト",
               "906b5e4cb8": "Linear / プロジェクト / {{value0}}",
@@ -4402,10 +4418,7 @@
         },
         "UsageBreakdownSection": {
           "7765a4c3e1": "該当なし",
-          "247c93ca92": "• 推定価格",
-          "32176e1d44": "ターン",
-          "79a69522a5": "イベント",
-          "02a046792e": "セッション •"
+          "247c93ca92": "• 推定価格"
         },
         "GrokUsagePane": {
           "g8h9i0j1k2": "Grok の使用状況",
@@ -5913,7 +5926,8 @@
         },
         "sidebarHostOptions": {
           "3e102f111c": "すべてのホスト",
-          "visibleHostsCount": "{{value0}} 台のホスト"
+          "hosts": "ホスト",
+          "visibleHosts_other": "{{count}} 台のホスト"
         },
         "HostRemoveDialog": {
           "1a2b3c4d5e": "{{value0}} を削除しました",
@@ -6201,7 +6215,7 @@
           "running": "実行中",
           "stopped": "停止中",
           "title": "WSL ディストリビューションを追加",
-          "description": "Orca はディストリビューション内でサーバーを実行するため、git、ファイル、ターミナルは Linux 上でネイティブに動作します。\\\\wsl.localhost 経由で開いたプロジェクトは、このホストに移動するまでそのまま動作し続けます。",
+          "description": "Orca はディストリビューション内でサーバーを実行するため、git、ファイル、ターミナルは Linux 上でネイティブに動作します。このディストリビューション内で \\\\wsl.localhost 経由で開いたプロジェクトは、ターミナルがアイドル状態になると自動的にこのホストへ移動します。Windows ドライブ (/mnt/…) 上のプロジェクトはこのコンピューターに残ります。移動したプロジェクトはサイドバーから戻せます。",
           "distro": "ディストリビューション",
           "loading": "WSL ディストリビューションを探しています…",
           "placeholder": "ディストリビューションを選択",
@@ -7935,7 +7949,9 @@
           "fbb428db98": "選択済み:",
           "search_terminal_themes": "ターミナルテーマを検索",
           "cb330ef7f8": "/{{value0}}",
-          "c822571b2e": " 「{{value0}}」に一致"
+          "c822571b2e": " 「{{value0}}」に一致",
+          "plugin_themes": "プラグイン",
+          "from_plugin": "{{value0}} から"
         },
         "SettingsSidebar": {
           "e0900f83e7": "SSH",
@@ -11725,7 +11741,8 @@
             "migration": "未完了: このサーバーへの移動が終わっていません。先に再開してください。",
             "deferred": "まだ未完了です: サーバーはこの操作の準備ができていません。しばらくしてから、もう一度お試しください。",
             "failed": "Orca はサーバー上でこれを完了できませんでした。もう一度お試しください。",
-            "defaultServer": "実行されませんでした: このサーバーは新しいプロジェクトの既定のホストです。停止する前に「新しいプロジェクトを開く場所」で別のものを選んでください。"
+            "defaultServer": "実行されませんでした: このサーバーは新しいプロジェクトの既定のホストです。停止する前に「新しいプロジェクトを開く場所」で別のものを選んでください。",
+            "wslMoveRunning": "未完了: このサーバーへプロジェクトを移動中です。移動が完了すると Orca が更新します。"
           },
           "reassurance": "各ホスト上で動作し、あなた自身の SSH 接続を通じて利用します。コードやファイルは今の場所から動きません。ホストに移るのは、Orca のプロジェクト、タブ、ターミナルの一覧だけです。"
         },
@@ -12062,6 +12079,9 @@
           "searchLabel": "ビルドの検索",
           "searchPlaceholder": "ビルドを検索…",
           "noMatches": "一致するビルドはありません。"
+        },
+        "AppearanceThemeControl": {
+          "useTerminalTheme": "このテーマのターミナル配色を使う"
         },
         "notification": {
           "settings": {
@@ -12951,10 +12971,10 @@
                 "dialog": {
                   "3bc61dc989": "キャンセル",
                   "15efa778e3": "破棄",
-                  "42f89dd030": "ファイル",
-                  "e7611dca35": "ファイル",
                   "0d2d88cba5": "これを元に戻すことはできません。",
-                  "1551c14668": "変更を破棄しますか?"
+                  "1551c14668": "変更を破棄しますか?",
+                  "fileCount_one": "{{count}} 個のファイル",
+                  "fileCount_other": "{{count}} 個のファイル"
                 }
               },
               "dropdown": {
@@ -13181,16 +13201,19 @@
             "unresolved": "このワークスペースを所有しているホストを特定できませんでした。接続を確認して、もう一度お試しください。"
           },
           "useFileDeletion": {
-            "72691dfebc": "{{value0}} '{{value1}}' に失敗しました。",
             "d979a4fbb5": "「{{value0}}」を完全に削除しますか?",
             "92276aceb7": "削除",
             "7fb9435c86": "リモートホスト上のディレクトリとその内容を完全に削除します。この操作は取り消せません。",
             "23e98f192f": "リモートホスト上のファイルを完全に削除します。この操作は取り消せません。",
             "8b8ee9d22f": "このファイルを所有しているホストを特定できませんでした。ワークスペースの接続を確認して、もう一度お試しください。",
-            "af1270b90d": "{{count}}個の項目を完全に削除しますか?",
             "dd029aa5cd": "選択した項目とディレクトリの内容がリモートホスト上で完全に削除されます。この操作は元に戻せません。",
-            "77fdc36183": "{{count}} 個の項目を削除しますか？",
-            "fca915a67a": "リモートの項目は完全に削除され、取り消せません。ローカルの項目は {{value0}} に移動します。"
+            "deleteFailed": "「{{name}}」を削除できませんでした。",
+            "deleteItems_other": "{{count}} 件の項目を削除しますか？",
+            "mixedRecycleBin": "リモートの項目は完全に削除され、元に戻せません。ローカルの項目はごみ箱に移動します。",
+            "mixedTrash": "リモートの項目は完全に削除され、元に戻せません。ローカルの項目はごみ箱に移動します。",
+            "permanentlyDeleteItems_other": "{{count}} 件の項目を完全に削除しますか？",
+            "recycleBinFailed": "「{{name}}」をごみ箱に移動できませんでした。",
+            "trashFailed": "「{{name}}」をごみ箱に移動できませんでした。"
           },
           "useFileExplorerHandlers": {
             "32cd9fd991": "シンボリックリンクターゲットを開けません",
@@ -14165,13 +14188,13 @@
             "9ee54037a4": "カスタムコマンド",
             "4b2fc4b80c": "考える努力",
             "be8917699e": "モデル",
-            "4d9b6d84df": "サポートされていません。Claude、Codex、またはカスタムを選択します。",
             "560d4feb00": "カスタム",
             "29d119fe95": "Agent",
             "f9382b48a1": "AI 著者を有効にする",
             "1c0cb4fabb": "AI作者",
             "bd14e9c42a": "未設定",
-            "1f9468c5c9": "{{value0}} はサポートされていません"
+            "1f9468c5c9": "{{value0}} はサポートされていません",
+            "unsupportedAgent": "{{agent}} はサポートされていません。Claude、Codex、カスタムのいずれかを選択してください。"
           },
           "BrowserAnimatedVisual": {
             "46df009982": "無料トライアルを開始する",
@@ -14712,17 +14735,14 @@
         "ConflictComponents": {
           "f338288514": "競合するコンテンツを読み込んでいます…",
           "90d576adb2": "更新",
-          "a1ce36f77d": "スナップショットがキャプチャされた場所",
           "c8ca989aea": "ファイルツリーを表示",
           "58ad5ad431": "閉じる",
           "28e7db4a90": "ソース管理",
           "31931dec46": "このレビュースナップショットには、未解決のライブ競合はなくなりました。",
           "992145ff5a": "すべての競合が解決されました",
-          "d5edd81755": "から改名",
           "6e459867ad": "セッションローカルの継続状態。 Git は、このファイルがマージされていないと報告しなくなりました。",
           "9c2901ef8a": "次の競合",
           "41d9af2e7a": "前の競合",
-          "55d61a0ccd": "競合 ·",
           "da539359b6": "この競合に対して編集できる作業ツリーファイルはありません。",
           "unresolvedConflicts_one": "未解決の競合 {{count}} 件",
           "unresolvedConflicts_other": "未解決の競合 {{count}} 件"
@@ -17004,12 +17024,10 @@
         "untitled": "無題のチャット",
         "listLabel": "再開されるチャット",
         "dontAskAgain": "二度と質問しないでください (自動的に再開します)",
-        "dontAskAgainHint": "これは、「設定」→「実験的機能」→「チャット UI」でオフにできます。",
+        "dontAskAgainHint": "設定 → チャット → 動作でオフにできます。",
         "continuedOne": "1 件のチャットを再開しました",
         "continuedMany": "{{value0}} 件のチャットを再開しました",
         "selectAgent": "{{value0}} チャット「{{value1}}」を {{value2}} で再開します",
-        "resumeSelected": "{{value0}} チャットを再開",
-        "resumeSelectedOne": "1 チャットを再開",
         "dismissAll": "すべて閉じる",
         "notContinuedOne": "1 件のチャットを再開できませんでした",
         "notContinuedMany": "{{value0}} 件のチャットを再開できませんでした",
@@ -17044,7 +17062,9 @@
         "serverDismiss": "閉じる",
         "serverResumeAll": "{{machine}} の {{count}} 件をすべて再開",
         "serverResumeHereOne": "ここで開始したチャット 1 件を再開",
-        "serverResumeHere": "ここで開始したチャット {{count}} 件を再開"
+        "serverResumeHere": "ここで開始したチャット {{count}} 件を再開",
+        "resumeChats_one": "{{count}} 件のチャットを再開",
+        "resumeChats_other": "{{count}} 件のチャットを再開"
       },
       "linear-issue-attribute-filter-coverage-notice": {
         "statusPartialTeamCoverage": "{{value0}}/{{value1}} チームステータスをフィルタリングしています。残りのチームからの問題は含まれません。",
@@ -17618,7 +17638,8 @@
         "compactAfterRetry": "以前のメッセージを再試行してから、/compact を実行してください。",
         "clearAfterSending": "以前のメッセージはまだ送信中です。送信が終わったら /clear を実行してください。",
         "compactAfterSending": "以前のメッセージはまだ送信中です。送信が終わったら /compact を実行してください。",
-        "pendingWork": "このコマンドを使用する前に、保留中の作業とメッセージが完了するまで待ってください。"
+        "pendingWork": "このコマンドを使用する前に、保留中の作業とメッセージが完了するまで待ってください。",
+        "notDoneGoalChangeIncomplete": "目標の変更を完了できませんでした。チャットを確認してください。"
       },
       "composer": {
         "send": "送信",
@@ -18291,6 +18312,15 @@
         "settings": "ターミナルで設定を開く",
         "extensions": "ターミナルで拡張機能ダッシュボードを開く",
         "hotkeys": "ターミナルでキーボードショートカットを表示"
+      },
+      "modelDescriptions": {
+        "grok_4_7": "xAI の最新のフロンティアモデル",
+        "grok_4_6": "xAI の前世代のフロンティアモデル",
+        "grok_4_5": "xAI の以前のフロンティアモデル",
+        "fable": "最も難しく、長時間かかるタスクに最適",
+        "opus": "日常の複雑なタスクに最適",
+        "sonnet": "日常のタスクを効率的に処理",
+        "haiku": "素早い回答に最適"
       }
     },
     "tab": {
@@ -19045,6 +19075,15 @@
       "empty": "このプロファイルで有効な拡張機能はありません",
       "visitWebStore": "Chrome ウェブストアにアクセス",
       "manage": "拡張機能を管理"
+    },
+    "viewport": {
+      "mobile-s": "モバイル S — 320 × 568",
+      "mobile-m": "モバイル M — 375 × 667",
+      "mobile-l": "モバイル L — 425 × 812",
+      "tablet": "タブレット — 768 × 1024",
+      "laptop": "ノートパソコン — 1024 × 768",
+      "laptop-l": "ノートパソコン L — 1440 × 900",
+      "desktop": "デスクトップ — 1920 × 1080"
     }
   },
   "runtimeRpc": {
@@ -19118,13 +19157,22 @@
       "useHereDescription": "Orca はこのプロジェクトを移動前の状態でここに開きます。コードには影響しません（移動していません）。移動後に {{distro}} ホストで行った変更（新しいタブやチャットなど）はホストに残り、戻りません。一緒に移動したプロジェクトも戻ります。プロジェクトは、{{distro}} ホストで削除するまでそこにも残ります。このウィンドウは再読み込みされます。",
       "useHereConfirm": "このコンピューターで使用",
       "useHereSuperseded": "{{distro}} ホストへの後の移動にこのプロジェクトが含まれています。先にそちらを戻してください。",
+      "useHereRefusedTitle": "{{name}} はまだここで使用できません",
+      "useHereRefusedOk": "OK",
+      "useHereSupersededBy": "このプロジェクトの後に、{{names}} が {{distro}} ホストに移動しました。先にそれらをこのコンピューターで再び使用してから、このプロジェクトを戻してください。",
       "useHereMoveRunning": "{{distro}} ホストへの移動がまだ実行中です。終了してからもう一度お試しください。",
       "useHereHostKeptForPeers": "{{project}} は {{distro}} ホストに移動しました。そのホストは別の Orca のために動作中です。ここで再び使うには、ホストを追加し直してください。",
       "useHereHostUnreachable": "{{distro}} ホストが応答しないため、Orca はこのプロジェクトのホスト側のコピーを停止できず、そのAgentがまだ実行中の可能性があります。設定でホストに接続するか削除してから、もう一度お試しください。",
       "useHereHostStillRunning": "{{distro}} ホスト上のこのプロジェクトのコピーでまだターミナルが実行中のため、Agentが二重に動く可能性があります。少し待ってからもう一度お試しください。",
       "useHereFailed": "このプロジェクトをこのコンピューターに戻せませんでした。",
+      "useHereHostRemovalPending": "{{distro}} ホストはまだ削除中のため、Orca はそのままにしています。設定で削除を完了してから、もう一度お試しください。",
+      "useHereHostAutomations": "Orca は {{distro}} ホスト上のこのプロジェクトのオートメーションをオフにできなかったため、二重に実行される可能性があります。設定でホストに接続してから、もう一度お試しください。",
       "useHereUnsavedTitle": "先にファイルを保存してください",
-      "useHereUnsavedDescription": "{{name}} を戻すとこのウィンドウが再読み込みされます。先に次のファイルを保存するか閉じてください: {{files}}"
+      "useHereUnsavedDescription": "{{name}} を戻すとこのウィンドウが再読み込みされます。先に次のファイルを保存するか閉じてください: {{files}}",
+      "automationRunsOnHost": "{{distro}} ホストで実行",
+      "quitDuringMoveTitle": "プロジェクトの移動中に終了しますか？",
+      "quitDuringMoveDescription": "プロジェクトを WSL ホストへ移動しています。それでも終了しますか？移動は次回の起動時に取り消されます。",
+      "quitDuringMoveConfirm": "終了する"
     },
     "startupWorktreeRefresh": {
       "loading": "ワークスペースを検出中…",
@@ -19227,7 +19275,9 @@
   },
   "quickOpen": {
     "moreMatchesAvailable": "さらに多くの一致が利用可能になる可能性があります。検索を絞り込んで結果を絞り込みます。",
-    "recentValidationFailed": "最近のファイルを確認できませんでした: {{error}}"
+    "recentValidationFailed": "最近のファイルを確認できませんでした: {{error}}",
+    "installRipgrepOnRemote": ".gitignore の設定に従ってファイルを高速に一覧表示するには、リモートホストに <code>ripgrep</code> をインストールしてください：",
+    "scanTooLarge": "クイックオープンのスキャン対象が大きすぎます（{{reason}}）。"
   },
   "checksPanel": {
     "unlinked": {
@@ -19243,11 +19293,18 @@
     },
     "discard": {
       "deleteUntrackedFileDescription": "この未追跡ファイルは完全に削除されます。この操作は元に戻せません。",
-      "deleteUntrackedFilesDescription": "これらの {{count}} 個の未追跡ファイルは完全に削除されます。この操作は元に戻せません。",
+      "deleteUntrackedFilesDescription_other": "これらの {{count}} 個の未追跡ファイルは完全に削除されます。この操作は元に戻せません。",
       "restoreStagedVersionDescription": "これにより、最後にステージングされたバージョンが復元され、削除が破棄されます。これを元に戻すことはできません。",
       "unstagedChangesDescription": "これにより、このファイルに対するステージングされていない変更が元に戻ります。これを元に戻すことはできません。",
       "unstagedSelectionIncludingUntrackedDescription": "ステージングされていない変更を元に戻し、この選択内の未追跡ファイルを完全に削除します。この操作は元に戻せません。",
-      "unstagedFilesIncludingUntrackedDescription": "ステージングされていない変更を元に戻し、これらの {{count}} 個のファイルに含まれる未追跡ファイルを完全に削除します。この操作は元に戻せません。"
+      "unstagedFilesIncludingUntrackedDescription_other": "ステージングされていない変更を元に戻し、これらの {{count}} 個のファイルに含まれる未追跡ファイルを完全に削除します。この操作は元に戻せません。",
+      "delete": "削除",
+      "restore": "復元",
+      "discard": "破棄",
+      "discardAll": "すべて破棄",
+      "deleteUntrackedTitle_one": "未追跡のファイル {{count}} 個を削除しますか？",
+      "deleteUntrackedTitle_other": "未追跡のファイル {{count}} 個を削除しますか？",
+      "deleteCount": "{{count}} 個を削除"
     },
     "createReviewFailure": {
       "authRequiredCommand": "{{providerName}} が認証されていません。次の手順: この環境で {{command}} を実行してください。",
@@ -19278,6 +19335,34 @@
       "creationUnconfirmed": "{{shortLabel}} の作成は完了している可能性があります。ブランチのレビュー状態を更新しています…",
       "withDetail": "{{shortLabel}} の作成に失敗しました: {{detail}}",
       "pushFailed": "プッシュに失敗しました。プッシュのエラーを解決してから、もう一度お試しください。"
+    },
+    "model": {
+      "auto": "自動",
+      "configDefault": "設定のデフォルト"
+    },
+    "thinking": {
+      "off": "オフ",
+      "minimal": "最小",
+      "low": "低",
+      "medium": "中",
+      "high": "高",
+      "max": "最大",
+      "xhigh": "最高"
+    },
+    "variables": {
+      "basePrompt": "Orca が安全に収集できるコンテキストを含む、この操作用の組み込みプロンプトです。",
+      "branch": "現在のソース管理ブランチ名です。",
+      "stagedFiles": "コミットメッセージの生成に使う、ステージ済みファイルの改行区切りリストです。",
+      "stagedPatch": "コミットメッセージの生成に使う、ステージ済みの Git パッチです。",
+      "baseBranch": "PR 作成画面で選択したターゲットブランチです。",
+      "currentTitle": "生成開始前に入力されている PR のタイトルです。",
+      "currentBody": "生成開始前に入力されている PR の説明です。",
+      "commitSummary": "ベースブランチと比較した、このブランチのコミットの改行区切りリストです。",
+      "changedFiles": "このブランチとベースブランチの間で変更されたファイルの概要です。",
+      "patch": "PR の詳細の生成に使う、このブランチとベースブランチの差分です。",
+      "firstPrompt": "このワークスペースまたはチャットでの最初のユーザーの依頼です。",
+      "assistantMessage": "Orca が取得できる場合の、Agent の最初の応答です。",
+      "linkedIssue": "このワークスペースにリンクされた GitHub Issue の番号です。GitHub Issue がリンクされていない場合は空です（GitLab にリンクされたワークスペースを含む）。指示を含むテンプレートを使ってください。リンクがない場合、単独の「Fixes #{linkedIssue}」は「Fixes #」になります。"
     }
   },
   "rendererRecovery": {
@@ -19694,7 +19779,9 @@
       "confirmTitle": "ターミナルデーモンを再起動しますか?",
       "confirmBody": "再起動すると、{{sessions}} で実行中のすべてのプロセスが終了します。再開に対応している Agent は後で再開できますが、シェルなどのジョブは再開できず、再度開始する必要があります。Agent がアイドル状態のときに行ってください。",
       "cancel": "キャンセル",
-      "confirm": "再起動してプロセスを終了"
+      "confirm": "再起動してプロセスを終了",
+      "count_other": "実行中のターミナル {{count}} 個",
+      "count_one": "実行中のターミナル {{count}} 個"
     },
     "restartedInputNotSent": "入力中にターミナルが再起動したため、一部の入力が届いていない可能性があります。もう一度入力する前に新しいシェルを確認してください。",
     "stalledDaemonBanner": {
@@ -19811,7 +19898,11 @@
     "picker": {
       "pasteUnparseable": "プロジェクトの URL または owner/number を入力してください",
       "ownerLoadFailed": "{{owner}} のプロジェクトを読み込めませんでした。",
-      "organizationsLoadFailed": "一部の組織を読み込めませんでした（{{failureCount}}）。"
+      "organizationsLoadFailed": "一部の組織を読み込めませんでした（{{failureCount}}）。",
+      "organizations": "組織",
+      "listFailed": "プロジェクト一覧を取得できませんでした",
+      "detailsFailed": "詳細を読み込めませんでした",
+      "viewFailed": "プロジェクトビューを取得できませんでした"
     },
     "error": {
       "notFoundState": "このプロジェクトまたはビューが見つかりませんでした。",
@@ -19846,6 +19937,9 @@
       "tooLargeUnknownCount": "このビューはアイテムが多すぎて Orca で表示できません。GitHub でビューのフィルターを絞り込んでください。",
       "tooLarge": "このビューには {{itemCount}} 件のアイテムがあり、Orca で表示するには多すぎます。GitHub でビューのフィルターを絞り込んでください。",
       "schemaDriftDetail": "このプロジェクトビューを読み取れませんでした: {{detail}}。"
+    },
+    "columns": {
+      "type": "タイプ"
     }
   },
   "projectField": {
@@ -19932,6 +20026,27 @@
     "attachments": {
       "updateRuntime": "ワークスペースのリンクを変更するには、リモートランタイムを更新してください",
       "updateRuntimeSafely": "ワークスペースのリンクを安全に変更するには、リモートランタイムを更新してください"
+    },
+    "activity": {
+      "active": "アクティブ",
+      "working": "作業中",
+      "monitoring": "バックグラウンドタスクを監視中",
+      "failed": "失敗",
+      "interrupted": "中断",
+      "unconfirmed": "確認できませんでした",
+      "done": "完了",
+      "inactive": "非アクティブ",
+      "permission": "許可が必要",
+      "unreadLabel": "{{status}} · 未読"
+    },
+    "reviewStatus": {
+      "checksFailed": "{{review}} のチェック: 失敗",
+      "checksPassing": "{{review}} のチェック: 成功",
+      "checksPending": "{{review}} のチェック: 保留中",
+      "closed": "{{review}}: クローズ",
+      "draft": "{{review}}: 下書き",
+      "merged": "{{review}}: マージ済み",
+      "open": "{{review}}: オープン"
     }
   },
   "tabHoverCard": {
@@ -20074,7 +20189,9 @@
       "preparingAriaLabel": "更新を準備中。クリックして展開します。",
       "browserGuidance": "以下のプロセスを終了してから再試行してください。サーバーはブラウザなしで実行を続けます。別のコンピュータがこの Mac を SSH ホストとして使用している場合、そのコンピュータの Orca を更新すると、更新時にブラウザが自動的に一時停止するようになります。",
       "browserSummary": "バックグラウンド Orca サーバーのブラウザはまだこのアプリを使用しています。"
-    }
+    },
+    "wslMoveInstallHeld": "プロジェクトを WSL ホストへ移動しています。移動が完了してからアップデートをインストールしてください。",
+    "wslMoveUndoInstallHeld": "プロジェクトを WSL ホストから戻しています。完了してからアップデートをインストールしてください。"
   },
   "onboarding": {
     "language": {
@@ -20486,6 +20603,341 @@
   "nativeChat": {
     "math": {
       "scrollDisplayEquation": "数式ブロックをスクロール"
+    }
+  },
+  "runtime": {
+    "health": {
+      "local": "ローカル",
+      "available": "接続済み",
+      "connecting": "接続中",
+      "disconnected": "切断済み",
+      "error": "対応が必要",
+      "mixed": "混在",
+      "repair": "再ペアリングが必要",
+      "update": "更新が必要"
+    },
+    "compat": {
+      "compatible": "ランタイムのクライアントとサーバーは互換性があります。",
+      "clientTooOld": "この Orca クライアントは古すぎるため、選択したサーバーに接続できません。このマシンの Orca を更新してください。クライアントのプロトコルは {{clientProtocol}}、サーバーが要求するクライアントのプロトコルは {{requiredProtocol}} です。",
+      "serverTooOld": "選択した Orca サーバーは古すぎるため、このクライアントと互換性がありません。サーバーの Orca を更新してください。サーバーのプロトコルは {{serverProtocol}}、クライアントが要求するサーバーのプロトコルは {{requiredProtocol}} です。"
+    }
+  },
+  "native": {
+    "about": {
+      "gpu": {
+        "unknownStatus": "ステータスを取得できません",
+        "enabled": "有効",
+        "disabled": "無効",
+        "unavailable": "利用不可",
+        "safeMode": "無効（セーフグラフィックスモード）",
+        "software": "ソフトウェアレンダリング",
+        "unknown": "不明（{{status}}）",
+        "summary": "GPU アクセラレーション：{{status}}"
+      }
+    },
+    "dialog": {
+      "importCookies": "Cookie のインポート",
+      "spaceTitle": "Orca スペースベータ",
+      "dashboardTitle": "Orca Agent ダッシュボード",
+      "cookieFiles": "Cookie ファイル",
+      "allFiles": "すべてのファイル",
+      "importPetBundle": ".codex-pet バンドルを選択",
+      "pickPet": "ペットを選択",
+      "petImage": "ペットの画像",
+      "importWarpTheme": "Warp テーマをインポート",
+      "warpThemeYaml": "Warp テーマ YAML",
+      "importWarpFolder": "Warp テーマフォルダーをインポート",
+      "images": "画像",
+      "repoIconImages": "リポジトリアイコン画像",
+      "audio": "音声"
+    }
+  },
+  "taskProviders": {
+    "linear": {
+      "updateAccess": "アクセスを更新",
+      "addAccess": "Linear アクセスを追加",
+      "fetchMore": "さらに読み込む",
+      "connectionFailed": "接続に失敗しました",
+      "listLabel": "Linear リスト",
+      "projectsLoadFailed": "プロジェクトを読み込めませんでした。",
+      "projectNotFound": "プロジェクトが見つかりませんでした。",
+      "projectLoadFailed": "プロジェクトを読み込めませんでした。",
+      "projectIssuesLoadFailed": "プロジェクトの Issue を読み込めませんでした。",
+      "viewsLoadFailed": "ビューを読み込めませんでした。",
+      "viewContentsLoadFailed": "ビューの内容を読み込めませんでした。",
+      "issuesLoadFailed": "Linear の Issue を読み込めませんでした。",
+      "apiKeyHint": "Orca で使う Linear ワークスペースの個人 API キーを貼り付けてください。すでに接続済みの場合、保存されたキーを置き換えます。",
+      "remoteKeyStorage": "このキーは現在のリモートランタイムに保存されます。",
+      "localKeyStorage": "ローカルランタイムのキーはこのデバイスに保存され、利用可能な場合は Electron の暗号化ストレージを使います。",
+      "commentsLoadFailed": "コメントを読み込めませんでした。",
+      "updateWorkspaceAccess": "{{workspace}} の Linear アクセスを更新",
+      "workspaceApiKeyHint": "{{workspace}} の個人 API キーを貼り付けてください。すでに接続済みの場合、保存されたキーを置き換えます。",
+      "connect": "接続",
+      "descriptionUpdateFailed": "説明の更新に失敗しました。",
+      "titleUpdateFailed": "タイトルの更新に失敗しました。",
+      "truncated": {
+        "issues_one": "最初の {{count}} 件の Issue を表示しています。全件を確認するには、検索するか Linear を開いてください。",
+        "issues_other": "最初の {{count}} 件の Issue を表示しています。全件を確認するには、検索するか Linear を開いてください。",
+        "projectIssues_one": "プロジェクトの Issue を最初の {{count}} 件表示しています。全件を確認するには、検索するか Linear を開いてください。",
+        "projectIssues_other": "プロジェクトの Issue を最初の {{count}} 件表示しています。全件を確認するには、検索するか Linear を開いてください。",
+        "projects_one": "最初の {{count}} 件のプロジェクトを表示しています。全件を確認するには、検索するか Linear を開いてください。",
+        "projects_other": "最初の {{count}} 件のプロジェクトを表示しています。全件を確認するには、検索するか Linear を開いてください。",
+        "viewIssues_one": "ビューの Issue を最初の {{count}} 件表示しています。全件を確認するには、検索するか Linear を開いてください。",
+        "viewIssues_other": "ビューの Issue を最初の {{count}} 件表示しています。全件を確認するには、検索するか Linear を開いてください。",
+        "views_one": "最初の {{count}} 件のビューを表示しています。全件を確認するには、検索するか Linear を開いてください。",
+        "views_other": "最初の {{count}} 件のビューを表示しています。全件を確認するには、検索するか Linear を開いてください。"
+      }
+    },
+    "jira": {
+      "connectionFailed": "接続に失敗しました",
+      "remoteTokenStorage": "トークンは選択したリモートランタイムに送信され、そのランタイムがサポートする暗号化方式で保存されます。",
+      "localTokenStorage": "トークンはローカルに保存され、ローカルランタイムのストレージが対応している場合は暗号化されます。"
+    },
+    "errors": {
+      "jira": {
+        "createFailed": "Issue の作成に失敗しました。",
+        "commentFailed": "コメントの追加に失敗しました。",
+        "notConnected": "Jira に接続されていません。",
+        "titleRequired": "タイトルが必要です。",
+        "labelsConflict": "labels または labelOperations のどちらか一方を指定してください。",
+        "updateFailed": "Issue を更新できませんでした。",
+        "credentialsRequired": "サイト URL、メールアドレス、API トークンが必要です。",
+        "projectRequired": "プロジェクトが必要です。",
+        "issueTypeRequired": "Issue の種類が必要です。",
+        "issueKeyRequired": "Issue キーが必要です。",
+        "updatesRequired": "更新オブジェクトが必要です。",
+        "commentBodyRequired": "コメント本文が必要です。",
+        "invalidSiteUrl": "有効な Jira サイト URL を入力してください。",
+        "passwordRequired": "パスワードが必要です。",
+        "personalTokenRequired": "個人アクセストークンが必要です。",
+        "apiTokenRequired": "API トークンが必要です。",
+        "connectionFailed": "接続に失敗しました。",
+        "invalidSiteIdentity": "認証情報を含まない HTTP または HTTPS の Jira サイト URL を入力してください。",
+        "missingProjectIdentity": "Jira が ID またはキーのないプロジェクトを返しました。",
+        "invalidIssuePage": "Jira が無効な Issue ページを返しました。",
+        "incompleteIssuePage": "Jira が不完全な Issue ページを返しました。",
+        "repeatedIssueToken": "Jira が無効または重複した Issue ページトークンを返しました。",
+        "issueSearchLimit": "Jira の Issue 検索がページ数の上限を超えました。代わりに JQL でプロジェクトを選択してください。",
+        "invalidProjectPage": "Jira が無効なプロジェクトページを返しました。",
+        "incompleteProjectPage": "Jira が不完全なプロジェクトページを返しました。",
+        "projectListLimit": "Jira のプロジェクト一覧がページ数の上限を超えました。代わりに JQL でプロジェクトを選択してください。",
+        "invalidCloudId": "サイトが有効な Atlassian Cloud ID を返しませんでした。"
+      },
+      "linear": {
+        "notConnected": "Linear に接続されていません",
+        "createFailed": "Linear での作成に失敗しました",
+        "createdButUnavailable": "Issue は作成されましたが、取得できませんでした",
+        "updateFailed": "Linear での更新に失敗しました",
+        "commentFailed": "コメントを作成できませんでした",
+        "projectCreateFailed": "Linear プロジェクトを作成できませんでした",
+        "noApiKey": "API キーが保存されていません。",
+        "workspaceAuthExpired": "このワークスペースの Linear 認証は期限切れです。",
+        "projectNameRequired": "プロジェクト名が必要です",
+        "projectIdRequired": "プロジェクト ID が必要です",
+        "projectNotFound": "プロジェクトが見つかりませんでした",
+        "viewIdRequired": "カスタムビュー ID が必要です",
+        "viewHasNoIssues": "カスタムビューに Issue が含まれていません",
+        "viewHasNoProjects": "カスタムビューにプロジェクトが含まれていません"
+      }
+    }
+  },
+  "workspaceOptions": {
+    "activeFilterCount_one": "{{count}} 件のフィルター",
+    "activeFilterCount_other": "{{count}} 件のフィルター"
+  },
+  "editorConflicts": {
+    "kind": {
+      "addedByUs": "こちらで追加",
+      "bothAdded": "双方で追加",
+      "deletedByUs": "こちらで削除",
+      "addedByThem": "相手側で追加",
+      "bothDeleted": "双方で削除",
+      "bothModified": "双方で変更",
+      "deletedByThem": "相手側で削除"
+    },
+    "resolvedBanner": "ローカルで解決済みの競合 · {{kind}}",
+    "hint": {
+      "addedByUs": "追加されたファイルを保持するかどうか検討してください",
+      "bothModified": "競合マーカーがある箇所を修正してください",
+      "addedByThem": "保持する前に、追加されたファイルの内容を確認してください",
+      "bothDeleted": "編集する前に、Git で競合を解決するか、どちらか一方のファイルを復元してください",
+      "deletedByThem": "ファイルを保持するか、削除を受け入れるか判断してください",
+      "deletedByUs": "ファイルを復元するかどうか判断してください",
+      "bothAdded": "保持するバージョンを選択するか、統合してください"
+    },
+    "renamedFrom": "{{path}} から名前を変更",
+    "snapshotCapturedAt": "{{time}} にスナップショットを取得しました。",
+    "unresolvedBanner": "未解決の競合 · {{kind}}"
+  },
+  "stats": {
+    "usageBreakdown": {
+      "turns_one": "{{count}} ターン",
+      "events_one": "{{count}} イベント",
+      "sessions_one": "{{count}} セッション",
+      "events_other": "{{count}} イベント",
+      "sessions_other": "{{count}} セッション",
+      "turns_other": "{{count}} ターン"
+    }
+  },
+  "github": {
+    "viewed": {
+      "markFile": "{{path}} を閲覧済みとしてマークする",
+      "unmarkFile": "{{path}} の閲覧済みのマークを外す"
+    }
+  },
+  "wslMove": {
+    "entry": {
+      "hostRow": "このディストリビューションからプロジェクトを移動…",
+      "projectMenu": "{{distro}} ホストへ移動…"
+    },
+    "blockers": {
+      "title": "これらのプロジェクトを移動する前に",
+      "inProjects": "{{names}} 内",
+      "skipOne": "{{name}} をこの移動から除外",
+      "skipMany": "これらの {{n}} 件のプロジェクトをこの移動から除外"
+    },
+    "title": "プロジェクトを {{distro}} ホストへ移動",
+    "loading": "{{distro}} 内のプロジェクトを確認しています…",
+    "runningTitle": "{{distro}} ホストへ移動しています",
+    "preview": {
+      "counts": "プロジェクト: {{projects}} · ワークスペース: {{workspaces}} · ターミナル: {{terminals}} · チャット: {{chats}}",
+      "whatHappens": "ファイルは現在の場所に残ります。ターミナルは同じフォルダーで再起動し、出力、シェル履歴、Agent との会話は保持されます。",
+      "projects": "{{distro}} 内のプロジェクト",
+      "folderBadge": "フォルダー",
+      "notMoving": "移動しない",
+      "checking": "選択したプロジェクトを確認しています…",
+      "checkAgain": "再確認",
+      "moveOne": "1 件のプロジェクトを移動",
+      "moveMany": "{{n}} 件のプロジェクトを移動",
+      "heldByHost": "すでに {{distro}} ホスト上にあります。",
+      "changed": "以前に移動した後、古いバージョンの Orca によってここで変更されました。再び移動されることはありません。",
+      "chatsStay": "既存のチャットはこのコンピューターに残ります。このプロジェクトの新しいチャットは WSL ホストで開始されます。",
+      "browserLoginsConflict": "ホストのブラウザープロファイルがすでに使用中のため、ブラウザーのサインイン状態は引き継がれません。移動後、ホストのブラウザータブで再度サインインしてください。",
+      "browserLoginsNotCarried": "ブラウザーのサインイン状態はこのホストに引き継がれません。移動後、そのブラウザータブで再度サインインしてください。"
+    },
+    "cancel": "キャンセル",
+    "progress": {
+      "bytes": "{{sent}} / {{total}}",
+      "tooLate": "ホストがすでに切り替え中のため、キャンセルできません。完了するまで Orca を開いたままにしてください。",
+      "switching": "切り替えはキャンセルできません。完了するまで Orca を開いたままにしてください。",
+      "readOnly": "移動中、これらのプロジェクトは読み取り専用です。切り替えが始まるまではキャンセルできます。",
+      "cancelUntilSwitch": "切り替えが始まるまではキャンセルできます。",
+      "closeKeepsGoing": "このダイアログを閉じても移動は止まりません。移動が終わると再び開きます。",
+      "cancelling": "キャンセルしています…",
+      "cancel": "移動をキャンセル"
+    },
+    "result": {
+      "movedTitle": "{{distro}} ホストに移動しました",
+      "resetTitle": "何も移動されませんでした",
+      "waitingTitle": "{{distro}} ホストを待っています",
+      "earlierMoveTitle": "以前の移動が先に完了しました",
+      "refusedTitle": "プロジェクトは移動されませんでした",
+      "reloadCheckpointRefused": "Orca は未保存のファイルをバックアップできなかったため、ウィンドウを再読み込みしませんでした。このダイアログを閉じ、それらのファイルを保存するか閉じてから、表示されたままの通知で「今すぐ再読み込み」を使用してください。",
+      "reloadVetoed": "ウィンドウの再読み込みが妨げられました。このダイアログを閉じ、作業を保存してから、表示されたままの通知で「今すぐ再読み込み」を使用してください。",
+      "reloadFailed": "ウィンドウを再読み込みできませんでした。もう一度お試しください。",
+      "moved": "このウィンドウを再読み込みすると、プロジェクトが {{distro}} ホストの下に表示されます。Orca は再読み込みの前に未保存のファイルをバックアップします。",
+      "automationsPendingOne": "1 件のオートメーションがホスト上で一時的にオフになっています。Orca はホストに再びオンにするよう要求し続けます。",
+      "automationsPendingMany": "{{n}} 件のオートメーションがホスト上で一時的にオフになっています。Orca はホストに再びオンにするよう要求し続けます。",
+      "undoHint": "気が変わった場合は、再読み込み後、サイドバーにこれらのプロジェクトが「{{distro}} ホストに移動済み」と表示されます。そこで「このコンピューターで再び使用」を選ぶと、移動前の状態に戻せます。",
+      "reset": "移動は停止し、すべて元に戻されました。プロジェクトは以前と同じようにこのコンピューターで動作します。一時停止したターミナルは、開くと再び開始されます。",
+      "resetReason": "停止した理由: {{detail}}",
+      "waiting": "移動は {{distro}} ホストに届いた可能性がありますが、ホストが応答しません。応答するまで、これらのプロジェクトはここで読み取り専用のままです。設定でホストに接続してから、このダイアログを再び開いて移動を開始してください。Orca は先にこの移動を完了するか取り消します。",
+      "reloading": "再読み込みしています…",
+      "reload": "今すぐ再読み込み",
+      "close": "閉じる",
+      "review": "プロジェクトに戻る",
+      "browserLoginsHostUnknown": "Orca がホストのブラウザープロファイルを特定できなかったため、ブラウザーのログイン情報はコピーされませんでした。ホストのブラウザータブで再度サインインしてください。",
+      "browserLoginsConflict": "ホストのブラウザープロファイルがすでに使用中のため、ブラウザーのログイン情報はコピーされませんでした。ホストのブラウザータブで再度サインインしてください。",
+      "browserLoginsNotCopied": "ブラウザーのログイン情報はホストにコピーされませんでした。ホストのブラウザータブで再度サインインしてください。"
+    },
+    "runtime": {
+      "label": "プロジェクトのランタイム",
+      "description": "このプロジェクトは、このコンピューターを経由して {{distro}} で実行されています。{{distro}} ホストに移動すると、そこで実行されます。",
+      "move": "プロジェクトを移動"
+    },
+    "unfinished": {
+      "one": "{{distro}} ホストに移動した 1 件のオートメーションがまだオフです。Orca はホストに再びオンにするよう要求し続けます。",
+      "many": "{{distro}} ホストに移動した {{n}} 件のオートメーションがまだオフです。Orca はホストに再びオンにするよう要求し続けます。"
+    },
+    "refusal": {
+      "previewFailed": "Orca はこれらのプロジェクトを確認できませんでした。もう一度お試しください。",
+      "startFailed": "Orca は移動の状況を把握できなくなりました。このダイアログを再び開いて、現在の状況を確認してください。",
+      "unavailable": "このウィンドウでは、プロジェクトを WSL ホストへ移動できません。",
+      "alreadyRunning": "{{distro}} への移動がすでに実行中です。完了するのを待ってから、もう一度お試しください。",
+      "alreadyInFlightPreview": "{{distro}} の移動がまだ完了処理中です。この移動を開始すると、Orca は可能な範囲で先にその移動を完了するか取り消します。",
+      "alreadyInFlight": "{{distro}} の移動がまだ完了処理中のため、この移動は開始されませんでした。{{distro}} ホストを接続したままにして、後でもう一度お試しください。",
+      "nothingNew": "これらのプロジェクトはすでに {{distro}} ホスト上にあります。",
+      "destinationChanged": "{{distro}} から以前に移動したプロジェクトは、別の WSL ホストに移動しています。さらに移動するには、そのホストに接続してください。",
+      "hostUnavailable": "{{distro}} ホストが接続されていません。設定で接続してから、もう一度お試しください。",
+      "hostUpdateRequired": "{{distro}} ホストでは古いバージョンの Orca が実行されています。設定で更新してから、もう一度お試しください。",
+      "terminalsBlocked": "これらのプロジェクト内の一部のターミナル、Agent、またはオートメーションが使用中です。何も移動されませんでした。",
+      "exportIncomplete": "これらのプロジェクトの一部の保存済み状態はまだ移動できないため、何も移動されませんでした:",
+      "exportIncompletePreview": "これらのプロジェクトの一部の保存済み状態はまだ移動できません:",
+      "tooLarge": "これらのプロジェクトは保存済み状態が多すぎて、一度に移動できません。一度に移動するプロジェクトを減らしてください。",
+      "pauseFailed": "Orca はこれらのプロジェクトのターミナルを一時停止できなかったため、何も移動されませんでした。一時停止したターミナルは、開くと再び開始されます。もう一度お試しください。",
+      "scopeChanged": "移動の準備中にプロジェクトが変更されたため、何も移動されませんでした。プロジェクトを確認して、もう一度お試しください。",
+      "cancelled": "移動をキャンセルしました。何も移動されませんでした。",
+      "finishedEarlierMove": "Orca は先に {{distro}} への以前の移動を完了しました。ウィンドウを再読み込みしてから、この移動をもう一度開始してください。"
+    },
+    "step": {
+      "preparing": "準備中",
+      "pausingTerminals": "ターミナルを一時停止中",
+      "copying": "コピー中",
+      "switching": "切り替え中",
+      "finishing": "完了処理中",
+      "done": "完了"
+    },
+    "blocker": {
+      "agentWorkingOne": "Agent が作業中か、回答を待っています",
+      "agentWorkingMany": "{{n}} 個の Agent が作業中か、回答を待っています",
+      "processRunningOne": "ターミナルでプログラムが実行中です",
+      "processRunningMany": "{{n}} 個のターミナルでプログラムが実行中です",
+      "agentNotResumableOne": "移動後に再開できない Agent があります",
+      "agentNotResumableMany": "移動後に再開できない Agent が {{n}} 個あります",
+      "unverifiableOne": "Orca は現在ターミナルを確認できません",
+      "unverifiableMany": "Orca は現在 {{n}} 個のターミナルを確認できません",
+      "automationRunningOne": "オートメーションの実行が進行中です",
+      "automationRunningMany": "{{n}} 件のオートメーションの実行が進行中です",
+      "dispatchRunningOne": "Agent のタスクが進行中です",
+      "dispatchRunningMany": "{{n}} 件の Agent のタスクが進行中です",
+      "scrollbackTooLargeOne": "出力履歴が多すぎて移動できないターミナルがあります",
+      "scrollbackTooLargeMany": "{{n}} 個のターミナルの出力履歴が多すぎて移動できません"
+    },
+    "blockerHint": {
+      "agentWorking": "完了するのを待つか、ターミナルで停止してから、再確認してください。",
+      "processRunning": "プログラム（開発サーバーやエディターなど）を停止してから、再確認してください。",
+      "agentNotResumable": "ターミナルで Agent を終了してから、再確認してください。",
+      "unverifiable": "少し待ってから、再確認してください。移動のために何かが停止されることはありません。",
+      "wait": "完了するのを待ってから、再確認してください。",
+      "scrollbackTooLarge": "それらのターミナルの出力をクリアしてから、再確認してください。"
+    },
+    "scopeRefused": {
+      "windowsDrive": "フォルダーが Windows ドライブ上にあるため、このコンピューターに残ります。",
+      "mixedLocations": "一部のフォルダーがこのディストリビューションの外にあるため、このコンピューターに残ります。",
+      "notLocal": "すでに別のホストで実行されています。",
+      "other": "移動できません。"
+    },
+    "reloadToast": {
+      "title": "再読み込みして移動を完了"
+    },
+    "orchestrator": {
+      "showTerminal": "ターミナルを表示",
+      "moveAgain": "再度移動",
+      "checkAgain": "再確認",
+      "deferred": "{{distro}} ホストへの移動を完了しようとしています。一部のターミナルがまだ使用中です。",
+      "stuck": "{{distro}} ホストへの以前の移動がまだ完了していません。",
+      "declined": "これらのプロジェクトをこのコンピューターに戻したため、移動は一時停止しています。",
+      "doneToast": "プロジェクトを {{distro}} ホストに移動しました",
+      "terminalGone": "そのターミナルはこのウィンドウで開かれていません。再確認して更新してください。",
+      "blocker": "{{title}}。{{hint}}",
+      "paused": "{{distro}} ホストへのプロジェクトの移動は一時停止しています: {{reason}}。",
+      "pausedReason": {
+        "exportIncomplete": "一部の保存済み状態をまだ引き継げません",
+        "manifestTooLarge": "保存済み状態が 1 回の移動で運べる量を超えています",
+        "hostUpdate": "先にホストを更新する必要があります",
+        "attemptsExhausted": "何度か試しても完了しませんでした"
+      },
+      "finishPending": "{{distro}} ホストへの以前の移動はホスト側で完了しています。Orca は再起動時、または「再確認」ですぐに、ここでの処理を完了します。"
     }
   }
 }

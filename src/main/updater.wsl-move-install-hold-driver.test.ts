@@ -17,7 +17,8 @@ import type * as RigModule from './persistence/__fixtures__/wsl-mover/wsl-move-k
 import type * as RewriteStores from './persistence/moving-wsl-projects/wsl-move-desktop-rewrite-stores'
 import type * as Driver from './persistence/moving-wsl-projects/wsl-move-driver'
 import type * as RunningMoves from './persistence/moving-wsl-projects/wsl-move-running-moves'
-import { WSL_MOVE_INSTALL_HELD_MESSAGE } from './updater/updater-install-execution'
+import type * as ReleaseHere from './ipc/wsl-move-release-here'
+import type * as Retention from './persistence/moving-wsl-projects/wsl-move-retention'
 
 const {
   nativeUpdaterMock,
@@ -70,6 +71,8 @@ type Mover = {
   driver: typeof Driver
   moves: typeof RunningMoves
   rewriteStores: typeof RewriteStores
+  releaseHere: typeof ReleaseHere
+  retention: typeof Retention
 }
 
 let mover: Mover | null = null
@@ -84,7 +87,10 @@ async function loadMover(): Promise<Mover> {
     fixture,
     driver: await import('./persistence/moving-wsl-projects/wsl-move-driver'),
     moves: await import('./persistence/moving-wsl-projects/wsl-move-running-moves'),
-    rewriteStores: await import('./persistence/moving-wsl-projects/wsl-move-desktop-rewrite-stores')
+    rewriteStores:
+      await import('./persistence/moving-wsl-projects/wsl-move-desktop-rewrite-stores'),
+    releaseHere: await import('./ipc/wsl-move-release-here'),
+    retention: await import('./persistence/moving-wsl-projects/wsl-move-retention')
   }
   mover = loaded
   return loaded
@@ -174,7 +180,16 @@ function pausedMove({ rig: r, driver, fixture }: Mover): {
   return { run, release }
 }
 
-function expectHeld({ send }: Staged): void {
+const MOVE_HELD = {
+  message: 'A project is moving to its WSL host. Install the update once the move finishes.',
+  lifecycleEvent: 'quit_and_install_held_for_wsl_move'
+}
+const UNDO_HELD = {
+  message: 'A project is coming back from its WSL host. Install the update once that finishes.',
+  lifecycleEvent: 'quit_and_install_held_for_wsl_move_undo'
+}
+
+function expectHeld({ send }: Staged, held = MOVE_HELD): void {
   expect(autoUpdaterMock.quitAndInstall).not.toHaveBeenCalled()
   expect(killAllPtyMock).not.toHaveBeenCalled()
   expect(send).toHaveBeenCalledWith('updater:quitAndInstallAborted')
@@ -183,11 +198,11 @@ function expectHeld({ send }: Staged): void {
   )?.[1]
   expect(status).toEqual({
     state: 'error',
-    message: WSL_MOVE_INSTALL_HELD_MESSAGE,
+    message: held.message,
     retryAction: 'install',
     version: '1.0.61'
   })
-  expect(recordUpdaterLifecycleMock).toHaveBeenCalledWith('quit_and_install_held_for_wsl_move', {
+  expect(recordUpdaterLifecycleMock).toHaveBeenCalledWith(held.lifecycleEvent, {
     version: '1.0.61'
   })
 }
@@ -266,6 +281,43 @@ describe('an app update while a real WSL project move runs (#34813)', () => {
     })
     expect(staged.mover.fixture.wslMoveRigOutcome(staged.mover.rig)).not.toBe('stuck')
     expect(staged.mover.moves.isAnyWslMoveRunning()).toBe(false)
+    await pressInstall(staged)
+    expectInstalled(staged)
+  })
+
+  it('is held while "Use on this computer again" brings a moved project back, then installs', async () => {
+    const staged = await stagedUpdate()
+    const { rig, driver, fixture, releaseHere, retention, moves } = staged.mover
+    expect(
+      await driver.moveProjectsToWslHost(rig.world.deps, fixture.WSL_MOVE_RIG_REQUEST)
+    ).toMatchObject({
+      outcome: 'moved'
+    })
+    await retention.runWslMoveRetentionPass({
+      userDataPath: rig.userDataPath,
+      store: fixture.wslMoveRigRetentionStore(rig)
+    })
+    let hostStopped!: () => void
+    const stopping = new Promise<void>((resolve) => {
+      hostStopped = resolve
+    })
+    const undo = releaseHere.releaseWslMovedProjectHere(
+      rig.userDataPath,
+      { repoId: 'repo-1' },
+      [],
+      () => ({
+        // Paused while the host's copies of the project's terminals stop.
+        stopHostCopies: async () => (await stopping, 'stopped' as const)
+      })
+    )
+    // An undo is not a move: the move prompt, Cancel and the driver do not see it.
+    expect(moves.isAnyWslMoveRunning()).toBe(false)
+
+    await pressInstall(staged)
+    expectHeld(staged, UNDO_HELD)
+
+    hostStopped()
+    expect(await undo).toMatchObject({ released: true })
     await pressInstall(staged)
     expectInstalled(staged)
   })

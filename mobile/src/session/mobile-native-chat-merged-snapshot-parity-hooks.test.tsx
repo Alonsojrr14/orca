@@ -237,6 +237,7 @@ async function mountPhone(): Promise<Phone> {
       images: OVERLAY_IMAGES,
       onMicPress: () => {},
       micActive: false,
+      micStarting: false,
       micProcessing: false,
       dictationMode: 'toggle',
       onMicPressIn: () => {},

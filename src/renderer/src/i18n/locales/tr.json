@@ -52,6 +52,30 @@
     "startupWorktreeRefresh": {
       "loading": "Çalışma alanları bulunuyor…",
       "description": "Yerel ve uzak projeler yüklenirken daha fazla çalışma alanı görünebilir."
+    },
+    "wslMoved": {
+      "movedToHost": "{{distro}} ana makinesine taşındı",
+      "useHere": "Bu bilgisayarda yeniden kullan",
+      "useHereTitle": "{{name}} bu bilgisayarda yeniden kullanılsın mı?",
+      "useHereDescription": "Orca bu projeyi burada, taşımadan önceki hâliyle açar. Kodunuz etkilenmez: hiç taşınmadı. Taşımadan bu yana {{distro}} ana makinesinde yapılan yeni sekmeler ve sohbetler gibi değişiklikler ana makinede kalır ve geri gelmez. Bu projeyle birlikte taşınan projeler de geri gelir. Proje, siz oradan kaldırana kadar {{distro}} ana makinesinde de kalır. Bu pencere yeniden yüklenir.",
+      "useHereConfirm": "Bu bilgisayarda kullan",
+      "useHereSuperseded": "{{distro}} ana makinesine daha sonra yapılan bir taşıma bu projeyi de içeriyor. Önce o taşımayı geri getirin.",
+      "useHereRefusedTitle": "{{name}} henüz burada kullanılamıyor",
+      "useHereRefusedOk": "Tamam",
+      "useHereSupersededBy": "Şu projeler bu projeden sonra {{distro}} ana makinesine taşındı: {{names}}. Önce onları, ardından bu projeyi bu bilgisayarda yeniden kullanın.",
+      "useHereMoveRunning": "{{distro}} ana makinesine yapılan bir taşıma hâlâ sürüyor. Bittiğinde tekrar deneyin.",
+      "useHereHostKeptForPeers": "{{project}} projesi, başka bir Orca için hâlâ çalışan {{distro}} ana makinesine taşındı. Burada yeniden kullanmak için ana makineyi tekrar ekleyin.",
+      "useHereHostUnreachable": "{{distro}} ana makinesi yanıt vermiyor; bu nedenle Orca bu projenin oradaki kopyasını durduramıyor ve kopyadaki ajanlar hâlâ çalışıyor olabilir. Ana makineyi Ayarlar'dan bağlayın veya kaldırın, ardından tekrar deneyin.",
+      "useHereHostStillRunning": "Bu projenin {{distro}} ana makinesindeki kopyasında hâlâ terminaller çalışıyor; bu yüzden oradaki ajanlar iki kez çalışabilir. Biraz bekleyip tekrar deneyin.",
+      "useHereFailed": "Bu proje bu bilgisayara geri getirilemedi.",
+      "useHereHostRemovalPending": "{{distro}} ana makinesi hâlâ kaldırılıyor, bu yüzden Orca ona dokunmuyor. Kaldırma işlemini Ayarlar'da tamamlayın, ardından tekrar deneyin.",
+      "useHereHostAutomations": "Orca bu projenin {{distro}} ana makinesindeki otomasyonlarını kapatamadı; bu yüzden otomasyonlar iki kez çalışabilir. Ana makineyi Ayarlar'dan bağlayın, ardından tekrar deneyin.",
+      "useHereUnsavedTitle": "Önce dosyalarınızı kaydedin",
+      "useHereUnsavedDescription": "{{name}} projesini geri getirmek bu pencereyi yeniden yükler. Önce şu dosyaları kaydedin veya kapatın: {{files}}",
+      "automationRunsOnHost": "{{distro}} ana makinesinde çalışır",
+      "quitDuringMoveTitle": "Bir proje taşınırken çıkılsın mı?",
+      "quitDuringMoveDescription": "Bir proje WSL ana makinesine taşınıyor. Yine de çıkılsın mı? Taşıma bir sonraki açılışta geri alınır.",
+      "quitDuringMoveConfirm": "Yine de çık"
     }
   },
   "app": {
@@ -237,6 +261,15 @@
       "title": "Geçmiş",
       "today": "Bugün",
       "yesterday": "Dün"
+    },
+    "viewport": {
+      "desktop": "Masaüstü — 1920 × 1080",
+      "laptop": "Dizüstü — 1024 × 768",
+      "laptop-l": "Dizüstü L — 1440 × 900",
+      "mobile-l": "Mobil L — 425 × 812",
+      "mobile-m": "Mobil M — 375 × 667",
+      "mobile-s": "Mobil S — 320 × 568",
+      "tablet": "Tablet — 768 × 1024"
     }
   },
   "editor": {
@@ -592,7 +625,8 @@
       "permissionOverrideMore": "ve {{count}} ajan daha",
       "permissionOverrideMore_one": "ve {{count}} ajan daha",
       "permissionOverrideMore_other": "ve {{count}} ajan daha",
-      "permissionOverridesUse": "{{mode}} ayarını kullan"
+      "permissionOverridesUse": "{{mode}} ayarını kullan",
+      "approveForMe": "benim için onayla"
     },
     "followSymlinkedDirectoriesKeywords": {
       "symlink": "sembolik bağlantı",
@@ -622,6 +656,34 @@
       },
       "actionPermissions": {
         "sameAsAgent": "{{agent}} ile aynı"
+      }
+    },
+    "mcp": {
+      "claudeWorkspace": "Claude çalışma alanı",
+      "httpServer": "HTTP sunucusu",
+      "inspectFailed": "{{directory}} incelenemedi.",
+      "invalidJson": "Geçersiz JSON",
+      "invalidServer": "Geçersiz sunucu",
+      "noServers": "Sunucu yok",
+      "notFound": "Bulunamadı",
+      "serverCount_one": "{{count}} sunucu",
+      "serverCount_other": "{{count}} sunucu",
+      "stdioServer": "stdio sunucusu",
+      "unreadable": "Okunamıyor",
+      "workspace": "Çalışma Alanı"
+    },
+    "shortcuts": {
+      "parseFailed": "Kısayol ayrıştırılamadı."
+    },
+    "ssh": {
+      "status": {
+        "auth-failed": "Kimlik doğrulanamadı",
+        "connected": "Bağlandı",
+        "connecting": "Bağlanıyor…",
+        "deploying-relay": "Aktarıcı kuruluyor…",
+        "disconnected": "Bağlantı kesildi",
+        "reconnecting": "Yeniden bağlanıyor…",
+        "reconnection-failed": "Yeniden bağlanılamadı"
       }
     }
   },
@@ -1813,7 +1875,6 @@
         "d1fa2cf888": "PR head SHA'sı olmadan yorum yapılamıyor.",
         "829674460a": "PR commit SHA'ları eksik olduğu için diff kullanılamıyor.",
         "af924014f8": "Görüldü",
-        "2d89a38d9d": "{{value1}} dosyasını görüldü olarak {{value0}}",
         "70e84e3d0b": "Eşleşen inceleyen yok.",
         "1ffce94a8b": "Diğer herkes",
         "c2b21818e1": "Öneriler",
@@ -2030,7 +2091,6 @@
       "LinearIssueTextEditor": {
         "947ba2d6f4": "kaydetmek için",
         "04d73b72dc": "Sorun başlığı",
-        "e8ff595db3": "{{value0}} güncellenemedi",
         "1e08a1ec80": "Başlık zorunludur"
       },
       "LinearIssueWorkspace": {
@@ -2353,10 +2413,6 @@
         "9e97f08d0f": "Açmak için bir dosya arayın",
         "ec31e058f7": "Dosyaya git",
         "73b44e7bde": "Kurulum komutunu kopyala",
-        "1cf8561ab4": "hızlı ve gitignore'a duyarlı listeleme için uzak sunucuda:",
-        "5d80dc39bb": "ripgrep",
-        "2ca749c15d": "Kur",
-        "4725b0e931": "Quick Open taraması çok büyük (",
         "b227d88520": "{{value0}} dosya bulundu",
         "995be8ea22": "Kopyala",
         "cf144856dc": "Kopyalandı"
@@ -2382,8 +2438,6 @@
         "continuedOne": "1 sohbete devam edildi",
         "continuedMany": "{{value0}} sohbete devam edildi",
         "selectAgent": "{{value2}} içindeki \"{{value1}}\" adlı {{value0}} sohbetine devam et",
-        "resumeSelected": "{{value0}} sohbete devam et",
-        "resumeSelectedOne": "1 sohbete devam et",
         "dismissAll": "Tümünü kapat",
         "notContinuedOne": "1 sohbete devam edilemedi",
         "notContinuedMany": "{{value0}} sohbete devam edilemedi",
@@ -2412,7 +2466,9 @@
         "selectMachine": "{{value0}} üzerindeki tüm sohbetleri seç",
         "sshHost": "SSH",
         "done": "Bitti",
-        "resultListLabel": "Bu sürdürme işlemindeki sohbetler"
+        "resultListLabel": "Bu sürdürme işlemindeki sohbetler",
+        "resumeChats_one": "{{count}} sohbete devam et",
+        "resumeChats_other": "{{count}} sohbete devam et"
       },
       "StarNagCard": {
         "30c36231c1": "Orca açık kaynaktır. Bugün işinize yaradıysa, bir GitHub yıldızı diğer geliştiricilerin onu bulmasına yardımcı olur.",
@@ -2477,9 +2533,6 @@
         "7f3f7b4c18": "Açıklama (isteğe bağlı, markdown)",
         "9f2b4c03a6": "Kaydedilecek yer:",
         "d3d0998b7d": "Yeni GitHub sorunu",
-        "d1e243795c": "sorunlar",
-        "be8cf68d9f": "sorunları görüntüle",
-        "67662ade50": "proje sorunları",
         "6244a02f46": "Linear'da aç",
         "606a85c774": "Aç",
         "5e8061b088": "{{value0}} {{value1}} üzerinden çalışma alanı başlat",
@@ -2499,11 +2552,9 @@
         "af377b13b1": "{{value0}} görünümü",
         "d47248df4d": "Linear görünüm modu",
         "f397d513e3": "Geri",
-        "b39fe6511d": "projeler",
         "8675cd6188": "Linear",
         "733b8f2421": "Linear / Görünümler",
         "bc06ed0fb0": "Görünümlere dön",
-        "3cb855080f": "görünümler",
         "b4e10f096e": "Sahip",
         "a04fe7ba73": "Görünürlük",
         "0aa8525950": "Model",
@@ -3174,8 +3225,6 @@
               "7616c986c6": "{{value0}} projesindeki sorunları aç",
               "openInLinear": "{{value0}} öğesini Linear'da aç",
               "93e1f6bfca": "Yükleniyor",
-              "98730088a6": ". Tamamı için arayın veya Linear'ı açın.",
-              "06b887d622": "İlk",
               "linearLoginUnreadable": "Kayıtlı Linear oturum açma bilgileri okunamıyor. Ayarlar'dan yeniden bağlayın.",
               "f2cc1e0ff6": "Linear / Projeler",
               "906b5e4cb8": "Linear / Projeler / {{value0}}",
@@ -4709,10 +4758,7 @@
         },
         "UsageBreakdownSection": {
           "7765a4c3e1": "yok",
-          "247c93ca92": "• tahmini fiyatlandırma",
-          "32176e1d44": "tur",
-          "79a69522a5": "olay",
-          "02a046792e": "oturum •"
+          "247c93ca92": "• tahmini fiyatlandırma"
         },
         "GrokUsagePane": {
           "g8h9i0j1k2": "Grok kullanımı",
@@ -5639,7 +5685,9 @@
         },
         "sidebarHostOptions": {
           "3e102f111c": "Tüm host'lar",
-          "visibleHostsCount": "{{value0}} host"
+          "hosts": "Sunucular",
+          "visibleHosts_one": "{{count}} sunucu",
+          "visibleHosts_other": "{{count}} sunucu"
         },
         "SidebarWorkspaceOptionsMenu": {
           "hosts": "Host'lar",
@@ -6506,7 +6554,7 @@
           "running": "Çalışıyor",
           "stopped": "Durduruldu",
           "title": "WSL dağıtımı ekle",
-          "description": "Orca sunucusunu dağıtım içinde çalıştırır; böylece git, dosyalar ve terminaller doğrudan Linux'ta çalışır. Yeni projeler için kullanın; \\\\wsl.localhost üzerinden açtığınız projeler mevcut hâliyle çalışmaya devam eder.",
+          "description": "Orca sunucusunu dağıtım içinde çalıştırır; böylece git, dosyalar ve terminaller doğrudan Linux'ta çalışır. Bu dağıtımda \\\\wsl.localhost üzerinden açtığınız projeler, terminalleri boşta kaldığında otomatik olarak bu ana bilgisayara taşınır; Windows sürücüsündeki (/mnt/…) projeler bu bilgisayarda kalır. Taşınan bir projeyi kenar çubuğundan geri getirebilirsiniz.",
           "distro": "Dağıtım",
           "loading": "WSL dağıtımları aranıyor…",
           "placeholder": "Dağıtım seçin",
@@ -11986,7 +12034,8 @@
             "migration": "Tamamlanamadı: bu sunucuya taşıma işlemi henüz bitmedi. Önce bu işlemi sürdürün.",
             "deferred": "Henüz tamamlanamadı: sunucu bu işleme hazır değil. Daha sonra yeniden deneyin.",
             "failed": "Orca bu işlemi sunucuda tamamlayamadı. Yeniden deneyin.",
-            "defaultServer": "Tamamlanamadı: bu sunucu yeni projeler için varsayılan ana makine. Durdurmadan önce Yeni projelerin açılacağı yer bölümünden başka bir ana makine seçin."
+            "defaultServer": "Tamamlanamadı: bu sunucu yeni projeler için varsayılan ana makine. Durdurmadan önce Yeni projelerin açılacağı yer bölümünden başka bir ana makine seçin.",
+            "wslMoveRunning": "Tamamlanamadı: bu sunucuya bir proje taşınıyor. Taşıma bittiğinde Orca sunucuyu günceller."
           },
           "reassurance": "Her ana makinede çalışır ve kendi SSH bağlantınız üzerinden erişilir. Kodunuz ve dosyalarınız bulundukları yerde kalır. Ana makineye yalnızca Orca'nın proje, sekme ve terminal listesi taşınır."
         },
@@ -13256,10 +13305,10 @@
                 "dialog": {
                   "3bc61dc989": "İptal",
                   "15efa778e3": "Geri Al",
-                  "42f89dd030": "dosyalar",
-                  "e7611dca35": "dosya",
                   "0d2d88cba5": "Bu geri alınamaz.",
-                  "1551c14668": "Değişiklikler geri alınsın mı?"
+                  "1551c14668": "Değişiklikler geri alınsın mı?",
+                  "fileCount_one": "{{count}} dosya",
+                  "fileCount_other": "{{count}} dosya"
                 }
               },
               "dropdown": {
@@ -13486,16 +13535,21 @@
             "unresolved": "Bu çalışma alanının sahibi olan host belirlenemedi. Bağlantıyı kontrol edip tekrar deneyin."
           },
           "useFileDeletion": {
-            "72691dfebc": "'{{value1}}' için {{value0}} işlemi başarısız oldu.",
             "d979a4fbb5": "'{{value0}}' kalıcı olarak silinsin mi?",
             "92276aceb7": "Sil",
             "7fb9435c86": "Bu, uzak sunucudaki dizini ve içeriğini kalıcı olarak siler. Bu geri alınamaz.",
             "23e98f192f": "Bu, uzak sunucudaki dosyayı kalıcı olarak siler. Bu geri alınamaz.",
             "8b8ee9d22f": "Bu dosyanın sahibi olan host belirlenemedi. Çalışma alanı bağlantısını kontrol edip tekrar deneyin.",
-            "af1270b90d": "{{count}} öge kalıcı olarak silinsin mi?",
             "dd029aa5cd": "Bu, uzak sunucudaki seçili ögeleri ve dizin içeriklerini kalıcı olarak siler. Bu geri alınamaz.",
-            "77fdc36183": "{{count}} öge silinsin mi?",
-            "fca915a67a": "Uzaktaki ögeler kalıcı olarak silinir ve bu işlem geri alınamaz. Yerel ögeler {{value0}} konumuna taşınır."
+            "deleteFailed": "'{{name}}' silinemedi.",
+            "deleteItems_one": "{{count}} öğe silinsin mi?",
+            "deleteItems_other": "{{count}} öğe silinsin mi?",
+            "mixedRecycleBin": "Uzak öğeler kalıcı olarak silinir ve bu işlem geri alınamaz. Yerel öğeler geri dönüşüm kutusuna taşınır.",
+            "mixedTrash": "Uzak öğeler kalıcı olarak silinir ve bu işlem geri alınamaz. Yerel öğeler çöp kutusuna taşınır.",
+            "permanentlyDeleteItems_one": "{{count}} öğe kalıcı olarak silinsin mi?",
+            "permanentlyDeleteItems_other": "{{count}} öğe kalıcı olarak silinsin mi?",
+            "recycleBinFailed": "'{{name}}' geri dönüşüm kutusuna taşınamadı.",
+            "trashFailed": "'{{name}}' çöp kutusuna taşınamadı."
           },
           "useFileExplorerHandlers": {
             "32cd9fd991": "Sembolik bağlantı hedefi açılamıyor",
@@ -14470,13 +14524,13 @@
             "9ee54037a4": "Özel komut",
             "4b2fc4b80c": "Düşünme çabası",
             "be8917699e": "Model",
-            "4d9b6d84df": "desteklenmiyor. Claude, Codex veya Özel seçin.",
             "560d4feb00": "Özel",
             "29d119fe95": "Ajan",
             "f9382b48a1": "AI yazarını etkinleştir",
             "1c0cb4fabb": "AI yazarı",
             "bd14e9c42a": "Yapılandırılmadı",
-            "1f9468c5c9": "{{value0}} desteklenmiyor"
+            "1f9468c5c9": "{{value0}} desteklenmiyor",
+            "unsupportedAgent": "{{agent}} desteklenmiyor. Claude, Codex veya Özel seçeneklerinden birini seçin."
           },
           "BrowserAnimatedVisual": {
             "46df009982": "Ücretsiz denemenizi başlatın",
@@ -15017,17 +15071,14 @@
         "ConflictComponents": {
           "f338288514": "Conflict içeriği yükleniyor...",
           "90d576adb2": "Yenile",
-          "a1ce36f77d": "Anlık görüntü şu tarihte alındı",
           "c8ca989aea": "Dosya ağacını göster",
           "58ad5ad431": "Kapat",
           "28e7db4a90": "Kaynak Kontrolü",
           "31931dec46": "Bu inceleme anlık görüntüsünde artık canlı, çözülmemiş bir conflict yok.",
           "992145ff5a": "Tüm conflict'ler çözüldü",
-          "d5edd81755": "Şuradan yeniden adlandırıldı",
           "6e459867ad": "Oturuma özel süreklilik durumu. Git artık bu dosyayı merge edilmemiş olarak raporlamıyor.",
           "9c2901ef8a": "Sonraki conflict",
           "41d9af2e7a": "Önceki conflict",
-          "55d61a0ccd": "conflict ·",
           "da539359b6": "Bu conflict için düzenlenebilecek bir working tree dosyası yok.",
           "unresolvedConflicts_one": "{{count}} çözülmemiş conflict",
           "unresolvedConflicts_other": "{{count}} çözülmemiş conflict"
@@ -18554,6 +18605,15 @@
         "settings": "Ayarları terminalde aç",
         "extensions": "Uzantı panosunu terminalde aç",
         "hotkeys": "Klavye kısayollarını terminalde göster"
+      },
+      "modelDescriptions": {
+        "fable": "En zor ve en uzun süren görevler için en yetkin model",
+        "grok_4_5": "xAI'ın daha eski bir öncü modeli",
+        "grok_4_6": "xAI'ın önceki öncü modeli",
+        "grok_4_7": "xAI'ın en yeni öncü modeli",
+        "haiku": "Hızlı yanıtlar için en hızlı model",
+        "opus": "Günlük ve karmaşık görevler için en iyi model",
+        "sonnet": "Rutin görevler için verimli"
       }
     },
     "tab": {
@@ -19217,7 +19277,9 @@
   },
   "quickOpen": {
     "moreMatchesAvailable": "Daha fazla eşleşme olabilir. Sonuçları daraltmak için aramanızı detaylandırın.",
-    "recentValidationFailed": "Son dosyalar kontrol edilemedi: {{error}}"
+    "recentValidationFailed": "Son dosyalar kontrol edilemedi: {{error}}",
+    "installRipgrepOnRemote": "gitignore kurallarını dikkate alan hızlı listelemeyi etkinleştirmek için uzak sunucuya <code>ripgrep</code> yükleyin:",
+    "scanTooLarge": "Hızlı Aç taraması çok büyük ({{reason}})."
   },
   "checksPanel": {
     "unlinked": {
@@ -19230,11 +19292,20 @@
     "actionSaveFailed": "Bu eylem kaydedilemedi. Ayarlar bölümünden yeniden kaydetmeyi deneyin.",
     "discard": {
       "deleteUntrackedFileDescription": "Bu işlem, izlenmeyen bu dosyayı kalıcı olarak siler. Bu işlem geri alınamaz.",
-      "deleteUntrackedFilesDescription": "Bu işlem, izlenmeyen bu {{count}} dosyayı kalıcı olarak siler. Bu işlem geri alınamaz.",
+      "deleteUntrackedFilesDescription_other": "Bu işlem, izlenmeyen bu {{count}} dosyayı kalıcı olarak siler. Bu işlem geri alınamaz.",
       "restoreStagedVersionDescription": "Bu işlem, hazırlama alanındaki son sürümü geri yükler ve silme işlemini iptal eder. Bu işlem geri alınamaz.",
       "unstagedChangesDescription": "Bu işlem, dosyanın hazırlama alanına alınmamış değişikliklerini geri alır. Bu işlem geri alınamaz.",
       "unstagedSelectionIncludingUntrackedDescription": "Bu işlem, bu seçimdeki hazırlama alanına alınmamış değişiklikleri geri alır ve izlenmeyen dosyaları kalıcı olarak siler. Bu işlem geri alınamaz.",
-      "unstagedFilesIncludingUntrackedDescription": "Bu işlem, bu {{count}} dosyanın hazırlama alanına alınmamış değişikliklerini geri alır ve aralarındaki izlenmeyen dosyaları kalıcı olarak siler. Bu işlem geri alınamaz."
+      "unstagedFilesIncludingUntrackedDescription_other": "Bu işlem, bu {{count}} dosyanın hazırlama alanına alınmamış değişikliklerini geri alır ve aralarındaki izlenmeyen dosyaları kalıcı olarak siler. Bu işlem geri alınamaz.",
+      "delete": "Sil",
+      "deleteCount": "{{count}} öğeyi sil",
+      "deleteUntrackedFilesDescription_one": "Bu işlem, izlenmeyen bu {{count}} dosyayı kalıcı olarak siler. Bu işlem geri alınamaz.",
+      "deleteUntrackedTitle_one": "İzlenmeyen {{count}} dosya silinsin mi?",
+      "deleteUntrackedTitle_other": "İzlenmeyen {{count}} dosya silinsin mi?",
+      "discard": "Geri al",
+      "discardAll": "Tümünü geri al",
+      "restore": "Geri yükle",
+      "unstagedFilesIncludingUntrackedDescription_one": "Bu işlem, bu {{count}} dosyanın hazırlama alanına alınmamış değişikliklerini geri alır ve aralarındaki izlenmeyen dosyaları kalıcı olarak siler. Bu işlem geri alınamaz."
     },
     "unlinkedPr": {
       "status": "PR #{{number}} bağlantısı kaldırıldı"
@@ -19268,6 +19339,34 @@
       "creationUnconfirmed": "{{shortLabel}} oluşturma işlemi tamamlanmış olabilir. Branch'in inceleme durumu yenileniyor…",
       "withDetail": "{{shortLabel}} oluşturulamadı: {{detail}}",
       "pushFailed": "Gönderme işlemi yapılamadı. Gönderme hatasını giderip tekrar deneyin."
+    },
+    "model": {
+      "auto": "Otomatik",
+      "configDefault": "Yapılandırma varsayılanı"
+    },
+    "thinking": {
+      "high": "Yüksek",
+      "low": "Düşük",
+      "max": "Maks",
+      "medium": "Orta",
+      "minimal": "Minimal",
+      "off": "Kapalı",
+      "xhigh": "Ekstra Yüksek"
+    },
+    "variables": {
+      "assistantMessage": "Orca'da mevcutsa ajanın ilk yanıtı.",
+      "baseBranch": "PR Oluştur düzenleyicisinde seçilen hedef branch.",
+      "basePrompt": "Orca'nın bu eylem için yerleşik istemi; Orca'nın güvenle toplayabildiği bağlamı da içerir.",
+      "branch": "Kaynak kontrolündeki mevcut branch adı.",
+      "changedFiles": "Branch ile temel branch arasında değişen dosyaların özeti.",
+      "commitSummary": "Temel branch'e kıyasla branch'teki commit'lerin satır sonlarıyla ayrılmış listesi.",
+      "currentBody": "Oluşturma başlamadan önce düzenleyiciye yazılmış olan PR açıklaması.",
+      "currentTitle": "Oluşturma başlamadan önce düzenleyiciye yazılmış olan PR başlığı.",
+      "firstPrompt": "Bu çalışma alanı veya sohbet için ilk kullanıcı isteği.",
+      "linkedIssue": "Bu çalışma alanına bağlı GitHub sorun numarası. GitHub sorunu bağlı değilse boştur (GitLab'a bağlı çalışma alanları dahil). Talimat içeren şablonları tercih edin: tek başına \"Fixes #{linkedIssue}\", bağlantı olmadığında \"Fixes #\" olur.",
+      "patch": "PR ayrıntılarını oluşturmak için kullanılan, branch'in temel branch'e göre diff'i.",
+      "stagedFiles": "Commit mesajı oluşturmak için hazırlama alanına alınmış dosyaların satır sonlarıyla ayrılmış listesi.",
+      "stagedPatch": "Commit mesajı oluşturmak için kullanılan, hazırlama alanına alınmış git yaması."
     }
   },
   "agentsSidebarIntro": {
@@ -19530,7 +19629,9 @@
       "confirmTitle": "Terminal arka plan hizmeti yeniden başlatılsın mı?",
       "confirmBody": "Yeniden başlatma, {{sessions}} içindeki tüm süreçleri sonlandırır. Sürdürme desteği olan ajanlar daha sonra sürdürülebilir; kabuklar ve diğer işler ise yeniden başlatılmalıdır. Bunu ajanlarınız boşta olduğunda yapın.",
       "cancel": "İptal",
-      "confirm": "Yeniden başlat ve süreçleri sonlandır"
+      "confirm": "Yeniden başlat ve süreçleri sonlandır",
+      "count_one": "Çalışan {{count}} terminal",
+      "count_other": "Çalışan {{count}} terminal"
     },
     "restartedInputNotSent": "Siz yazarken terminal yeniden başlatıldı, bu nedenle girdilerinizin bir kısmı terminale ulaşmamış olabilir. Yeniden yazmadan önce yeni kabuğu kontrol edin."
   },
@@ -19810,7 +19911,11 @@
     "picker": {
       "pasteUnparseable": "Proje URL'si veya owner/number bekleniyor",
       "ownerLoadFailed": "{{owner}} hesabının projeleri yüklenemedi.",
-      "organizationsLoadFailed": "Bazı kuruluşlar yüklenemedi ({{failureCount}})."
+      "organizationsLoadFailed": "Bazı kuruluşlar yüklenemedi ({{failureCount}}).",
+      "detailsFailed": "Ayrıntılar yüklenemedi",
+      "listFailed": "Projeler listelenemedi",
+      "organizations": "Kuruluşlar",
+      "viewFailed": "Proje görünümü getirilemedi"
     },
     "error": {
       "notFoundState": "Bu proje veya görünüm bulunamadı.",
@@ -19845,6 +19950,9 @@
       "tooLargeUnknownCount": "Bu görünümde Orca'da gösterilemeyecek kadar çok öğe var. GitHub'da görünümün filtresini daraltın.",
       "tooLarge": "Bu görünüm {{itemCount}} öğe içeriyor — Orca'da gösterilemeyecek kadar büyük. GitHub'da görünümün filtresini daraltın.",
       "schemaDriftDetail": "Bu proje görünümü okunamadı: {{detail}}."
+    },
+    "columns": {
+      "type": "Tür"
     }
   },
   "projectField": {
@@ -19927,6 +20035,27 @@
     "attachments": {
       "updateRuntime": "Çalışma alanı bağlantılarını değiştirmek için uzak çalışma zamanını güncelleyin",
       "updateRuntimeSafely": "Çalışma alanı bağlantılarını güvenle değiştirmek için uzak çalışma zamanını güncelleyin"
+    },
+    "activity": {
+      "active": "Etkin",
+      "done": "Tamamlandı",
+      "failed": "Başarısız",
+      "inactive": "Etkin değil",
+      "interrupted": "Kesildi",
+      "monitoring": "Arka plan görevleri izleniyor",
+      "permission": "İzin gerekiyor",
+      "unconfirmed": "Doğrulanamadı",
+      "unreadLabel": "{{status}} · Okunmadı",
+      "working": "Çalışıyor"
+    },
+    "reviewStatus": {
+      "checksFailed": "{{review}} kontrolleri: Başarısız",
+      "checksPassing": "{{review}} kontrolleri: Başarılı",
+      "checksPending": "{{review}} kontrolleri: Beklemede",
+      "closed": "{{review}}: Kapalı",
+      "draft": "{{review}}: Taslak",
+      "merged": "{{review}}: Merge edildi",
+      "open": "{{review}}: Açık"
     }
   },
   "tabHoverCard": {
@@ -19976,7 +20105,9 @@
       "waitingAriaLabel": "Güncelleme diğer Orca örneklerini bekliyor. Genişletmek için tıklayın.",
       "preparingLabel": "Güncelleme hazırlanıyor",
       "preparingAriaLabel": "Güncelleme hazırlanıyor. Genişletmek için tıklayın."
-    }
+    },
+    "wslMoveInstallHeld": "Bir proje WSL ana makinesine taşınıyor. Taşıma bittiğinde güncellemeyi yükleyin.",
+    "wslMoveUndoInstallHeld": "Bir proje WSL ana makinesinden geri getiriliyor. Bu bittiğinde güncellemeyi yükleyin."
   },
   "jira": {
     "connect": {
@@ -20482,5 +20613,340 @@
   },
   "startupFailure": {
     "title": "Orca başlatılamadı"
+  },
+  "native": {
+    "about": {
+      "gpu": {
+        "disabled": "Devre dışı",
+        "enabled": "Etkin",
+        "safeMode": "Devre dışı (Güvenli Grafik Modu)",
+        "software": "Yazılımsal işleme",
+        "summary": "GPU hızlandırması: {{status}}",
+        "unavailable": "Kullanılamıyor",
+        "unknown": "Bilinmiyor ({{status}})",
+        "unknownStatus": "Durum bilgisi kullanılamıyor"
+      }
+    },
+    "dialog": {
+      "allFiles": "Tüm Dosyalar",
+      "audio": "Ses",
+      "cookieFiles": "Çerez Dosyaları",
+      "dashboardTitle": "Orca Ajan Panosu",
+      "images": "Görseller",
+      "importCookies": "Çerezleri İçe Aktar",
+      "importPetBundle": "Bir .codex-pet paketi seçin",
+      "importWarpFolder": "Warp Tema Klasörünü İçe Aktar",
+      "importWarpTheme": "Warp Temasını İçe Aktar",
+      "petImage": "Evcil hayvan görseli",
+      "pickPet": "Evcil hayvan seçin",
+      "repoIconImages": "Repo simgesi görselleri",
+      "spaceTitle": "Orca Space Beta",
+      "warpThemeYaml": "Warp teması YAML dosyası"
+    }
+  },
+  "runtime": {
+    "compat": {
+      "clientTooOld": "Bu Orca istemcisi seçilen sunucu için çok eski. Bu bilgisayardaki Orca'yı güncelleyin. İstemci protokolü: {{clientProtocol}}; sunucunun gerektirdiği istemci protokolü: {{requiredProtocol}}.",
+      "compatible": "Çalışma zamanı istemcisi ve sunucusu uyumlu.",
+      "serverTooOld": "Seçilen Orca sunucusu bu istemci için çok eski. Sunucudaki Orca'yı güncelleyin. Sunucu protokolü: {{serverProtocol}}; istemcinin gerektirdiği sunucu protokolü: {{requiredProtocol}}."
+    },
+    "health": {
+      "available": "Bağlandı",
+      "connecting": "Bağlanıyor",
+      "disconnected": "Bağlantı kesildi",
+      "error": "Dikkat gerektiriyor",
+      "local": "Yerel",
+      "mixed": "Karma",
+      "repair": "Yeniden eşleştirme gerekiyor",
+      "update": "Güncelleme gerekiyor"
+    }
+  },
+  "taskProviders": {
+    "errors": {
+      "jira": {
+        "apiTokenRequired": "API belirteci gerekli.",
+        "commentBodyRequired": "Yorum metni gerekli.",
+        "commentFailed": "Yorum eklenemedi.",
+        "connectionFailed": "Bağlantı kurulamadı.",
+        "createFailed": "Sorun oluşturulamadı.",
+        "credentialsRequired": "Site URL'si, e-posta ve API belirteci gerekli.",
+        "incompleteIssuePage": "Jira eksik bir sorun sayfası döndürdü.",
+        "incompleteProjectPage": "Jira eksik bir proje sayfası döndürdü.",
+        "invalidCloudId": "Site, geçerli bir Atlassian bulut kimliği bildirmedi.",
+        "invalidIssuePage": "Jira geçersiz bir sorun sayfası döndürdü.",
+        "invalidProjectPage": "Jira geçersiz bir proje sayfası döndürdü.",
+        "invalidSiteIdentity": "Kimlik bilgileri içermeyen bir HTTP veya HTTPS Jira site URL'si girin.",
+        "invalidSiteUrl": "Geçerli bir Jira site URL'si girin.",
+        "issueKeyRequired": "Sorun anahtarı gerekli.",
+        "issueSearchLimit": "Jira sorun araması sayfa sınırını aştı. Bunun yerine JQL ile bir proje seçin.",
+        "issueTypeRequired": "Sorun türü gerekli.",
+        "labelsConflict": "labels veya labelOperations belirtin; ikisini birden belirtmeyin.",
+        "missingProjectIdentity": "Jira, kimliği ve anahtarı olmayan bir proje döndürdü.",
+        "notConnected": "Jira'ya bağlı değil.",
+        "passwordRequired": "Parola gerekli.",
+        "personalTokenRequired": "Kişisel erişim belirteci gerekli.",
+        "projectListLimit": "Jira proje listesi sayfa sınırını aştı. Bunun yerine JQL ile bir proje seçin.",
+        "projectRequired": "Proje gerekli.",
+        "repeatedIssueToken": "Jira geçersiz veya yinelenen bir sorun sayfası belirteci döndürdü.",
+        "titleRequired": "Başlık gerekli.",
+        "updateFailed": "Sorun güncellenemedi.",
+        "updatesRequired": "Güncelleme nesnesi gerekli."
+      },
+      "linear": {
+        "commentFailed": "Yorum oluşturulamadı",
+        "createFailed": "Linear'da oluşturma işlemi gerçekleştirilemedi",
+        "createdButUnavailable": "Sorun oluşturuldu ancak getirilemedi",
+        "noApiKey": "Kayıtlı API anahtarı yok.",
+        "notConnected": "Linear'a bağlı değil",
+        "projectCreateFailed": "Linear projesi oluşturulamadı",
+        "projectIdRequired": "Proje kimliği gerekli",
+        "projectNameRequired": "Proje adı gerekli",
+        "projectNotFound": "Proje bulunamadı",
+        "updateFailed": "Linear'da güncelleme işlemi gerçekleştirilemedi",
+        "viewHasNoIssues": "Özel görünüm sorun içermiyor",
+        "viewHasNoProjects": "Özel görünüm proje içermiyor",
+        "viewIdRequired": "Özel görünüm kimliği gerekli",
+        "workspaceAuthExpired": "Bu çalışma alanı için Linear kimlik doğrulamasının süresi doldu."
+      }
+    },
+    "jira": {
+      "connectionFailed": "Bağlantı kurulamadı",
+      "localTokenStorage": "Belirteciniz yerel olarak saklanır ve yerel çalışma zamanı depolaması destekliyorsa şifrelenir.",
+      "remoteTokenStorage": "Belirteciniz seçilen uzak çalışma zamanına gönderilir ve orada çalışma zamanının desteklediği şifrelemeyle saklanır."
+    },
+    "linear": {
+      "addAccess": "Linear erişimi ekle",
+      "apiKeyHint": "Orca'nın kullanmasını istediğiniz Linear çalışma alanı için bir Kişisel API anahtarı yapıştırın. Bu çalışma alanı zaten bağlıysa Orca kayıtlı anahtarını değiştirir.",
+      "commentsLoadFailed": "Yorumlar yüklenemedi.",
+      "connect": "Bağlan",
+      "connectionFailed": "Bağlantı kurulamadı",
+      "descriptionUpdateFailed": "Açıklama güncellenemedi",
+      "fetchMore": "Daha fazla getir",
+      "issuesLoadFailed": "Linear sorunları yüklenemedi.",
+      "listLabel": "Linear listesi",
+      "localKeyStorage": "Yerel çalışma zamanı anahtarları bu cihazda saklanır; kullanılabiliyorsa Electron'un şifreli depolaması kullanılır.",
+      "projectIssuesLoadFailed": "Proje sorunları yüklenemedi.",
+      "projectLoadFailed": "Proje yüklenemedi.",
+      "projectNotFound": "Proje bulunamadı.",
+      "projectsLoadFailed": "Projeler yüklenemedi.",
+      "remoteKeyStorage": "Bu anahtar etkin uzak çalışma zamanı tarafından saklanır.",
+      "titleUpdateFailed": "Başlık güncellenemedi",
+      "truncated": {
+        "issues_one": "İlk {{count}} sorun gösteriliyor. Tümünü görmek için arama yapın veya Linear'ı açın.",
+        "issues_other": "İlk {{count}} sorun gösteriliyor. Tümünü görmek için arama yapın veya Linear'ı açın.",
+        "projectIssues_one": "İlk {{count}} proje sorunu gösteriliyor. Tümünü görmek için arama yapın veya Linear'ı açın.",
+        "projectIssues_other": "İlk {{count}} proje sorunu gösteriliyor. Tümünü görmek için arama yapın veya Linear'ı açın.",
+        "projects_one": "İlk {{count}} proje gösteriliyor. Tümünü görmek için arama yapın veya Linear'ı açın.",
+        "projects_other": "İlk {{count}} proje gösteriliyor. Tümünü görmek için arama yapın veya Linear'ı açın.",
+        "viewIssues_one": "Görünümdeki ilk {{count}} sorun gösteriliyor. Tümünü görmek için arama yapın veya Linear'ı açın.",
+        "viewIssues_other": "Görünümdeki ilk {{count}} sorun gösteriliyor. Tümünü görmek için arama yapın veya Linear'ı açın.",
+        "views_one": "İlk {{count}} görünüm gösteriliyor. Tümünü görmek için arama yapın veya Linear'ı açın.",
+        "views_other": "İlk {{count}} görünüm gösteriliyor. Tümünü görmek için arama yapın veya Linear'ı açın."
+      },
+      "updateAccess": "Erişimi güncelle",
+      "updateWorkspaceAccess": "{{workspace}} için Linear erişimini güncelle",
+      "viewContentsLoadFailed": "Görünüm içeriği yüklenemedi.",
+      "viewsLoadFailed": "Görünümler yüklenemedi.",
+      "workspaceApiKeyHint": "{{workspace}} için bir Kişisel API anahtarı yapıştırın. Bu çalışma alanı zaten bağlıysa Orca kayıtlı anahtarını değiştirir."
+    }
+  },
+  "workspaceOptions": {
+    "activeFilterCount_one": "{{count}} filtre",
+    "activeFilterCount_other": "{{count}} filtre"
+  },
+  "editorConflicts": {
+    "kind": {
+      "addedByUs": "Bizim tarafımızdan eklendi",
+      "bothAdded": "Her iki tarafça eklendi",
+      "deletedByUs": "Bizim tarafımızdan silindi",
+      "addedByThem": "Onlar tarafından eklendi",
+      "bothDeleted": "Her iki tarafça silindi",
+      "bothModified": "Her iki tarafça değiştirildi",
+      "deletedByThem": "Onlar tarafından silindi"
+    },
+    "resolvedBanner": "Conflict yerel olarak çözüldü · {{kind}}",
+    "hint": {
+      "addedByUs": "Eklenen dosyayı koruyup korumayacağınızı değerlendirin",
+      "bothModified": "Conflict işaretleyicilerini giderin",
+      "addedByThem": "Eklenen dosyayı korumadan önce inceleyin",
+      "bothDeleted": "Düzenlemeden önce conflict'i Git'te çözün veya taraflardan birinin sürümünü geri yükleyin",
+      "deletedByThem": "Dosyayı korumak ya da silinmesini kabul etmek arasında seçim yapın",
+      "deletedByUs": "Dosyayı geri yükleyip yüklemeyeceğinize karar verin",
+      "bothAdded": "Hangi sürümün korunacağını seçin veya sürümleri birleştirin"
+    },
+    "renamedFrom": "Önceki adı: {{path}}",
+    "snapshotCapturedAt": "Anlık görüntü şu saatte alındı: {{time}}.",
+    "unresolvedBanner": "Çözülmemiş conflict · {{kind}}"
+  },
+  "stats": {
+    "usageBreakdown": {
+      "turns_one": "{{count}} tur",
+      "events_one": "{{count}} olay",
+      "sessions_one": "{{count}} oturum",
+      "events_other": "{{count}} olay",
+      "sessions_other": "{{count}} oturum",
+      "turns_other": "{{count}} tur"
+    }
+  },
+  "github": {
+    "viewed": {
+      "markFile": "{{path}} dosyasını görüldü olarak işaretle",
+      "unmarkFile": "{{path}} dosyasının görüldü işaretini kaldır"
+    }
+  },
+  "wslMove": {
+    "entry": {
+      "hostRow": "Bu dağıtımdaki projeleri taşı…",
+      "projectMenu": "{{distro}} ana makinesine taşı…"
+    },
+    "blockers": {
+      "title": "Bu projeler taşınmadan önce",
+      "inProjects": "Şu projelerde: {{names}}",
+      "skipOne": "{{name}} projesini bu taşımanın dışında bırak",
+      "skipMany": "Bu {{n}} projeyi bu taşımanın dışında bırak"
+    },
+    "title": "Projeleri {{distro}} ana makinesine taşı",
+    "loading": "{{distro}} içindeki projeler kontrol ediliyor…",
+    "runningTitle": "{{distro}} ana makinesine taşınıyor",
+    "preview": {
+      "counts": "Projeler: {{projects}} · Çalışma alanları: {{workspaces}} · Terminaller: {{terminals}} · Sohbetler: {{chats}}",
+      "whatHappens": "Dosyalarınız olduğu yerde kalır. Terminaller aynı klasörde yeniden başlar; çıktıları, kabuk geçmişi ve ajan konuşmaları korunur.",
+      "projects": "{{distro}} içindeki projeler",
+      "folderBadge": "Klasör",
+      "notMoving": "Taşınmıyor",
+      "checking": "Seçili projeler kontrol ediliyor…",
+      "checkAgain": "Yeniden kontrol et",
+      "moveOne": "1 projeyi taşı",
+      "moveMany": "{{n}} projeyi taşı",
+      "heldByHost": "Zaten {{distro}} ana makinesinde.",
+      "changed": "Daha önce taşındı, ardından burada Orca'nın eski bir sürümü tarafından değiştirildi. Yeniden taşınmaz.",
+      "chatsStay": "Mevcut sohbetler bu bilgisayarda kalır. Bu projedeki yeni sohbetler WSL ana makinesinde başlar.",
+      "browserLoginsConflict": "Ana makinenin tarayıcı profili zaten kullanımda olduğundan tarayıcı oturumları aktarılmayacak. Taşımadan sonra ana makinenin tarayıcı sekmelerinde yeniden oturum açın.",
+      "browserLoginsNotCarried": "Tarayıcı oturumları bu ana makineye aktarılmayacak. Taşımadan sonra ana makinenin tarayıcı sekmelerinde yeniden oturum açın."
+    },
+    "cancel": "İptal",
+    "progress": {
+      "bytes": "{{sent}} / {{total}}",
+      "tooLate": "İptal etmek için çok geç: ana makine geçişe başladı bile. İşlem bitene kadar Orca'yı açık tutun.",
+      "switching": "Geçiş iptal edilemez. İşlem bitene kadar Orca'yı açık tutun.",
+      "readOnly": "Bu projeler taşınırken salt okunurdur. Geçiş başlayana kadar iptal edebilirsiniz.",
+      "cancelUntilSwitch": "Geçiş başlayana kadar iptal edebilirsiniz.",
+      "closeKeepsGoing": "Bu iletişim kutusunu kapatmak taşımayı durdurmaz; taşıma bittiğinde iletişim kutusu yeniden açılır.",
+      "cancelling": "İptal ediliyor…",
+      "cancel": "Taşımayı iptal et"
+    },
+    "result": {
+      "movedTitle": "{{distro}} ana makinesine taşındı",
+      "resetTitle": "Hiçbir şey taşınmadı",
+      "waitingTitle": "{{distro}} ana makinesi bekleniyor",
+      "earlierMoveTitle": "Önceki bir taşıma önce tamamlandı",
+      "refusedTitle": "Projeler taşınmadı",
+      "reloadCheckpointRefused": "Orca kaydedilmemiş dosyaları yedekleyemediği için pencere yeniden yüklenmedi. Bu iletişim kutusunu kapatın, o dosyaları kaydedin veya kapatın, ardından açık kalan bildirimdeki Şimdi yeniden yükle düğmesini kullanın.",
+      "reloadVetoed": "Bir şey pencerenin yeniden yüklenmesini engelledi. Bu iletişim kutusunu kapatın, çalışmanızı kaydedin, ardından açık kalan bildirimdeki Şimdi yeniden yükle düğmesini kullanın.",
+      "reloadFailed": "Pencere yeniden yüklenmedi. Tekrar deneyin.",
+      "moved": "Projeleri {{distro}} ana makinesi altında görmek için bu pencereyi yeniden yükleyin. Orca, yeniden yüklemeden önce kaydedilmemiş dosyaları yedekler.",
+      "automationsPendingOne": "Bir otomasyon şimdilik ana makinede kapalı. Orca, ana makineden otomasyonu yeniden açmasını istemeye devam ediyor.",
+      "automationsPendingMany": "{{n}} otomasyon şimdilik ana makinede kapalı. Orca, ana makineden bunları yeniden açmasını istemeye devam ediyor.",
+      "undoHint": "Fikrinizi mi değiştirdiniz? Yeniden yüklemeden sonra kenar çubuğu bu projeleri “{{distro}} ana makinesine taşındı” olarak listeler. Projeleri taşımadan önceki hâlleriyle geri getirmek için orada “Bu bilgisayarda yeniden kullan” seçeneğini belirleyin.",
+      "reset": "Taşıma durdu ve her şey eski hâline getirildi. Projeler bu bilgisayarda eskisi gibi çalışır; duraklatılan terminaller onları açtığınızda yeniden başlar.",
+      "resetReason": "Durma nedeni: {{detail}}",
+      "waiting": "Taşıma {{distro}} ana makinesine ulaşmış olabilir, ancak ana makine yanıt vermiyor. Bu projeler, ana makine yanıt verene kadar burada salt okunur kalır. Ana makineyi Ayarlar'dan bağlayın, ardından bu iletişim kutusunu yeniden açıp bir taşıma başlatın: Orca önce bu taşımayı tamamlar veya geri alır.",
+      "reloading": "Yeniden yükleniyor…",
+      "reload": "Şimdi yeniden yükle",
+      "close": "Kapat",
+      "review": "Projelere dön",
+      "browserLoginsHostUnknown": "Orca ana makinenin tarayıcı profilini belirleyemediği için tarayıcı oturumları kopyalanmadı. Ana makinenin tarayıcı sekmelerinde yeniden oturum açın.",
+      "browserLoginsConflict": "Ana makinenin tarayıcı profili zaten kullanımda olduğundan tarayıcı oturumları kopyalanmadı. Ana makinenin tarayıcı sekmelerinde yeniden oturum açın.",
+      "browserLoginsNotCopied": "Tarayıcı oturumları ana makineye kopyalanmadı. Ana makinenin tarayıcı sekmelerinde yeniden oturum açın."
+    },
+    "runtime": {
+      "label": "Proje çalışma zamanı",
+      "description": "Bu proje, bu bilgisayar üzerinden {{distro}} içinde çalışıyor. Orada çalıştırmak için projeyi {{distro}} ana makinesine taşıyın.",
+      "move": "Projeyi taşı"
+    },
+    "unfinished": {
+      "one": "{{distro}} ana makinesine taşınan bir otomasyon hâlâ kapalı. Orca, ana makineden otomasyonu yeniden açmasını istemeye devam ediyor.",
+      "many": "{{distro}} ana makinesine taşınan {{n}} otomasyon hâlâ kapalı. Orca, ana makineden bunları yeniden açmasını istemeye devam ediyor."
+    },
+    "refusal": {
+      "previewFailed": "Orca bu projeleri kontrol edemedi. Tekrar deneyin.",
+      "startFailed": "Orca'nın taşımayla bağlantısı koptu. Durumu görmek için bu iletişim kutusunu yeniden açın.",
+      "unavailable": "Projeleri bir WSL ana makinesine taşıma bu pencerede kullanılamıyor.",
+      "alreadyRunning": "{{distro}} içine bir taşıma zaten sürüyor. Bitmesini bekleyin, ardından tekrar deneyin.",
+      "alreadyInFlightPreview": "{{distro}} için bir taşıma hâlâ tamamlanıyor. Bu taşımayı başlatırsanız Orca, mümkün olduğu yerde önce o taşımayı tamamlar veya geri alır.",
+      "alreadyInFlight": "{{distro}} için bir taşıma hâlâ tamamlanıyor, bu yüzden bu taşıma başlamadı. {{distro}} ana makinesini bağlı tutun ve daha sonra tekrar deneyin.",
+      "nothingNew": "Bu projeler zaten {{distro}} ana makinesinde.",
+      "destinationChanged": "{{distro}} içindeki önceki projeler farklı bir WSL ana makinesine taşındı. Daha fazlasını taşımak için o ana makineyi bağlayın.",
+      "hostUnavailable": "{{distro}} ana makinesi bağlı değil. Ayarlar'dan bağlayın, ardından tekrar deneyin.",
+      "hostUpdateRequired": "{{distro}} ana makinesi Orca'nın eski bir sürümünü çalıştırıyor. Ayarlar'dan güncelleyin, ardından tekrar deneyin.",
+      "terminalsBlocked": "Bu projelerdeki bazı terminaller, ajanlar veya otomasyonlar meşgul. Hiçbir şey taşınmadı.",
+      "exportIncomplete": "Bu projelerdeki bazı kaydedilmiş veriler henüz taşınamadığı için hiçbir şey taşınmadı:",
+      "exportIncompletePreview": "Bu projelerdeki bazı kaydedilmiş veriler henüz taşınamıyor:",
+      "tooLarge": "Bu projelerde tek seferde taşınamayacak kadar çok kaydedilmiş veri var. Bir seferde daha az proje taşıyın.",
+      "pauseFailed": "Orca bu projelerdeki terminalleri duraklatamadığı için hiçbir şey taşınmadı. Duraklatılan terminaller onları açtığınızda yeniden başlar. Tekrar deneyin.",
+      "scopeChanged": "Taşıma hazırlanırken bir proje değiştiği için hiçbir şey taşınmadı. Projeleri kontrol edip tekrar deneyin.",
+      "cancelled": "Taşıma iptal edildi. Hiçbir şey taşınmadı.",
+      "finishedEarlierMove": "Orca önce {{distro}} içine yapılan önceki bir taşımayı tamamladı. Pencereyi yeniden yükleyin, ardından bu taşımayı yeniden başlatın."
+    },
+    "step": {
+      "preparing": "Hazırlanıyor",
+      "pausingTerminals": "Terminaller duraklatılıyor",
+      "copying": "Kopyalanıyor",
+      "switching": "Geçiş yapılıyor",
+      "finishing": "Tamamlanıyor",
+      "done": "Bitti"
+    },
+    "blocker": {
+      "agentWorkingOne": "Bir ajan çalışıyor veya yanıt bekliyor",
+      "agentWorkingMany": "{{n}} ajan çalışıyor veya yanıt bekliyor",
+      "processRunningOne": "Bir terminalde program çalışıyor",
+      "processRunningMany": "{{n}} terminalde program çalışıyor",
+      "agentNotResumableOne": "Bir ajan taşımadan sonra sürdürülemez",
+      "agentNotResumableMany": "{{n}} ajan taşımadan sonra sürdürülemez",
+      "unverifiableOne": "Orca şu anda bir terminali kontrol edemiyor",
+      "unverifiableMany": "Orca şu anda {{n}} terminali kontrol edemiyor",
+      "automationRunningOne": "Bir otomasyon çalıştırması etkin",
+      "automationRunningMany": "{{n}} otomasyon çalıştırması etkin",
+      "dispatchRunningOne": "Bir ajan görevi devam ediyor",
+      "dispatchRunningMany": "{{n}} ajan görevi devam ediyor",
+      "scrollbackTooLargeOne": "Bir terminalin çıktı geçmişi taşınamayacak kadar büyük",
+      "scrollbackTooLargeMany": "{{n}} terminalin çıktı geçmişi taşınamayacak kadar büyük"
+    },
+    "blockerHint": {
+      "agentWorking": "Bitmesini bekleyin veya ajanı terminalinde durdurun, ardından yeniden kontrol edin.",
+      "processRunning": "Programı (örneğin bir geliştirme sunucusunu veya düzenleyiciyi) durdurun, ardından yeniden kontrol edin.",
+      "agentNotResumable": "Ajandan kendi terminalinde çıkın, ardından yeniden kontrol edin.",
+      "unverifiable": "Biraz bekleyin, ardından yeniden kontrol edin. Taşıma için hiçbir şey durdurulmaz.",
+      "wait": "Bitmesini bekleyin, ardından yeniden kontrol edin.",
+      "scrollbackTooLarge": "O terminallerdeki çıktıyı temizleyin, ardından yeniden kontrol edin."
+    },
+    "scopeRefused": {
+      "windowsDrive": "Klasörü bir Windows sürücüsünde olduğu için bu bilgisayarda kalır.",
+      "mixedLocations": "Klasörlerinden bazıları bu dağıtımın dışında olduğu için bu bilgisayarda kalır.",
+      "notLocal": "Zaten başka bir ana makinede çalışıyor.",
+      "other": "Taşınamaz."
+    },
+    "reloadToast": {
+      "title": "Taşımayı tamamlamak için yeniden yükleyin"
+    },
+    "orchestrator": {
+      "showTerminal": "Terminali göster",
+      "moveAgain": "Yeniden taşı",
+      "checkAgain": "Yeniden kontrol et",
+      "deferred": "{{distro}} ana makinesine taşıma tamamlanıyor: bazı terminaller hâlâ meşgul.",
+      "stuck": "{{distro}} ana makinesine yapılan önceki bir taşıma henüz tamamen sonuçlanmadı.",
+      "declined": "Bu projeleri bu bilgisayara geri getirdiğiniz için taşıma duraklatıldı.",
+      "doneToast": "Projeler {{distro}} ana makinesine taşındı",
+      "terminalGone": "Bu terminal artık bu pencerede açık değil. Yenilemek için yeniden kontrol edin.",
+      "blocker": "{{title}}. {{hint}}",
+      "paused": "Projelerin {{distro}} ana makinesine taşınması duraklatıldı: {{reason}}.",
+      "pausedReason": {
+        "exportIncomplete": "bazı kaydedilmiş veriler henüz aktarılamıyor",
+        "manifestTooLarge": "kaydedilmiş veri, tek bir taşımanın aktarabileceğinden fazla",
+        "hostUpdate": "ana makinenin önce güncellenmesi gerekiyor",
+        "attemptsExhausted": "birkaç denemeden sonra tamamlanamadı"
+      },
+      "finishPending": "{{distro}} ana makinesine yapılan önceki bir taşıma orada tamamlandı. Orca bu taşımayı burada yeniden başladığında ya da şimdi Yeniden kontrol et ile tamamlar."
+    }
   }
 }

@@ -350,7 +350,8 @@
       "permissionOverridesUse": "使用 {{mode}}",
       "customPermissions": "自定义参数",
       "rowPermissionsLabel": "{{agent}} 权限",
-      "replaceWithPermissionMode": "替换为 {{mode}}"
+      "replaceWithPermissionMode": "替换为 {{mode}}",
+      "approveForMe": "代我批准"
     },
     "followSymlinkedDirectoriesKeywords": {
       "symlink": "符号链接",
@@ -381,6 +382,34 @@
       "actionPermissions": {
         "sameAsAgent": "与 {{agent}} 相同"
       }
+    },
+    "ssh": {
+      "status": {
+        "disconnected": "已断开",
+        "connecting": "正在连接…",
+        "auth-failed": "验证失败",
+        "connected": "已连接",
+        "reconnection-failed": "重新连接失败",
+        "deploying-relay": "正在部署中继…",
+        "reconnecting": "正在重新连接…"
+      }
+    },
+    "mcp": {
+      "workspace": "工作区",
+      "inspectFailed": "无法检查 {{directory}}。",
+      "unreadable": "无法读取",
+      "notFound": "未找到",
+      "invalidJson": "无效的 JSON",
+      "noServers": "没有服务器",
+      "httpServer": "HTTP 服务器",
+      "stdioServer": "stdio 服务器",
+      "invalidServer": "无效的服务器",
+      "serverCount_one": "{{count}} 个服务器",
+      "serverCount_other": "{{count}} 个服务器",
+      "claudeWorkspace": "Claude 工作区"
+    },
+    "shortcuts": {
+      "parseFailed": "无法解析快捷键。"
     }
   },
   "menu": {
@@ -1567,7 +1596,6 @@
         "d1fa2cf888": "没有 PR head SHA 就无法发表评论。",
         "829674460a": "Diff 不可用，因为 PR commit SHA 丢失。",
         "af924014f8": "已查看",
-        "2d89a38d9d": "{{value0}} {{value1}} 为已查看",
         "70e84e3d0b": "没有匹配的评审人。",
         "1ffce94a8b": "其他人",
         "c2b21818e1": "建议",
@@ -1784,7 +1812,6 @@
       "LinearIssueTextEditor": {
         "947ba2d6f4": "保存",
         "04d73b72dc": "议题标题",
-        "e8ff595db3": "更新 {{value0}} 失败",
         "1e08a1ec80": "标题为必填项"
       },
       "LinearIssueWorkspace": {
@@ -2107,10 +2134,6 @@
         "9e97f08d0f": "搜索要打开的文件",
         "ec31e058f7": "转到文件",
         "73b44e7bde": "复制安装命令",
-        "1cf8561ab4": "在远程启用快速、gitignore 感知列表：",
-        "5d80dc39bb": "ripgrep",
-        "2ca749c15d": "安装",
-        "4725b0e931": "快速打开扫描太大（",
         "b227d88520": "找到 {{value0}} 文件",
         "995be8ea22": "复制",
         "cf144856dc": "已复制"
@@ -2181,9 +2204,6 @@
         "7f3f7b4c18": "描述（可选，markdown）",
         "9f2b4c03a6": "提交",
         "d3d0998b7d": "新的 GitHub 议题",
-        "d1e243795c": "议题",
-        "be8cf68d9f": "查看议题",
-        "67662ade50": "项目议题",
         "6244a02f46": "在 Linear 中打开",
         "606a85c774": "开放",
         "5e8061b088": "从 {{value0}} {{value1}} 开始工作区",
@@ -2203,11 +2223,9 @@
         "af377b13b1": "{{value0}} 视图",
         "d47248df4d": "Linear 视图模式",
         "f397d513e3": "返回",
-        "b39fe6511d": "项目",
         "8675cd6188": "Linear",
         "733b8f2421": "Linear/视图",
         "bc06ed0fb0": "返回视图",
-        "3cb855080f": "视图",
         "b4e10f096e": "所有者",
         "a04fe7ba73": "可见性",
         "0aa8525950": "模型",
@@ -2878,8 +2896,6 @@
               "7616c986c6": "打开 {{value0}} 议题",
               "openInLinear": "在 Linear 中打开 {{value0}}",
               "93e1f6bfca": "加载中",
-              "98730088a6": "。在 Linear 中搜索或打开以查看完整列表。",
-              "06b887d622": "首先显示",
               "linearLoginUnreadable": "无法读取已保存的 Linear 登录信息。请在设置中重新连接。",
               "f2cc1e0ff6": "Linear/项目",
               "906b5e4cb8": "Linear/项目/{{value0}}",
@@ -4402,10 +4418,7 @@
         },
         "UsageBreakdownSection": {
           "7765a4c3e1": "n/a",
-          "247c93ca92": "• 推理价格",
-          "32176e1d44": "轮次",
-          "79a69522a5": "事件",
-          "02a046792e": "会话 •"
+          "247c93ca92": "• 推理价格"
         },
         "GrokUsagePane": {
           "g8h9i0j1k2": "Grok 使用量",
@@ -5913,7 +5926,8 @@
         },
         "sidebarHostOptions": {
           "3e102f111c": "所有主机",
-          "visibleHostsCount": "{{value0}} 个主机"
+          "hosts": "主机",
+          "visibleHosts_other": "{{count}} 个主机"
         },
         "HostRemoveDialog": {
           "1a2b3c4d5e": "已移除 {{value0}}",
@@ -6201,7 +6215,7 @@
           "running": "运行中",
           "stopped": "已停止",
           "title": "添加 WSL 发行版",
-          "description": "Orca 在发行版内运行其服务器，因此 git、文件和终端都在 Linux 中原生运行。通过 \\\\wsl.localhost 打开的项目会照常工作，直到你将它们移到此主机。",
+          "description": "Orca 在发行版内运行其服务器，因此 git、文件和终端都在 Linux 中原生运行。此发行版中通过 \\\\wsl.localhost 打开的项目会在其终端空闲时自动移到此主机；位于 Windows 驱动器 (/mnt/…) 上的项目会留在此电脑。你可以从侧边栏将已移动的项目移回。",
           "distro": "发行版",
           "loading": "正在查找 WSL 发行版…",
           "placeholder": "选择发行版",
@@ -7898,7 +7912,9 @@
           "builtin_themes": "内置",
           "imported_from": "从 {{value0}} 导入",
           "imported_themes": "已导入",
-          "search_terminal_themes": "搜索终端主题"
+          "search_terminal_themes": "搜索终端主题",
+          "plugin_themes": "插件",
+          "from_plugin": "来自 {{value0}}"
         },
         "SettingsSidebar": {
           "e0900f83e7": "SSH",
@@ -11739,7 +11755,8 @@
             "migration": "未完成：迁移到此服务器的操作尚未完成。请先继续该操作。",
             "deferred": "尚未完成：服务器尚未准备好执行此操作。请稍后重试。",
             "failed": "Orca 无法在服务器上完成此操作。请重试。",
-            "defaultServer": "未执行：此服务器是新项目的默认主机。停止前请在“新项目打开位置”中选择其他主机。"
+            "defaultServer": "未执行：此服务器是新项目的默认主机。停止前请在“新项目打开位置”中选择其他主机。",
+            "wslMoveRunning": "未完成：有项目正在移到此服务器上。移动完成后，Orca 会更新它。"
           },
           "reassurance": "在各个主机上运行，通过你自己的 SSH 连接访问。你的代码和文件留在原处。只有 Orca 的项目、标签页和终端列表会移到该主机。"
         },
@@ -12095,6 +12112,9 @@
           "searchPlaceholder": "搜索构建...",
           "noMatches": "没有匹配的版本。",
           "searchLabel": "搜索构建"
+        },
+        "AppearanceThemeControl": {
+          "useTerminalTheme": "使用其终端配色"
         },
         "notification": {
           "settings": {
@@ -12951,10 +12971,10 @@
                 "dialog": {
                   "3bc61dc989": "取消",
                   "15efa778e3": "放弃",
-                  "42f89dd030": "文件",
-                  "e7611dca35": "文件",
                   "0d2d88cba5": "此操作无法撤销。",
-                  "1551c14668": "放弃更改？"
+                  "1551c14668": "放弃更改？",
+                  "fileCount_one": "{{count}} 个文件",
+                  "fileCount_other": "{{count}} 个文件"
                 }
               },
               "dropdown": {
@@ -13181,16 +13201,19 @@
             "unresolved": "无法确定哪个主机拥有此工作区。请检查连接后重试。"
           },
           "useFileDeletion": {
-            "72691dfebc": "无法 {{value0}}“{{value1}}”。",
             "d979a4fbb5": "永久删除“{{value0}}”？",
             "92276aceb7": "删除",
             "7fb9435c86": "这会永久删除远程主机上的目录及其内容。此操作无法撤销。",
             "23e98f192f": "这会永久删除远程主机上的文件。此操作无法撤销。",
             "8b8ee9d22f": "无法确定哪个主机拥有此文件。请检查工作区连接后重试。",
-            "af1270b90d": "永久删除 {{count}} 项？",
             "dd029aa5cd": "这会永久删除远程主机上所选的各项及任何目录内容。此操作无法撤销。",
-            "77fdc36183": "删除 {{count}} 个项目？",
-            "fca915a67a": "远程项目将永久删除且无法撤销。本地项目将移至 {{value0}}。"
+            "deleteFailed": "删除“{{name}}”失败。",
+            "deleteItems_other": "删除 {{count}} 项内容？",
+            "mixedRecycleBin": "远程内容将被永久删除，此操作无法撤销。本地内容将移到回收站。",
+            "mixedTrash": "远程内容将被永久删除，此操作无法撤销。本地内容将移到废纸篓。",
+            "permanentlyDeleteItems_other": "永久删除 {{count}} 项内容？",
+            "recycleBinFailed": "无法将“{{name}}”移到回收站。",
+            "trashFailed": "无法将“{{name}}”移到废纸篓。"
           },
           "useFileExplorerHandlers": {
             "32cd9fd991": "无法打开符号链接目标",
@@ -14165,13 +14188,13 @@
             "9ee54037a4": "自定义命令",
             "4b2fc4b80c": "思考努力",
             "be8917699e": "模型",
-            "4d9b6d84df": "不支持。选择 Claude、Codex 或 Custom。",
             "560d4feb00": "自定义",
             "29d119fe95": "智能体",
             "f9382b48a1": "启用AI作者",
             "1c0cb4fabb": "AI 作者",
             "bd14e9c42a": "未配置",
-            "1f9468c5c9": "{{value0}} 不支持"
+            "1f9468c5c9": "{{value0}} 不支持",
+            "unsupportedAgent": "不支持 {{agent}}。请选择 Claude、Codex 或自定义。"
           },
           "BrowserAnimatedVisual": {
             "46df009982": "开始免费试用",
@@ -14712,17 +14735,14 @@
         "ConflictComponents": {
           "f338288514": "正在加载冲突内容...",
           "90d576adb2": "刷新",
-          "a1ce36f77d": "快照拍摄于",
           "c8ca989aea": "显示文件树",
           "58ad5ad431": "关闭",
           "28e7db4a90": "源代码控制",
           "31931dec46": "此评审快照不再有任何未解决的实时冲突。",
           "992145ff5a": "所有冲突均已解决",
-          "d5edd81755": "重命名自",
           "6e459867ad": "会话本地连续性状态。 Git 不再将此文件报告为未合并。",
           "9c2901ef8a": "下一次冲突",
           "41d9af2e7a": "上一个冲突",
-          "55d61a0ccd": "冲突 ·",
           "da539359b6": "对于此冲突，没有可编辑的工作树文件。",
           "unresolvedConflicts_one": "{{count}} 个未解决的冲突",
           "unresolvedConflicts_other": "{{count}} 个未解决的冲突"
@@ -17010,12 +17030,10 @@
         "untitled": "无标题聊天",
         "listLabel": "将恢复的聊天",
         "dontAskAgain": "不再询问（自动恢复）",
-        "dontAskAgainHint": "您可以在“设置”→“实验”→“聊天 UI”中关闭此功能。",
+        "dontAskAgainHint": "你可以在设置 → 聊天 → 行为中关闭此选项。",
         "continuedOne": "已恢复 1 个聊天",
         "continuedMany": "已恢复 {{value0}} 个聊天",
         "selectAgent": "在 {{value2}} 中恢复 {{value0}} 聊天“{{value1}}”",
-        "resumeSelected": "恢复 {{value0}} 聊天",
-        "resumeSelectedOne": "恢复 1 次聊天",
         "dismissAll": "全部关闭",
         "notContinuedOne": "1 个聊天无法恢复",
         "notContinuedMany": "{{value0}} 个聊天无法恢复",
@@ -17044,7 +17062,9 @@
         "selectMachine": "选择 {{value0}} 上的全部聊天",
         "sshHost": "SSH",
         "done": "完成",
-        "resultListLabel": "本次恢复的聊天"
+        "resultListLabel": "本次恢复的聊天",
+        "resumeChats_one": "恢复 {{count}} 个聊天",
+        "resumeChats_other": "恢复 {{count}} 个聊天"
       },
       "linear-issue-attribute-filter-coverage-notice": {
         "statusPartialTeamCoverage": "过滤 {{value1}} 团队状态中的 {{value0}} — 不包括其余团队的问题。",
@@ -18257,6 +18277,15 @@
         "settings": "在终端中打开设置",
         "extensions": "在终端中打开扩展面板",
         "hotkeys": "在终端中显示键盘快捷键"
+      },
+      "modelDescriptions": {
+        "grok_4_7": "xAI 最新的前沿模型",
+        "grok_4_6": "xAI 上一代前沿模型",
+        "grok_4_5": "xAI 较早的前沿模型",
+        "fable": "最擅长处理最困难、耗时最长的任务",
+        "opus": "最适合日常复杂任务",
+        "sonnet": "高效处理日常任务",
+        "haiku": "快速回答的最快选择"
       }
     },
     "tab": {
@@ -19046,6 +19075,15 @@
       "title": "历史记录",
       "today": "今天",
       "yesterday": "昨天"
+    },
+    "viewport": {
+      "mobile-s": "小屏手机 — 320 × 568",
+      "mobile-m": "中屏手机 — 375 × 667",
+      "mobile-l": "大屏手机 — 425 × 812",
+      "tablet": "平板电脑 — 768 × 1024",
+      "laptop": "笔记本电脑 — 1024 × 768",
+      "laptop-l": "大屏笔记本电脑 — 1440 × 900",
+      "desktop": "桌面电脑 — 1920 × 1080"
     }
   },
   "runtimeRpc": {
@@ -19119,13 +19157,22 @@
       "useHereDescription": "Orca 会按移动前的状态在这里打开此项目。你的代码不受影响：它从未移动。移动后在 {{distro}} 主机上所做的更改（例如新标签页和聊天）会留在主机上，不会回来。与它一起移动的项目也会一起回来。在你于 {{distro}} 主机上将其移除之前，项目也会一直保留在那里。此窗口将重新加载。",
       "useHereConfirm": "在此电脑上使用",
       "useHereSuperseded": "之后一次移动到 {{distro}} 主机的操作包含此项目。请先将那次移动恢复。",
+      "useHereRefusedTitle": "暂时无法在此处使用 {{name}}",
+      "useHereRefusedOk": "确定",
+      "useHereSupersededBy": "{{names}} 在此项目之后移到了 {{distro}} 主机。请先重新在此电脑上使用它们，再处理此项目。",
       "useHereMoveRunning": "移动到 {{distro}} 主机的操作仍在进行。请在其结束后重试。",
       "useHereHostKeptForPeers": "{{project}} 已移到 {{distro}} 主机，该主机仍在为另一个 Orca 运行。重新添加该主机即可在此处再次使用它。",
-      "useHereHostUnreachable": "{{distro}} 主机没有响应，Orca 无法停止它上面的此项目副本，其代理可能仍在运行。请在设置中连接或移除该主机，然后重试。",
-      "useHereHostStillRunning": "{{distro}} 主机上的此项目副本仍有终端在运行，其代理可能会运行两次。请稍候再试。",
+      "useHereHostUnreachable": "{{distro}} 主机没有响应，Orca 无法停止它上面的此项目副本，其智能体可能仍在运行。请在设置中连接或移除该主机，然后重试。",
+      "useHereHostStillRunning": "{{distro}} 主机上的此项目副本仍有终端在运行，其智能体可能会运行两次。请稍候再试。",
       "useHereFailed": "无法将此项目恢复到此电脑。",
+      "useHereHostRemovalPending": "{{distro}} 主机仍在移除中，因此 Orca 不会改动它。请在设置中完成移除，然后重试。",
+      "useHereHostAutomations": "Orca 无法关闭此项目在 {{distro}} 主机上的自动化，它们可能会运行两次。请在设置中连接该主机，然后重试。",
       "useHereUnsavedTitle": "请先保存文件",
-      "useHereUnsavedDescription": "将 {{name}} 恢复到此电脑会重新加载此窗口。请先保存或关闭以下文件：{{files}}"
+      "useHereUnsavedDescription": "将 {{name}} 恢复到此电脑会重新加载此窗口。请先保存或关闭以下文件：{{files}}",
+      "automationRunsOnHost": "在 {{distro}} 主机上运行",
+      "quitDuringMoveTitle": "要在项目移动期间退出吗？",
+      "quitDuringMoveDescription": "有项目正在移到其 WSL 主机。仍要退出吗？下次启动时将撤销此次移动。",
+      "quitDuringMoveConfirm": "仍要退出"
     },
     "startupWorktreeRefresh": {
       "loading": "正在发现工作区…",
@@ -19228,7 +19275,9 @@
   },
   "quickOpen": {
     "moreMatchesAvailable": "可能还有更多匹配结果。请细化搜索以缩小范围。",
-    "recentValidationFailed": "无法检查最近的文件：{{error}}"
+    "recentValidationFailed": "无法检查最近的文件：{{error}}",
+    "installRipgrepOnRemote": "在远程主机上安装 <code>ripgrep</code>，即可按 .gitignore 规则快速列出文件：",
+    "scanTooLarge": "“快速打开”的扫描范围过大（{{reason}}）。"
   },
   "checksPanel": {
     "unlinked": {
@@ -19244,11 +19293,18 @@
     },
     "discard": {
       "deleteUntrackedFileDescription": "这将永久删除此未跟踪文件。此操作无法撤销。",
-      "deleteUntrackedFilesDescription": "这将永久删除这 {{count}} 个未跟踪文件。此操作无法撤销。",
+      "deleteUntrackedFilesDescription_other": "这将永久删除这 {{count}} 个未跟踪文件。此操作无法撤销。",
       "restoreStagedVersionDescription": "这将恢复最后一个暂存版本并放弃删除。此操作无法撤消。",
       "unstagedChangesDescription": "这将恢复对此文件的未暂存更改。此操作无法撤消。",
       "unstagedSelectionIncludingUntrackedDescription": "这将还原未暂存的更改，并永久删除此选择中的任何未跟踪文件。此操作无法撤销。",
-      "unstagedFilesIncludingUntrackedDescription": "这将还原未暂存的更改，并永久删除这 {{count}} 个文件中的任何未跟踪文件。此操作无法撤销。"
+      "unstagedFilesIncludingUntrackedDescription_other": "这将还原未暂存的更改，并永久删除这 {{count}} 个文件中的任何未跟踪文件。此操作无法撤销。",
+      "delete": "删除",
+      "restore": "恢复",
+      "discard": "放弃",
+      "discardAll": "全部丢弃",
+      "deleteUntrackedTitle_one": "删除 {{count}} 个未跟踪文件？",
+      "deleteUntrackedTitle_other": "删除 {{count}} 个未跟踪文件？",
+      "deleteCount": "删除 {{count}} 个"
     },
     "createReviewFailure": {
       "authRequiredCommand": "{{providerName}} 未通过身份验证。下一步：在此环境中运行 {{command}}。",
@@ -19279,6 +19335,34 @@
       "creationUnconfirmed": "{{shortLabel}} 可能已创建完成。正在刷新分支评审状态...",
       "withDetail": "创建 {{shortLabel}} 失败：{{detail}}",
       "pushFailed": "推送失败。请解决推送错误后重试。"
+    },
+    "model": {
+      "auto": "自动",
+      "configDefault": "配置默认值"
+    },
+    "thinking": {
+      "off": "关闭",
+      "minimal": "最低",
+      "low": "低的",
+      "medium": "中等的",
+      "high": "高的",
+      "max": "最高",
+      "xhigh": "极高"
+    },
+    "variables": {
+      "basePrompt": "Orca 为此操作内置的提示词，包含 Orca 能安全收集的上下文。",
+      "branch": "当前源代码管理分支名称。",
+      "stagedFiles": "用于生成提交信息的已暂存文件列表，每行一个文件。",
+      "stagedPatch": "用于生成提交信息的已暂存 Git 补丁。",
+      "baseBranch": "在创建 PR 编辑器中选择的目标分支。",
+      "currentTitle": "开始生成前，编辑器中当前输入的 PR 标题。",
+      "currentBody": "开始生成前，编辑器中当前输入的 PR 描述。",
+      "commitSummary": "当前分支相对于基准分支的提交列表，每行一个提交。",
+      "changedFiles": "当前分支与基准分支之间的文件更改摘要。",
+      "patch": "用于生成 PR 详情的当前分支与基准分支的差异。",
+      "firstPrompt": "此工作区或聊天中的第一个用户请求。",
+      "assistantMessage": "Orca 可获取的智能体初始回复。",
+      "linkedIssue": "与此工作区关联的 GitHub issue 编号。未关联 GitHub issue 时为空（包括关联 GitLab 的工作区）。优先使用带指示的模板：未关联时，单独的“Fixes #{linkedIssue}”会变成“Fixes #”。"
     }
   },
   "rendererRecovery": {
@@ -19695,7 +19779,9 @@
       "confirmTitle": "重新启动终端守护进程？",
       "confirmBody": "重新启动会结束 {{sessions}} 中运行的所有进程。支持恢复的智能体之后可以恢复；shell 和其他作业则不能，必须重新启动。请在智能体空闲时执行此操作。",
       "cancel": "取消",
-      "confirm": "重新启动并结束进程"
+      "confirm": "重新启动并结束进程",
+      "count_other": "{{count}} 个正在运行的终端",
+      "count_one": "{{count}} 个运行中的终端"
     },
     "restartedInputNotSent": "终端在您输入时重新启动，部分输入可能未送达。请先查看新的 shell，再重新输入。",
     "stalledDaemonBanner": {
@@ -19812,7 +19898,11 @@
     "picker": {
       "pasteUnparseable": "应为项目 URL 或 owner/number",
       "ownerLoadFailed": "无法加载 {{owner}} 的项目。",
-      "organizationsLoadFailed": "部分组织未能加载（{{failureCount}}）。"
+      "organizationsLoadFailed": "部分组织未能加载（{{failureCount}}）。",
+      "organizations": "组织",
+      "listFailed": "无法列出项目",
+      "detailsFailed": "无法加载详情",
+      "viewFailed": "无法获取项目视图"
     },
     "error": {
       "notFoundState": "找不到此项目或视图。",
@@ -19847,6 +19937,9 @@
       "tooLargeUnknownCount": "此视图条目过多，无法在 Orca 中渲染。请在 GitHub 上缩小视图的筛选范围。",
       "tooLarge": "此视图有 {{itemCount}} 个条目，过多而无法在 Orca 中渲染。请在 GitHub 上缩小视图的筛选范围。",
       "schemaDriftDetail": "无法读取此项目视图：{{detail}}。"
+    },
+    "columns": {
+      "type": "类型"
     }
   },
   "projectField": {
@@ -19933,6 +20026,27 @@
     "attachments": {
       "updateRuntime": "更新远程运行时以更改工作区链接",
       "updateRuntimeSafely": "更新远程运行时以安全地更改工作区链接"
+    },
+    "activity": {
+      "active": "当前",
+      "working": "工作中",
+      "monitoring": "监控后台任务",
+      "failed": "失败的",
+      "interrupted": "已中断",
+      "unconfirmed": "无法确认",
+      "done": "完成",
+      "inactive": "未生效",
+      "permission": "需要授权",
+      "unreadLabel": "{{status}} · 未读"
+    },
+    "reviewStatus": {
+      "checksFailed": "{{review}} 检查：失败",
+      "checksPassing": "{{review}} 检查：通过",
+      "checksPending": "{{review}} 检查：待处理",
+      "closed": "{{review}}：已关闭",
+      "draft": "{{review}}：草稿",
+      "merged": "{{review}}：已合并",
+      "open": "{{review}}：开放"
     }
   },
   "tabHoverCard": {
@@ -20075,7 +20189,9 @@
       "preparingAriaLabel": "正在准备更新。点击展开。",
       "browserGuidance": "结束下方进程后重试：其服务器会继续运行，无需浏览器。如果其他计算机通过 SSH 连接到这台 Mac，请更新那台计算机上的 Orca，以便浏览器在更新时自动暂停。",
       "browserSummary": "后台 Orca 服务器的浏览器仍在使用此应用程序。"
-    }
+    },
+    "wslMoveInstallHeld": "项目正在移到其 WSL 主机。移动完成后再安装更新。",
+    "wslMoveUndoInstallHeld": "项目正在从其 WSL 主机移回。完成后再安装更新。"
   },
   "onboarding": {
     "language": {
@@ -20488,5 +20604,340 @@
     "signatureRequirement": "该构建必须具有与 Orca 相同的有效代码签名，否则安装将停止。",
     "useButton": "使用本地构建",
     "cancelButton": "取消"
+  },
+  "runtime": {
+    "health": {
+      "local": "本机",
+      "available": "已连接",
+      "connecting": "连接中",
+      "disconnected": "已断开",
+      "error": "需要处理",
+      "mixed": "混合状态",
+      "repair": "需要重新配对",
+      "update": "需要更新"
+    },
+    "compat": {
+      "compatible": "运行时客户端与服务器兼容。",
+      "clientTooOld": "此 Orca 客户端版本过旧，无法连接所选服务器。请更新本机上的 Orca。客户端协议版本为 {{clientProtocol}}，服务器要求的客户端协议版本为 {{requiredProtocol}}。",
+      "serverTooOld": "所选 Orca 服务器版本过旧，无法与此客户端兼容。请更新服务器上的 Orca。服务器协议版本为 {{serverProtocol}}，客户端要求的服务器协议版本为 {{requiredProtocol}}。"
+    }
+  },
+  "native": {
+    "about": {
+      "gpu": {
+        "unknownStatus": "状态不可用",
+        "enabled": "启用",
+        "disabled": "已禁用",
+        "unavailable": "不可用",
+        "safeMode": "已禁用（安全图形模式）",
+        "software": "软件渲染",
+        "unknown": "未知（{{status}}）",
+        "summary": "GPU 加速：{{status}}"
+      }
+    },
+    "dialog": {
+      "importCookies": "导入 Cookie",
+      "spaceTitle": "Orca 空间测试版",
+      "dashboardTitle": "Orca 智能体仪表盘",
+      "cookieFiles": "Cookie 文件",
+      "allFiles": "所有文件",
+      "importPetBundle": "选择 .codex-pet 包",
+      "pickPet": "选择宠物",
+      "petImage": "宠物图片",
+      "importWarpTheme": "导入 Warp 主题",
+      "warpThemeYaml": "Warp 主题 YAML",
+      "importWarpFolder": "导入 Warp 主题文件夹",
+      "images": "图片",
+      "repoIconImages": "仓库图标图片",
+      "audio": "音频"
+    }
+  },
+  "taskProviders": {
+    "linear": {
+      "updateAccess": "更新访问权限",
+      "addAccess": "添加 Linear 访问",
+      "fetchMore": "加载更多",
+      "connectionFailed": "连接失败",
+      "listLabel": "Linear 列表",
+      "projectsLoadFailed": "无法加载项目。",
+      "projectNotFound": "未找到项目。",
+      "projectLoadFailed": "无法加载项目。",
+      "projectIssuesLoadFailed": "无法加载项目 issue。",
+      "viewsLoadFailed": "无法加载视图。",
+      "viewContentsLoadFailed": "无法加载视图内容。",
+      "issuesLoadFailed": "无法加载 Linear issue。",
+      "apiKeyHint": "粘贴你希望 Orca 使用的 Linear 工作区的个人 API 密钥。如果该工作区已连接，Orca 会替换其已存储的密钥。",
+      "remoteKeyStorage": "此密钥由当前远程运行时存储。",
+      "localKeyStorage": "本地运行时的密钥存储在此设备上，并在可用时使用 Electron 加密存储。",
+      "commentsLoadFailed": "无法加载评论。",
+      "updateWorkspaceAccess": "更新 {{workspace}} 的 Linear 访问权限",
+      "workspaceApiKeyHint": "粘贴 {{workspace}} 的个人 API 密钥。如果此工作区已连接，Orca 会替换其已存储的密钥。",
+      "connect": "连接",
+      "descriptionUpdateFailed": "无法更新描述",
+      "titleUpdateFailed": "无法更新标题",
+      "truncated": {
+        "issues_one": "仅显示前 {{count}} 个议题。请搜索或打开 Linear 查看完整列表。",
+        "issues_other": "仅显示前 {{count}} 个议题。请搜索或打开 Linear 查看完整列表。",
+        "projectIssues_one": "仅显示项目中的前 {{count}} 个议题。请搜索或打开 Linear 查看完整列表。",
+        "projectIssues_other": "仅显示项目中的前 {{count}} 个议题。请搜索或打开 Linear 查看完整列表。",
+        "projects_one": "仅显示前 {{count}} 个项目。请搜索或打开 Linear 查看完整列表。",
+        "projects_other": "仅显示前 {{count}} 个项目。请搜索或打开 Linear 查看完整列表。",
+        "viewIssues_one": "仅显示视图中的前 {{count}} 个议题。请搜索或打开 Linear 查看完整列表。",
+        "viewIssues_other": "仅显示视图中的前 {{count}} 个议题。请搜索或打开 Linear 查看完整列表。",
+        "views_one": "仅显示前 {{count}} 个视图。请搜索或打开 Linear 查看完整列表。",
+        "views_other": "仅显示前 {{count}} 个视图。请搜索或打开 Linear 查看完整列表。"
+      }
+    },
+    "jira": {
+      "connectionFailed": "连接失败",
+      "remoteTokenStorage": "你的令牌会发送到所选的远程运行时，并使用该运行时支持的加密方式存储。",
+      "localTokenStorage": "你的令牌存储在本机，并在本地运行时存储支持加密时进行加密。"
+    },
+    "errors": {
+      "jira": {
+        "createFailed": "无法创建议题。",
+        "commentFailed": "添加评论失败。",
+        "notConnected": "未连接到 Jira。",
+        "titleRequired": "必须填写标题。",
+        "labelsConflict": "请提供 labels 或 labelOperations，不可同时提供两者。",
+        "updateFailed": "无法更新 issue。",
+        "credentialsRequired": "必须填写站点 URL、电子邮件和 API 令牌。",
+        "projectRequired": "必须选择项目。",
+        "issueTypeRequired": "必须选择 issue 类型。",
+        "issueKeyRequired": "必须提供 issue 键。",
+        "updatesRequired": "必须提供更新对象。",
+        "commentBodyRequired": "必须填写评论正文。",
+        "invalidSiteUrl": "请输入有效的 Jira 站点 URL。",
+        "passwordRequired": "必须填写密码。",
+        "personalTokenRequired": "必须填写个人访问令牌。",
+        "apiTokenRequired": "必须填写 API 令牌。",
+        "connectionFailed": "连接失败。",
+        "invalidSiteIdentity": "请输入不含凭据的 HTTP 或 HTTPS Jira 站点 URL。",
+        "missingProjectIdentity": "Jira 返回的项目缺少 ID 或键。",
+        "invalidIssuePage": "Jira 返回了无效的 issue 页面。",
+        "incompleteIssuePage": "Jira 返回了不完整的 issue 页面。",
+        "repeatedIssueToken": "Jira 返回了无效或重复的 issue 页面令牌。",
+        "issueSearchLimit": "Jira issue 搜索超出了页面数量限制。请改用 JQL 选择项目。",
+        "invalidProjectPage": "Jira 返回了无效的项目页面。",
+        "incompleteProjectPage": "Jira 返回了不完整的项目页面。",
+        "projectListLimit": "Jira 项目列表超出了页面数量限制。请改用 JQL 选择项目。",
+        "invalidCloudId": "站点未返回有效的 Atlassian Cloud ID。"
+      },
+      "linear": {
+        "notConnected": "未连接到 Linear",
+        "createFailed": "Linear 创建失败",
+        "createdButUnavailable": "已创建 issue，但无法获取其详情",
+        "updateFailed": "Linear 更新失败",
+        "commentFailed": "无法创建评论",
+        "projectCreateFailed": "Linear 项目创建失败",
+        "noApiKey": "未存储 API 密钥。",
+        "workspaceAuthExpired": "此工作区的 Linear 身份验证已过期。",
+        "projectNameRequired": "必须填写项目名称",
+        "projectIdRequired": "必须提供项目 ID",
+        "projectNotFound": "未找到项目",
+        "viewIdRequired": "必须提供自定义视图 ID",
+        "viewHasNoIssues": "自定义视图不包含 issue",
+        "viewHasNoProjects": "自定义视图不包含项目"
+      }
+    }
+  },
+  "workspaceOptions": {
+    "activeFilterCount_one": "{{count}} 个筛选条件",
+    "activeFilterCount_other": "{{count}} 个筛选条件"
+  },
+  "editorConflicts": {
+    "kind": {
+      "addedByUs": "我们添加",
+      "bothAdded": "双方都添加",
+      "deletedByUs": "我们删除",
+      "addedByThem": "对方添加",
+      "bothDeleted": "双方都删除",
+      "bothModified": "双方都修改",
+      "deletedByThem": "对方删除"
+    },
+    "resolvedBanner": "冲突已在本地解决 · {{kind}}",
+    "hint": {
+      "addedByUs": "检查添加的文件，决定是否保留",
+      "bothModified": "处理冲突标记",
+      "addedByThem": "保留前先检查添加的文件",
+      "bothDeleted": "在 Git 中解决冲突，或先恢复其中一方的版本再编辑",
+      "deletedByThem": "决定是保留文件还是接受删除",
+      "deletedByUs": "决定是否恢复文件",
+      "bothAdded": "选择要保留的版本，或将两者合并"
+    },
+    "renamedFrom": "由 {{path}} 重命名而来",
+    "snapshotCapturedAt": "快照创建于 {{time}}。",
+    "unresolvedBanner": "未解决的冲突 · {{kind}}"
+  },
+  "stats": {
+    "usageBreakdown": {
+      "turns_one": "{{count}} 轮",
+      "events_one": "{{count}} 个事件",
+      "sessions_one": "{{count}} 个会话",
+      "events_other": "{{count}} 个事件",
+      "sessions_other": "{{count}} 个会话",
+      "turns_other": "{{count}} 轮"
+    }
+  },
+  "github": {
+    "viewed": {
+      "markFile": "将 {{path}} 标记为已查看",
+      "unmarkFile": "取消 {{path}} 的已查看标记"
+    }
+  },
+  "wslMove": {
+    "entry": {
+      "hostRow": "从此发行版移动项目…",
+      "projectMenu": "移到 {{distro}} 主机…"
+    },
+    "blockers": {
+      "title": "这些项目移动前需要处理",
+      "inProjects": "位于 {{names}}",
+      "skipOne": "此次移动不包括 {{name}}",
+      "skipMany": "此次移动不包括这 {{n}} 个项目"
+    },
+    "title": "将项目移到 {{distro}} 主机",
+    "loading": "正在检查 {{distro}} 中的项目…",
+    "runningTitle": "正在移到 {{distro}} 主机",
+    "preview": {
+      "counts": "项目：{{projects}} · 工作区：{{workspaces}} · 终端：{{terminals}} · 聊天：{{chats}}",
+      "whatHappens": "你的文件保留在原处。终端会在同一文件夹中重新启动；其输出、Shell 历史记录和智能体对话都会保留。",
+      "projects": "{{distro}} 中的项目",
+      "folderBadge": "文件夹",
+      "notMoving": "不移动",
+      "checking": "正在检查所选项目…",
+      "checkAgain": "重新检查",
+      "moveOne": "移动 1 个项目",
+      "moveMany": "移动 {{n}} 个项目",
+      "heldByHost": "已在 {{distro}} 主机上。",
+      "changed": "之前已移动，之后又被旧版 Orca 在此处更改。不会再次移动。",
+      "chatsStay": "现有聊天保留在此电脑上。此项目中的新聊天将在 WSL 主机上开始。",
+      "browserLoginsConflict": "浏览器登录状态不会迁移，因为主机的浏览器配置文件已在使用中。移动后，请在主机的浏览器标签页中重新登录。",
+      "browserLoginsNotCarried": "浏览器登录状态不会迁移到此主机。移动后，请在其浏览器标签页中重新登录。"
+    },
+    "cancel": "取消",
+    "progress": {
+      "bytes": "{{sent}} / {{total}}",
+      "tooLate": "已无法取消：主机正在切换。请保持 Orca 打开，直到切换完成。",
+      "switching": "切换无法取消。请保持 Orca 打开，直到切换完成。",
+      "readOnly": "这些项目在移动期间为只读。切换开始前你都可以取消。",
+      "cancelUntilSwitch": "切换开始前你都可以取消。",
+      "closeKeepsGoing": "关闭此对话框不会停止移动；移动结束时它会重新打开。",
+      "cancelling": "正在取消…",
+      "cancel": "取消移动"
+    },
+    "result": {
+      "movedTitle": "已移到 {{distro}} 主机",
+      "resetTitle": "未移动任何内容",
+      "waitingTitle": "正在等待 {{distro}} 主机",
+      "earlierMoveTitle": "之前的一次移动先完成了",
+      "refusedTitle": "项目未移动",
+      "reloadCheckpointRefused": "Orca 无法备份未保存的文件，因此窗口未重新加载。请关闭此对话框，保存或关闭这些文件，然后在保持显示的通知中点击“立即重新加载”。",
+      "reloadVetoed": "有内容阻止了窗口重新加载。请关闭此对话框，保存你的工作，然后在保持显示的通知中点击“立即重新加载”。",
+      "reloadFailed": "窗口未重新加载。请重试。",
+      "moved": "重新加载此窗口，即可在 {{distro}} 主机下看到这些项目。Orca 会在重新加载前备份未保存的文件。",
+      "automationsPendingOne": "主机上有一个自动化暂时处于关闭状态。Orca 会持续请求主机将其重新开启。",
+      "automationsPendingMany": "主机上有 {{n}} 个自动化暂时处于关闭状态。Orca 会持续请求主机将其重新开启。",
+      "undoHint": "改变主意了？重新加载后，侧边栏会将这些项目显示为“已移至 {{distro}} 主机”。在那里选择“重新在此电脑上使用”，即可将它们恢复到移动前的状态。",
+      "reset": "移动已停止，所有内容均已还原。这些项目会像之前一样在此电脑上工作；已暂停的终端会在你打开时重新启动。",
+      "resetReason": "停止原因：{{detail}}",
+      "waiting": "此次移动可能已到达 {{distro}} 主机，但主机没有响应。在主机响应之前，这些项目在此处保持只读。请在设置中连接该主机，然后再次打开此对话框并开始移动：Orca 会先完成或撤销这次移动。",
+      "reloading": "正在重新加载…",
+      "reload": "立即重新加载",
+      "close": "关闭",
+      "review": "返回项目",
+      "browserLoginsHostUnknown": "浏览器登录状态未复制，因为 Orca 无法识别主机的浏览器配置文件。请在主机的浏览器标签页中重新登录。",
+      "browserLoginsConflict": "浏览器登录状态未复制，因为主机的浏览器配置文件已在使用中。请在主机的浏览器标签页中重新登录。",
+      "browserLoginsNotCopied": "浏览器登录状态未复制到主机。请在主机的浏览器标签页中重新登录。"
+    },
+    "runtime": {
+      "label": "项目运行环境",
+      "description": "此项目通过此电脑在 {{distro}} 中运行。将其移到 {{distro}} 主机即可在那里运行。",
+      "move": "移动项目"
+    },
+    "unfinished": {
+      "one": "已移到 {{distro}} 主机的一个自动化仍处于关闭状态。Orca 会持续请求主机将其重新开启。",
+      "many": "已移到 {{distro}} 主机的 {{n}} 个自动化仍处于关闭状态。Orca 会持续请求主机将其重新开启。"
+    },
+    "refusal": {
+      "previewFailed": "Orca 无法检查这些项目。请重试。",
+      "startFailed": "Orca 与此次移动失去了联系。请重新打开此对话框查看其进展。",
+      "unavailable": "此窗口无法将项目移到 WSL 主机。",
+      "alreadyRunning": "移到 {{distro}} 的操作已在进行中。请等待其完成，然后重试。",
+      "alreadyInFlightPreview": "{{distro}} 的一次移动仍在收尾。开始此次移动时，Orca 会尽可能先完成或撤销那次移动。",
+      "alreadyInFlight": "{{distro}} 的一次移动仍在收尾，因此此次移动未开始。请保持 {{distro}} 主机连接，稍后重试。",
+      "nothingNew": "这些项目已在 {{distro}} 主机上。",
+      "destinationChanged": "之前来自 {{distro}} 的项目已移到另一个 WSL 主机。请连接该主机以移动更多项目。",
+      "hostUnavailable": "{{distro}} 主机未连接。请在设置中连接它，然后重试。",
+      "hostUpdateRequired": "{{distro}} 主机运行的是旧版 Orca。请在设置中更新它，然后重试。",
+      "terminalsBlocked": "这些项目中的部分终端、智能体或自动化正忙。未移动任何内容。",
+      "exportIncomplete": "这些项目中的部分已保存状态暂时无法移动，因此未移动任何内容：",
+      "exportIncompletePreview": "这些项目中的部分已保存状态暂时无法移动：",
+      "tooLarge": "这些项目的已保存状态过多，无法一次移动。请每次少移动一些项目。",
+      "pauseFailed": "Orca 无法暂停这些项目中的终端，因此未移动任何内容。已暂停的终端会在你打开时重新启动。请重试。",
+      "scopeChanged": "移动准备期间有项目发生了更改，因此未移动任何内容。请检查项目后重试。",
+      "cancelled": "移动已取消。未移动任何内容。",
+      "finishedEarlierMove": "Orca 先完成了之前一次移到 {{distro}} 的操作。请重新加载窗口，然后重新开始此次移动。"
+    },
+    "step": {
+      "preparing": "准备中",
+      "pausingTerminals": "正在暂停终端",
+      "copying": "正在复制",
+      "switching": "正在切换",
+      "finishing": "正在收尾",
+      "done": "完成"
+    },
+    "blocker": {
+      "agentWorkingOne": "有一个智能体正在工作或等待回复",
+      "agentWorkingMany": "有 {{n}} 个智能体正在工作或等待回复",
+      "processRunningOne": "有一个终端正在运行程序",
+      "processRunningMany": "有 {{n}} 个终端正在运行程序",
+      "agentNotResumableOne": "有一个智能体在移动后无法恢复",
+      "agentNotResumableMany": "有 {{n}} 个智能体在移动后无法恢复",
+      "unverifiableOne": "Orca 目前无法检查一个终端",
+      "unverifiableMany": "Orca 目前无法检查 {{n}} 个终端",
+      "automationRunningOne": "有一个自动化运行正在进行",
+      "automationRunningMany": "有 {{n}} 个自动化运行正在进行",
+      "dispatchRunningOne": "有一个智能体任务正在进行",
+      "dispatchRunningMany": "有 {{n}} 个智能体任务正在进行",
+      "scrollbackTooLargeOne": "有一个终端的输出历史记录过多，无法移动",
+      "scrollbackTooLargeMany": "有 {{n}} 个终端的输出历史记录过多，无法移动"
+    },
+    "blockerHint": {
+      "agentWorking": "等待它完成，或在其终端中停止它，然后重新检查。",
+      "processRunning": "停止该程序（例如开发服务器或编辑器），然后重新检查。",
+      "agentNotResumable": "在其终端中退出该智能体，然后重新检查。",
+      "unverifiable": "请稍候，然后重新检查。Orca 不会为了移动而停止任何内容。",
+      "wait": "等待其完成，然后重新检查。",
+      "scrollbackTooLarge": "清除这些终端中的输出，然后重新检查。"
+    },
+    "scopeRefused": {
+      "windowsDrive": "其文件夹位于 Windows 驱动器上，因此保留在此电脑上。",
+      "mixedLocations": "其部分文件夹不在此发行版中，因此保留在此电脑上。",
+      "notLocal": "它已在另一台主机上运行。",
+      "other": "它无法移动。"
+    },
+    "reloadToast": {
+      "title": "重新加载以完成移动"
+    },
+    "orchestrator": {
+      "showTerminal": "显示终端",
+      "moveAgain": "再次移动",
+      "checkAgain": "重新检查",
+      "deferred": "正在完成到 {{distro}} 主机的移动：部分终端仍在忙碌。",
+      "stuck": "之前一次到 {{distro}} 主机的移动尚未完全结束。",
+      "declined": "移动已暂停，因为你已将这些项目恢复到此电脑。",
+      "doneToast": "项目已移到 {{distro}} 主机",
+      "terminalGone": "该终端已不在此窗口中打开。请重新检查以刷新。",
+      "blocker": "{{title}}。{{hint}}",
+      "paused": "将项目移到 {{distro}} 主机的操作已暂停：{{reason}}。",
+      "pausedReason": {
+        "exportIncomplete": "部分已保存状态暂时无法迁移",
+        "manifestTooLarge": "已保存状态超出了一次移动的容量",
+        "hostUpdate": "需要先更新主机",
+        "attemptsExhausted": "多次尝试后仍未完成"
+      },
+      "finishPending": "之前一次到 {{distro}} 主机的移动已在主机上完成。Orca 会在重启时在此处完成它，也可以点击“重新检查”立即完成。"
+    }
   }
 }

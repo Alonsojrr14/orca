@@ -189,6 +189,15 @@
       "empty": "Aucune extension n'est activée pour ce profil",
       "visitWebStore": "Visiter le Chrome Web Store",
       "manage": "Gérer les extensions"
+    },
+    "viewport": {
+      "mobile-s": "Mobile S — 320 × 568",
+      "mobile-m": "Mobile M — 375 × 667",
+      "mobile-l": "Mobile L — 425 × 812",
+      "tablet": "Tablette — 768 × 1024",
+      "laptop": "Ordinateur portable — 1024 × 768",
+      "laptop-l": "Grand ordinateur portable — 1440 × 900",
+      "desktop": "Ordinateur de bureau — 1920 × 1080"
     }
   },
   "githubChecks": {
@@ -523,7 +532,8 @@
       "permissionOverrideMore": "et {{count}} de plus",
       "permissionOverrideMore_one": "et {{count}} de plus",
       "permissionOverrideMore_other": "et {{count}} de plus",
-      "permissionOverridesUse": "Utiliser {{mode}}"
+      "permissionOverridesUse": "Utiliser {{mode}}",
+      "approveForMe": "approuver pour moi"
     },
     "followSymlinkedDirectoriesKeywords": {
       "symlink": "lien symbolique",
@@ -554,6 +564,34 @@
       "actionPermissions": {
         "sameAsAgent": "Comme {{agent}}"
       }
+    },
+    "ssh": {
+      "status": {
+        "disconnected": "Déconnecté",
+        "connecting": "Connexion…",
+        "auth-failed": "Échec de l'authentification",
+        "connected": "Connecté",
+        "reconnection-failed": "Échec de la reconnexion",
+        "deploying-relay": "Déploiement du relais…",
+        "reconnecting": "Reconnexion…"
+      }
+    },
+    "mcp": {
+      "workspace": "Espace de travail",
+      "inspectFailed": "Impossible d’inspecter {{directory}}.",
+      "unreadable": "Illisible",
+      "notFound": "Introuvable",
+      "invalidJson": "JSON invalide",
+      "noServers": "Aucun serveur",
+      "httpServer": "Serveur HTTP",
+      "stdioServer": "Serveur stdio",
+      "invalidServer": "Serveur invalide",
+      "serverCount_one": "{{count}} serveur",
+      "serverCount_other": "{{count}} serveurs",
+      "claudeWorkspace": "Espace de travail Claude"
+    },
+    "shortcuts": {
+      "parseFailed": "Impossible d’analyser le raccourci."
     }
   },
   "menu": {
@@ -1759,7 +1797,6 @@
         "d1fa2cf888": "Impossible de commenter sans le SHA head de la PR.",
         "829674460a": "Diff indisponible car les SHA des commits de la PR manquent.",
         "af924014f8": "Consulté",
-        "2d89a38d9d": "{{value0}} {{value1}} comme consultés",
         "70e84e3d0b": "Aucun reviewer correspondant.",
         "1ffce94a8b": "Tous les autres",
         "c2b21818e1": "Suggestions",
@@ -1976,7 +2013,6 @@
       "LinearIssueTextEditor": {
         "947ba2d6f4": "pour enregistrer",
         "04d73b72dc": "Titre du ticket",
-        "e8ff595db3": "Échec de la mise à jour de {{value0}}",
         "1e08a1ec80": "Le titre est obligatoire"
       },
       "LinearIssueWorkspace": {
@@ -2299,10 +2335,6 @@
         "9e97f08d0f": "Rechercher un fichier à ouvrir",
         "ec31e058f7": "Accéder au fichier",
         "73b44e7bde": "Copier la commande d'installation",
-        "1cf8561ab4": "sur le remote pour activer un listage rapide respectant .gitignore :",
-        "5d80dc39bb": "ripgrep",
-        "2ca749c15d": "Installer",
-        "4725b0e931": "Scan Quick Open trop volumineux (",
         "b227d88520": "{{value0}} fichiers trouvés",
         "995be8ea22": "Copier",
         "cf144856dc": "Copied"
@@ -2373,9 +2405,6 @@
         "7f3f7b4c18": "Description (facultatif, markdown)",
         "9f2b4c03a6": "Création dans",
         "d3d0998b7d": "Nouveau ticket GitHub",
-        "d1e243795c": "tickets",
-        "be8cf68d9f": "voir les tickets",
-        "67662ade50": "tickets du projet",
         "6244a02f46": "Ouvrir dans Linear",
         "606a85c774": "Ouvert",
         "5e8061b088": "Démarrer un espace de travail depuis {{value0}} {{value1}}",
@@ -2395,11 +2424,9 @@
         "af377b13b1": "Vue {{value0}}",
         "d47248df4d": "Mode d'affichage Linear",
         "f397d513e3": "Retour",
-        "b39fe6511d": "projets",
         "8675cd6188": "Linear",
         "733b8f2421": "Linear / Vues",
         "bc06ed0fb0": "Retour aux vues",
-        "3cb855080f": "vues",
         "b4e10f096e": "Propriétaire",
         "a04fe7ba73": "Visibilité",
         "0aa8525950": "Modèle",
@@ -3070,8 +3097,6 @@
               "7616c986c6": "Ouvrir {{value0}} issues",
               "openInLinear": "Ouvrir {{value0}} dans Linear",
               "93e1f6bfca": "Chargement",
-              "98730088a6": ". Recherchez ou ouvrez Linear pour voir l'ensemble complet.",
-              "06b887d622": "Affichage des premières",
               "linearLoginUnreadable": "Impossible de lire la connexion Linear enregistrée. Reconnectez-la dans les réglages.",
               "f2cc1e0ff6": "Linear / Projets",
               "906b5e4cb8": "Linear / Projets / {{value0}}",
@@ -4594,10 +4619,7 @@
         },
         "UsageBreakdownSection": {
           "7765a4c3e1": "n/d",
-          "247c93ca92": "• tarification déduite",
-          "32176e1d44": "tours",
-          "79a69522a5": "événements",
-          "02a046792e": "sessions •"
+          "247c93ca92": "• tarification déduite"
         },
         "GrokUsagePane": {
           "g8h9i0j1k2": "Utilisation Grok",
@@ -5526,7 +5548,9 @@
         },
         "sidebarHostOptions": {
           "3e102f111c": "Tous les hôtes",
-          "visibleHostsCount": "{{value0}} hôtes"
+          "hosts": "Hôtes",
+          "visibleHosts_one": "{{count}} hôte",
+          "visibleHosts_other": "{{count}} hôtes"
         },
         "SidebarWorkspaceOptionsMenu": {
           "hosts": "Hôtes",
@@ -6380,7 +6404,7 @@
           "running": "En cours",
           "stopped": "Arrêtée",
           "title": "Ajouter une distro WSL",
-          "description": "Orca exécute son serveur dans la distro, de sorte que git, les fichiers et les terminaux s'exécutent nativement sous Linux. Les projets que vous avez ouverts via \\\\wsl.localhost continuent de fonctionner tels quels jusqu'à ce que vous les déplaciez vers cet hôte.",
+          "description": "Orca exécute son serveur dans la distro, de sorte que git, les fichiers et les terminaux s'exécutent nativement sous Linux. Les projets de cette distro que vous avez ouverts via \\\\wsl.localhost sont déplacés automatiquement vers cet hôte dès que leurs terminaux sont inactifs ; les projets situés sur un lecteur Windows (/mnt/…) restent sur cet ordinateur. Vous pouvez ramener un projet déplacé depuis la barre latérale.",
           "distro": "Distro",
           "loading": "Recherche des distros WSL…",
           "placeholder": "Choisissez une distro",
@@ -8144,7 +8168,9 @@
           "fbb428db98": "Sélectionné :",
           "search_terminal_themes": "Rechercher des thèmes de terminal",
           "cb330ef7f8": " sur {{value0}}",
-          "c822571b2e": " correspondant à \"{{value0}}\""
+          "c822571b2e": " correspondant à \"{{value0}}\"",
+          "plugin_themes": "Plugins",
+          "from_plugin": "De {{value0}}"
         },
         "SettingsSidebar": {
           "e0900f83e7": "SSH",
@@ -11918,7 +11944,8 @@
             "migration": "Non effectué : un déplacement vers ce serveur est inachevé. Reprenez-le d'abord.",
             "deferred": "Pas encore effectué : le serveur n'est pas prêt pour cela. Réessayez plus tard.",
             "failed": "Orca n'a pas pu terminer cette action sur le serveur. Réessayez.",
-            "defaultServer": "Non effectué : ce serveur est l’hôte par défaut des nouveaux projets. Choisissez-en un autre dans « Les nouveaux projets s’ouvrent sur » avant de l’arrêter."
+            "defaultServer": "Non effectué : ce serveur est l’hôte par défaut des nouveaux projets. Choisissez-en un autre dans « Les nouveaux projets s’ouvrent sur » avant de l’arrêter.",
+            "wslMoveRunning": "Non effectué : un projet est en cours de déplacement vers ce serveur. Orca le mettra à jour une fois le déplacement terminé."
           },
           "reassurance": "S’exécute sur chaque hôte, accessible via votre propre connexion SSH. Votre code et vos fichiers restent où ils sont. Seule la liste des projets, onglets et terminaux d’Orca passe sur l’hôte."
         },
@@ -12255,6 +12282,9 @@
           "searchPlaceholder": "Rechercher des versions…",
           "searchLabel": "Rechercher des versions",
           "noMatches": "Aucune version correspondante."
+        },
+        "AppearanceThemeControl": {
+          "useTerminalTheme": "Utiliser ses couleurs de terminal"
         },
         "notification": {
           "settings": {
@@ -13161,10 +13191,10 @@
                 "dialog": {
                   "3bc61dc989": "Annuler",
                   "15efa778e3": "Abandonner",
-                  "42f89dd030": "fichiers",
-                  "e7611dca35": "fichier",
                   "0d2d88cba5": "Cette action est irréversible.",
-                  "1551c14668": "Abandonner les modifications ?"
+                  "1551c14668": "Abandonner les modifications ?",
+                  "fileCount_one": "{{count}} fichier",
+                  "fileCount_other": "{{count}} fichiers"
                 }
               },
               "dropdown": {
@@ -13391,16 +13421,21 @@
             "unresolved": "Impossible de déterminer quel hôte possède cet espace de travail. Vérifiez la connexion et réessayez."
           },
           "useFileDeletion": {
-            "72691dfebc": "Échec : {{value0}} « {{value1}} ».",
             "d979a4fbb5": "Supprimer définitivement « {{value0}} » ?",
             "92276aceb7": "Supprimer",
             "7fb9435c86": "Cette action supprime définitivement le répertoire et son contenu sur l'hôte distant. Elle est irréversible.",
             "23e98f192f": "Cette action supprime définitivement le fichier sur l'hôte distant. Elle est irréversible.",
             "8b8ee9d22f": "Impossible de déterminer quel hôte possède ce fichier. Vérifiez la connexion de l'espace de travail et réessayez.",
-            "af1270b90d": "Supprimer définitivement {{count}} éléments ?",
             "dd029aa5cd": "Cette action supprime définitivement les éléments sélectionnés ainsi que le contenu des répertoires sur l'hôte distant. Elle est irréversible.",
-            "77fdc36183": "Supprimer {{count}} éléments ?",
-            "fca915a67a": "Les éléments distants sont définitivement supprimés, sans retour arrière. Les éléments locaux sont déplacés dans {{value0}}."
+            "deleteFailed": "Impossible de supprimer « {{name}} ».",
+            "deleteItems_one": "Supprimer {{count}} élément ?",
+            "deleteItems_other": "Supprimer {{count}} éléments ?",
+            "mixedRecycleBin": "Les éléments distants sont supprimés définitivement. Cette action est irréversible. Les éléments locaux sont déplacés vers la Corbeille.",
+            "mixedTrash": "Les éléments distants sont supprimés définitivement. Cette action est irréversible. Les éléments locaux sont déplacés vers la Corbeille.",
+            "permanentlyDeleteItems_one": "Supprimer définitivement {{count}} élément ?",
+            "permanentlyDeleteItems_other": "Supprimer définitivement {{count}} éléments ?",
+            "recycleBinFailed": "Impossible de déplacer « {{name}} » vers la Corbeille.",
+            "trashFailed": "Impossible de déplacer « {{name}} » vers la Corbeille."
           },
           "useFileExplorerHandlers": {
             "32cd9fd991": "Impossible d'ouvrir la cible du symlink",
@@ -14358,13 +14393,13 @@
             "9ee54037a4": "Commande personnalisée",
             "4b2fc4b80c": "Effort de réflexion",
             "be8917699e": "Modèle",
-            "4d9b6d84df": "non pris en charge. Choisissez Claude, Codex ou Personnalisé.",
             "560d4feb00": "Personnalisé",
             "29d119fe95": "Agent",
             "f9382b48a1": "Activer l'auteur IA",
             "1c0cb4fabb": "Auteur IA",
             "bd14e9c42a": "Non configuré",
-            "1f9468c5c9": "{{value0}} non pris en charge"
+            "1f9468c5c9": "{{value0}} non pris en charge",
+            "unsupportedAgent": "{{agent}} n'est pas pris en charge. Choisissez Claude, Codex ou Personnalisé."
           },
           "BrowserAnimatedVisual": {
             "46df009982": "Démarrer l'essai gratuit",
@@ -14905,17 +14940,14 @@
         "ConflictComponents": {
           "f338288514": "Chargement du contenu des conflits...",
           "90d576adb2": "Actualiser",
-          "a1ce36f77d": "Instantané capturé le",
           "c8ca989aea": "Afficher l'arborescence des fichiers",
           "58ad5ad431": "Ignorer",
           "28e7db4a90": "Contrôle de code source",
           "31931dec46": "Cet instantané de revue ne contient plus aucun conflit non résolu actif.",
           "992145ff5a": "Tous les conflits sont résolus",
-          "d5edd81755": "Renommé depuis",
           "6e459867ad": "État de continuité valable pour la session. Git ne signale plus ce fichier comme non fusionné.",
           "9c2901ef8a": "Conflit suivant",
           "41d9af2e7a": "Conflit précédent",
-          "55d61a0ccd": "conflit ·",
           "da539359b6": "Aucun fichier de l'arbre de travail n'est modifiable pour ce conflit.",
           "unresolvedConflicts_one": "{{count}} conflit non résolu",
           "unresolvedConflicts_other": "{{count}} conflits non résolus"
@@ -17209,12 +17241,10 @@
         "untitled": "Discussion sans titre",
         "listLabel": "Des discussions qui reprendraient",
         "dontAskAgain": "Ne plus demander (reprendre automatiquement)",
-        "dontAskAgainHint": "Vous pouvez désactiver cette option dans Paramètres → Expérimental → Chat UI.",
+        "dontAskAgainHint": "Vous pouvez désactiver cette option dans Paramètres → Chat → Comportement.",
         "continuedOne": "1 chat a été repris",
         "continuedMany": "{{value0}} chats ont été repris",
         "selectAgent": "Reprendre le chat {{value0}} \"{{value1}}\" dans {{value2}}",
-        "resumeSelected": "Reprendre les discussions {{value0}}",
-        "resumeSelectedOne": "Reprendre 1 discussion",
         "dismissAll": "Tout rejeter",
         "notContinuedOne": "1 chat n'a pas pu reprendre",
         "notContinuedMany": "{{value0}} chats n'ont pas pu reprendre",
@@ -17249,7 +17279,9 @@
         "serverDismiss": "Ignorer",
         "serverResumeAll": "Reprendre les {{count}} sur {{machine}}",
         "serverResumeHereOne": "Reprendre 1 chat démarré ici",
-        "serverResumeHere": "Reprendre {{count}} chats démarrés ici"
+        "serverResumeHere": "Reprendre {{count}} chats démarrés ici",
+        "resumeChats_one": "Reprendre {{count}} discussion",
+        "resumeChats_other": "Reprendre {{count}} discussions"
       },
       "linear-issue-attribute-filter-coverage-notice": {
         "statusPartialTeamCoverage": "Filtrage des statuts des équipes {{value0}} sur {{value1}} : les problèmes des équipes restantes ne sont pas inclus.",
@@ -17761,7 +17793,8 @@
         "compactAfterRetry": "Réessayez votre message précédent, puis lancez /compact.",
         "clearAfterSending": "Votre message précédent est encore en cours d'envoi. Lancez /clear une fois qu'il est parti.",
         "compactAfterSending": "Votre message précédent est encore en cours d'envoi. Lancez /compact une fois qu'il est parti.",
-        "pendingWork": "Attendez la fin du travail et des messages en attente avant d'utiliser cette commande."
+        "pendingWork": "Attendez la fin du travail et des messages en attente avant d'utiliser cette commande.",
+        "notDoneGoalChangeIncomplete": "Impossible de terminer la modification de l’objectif. Consultez le chat."
       },
       "composer": {
         "imageUnavailable": "Aperçu indisponible",
@@ -18430,6 +18463,15 @@
         "settings": "Ouvrir les paramètres dans le terminal",
         "extensions": "Ouvrir le tableau de bord des extensions dans le terminal",
         "hotkeys": "Afficher les raccourcis clavier dans le terminal"
+      },
+      "modelDescriptions": {
+        "grok_4_7": "Le dernier modèle de pointe de xAI",
+        "grok_4_6": "Le précédent modèle de pointe de xAI",
+        "grok_4_5": "Un ancien modèle de pointe de xAI",
+        "fable": "Le plus performant pour les tâches les plus difficiles et longues",
+        "opus": "Idéal pour les tâches complexes du quotidien",
+        "sonnet": "Efficace pour les tâches courantes",
+        "haiku": "Le plus rapide pour des réponses immédiates"
       }
     },
     "tab": {
@@ -19139,7 +19181,9 @@
   },
   "quickOpen": {
     "moreMatchesAvailable": "D'autres correspondances sont peut-être disponibles. Affinez votre recherche pour réduire les résultats.",
-    "recentValidationFailed": "Impossible de vérifier les fichiers récents : {{error}}"
+    "recentValidationFailed": "Impossible de vérifier les fichiers récents : {{error}}",
+    "installRipgrepOnRemote": "Installez <code>ripgrep</code> sur l'hôte distant pour lister rapidement les fichiers en respectant les règles de .gitignore :",
+    "scanTooLarge": "L'analyse de l'ouverture rapide est trop volumineuse ({{reason}})."
   },
   "notifications": {
     "agentStatus": {
@@ -19189,13 +19233,22 @@
       "useHereDescription": "Orca ouvrira ce projet ici tel qu'il était avant le déplacement. Votre code n'est pas concerné : il n'a jamais été déplacé. Les modifications faites sur l'hôte {{distro}} depuis le déplacement, comme de nouveaux onglets et chats, restent sur l'hôte et ne reviennent pas. Les projets déplacés avec celui-ci reviennent aussi. Le projet reste également sur l'hôte {{distro}} jusqu'à ce que vous l'y supprimiez. Cette fenêtre va se recharger.",
       "useHereConfirm": "Utiliser sur cet ordinateur",
       "useHereSuperseded": "Un déplacement ultérieur vers l'hôte {{distro}} inclut ce projet. Ramenez d'abord celui-là.",
+      "useHereRefusedTitle": "Impossible d'utiliser {{name}} ici pour le moment",
+      "useHereRefusedOk": "OK",
+      "useHereSupersededBy": "Ces projets ont été déplacés vers l'hôte {{distro}} après celui-ci : {{names}}. Ramenez-les d'abord sur cet ordinateur, puis ce projet.",
       "useHereMoveRunning": "Un déplacement vers l'hôte {{distro}} est encore en cours. Réessayez une fois terminé.",
       "useHereHostKeptForPeers": "{{project}} a été déplacé vers l'hôte {{distro}}, qui reste actif pour un autre Orca. Ajoutez de nouveau l'hôte pour l'utiliser ici.",
-      "useHereHostUnreachable": "L'hôte {{distro}} ne répond pas : Orca ne peut pas arrêter sa copie de ce projet, et ses agents y tournent peut-être encore. Connectez l'hôte dans les Réglages, ou supprimez-le, puis réessayez.",
+      "useHereHostUnreachable": "L'hôte {{distro}} ne répond pas : Orca ne peut pas arrêter sa copie de ce projet, et ses agents y tournent peut-être encore. Connectez l'hôte dans les Paramètres, ou supprimez-le, puis réessayez.",
       "useHereHostStillRunning": "La copie de ce projet sur l'hôte {{distro}} a encore des terminaux en cours : ses agents pourraient tourner deux fois. Patientez un instant, puis réessayez.",
       "useHereFailed": "Impossible de ramener ce projet sur cet ordinateur.",
+      "useHereHostRemovalPending": "L'hôte {{distro}} est encore en cours de suppression, Orca n'y touche donc pas. Terminez sa suppression dans les Paramètres, puis réessayez.",
+      "useHereHostAutomations": "Orca n'a pas pu désactiver les automatisations de ce projet sur l'hôte {{distro}} : elles pourraient s'exécuter deux fois. Connectez l'hôte dans les Paramètres, puis réessayez.",
       "useHereUnsavedTitle": "Enregistrez d'abord vos fichiers",
-      "useHereUnsavedDescription": "Récupérer {{name}} recharge cette fenêtre. Enregistrez ou fermez d'abord ces fichiers : {{files}}"
+      "useHereUnsavedDescription": "Récupérer {{name}} recharge cette fenêtre. Enregistrez ou fermez d'abord ces fichiers : {{files}}",
+      "automationRunsOnHost": "S'exécute sur l'hôte {{distro}}",
+      "quitDuringMoveTitle": "Quitter pendant le déplacement d'un projet ?",
+      "quitDuringMoveDescription": "Un projet est en cours de déplacement vers son hôte WSL. Quitter quand même ? Le déplacement sera annulé au prochain lancement.",
+      "quitDuringMoveConfirm": "Quitter quand même"
     },
     "startupWorktreeRefresh": {
       "loading": "Recherche des espaces de travail…",
@@ -19237,11 +19290,20 @@
     },
     "discard": {
       "deleteUntrackedFileDescription": "Cela supprimera définitivement ce fichier non suivi. Cette action est irréversible.",
-      "deleteUntrackedFilesDescription": "Cela supprimera définitivement ces {{count}} fichiers non suivis. Cette action est irréversible.",
+      "deleteUntrackedFilesDescription_other": "Cela supprimera définitivement ces {{count}} fichiers non suivis. Cette action est irréversible.",
       "restoreStagedVersionDescription": "Cela restaurera la dernière version intermédiaire et annulera la suppression. Cela ne peut pas être annulé.",
       "unstagedChangesDescription": "Cela annulera les modifications non planifiées apportées à ce fichier. Cela ne peut pas être annulé.",
       "unstagedSelectionIncludingUntrackedDescription": "Cela annulera les modifications non indexées et supprimera définitivement tous les fichiers non suivis de cette sélection. Cette action est irréversible.",
-      "unstagedFilesIncludingUntrackedDescription": "Cela annulera les modifications non indexées et supprimera définitivement tous les fichiers non suivis parmi ces {{count}} fichiers. Cette action est irréversible."
+      "unstagedFilesIncludingUntrackedDescription_other": "Cela annulera les modifications non indexées et supprimera définitivement tous les fichiers non suivis parmi ces {{count}} fichiers. Cette action est irréversible.",
+      "delete": "Supprimer",
+      "restore": "Restaurer",
+      "discard": "Abandonner",
+      "discardAll": "Tout abandonner",
+      "deleteUntrackedTitle_one": "Supprimer {{count}} fichier non suivi ?",
+      "deleteUntrackedTitle_other": "Supprimer {{count}} fichiers non suivis ?",
+      "deleteCount": "Supprimer {{count}}",
+      "deleteUntrackedFilesDescription_one": "Cela supprimera définitivement {{count}} fichier non suivi. Cette action est irréversible.",
+      "unstagedFilesIncludingUntrackedDescription_one": "Cela annulera les modifications non indexées apportées à {{count}} fichier et le supprimera définitivement s'il n'est pas suivi. Cette action est irréversible."
     },
     "createReviewFailure": {
       "authRequiredCommand": "{{providerName}} n'est pas authentifié. Étape suivante : exécutez {{command}} dans cet environnement.",
@@ -19272,6 +19334,34 @@
       "creationUnconfirmed": "La création de {{shortLabel}} est peut-être terminée. Actualisation de l'état de revue de la branche...",
       "withDetail": "La création de {{shortLabel}} a échoué : {{detail}}",
       "pushFailed": "Le push a échoué. Résolvez l'erreur de push, puis réessayez."
+    },
+    "thinking": {
+      "off": "Désactivé",
+      "low": "Basse",
+      "medium": "Moyenne",
+      "high": "Haute",
+      "minimal": "Minimal",
+      "xhigh": "Très élevé",
+      "max": "Maximum"
+    },
+    "variables": {
+      "basePrompt": "Le prompt intégré d’Orca pour cette action, avec le contexte qu’Orca sait recueillir en toute sécurité.",
+      "branch": "Le nom de la branche actuelle du contrôle de version.",
+      "stagedFiles": "La liste des fichiers indexés, séparés par des sauts de ligne, pour générer le message de commit.",
+      "stagedPatch": "Le patch Git indexé utilisé pour générer le message de commit.",
+      "baseBranch": "La branche cible sélectionnée dans l’éditeur de création de PR.",
+      "currentTitle": "Le titre du PR saisi dans l’éditeur avant le début de la génération.",
+      "currentBody": "La description du PR saisie dans l’éditeur avant le début de la génération.",
+      "commitSummary": "La liste des commits de la branche par rapport à la base, séparés par des sauts de ligne.",
+      "changedFiles": "Un résumé des fichiers modifiés entre la branche et sa base.",
+      "patch": "Le diff de la branche par rapport à sa base utilisé pour générer les détails du PR.",
+      "firstPrompt": "La première demande de l’utilisateur dans cet espace de travail ou ce chat.",
+      "assistantMessage": "La réponse initiale de l’agent, lorsqu’Orca en dispose.",
+      "linkedIssue": "Le numéro de l’issue GitHub liée à cet espace de travail. Vide si aucune issue GitHub n’est liée (y compris pour les espaces liés à GitLab). Préférez les modèles avec instructions : « Fixes #{linkedIssue} » seul devient « Fixes # » sans lien."
+    },
+    "model": {
+      "configDefault": "Valeur par défaut de la configuration",
+      "auto": "Automatique"
     }
   },
   "agentsSidebarIntro": {
@@ -19695,7 +19785,9 @@
       "confirmTitle": "Redémarrer le daemon de terminal ?",
       "confirmBody": "Le redémarrage met fin à tous les processus en cours d'exécution dans {{sessions}}. Les agents qui prennent en charge la reprise peuvent être repris ensuite ; les shells et autres tâches ne le peuvent pas et doivent être redémarrés. Faites-le lorsque vos agents sont inactifs.",
       "cancel": "Annuler",
-      "confirm": "Redémarrer et arrêter les processus"
+      "confirm": "Redémarrer et arrêter les processus",
+      "count_other": "{{count}} terminaux en cours d'exécution",
+      "count_one": "{{count}} terminal en cours d’exécution"
     },
     "restartedInputNotSent": "Le terminal a redémarré pendant votre saisie, une partie ne lui est peut-être pas parvenue. Vérifiez le nouveau shell avant de la saisir à nouveau.",
     "stalledDaemonBanner": {
@@ -19870,7 +19962,11 @@
     "picker": {
       "pasteUnparseable": "URL de projet ou owner/number attendu",
       "ownerLoadFailed": "Impossible de charger les projets de {{owner}}.",
-      "organizationsLoadFailed": "Certaines organisations n'ont pas été chargées ({{failureCount}})."
+      "organizationsLoadFailed": "Certaines organisations n'ont pas été chargées ({{failureCount}}).",
+      "organizations": "Organisations",
+      "listFailed": "Impossible de lister les projets",
+      "detailsFailed": "Impossible de charger les détails",
+      "viewFailed": "Impossible de récupérer la vue du projet"
     },
     "error": {
       "notFoundState": "Impossible de trouver ce projet ou cette vue.",
@@ -19905,6 +20001,9 @@
       "tooLargeUnknownCount": "Cette vue contient trop d'éléments pour être affichée dans Orca. Restreignez le filtre de la vue sur GitHub.",
       "tooLarge": "Cette vue contient {{itemCount}} éléments, trop pour être affichée dans Orca. Restreignez le filtre de la vue sur GitHub.",
       "schemaDriftDetail": "Impossible de lire cette vue de projet : {{detail}}."
+    },
+    "columns": {
+      "type": "Tapez"
     }
   },
   "projectField": {
@@ -19991,6 +20090,27 @@
     "attachments": {
       "updateRuntime": "Mettez à jour le runtime distant pour modifier les liens de l'espace de travail",
       "updateRuntimeSafely": "Mettez à jour le runtime distant pour modifier les liens de l'espace de travail en toute sécurité"
+    },
+    "activity": {
+      "active": "Actif",
+      "working": "Fonctionnement",
+      "monitoring": "Surveillance des tâches en arrière-plan",
+      "failed": "Échec",
+      "interrupted": "Interrompu",
+      "unconfirmed": "Impossible de confirmer",
+      "done": "Terminé",
+      "inactive": "Inactif",
+      "permission": "Autorisation requise",
+      "unreadLabel": "{{status}} · Non lu"
+    },
+    "reviewStatus": {
+      "checksFailed": "{{review}} : vérifications en échec",
+      "checksPassing": "{{review}} : vérifications réussies",
+      "checksPending": "{{review}} : vérifications en attente",
+      "closed": "{{review}} : fermée",
+      "draft": "{{review}} : brouillon",
+      "merged": "{{review}} : fusionnée",
+      "open": "{{review}} : ouverte"
     }
   },
   "tabHoverCard": {
@@ -20133,7 +20253,9 @@
       "preparingAriaLabel": "Préparation de la mise à jour. Cliquez pour développer.",
       "browserSummary": "Le navigateur d'un serveur Orca en arrière-plan utilise toujours cette application.",
       "browserGuidance": "Terminez le processus ci-dessous, puis réessayez : son serveur continue de fonctionner sans navigateur. Si un autre ordinateur utilise ce Mac comme hôte SSH, la mise à jour d’Orca sur cet ordinateur permet au navigateur de se mettre automatiquement en pause lors des mises à jour."
-    }
+    },
+    "wslMoveInstallHeld": "Un projet est en cours de déplacement vers son hôte WSL. Installez la mise à jour une fois le déplacement terminé.",
+    "wslMoveUndoInstallHeld": "Un projet est en train de revenir de son hôte WSL. Installez la mise à jour une fois l'opération terminée."
   },
   "onboarding": {
     "language": {
@@ -20487,6 +20609,341 @@
   "nativeChat": {
     "math": {
       "scrollDisplayEquation": "Faire défiler l'équation affichée"
+    }
+  },
+  "runtime": {
+    "health": {
+      "local": "Local",
+      "available": "Connecté",
+      "connecting": "Connexion",
+      "disconnected": "Déconnecté",
+      "error": "Demande votre attention",
+      "mixed": "Mixte",
+      "repair": "Nouvel appairage requis",
+      "update": "Mise à jour requise"
+    },
+    "compat": {
+      "compatible": "Le client et le serveur d’exécution sont compatibles.",
+      "clientTooOld": "Ce client Orca est trop ancien pour le serveur sélectionné. Mettez Orca à jour sur cette machine. Protocole du client : {{clientProtocol}} ; le serveur exige le protocole client {{requiredProtocol}}.",
+      "serverTooOld": "Le serveur Orca sélectionné est trop ancien pour ce client. Mettez Orca à jour sur le serveur. Protocole du serveur : {{serverProtocol}} ; le client exige le protocole serveur {{requiredProtocol}}."
+    }
+  },
+  "native": {
+    "about": {
+      "gpu": {
+        "unknownStatus": "Statut indisponible",
+        "enabled": "Activé",
+        "disabled": "Désactivé",
+        "unavailable": "Indisponible",
+        "safeMode": "Désactivée (mode graphique sécurisé)",
+        "software": "Rendu logiciel",
+        "unknown": "Inconnu ({{status}})",
+        "summary": "Accélération GPU : {{status}}"
+      }
+    },
+    "dialog": {
+      "importCookies": "Importer des cookies",
+      "spaceTitle": "Espace Orca bêta",
+      "dashboardTitle": "Tableau de bord des agents Orca",
+      "cookieFiles": "Fichiers de cookies",
+      "allFiles": "Tous les fichiers",
+      "importPetBundle": "Choisir un paquet .codex-pet",
+      "pickPet": "Choisir une mascotte",
+      "petImage": "Image de mascotte",
+      "importWarpTheme": "Importer un thème Warp",
+      "warpThemeYaml": "YAML de thème Warp",
+      "importWarpFolder": "Importer un dossier de thèmes Warp",
+      "images": "Images",
+      "repoIconImages": "Images d’icône du dépôt",
+      "audio": "Audio"
+    }
+  },
+  "taskProviders": {
+    "linear": {
+      "updateAccess": "Accès aux mises à jour",
+      "addAccess": "Ajouter l'accès Linear",
+      "fetchMore": "Charger plus",
+      "connectionFailed": "Échec de la connexion",
+      "listLabel": "Liste Linear",
+      "projectsLoadFailed": "Impossible de charger les projets.",
+      "projectNotFound": "Le projet est introuvable.",
+      "projectLoadFailed": "Impossible de charger le projet.",
+      "projectIssuesLoadFailed": "Impossible de charger les issues du projet.",
+      "viewsLoadFailed": "Impossible de charger les vues.",
+      "viewContentsLoadFailed": "Impossible de charger le contenu de la vue.",
+      "issuesLoadFailed": "Impossible de charger les issues Linear.",
+      "apiKeyHint": "Collez une clé API personnelle de l’espace de travail Linear à utiliser dans Orca. Si cet espace est déjà connecté, Orca remplace la clé enregistrée.",
+      "remoteKeyStorage": "Cette clé est stockée par l’environnement d’exécution distant actif.",
+      "localKeyStorage": "Les clés de l’environnement d’exécution local sont stockées sur cet appareil avec le stockage chiffré d’Electron lorsqu’il est disponible.",
+      "commentsLoadFailed": "Impossible de charger les commentaires.",
+      "updateWorkspaceAccess": "Mettre à jour l’accès Linear pour {{workspace}}",
+      "workspaceApiKeyHint": "Collez une clé API personnelle pour {{workspace}}. Si cet espace est déjà connecté, Orca remplace la clé enregistrée.",
+      "connect": "Se connecter",
+      "descriptionUpdateFailed": "Échec de la mise à jour de la description",
+      "titleUpdateFailed": "Échec de la mise à jour du titre",
+      "truncated": {
+        "issues_one": "Affichage de {{count}} issue en tête de liste. Faites une recherche ou ouvrez Linear pour consulter la liste complète.",
+        "issues_other": "Affichage des {{count}} premières issues. Faites une recherche ou ouvrez Linear pour consulter la liste complète.",
+        "projectIssues_one": "Affichage de {{count}} issue du projet en tête de liste. Faites une recherche ou ouvrez Linear pour consulter la liste complète.",
+        "projectIssues_other": "Affichage des {{count}} premières issues du projet. Faites une recherche ou ouvrez Linear pour consulter la liste complète.",
+        "projects_one": "Affichage de {{count}} projet en tête de liste. Faites une recherche ou ouvrez Linear pour consulter la liste complète.",
+        "projects_other": "Affichage des {{count}} premiers projets. Faites une recherche ou ouvrez Linear pour consulter la liste complète.",
+        "viewIssues_one": "Affichage de {{count}} issue de la vue en tête de liste. Faites une recherche ou ouvrez Linear pour consulter la liste complète.",
+        "viewIssues_other": "Affichage des {{count}} premières issues de la vue. Faites une recherche ou ouvrez Linear pour consulter la liste complète.",
+        "views_one": "Affichage de {{count}} vue en tête de liste. Faites une recherche ou ouvrez Linear pour consulter la liste complète.",
+        "views_other": "Affichage des {{count}} premières vues. Faites une recherche ou ouvrez Linear pour consulter la liste complète."
+      }
+    },
+    "jira": {
+      "connectionFailed": "Échec de la connexion",
+      "remoteTokenStorage": "Votre jeton est envoyé à l’environnement d’exécution distant sélectionné et y est stocké avec le chiffrement pris en charge.",
+      "localTokenStorage": "Votre jeton est stocké localement et chiffré si le stockage de l’environnement d’exécution local le permet."
+    },
+    "errors": {
+      "jira": {
+        "createFailed": "Échec de la création de l'issue.",
+        "commentFailed": "Échec de l'ajout du commentaire.",
+        "notConnected": "Non connecté à Jira.",
+        "titleRequired": "Le titre est requis.",
+        "labelsConflict": "Fournissez labels ou labelOperations, mais pas les deux.",
+        "updateFailed": "Impossible de mettre à jour l’issue.",
+        "credentialsRequired": "L’URL du site, l’adresse e-mail et le jeton API sont requis.",
+        "projectRequired": "Le projet est requis.",
+        "issueTypeRequired": "Le type d’issue est requis.",
+        "issueKeyRequired": "La clé de l’issue est requise.",
+        "updatesRequired": "L’objet de mise à jour est requis.",
+        "commentBodyRequired": "Le contenu du commentaire est requis.",
+        "invalidSiteUrl": "Saisissez une URL de site Jira valide.",
+        "passwordRequired": "Le mot de passe est requis.",
+        "personalTokenRequired": "Le jeton d’accès personnel est requis.",
+        "apiTokenRequired": "Le jeton API est requis.",
+        "connectionFailed": "Échec de la connexion.",
+        "invalidSiteIdentity": "Saisissez une URL de site Jira HTTP ou HTTPS sans identifiants.",
+        "missingProjectIdentity": "Jira a renvoyé un projet sans ID ni clé.",
+        "invalidIssuePage": "Jira a renvoyé une page d’issues invalide.",
+        "incompleteIssuePage": "Jira a renvoyé une page d’issues incomplète.",
+        "repeatedIssueToken": "Jira a renvoyé un jeton de page d’issues invalide ou répété.",
+        "issueSearchLimit": "La recherche d’issues Jira a dépassé la limite de pages. Sélectionnez plutôt un projet avec JQL.",
+        "invalidProjectPage": "Jira a renvoyé une page de projets invalide.",
+        "incompleteProjectPage": "Jira a renvoyé une page de projets incomplète.",
+        "projectListLimit": "La liste des projets Jira a dépassé la limite de pages. Sélectionnez plutôt un projet avec JQL.",
+        "invalidCloudId": "Le site n’a pas fourni d’ID Atlassian Cloud valide."
+      },
+      "linear": {
+        "notConnected": "Non connecté à Linear",
+        "createFailed": "Échec de la création dans Linear",
+        "createdButUnavailable": "L’issue a été créée, mais n’a pas pu être récupérée",
+        "updateFailed": "Échec de la mise à jour dans Linear",
+        "commentFailed": "Impossible de créer le commentaire",
+        "projectCreateFailed": "Échec de la création du projet Linear",
+        "noApiKey": "Aucune clé API n’est enregistrée.",
+        "workspaceAuthExpired": "L’authentification Linear a expiré pour cet espace de travail.",
+        "projectNameRequired": "Le nom du projet est requis",
+        "projectIdRequired": "L’ID du projet est requis",
+        "projectNotFound": "Le projet est introuvable",
+        "viewIdRequired": "L’ID de la vue personnalisée est requis",
+        "viewHasNoIssues": "La vue personnalisée ne contient pas d’issues",
+        "viewHasNoProjects": "La vue personnalisée ne contient pas de projets"
+      }
+    }
+  },
+  "workspaceOptions": {
+    "activeFilterCount_one": "{{count}} filtre",
+    "activeFilterCount_other": "{{count}} filtres"
+  },
+  "editorConflicts": {
+    "kind": {
+      "addedByUs": "Ajouté chez nous",
+      "bothAdded": "Ajouté des deux côtés",
+      "deletedByUs": "Supprimé chez nous",
+      "addedByThem": "Ajouté chez eux",
+      "bothDeleted": "Supprimé des deux côtés",
+      "bothModified": "Modifié des deux côtés",
+      "deletedByThem": "Supprimé chez eux"
+    },
+    "resolvedBanner": "Conflit résolu localement · {{kind}}",
+    "hint": {
+      "addedByUs": "Vérifiez s'il faut conserver le fichier ajouté",
+      "bothModified": "Résolvez les conflits signalés par les marqueurs",
+      "addedByThem": "Examinez le fichier ajouté avant de le conserver",
+      "bothDeleted": "Résolvez le conflit dans Git ou restaurez l'une des versions avant de modifier le fichier",
+      "deletedByThem": "Décidez s'il faut conserver le fichier ou accepter sa suppression",
+      "deletedByUs": "Décidez s'il faut restaurer le fichier",
+      "bothAdded": "Choisissez la version à conserver ou combinez les deux"
+    },
+    "renamedFrom": "Ancien nom : {{path}}",
+    "snapshotCapturedAt": "Instantané capturé à {{time}}.",
+    "unresolvedBanner": "Conflit non résolu · {{kind}}"
+  },
+  "stats": {
+    "usageBreakdown": {
+      "turns_one": "{{count}} tour",
+      "events_one": "{{count}} événement",
+      "sessions_one": "{{count}} session",
+      "events_other": "{{count}} événements",
+      "sessions_other": "{{count}} sessions",
+      "turns_other": "{{count}} tours"
+    }
+  },
+  "github": {
+    "viewed": {
+      "markFile": "Marquer {{path}} comme consulté",
+      "unmarkFile": "Ne plus marquer {{path}} comme consulté"
+    }
+  },
+  "wslMove": {
+    "entry": {
+      "hostRow": "Déplacer des projets depuis cette distro…",
+      "projectMenu": "Déplacer vers l'hôte {{distro}}…"
+    },
+    "blockers": {
+      "title": "Avant que ces projets puissent être déplacés",
+      "inProjects": "Dans {{names}}",
+      "skipOne": "Exclure {{name}} de ce déplacement",
+      "skipMany": "Exclure ces {{n}} projets de ce déplacement"
+    },
+    "title": "Déplacer des projets vers l'hôte {{distro}}",
+    "loading": "Vérification des projets dans {{distro}}…",
+    "runningTitle": "Déplacement vers l'hôte {{distro}}",
+    "preview": {
+      "counts": "Projets : {{projects}} · Espaces de travail : {{workspaces}} · Terminaux : {{terminals}} · Chats : {{chats}}",
+      "whatHappens": "Vos fichiers restent où ils sont. Les terminaux redémarrent dans le même dossier ; leur sortie, l'historique du shell et les conversations des agents sont conservés.",
+      "projects": "Projets dans {{distro}}",
+      "folderBadge": "Dossier",
+      "notMoving": "Non déplacé",
+      "checking": "Vérification des projets sélectionnés…",
+      "checkAgain": "Revérifier",
+      "moveOne": "Déplacer 1 projet",
+      "moveMany": "Déplacer {{n}} projets",
+      "heldByHost": "Déjà sur l'hôte {{distro}}.",
+      "changed": "Déplacé auparavant, puis modifié ici par une version plus ancienne d'Orca. Il n'est pas déplacé à nouveau.",
+      "chatsStay": "Les chats existants restent sur cet ordinateur. Les nouveaux chats de ce projet démarrent sur l'hôte WSL.",
+      "browserLoginsConflict": "Les connexions du navigateur ne seront pas transférées, car le profil de navigateur de l'hôte est déjà utilisé. Reconnectez-vous dans les onglets de navigateur de l'hôte après le déplacement.",
+      "browserLoginsNotCarried": "Les connexions du navigateur ne seront pas transférées vers cet hôte. Reconnectez-vous dans ses onglets de navigateur après le déplacement."
+    },
+    "cancel": "Annuler",
+    "progress": {
+      "bytes": "{{sent}} sur {{total}}",
+      "tooLate": "Trop tard pour annuler : l'hôte est déjà en train de basculer. Gardez Orca ouvert jusqu'à la fin.",
+      "switching": "La bascule ne peut pas être annulée. Gardez Orca ouvert jusqu'à la fin.",
+      "readOnly": "Ces projets sont en lecture seule pendant leur déplacement. Vous pouvez annuler jusqu'au début de la bascule.",
+      "cancelUntilSwitch": "Vous pouvez annuler jusqu'au début de la bascule.",
+      "closeKeepsGoing": "Fermer cette boîte de dialogue n'arrête pas le déplacement ; elle se rouvre à la fin du déplacement.",
+      "cancelling": "Annulation…",
+      "cancel": "Annuler le déplacement"
+    },
+    "result": {
+      "movedTitle": "Projets déplacés vers l'hôte {{distro}}",
+      "resetTitle": "Rien n'a été déplacé",
+      "waitingTitle": "En attente de l'hôte {{distro}}",
+      "earlierMoveTitle": "Un déplacement précédent s'est terminé d'abord",
+      "refusedTitle": "Projets non déplacés",
+      "reloadCheckpointRefused": "Orca n'a pas pu sauvegarder les fichiers non enregistrés : la fenêtre ne s'est donc pas rechargée. Fermez cette boîte de dialogue, enregistrez ou fermez ces fichiers, puis utilisez Recharger maintenant dans la notification qui reste ouverte.",
+      "reloadVetoed": "Quelque chose a empêché le rechargement de la fenêtre. Fermez cette boîte de dialogue, enregistrez votre travail, puis utilisez Recharger maintenant dans la notification qui reste ouverte.",
+      "reloadFailed": "La fenêtre ne s'est pas rechargée. Réessayez.",
+      "moved": "Rechargez cette fenêtre pour voir les projets sous l'hôte {{distro}}. Orca sauvegarde les fichiers non enregistrés avant de recharger.",
+      "automationsPendingOne": "Une automatisation est désactivée sur l'hôte pour l'instant. Orca continue de demander à l'hôte de la réactiver.",
+      "automationsPendingMany": "{{n}} automatisations sont désactivées sur l'hôte pour l'instant. Orca continue de demander à l'hôte de les réactiver.",
+      "undoHint": "Vous avez changé d'avis ? Après le rechargement, la barre latérale affiche ces projets comme « Déplacé vers l'hôte {{distro}} ». Choisissez-y « Utiliser à nouveau sur cet ordinateur » pour les ramener tels qu'ils étaient avant le déplacement.",
+      "reset": "Le déplacement s'est arrêté et tout a été remis en place. Les projets fonctionnent sur cet ordinateur comme avant ; les terminaux en pause redémarrent quand vous les ouvrez.",
+      "resetReason": "Raison de l'arrêt : {{detail}}",
+      "waiting": "Le déplacement a peut-être atteint l'hôte {{distro}}, mais l'hôte ne répond pas. Ces projets restent en lecture seule ici jusqu'à ce qu'il réponde. Connectez l'hôte dans les Paramètres, puis rouvrez cette boîte de dialogue et lancez un déplacement : Orca termine ou annule d'abord celui-ci.",
+      "reloading": "Rechargement…",
+      "reload": "Recharger maintenant",
+      "close": "Fermer",
+      "review": "Retour aux projets",
+      "browserLoginsHostUnknown": "Les connexions du navigateur n'ont pas été copiées, car Orca n'a pas pu identifier le profil de navigateur de l'hôte. Reconnectez-vous dans les onglets de navigateur de l'hôte.",
+      "browserLoginsConflict": "Les connexions du navigateur n'ont pas été copiées, car le profil de navigateur de l'hôte est déjà utilisé. Reconnectez-vous dans les onglets de navigateur de l'hôte.",
+      "browserLoginsNotCopied": "Les connexions du navigateur n'ont pas été copiées vers l'hôte. Reconnectez-vous dans les onglets de navigateur de l'hôte."
+    },
+    "runtime": {
+      "label": "Runtime du projet",
+      "description": "Ce projet s'exécute dans {{distro}} via cet ordinateur. Déplacez-le vers l'hôte {{distro}} pour l'y exécuter.",
+      "move": "Déplacer le projet"
+    },
+    "unfinished": {
+      "one": "Une automatisation déplacée vers l'hôte {{distro}} est toujours désactivée. Orca continue de demander à l'hôte de la réactiver.",
+      "many": "{{n}} automatisations déplacées vers l'hôte {{distro}} sont toujours désactivées. Orca continue de demander à l'hôte de les réactiver."
+    },
+    "refusal": {
+      "previewFailed": "Orca n'a pas pu vérifier ces projets. Réessayez.",
+      "startFailed": "Orca a perdu le contact avec le déplacement. Rouvrez cette boîte de dialogue pour voir où il en est.",
+      "unavailable": "Le déplacement de projets vers un hôte WSL n'est pas disponible dans cette fenêtre.",
+      "alreadyRunning": "Un déplacement vers {{distro}} est déjà en cours. Attendez qu'il se termine, puis réessayez.",
+      "alreadyInFlightPreview": "Un déplacement de {{distro}} est encore en cours de finalisation. Lancer ce déplacement le termine ou l'annule d'abord, là où Orca le peut.",
+      "alreadyInFlight": "Un déplacement de {{distro}} est encore en cours de finalisation : celui-ci n'a donc pas démarré. Gardez l'hôte {{distro}} connecté et réessayez plus tard.",
+      "nothingNew": "Ces projets sont déjà sur l'hôte {{distro}}.",
+      "destinationChanged": "Des projets de {{distro}} ont déjà été déplacés vers un autre hôte WSL. Connectez cet hôte pour en déplacer d'autres.",
+      "hostUnavailable": "L'hôte {{distro}} n'est pas connecté. Connectez-le dans les Paramètres, puis réessayez.",
+      "hostUpdateRequired": "L'hôte {{distro}} exécute une version plus ancienne d'Orca. Mettez-le à jour dans les Paramètres, puis réessayez.",
+      "terminalsBlocked": "Des terminaux, agents ou automatisations de ces projets sont occupés. Rien n'a été déplacé.",
+      "exportIncomplete": "Rien n'a été déplacé, car certaines données enregistrées de ces projets ne peuvent pas encore l'être :",
+      "exportIncompletePreview": "Certaines données enregistrées de ces projets ne peuvent pas encore être déplacées :",
+      "tooLarge": "Ces projets contiennent trop de données enregistrées pour être déplacés en une seule fois. Déplacez moins de projets à la fois.",
+      "pauseFailed": "Orca n'a pas pu mettre en pause les terminaux de ces projets : rien n'a donc été déplacé. Les terminaux en pause redémarrent quand vous les ouvrez. Réessayez.",
+      "scopeChanged": "Un projet a changé pendant la préparation du déplacement : rien n'a donc été déplacé. Vérifiez les projets et réessayez.",
+      "cancelled": "Déplacement annulé. Rien n'a été déplacé.",
+      "finishedEarlierMove": "Orca a d'abord terminé un déplacement précédent vers {{distro}}. Rechargez la fenêtre, puis relancez ce déplacement."
+    },
+    "step": {
+      "preparing": "Préparation",
+      "pausingTerminals": "Mise en pause des terminaux",
+      "copying": "Copie",
+      "switching": "Bascule",
+      "finishing": "Finalisation",
+      "done": "Terminé"
+    },
+    "blocker": {
+      "agentWorkingOne": "Un agent travaille ou attend une réponse",
+      "agentWorkingMany": "{{n}} agents travaillent ou attendent une réponse",
+      "processRunningOne": "Un terminal exécute un programme",
+      "processRunningMany": "{{n}} terminaux exécutent un programme",
+      "agentNotResumableOne": "Un agent ne pourra pas reprendre après le déplacement",
+      "agentNotResumableMany": "{{n}} agents ne pourront pas reprendre après le déplacement",
+      "unverifiableOne": "Orca ne peut pas vérifier un terminal pour le moment",
+      "unverifiableMany": "Orca ne peut pas vérifier {{n}} terminaux pour le moment",
+      "automationRunningOne": "Une exécution d'automatisation est en cours",
+      "automationRunningMany": "{{n}} exécutions d'automatisation sont en cours",
+      "dispatchRunningOne": "Une tâche d'agent est en cours",
+      "dispatchRunningMany": "{{n}} tâches d'agent sont en cours",
+      "scrollbackTooLargeOne": "Un terminal a un historique de sortie trop volumineux pour être déplacé",
+      "scrollbackTooLargeMany": "{{n}} terminaux ont un historique de sortie trop volumineux pour être déplacés"
+    },
+    "blockerHint": {
+      "agentWorking": "Laissez-le terminer, ou arrêtez-le dans son terminal, puis revérifiez.",
+      "processRunning": "Arrêtez le programme (par exemple un serveur de développement ou un éditeur), puis revérifiez.",
+      "agentNotResumable": "Quittez l'agent dans son terminal, puis revérifiez.",
+      "unverifiable": "Patientez un instant, puis revérifiez. Rien n'est arrêté pour permettre le déplacement.",
+      "wait": "Attendez la fin, puis revérifiez.",
+      "scrollbackTooLarge": "Effacez la sortie de ces terminaux, puis revérifiez."
+    },
+    "scopeRefused": {
+      "windowsDrive": "Son dossier se trouve sur un lecteur Windows : il reste donc sur cet ordinateur.",
+      "mixedLocations": "Certains de ses dossiers se trouvent hors de cette distro : il reste donc sur cet ordinateur.",
+      "notLocal": "Il s'exécute déjà sur un autre hôte.",
+      "other": "Il ne peut pas être déplacé."
+    },
+    "reloadToast": {
+      "title": "Rechargez pour terminer le déplacement"
+    },
+    "orchestrator": {
+      "showTerminal": "Afficher le terminal",
+      "moveAgain": "Relancer le déplacement",
+      "checkAgain": "Revérifier",
+      "deferred": "Finalisation de votre déplacement vers l'hôte {{distro}} : certains terminaux sont encore occupés.",
+      "stuck": "Un déplacement précédent vers l'hôte {{distro}} n'est pas encore entièrement finalisé.",
+      "declined": "Le déplacement est en pause, car vous avez ramené ces projets sur cet ordinateur.",
+      "doneToast": "Projets déplacés vers l'hôte {{distro}}",
+      "terminalGone": "Ce terminal n'est plus ouvert dans cette fenêtre. Revérifiez pour actualiser.",
+      "blocker": "{{title}}. {{hint}}",
+      "paused": "Le déplacement des projets vers l'hôte {{distro}} est en pause : {{reason}}.",
+      "pausedReason": {
+        "exportIncomplete": "certaines données enregistrées ne peuvent pas encore être transférées",
+        "manifestTooLarge": "il y a plus de données enregistrées qu'un seul déplacement ne peut en transférer",
+        "hostUpdate": "l'hôte doit d'abord être mis à jour",
+        "attemptsExhausted": "il n'a pas abouti après plusieurs tentatives"
+      },
+      "finishPending": "Un déplacement précédent vers l'hôte {{distro}} est terminé là-bas. Orca le finalise ici au redémarrage, ou dès maintenant avec Revérifier."
     }
   }
 }

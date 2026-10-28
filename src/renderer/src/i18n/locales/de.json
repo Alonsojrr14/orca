@@ -68,7 +68,10 @@
       "useHereHostAutomations": "Orca konnte die Automatisierungen dieses Projekts auf dem {{distro}}-Host nicht deaktivieren, daher könnten sie doppelt ausgeführt werden. Den Host in den Einstellungen verbinden und dann erneut versuchen.",
       "useHereUnsavedTitle": "Zuerst Dateien speichern",
       "useHereUnsavedDescription": "Beim Zurückholen von {{name}} wird dieses Fenster neu geladen. Zuerst diese Dateien speichern oder schließen: {{files}}",
-      "automationRunsOnHost": "Wird auf dem {{distro}}-Host ausgeführt"
+      "automationRunsOnHost": "Wird auf dem {{distro}}-Host ausgeführt",
+      "quitDuringMoveTitle": "Beenden, während ein Projekt verschoben wird?",
+      "quitDuringMoveDescription": "Ein Projekt wird auf seinen WSL-Host verschoben. Trotzdem beenden? Das Verschieben wird beim nächsten Start rückgängig gemacht.",
+      "quitDuringMoveConfirm": "Trotzdem beenden"
     },
     "startupWorktreeRefresh": {
       "loading": "Arbeitsbereiche werden gesucht…",
@@ -258,6 +261,15 @@
       "title": "Verlauf",
       "today": "Heute",
       "yesterday": "Gestern"
+    },
+    "viewport": {
+      "desktop": "Desktop — 1920 × 1080",
+      "laptop": "Laptop — 1024 × 768",
+      "laptop-l": "Laptop L — 1440 × 900",
+      "mobile-l": "Mobil L — 425 × 812",
+      "mobile-m": "Mobil M — 375 × 667",
+      "mobile-s": "Mobil S — 320 × 568",
+      "tablet": "Tablet — 768 × 1024"
     }
   },
   "editor": {
@@ -621,7 +633,8 @@
       "permissionOverrideMore": "und {{count}} weitere",
       "permissionOverrideMore_one": "und {{count}} weiterer",
       "permissionOverrideMore_other": "und {{count}} weitere",
-      "permissionOverridesUse": "{{mode}} verwenden"
+      "permissionOverridesUse": "{{mode}} verwenden",
+      "approveForMe": "für mich genehmigen"
     },
     "followSymlinkedDirectoriesKeywords": {
       "symlink": "Symbolischer Link",
@@ -665,6 +678,34 @@
     "openInApp": {
       "preset": {
         "devinDesktop": "Devin Desktop"
+      }
+    },
+    "mcp": {
+      "claudeWorkspace": "Claude-Arbeitsbereich",
+      "httpServer": "HTTP-Server",
+      "inspectFailed": "{{directory}} konnte nicht geprüft werden.",
+      "invalidJson": "Ungültiges JSON",
+      "invalidServer": "Ungültiger Server",
+      "noServers": "Keine Server",
+      "notFound": "Nicht gefunden",
+      "serverCount_one": "{{count}} Server",
+      "serverCount_other": "{{count}} Server",
+      "stdioServer": "stdio-Server",
+      "unreadable": "Nicht lesbar",
+      "workspace": "Arbeitsbereich"
+    },
+    "shortcuts": {
+      "parseFailed": "Tastenkürzel konnte nicht ausgewertet werden."
+    },
+    "ssh": {
+      "status": {
+        "auth-failed": "Authentifizierung fehlgeschlagen",
+        "connected": "Verbunden",
+        "connecting": "Verbindung wird hergestellt…",
+        "deploying-relay": "Relay wird bereitgestellt…",
+        "disconnected": "Getrennt",
+        "reconnecting": "Verbindung wird wiederhergestellt…",
+        "reconnection-failed": "Wiederherstellen der Verbindung fehlgeschlagen"
       }
     }
   },
@@ -1856,7 +1897,6 @@
         "d1fa2cf888": "Ohne PR-Head-SHA ist kein Kommentar möglich.",
         "829674460a": "Der Diff ist nicht verfügbar, da die Commit-SHAs des PRs fehlen.",
         "af924014f8": "Angesehen",
-        "2d89a38d9d": "Markierung „Angesehen“ für {{value1}} ändern ({{value0}})",
         "70e84e3d0b": "Keine passenden Prüfer.",
         "1ffce94a8b": "Alle anderen",
         "c2b21818e1": "Vorschläge",
@@ -2073,7 +2113,6 @@
       "LinearIssueTextEditor": {
         "947ba2d6f4": "zum Speichern",
         "04d73b72dc": "Issue-Titel",
-        "e8ff595db3": "{{value0}} konnte nicht aktualisiert werden",
         "1e08a1ec80": "Titel ist erforderlich"
       },
       "LinearIssueWorkspace": {
@@ -2396,10 +2435,6 @@
         "9e97f08d0f": "Nach einer Datei zum Öffnen suchen",
         "ec31e058f7": "Zu Datei wechseln",
         "73b44e7bde": "Installationsbefehl kopieren",
-        "1cf8561ab4": "auf dem Remote-Host, um eine schnelle Dateiauflistung unter Berücksichtigung von gitignore zu ermöglichen:",
-        "5d80dc39bb": "ripgrep",
-        "2ca749c15d": "Installiere",
-        "4725b0e931": "Schnellöffnen-Suche zu umfangreich (",
         "b227d88520": "{{value0}} Dateien gefunden",
         "995be8ea22": "Kopieren",
         "cf144856dc": "Kopiert"
@@ -2425,8 +2460,6 @@
         "continuedOne": "1 Chat fortgesetzt",
         "continuedMany": "{{value0}} Chats fortgesetzt",
         "selectAgent": "{{value0}}-Chat „{{value1}}“ in {{value2}} fortsetzen",
-        "resumeSelected": "{{value0}} Chats fortsetzen",
-        "resumeSelectedOne": "1 Chat fortsetzen",
         "dismissAll": "Alle verwerfen",
         "notContinuedOne": "1 Chat konnte nicht fortgesetzt werden",
         "notContinuedMany": "{{value0}} Chats konnten nicht fortgesetzt werden",
@@ -2455,7 +2488,9 @@
         "selectMachine": "Alle Chats auf {{value0}} auswählen",
         "sshHost": "SSH",
         "done": "Abschließen",
-        "resultListLabel": "Chats dieses Fortsetzungsvorgangs"
+        "resultListLabel": "Chats dieses Fortsetzungsvorgangs",
+        "resumeChats_one": "{{count}} Chat fortsetzen",
+        "resumeChats_other": "{{count}} Chats fortsetzen"
       },
       "StarNagCard": {
         "30c36231c1": "Orca ist Open Source. Wenn es heute hilfreich war, hilft ein Stern auf GitHub anderen Entwicklern, Orca zu finden.",
@@ -2520,9 +2555,6 @@
         "7f3f7b4c18": "Beschreibung (optional, Markdown)",
         "9f2b4c03a6": "Erstellen in",
         "d3d0998b7d": "Neues GitHub-Issue",
-        "d1e243795c": "Issues",
-        "be8cf68d9f": "Issues der Ansicht",
-        "67662ade50": "Projekt-Issues",
         "6244a02f46": "In Linear öffnen",
         "606a85c774": "Offen",
         "5e8061b088": "Arbeitsbereich aus {{value0}} {{value1}} starten",
@@ -2542,11 +2574,9 @@
         "af377b13b1": "{{value0}}-Ansicht",
         "d47248df4d": "Linear-Ansichtsmodus",
         "f397d513e3": "Zurück",
-        "b39fe6511d": "Projekte",
         "8675cd6188": "Linear",
         "733b8f2421": "Linear / Ansichten",
         "bc06ed0fb0": "Zurück zu den Ansichten",
-        "3cb855080f": "Ansichten",
         "b4e10f096e": "Eigentümer",
         "a04fe7ba73": "Sichtbarkeit",
         "0aa8525950": "Modell",
@@ -3217,8 +3247,6 @@
               "7616c986c6": "{{value0}} Issues öffnen",
               "openInLinear": "{{value0}} in Linear öffnen",
               "93e1f6bfca": "Wird geladen",
-              "98730088a6": ". Für die vollständige Liste suchen oder Linear öffnen.",
-              "06b887d622": "Angezeigt werden die ersten",
               "linearLoginUnreadable": "Die gespeicherten Linear-Anmeldedaten konnten nicht gelesen werden. Linear in den Einstellungen erneut verbinden.",
               "f2cc1e0ff6": "Linear / Projekte",
               "906b5e4cb8": "Linear / Projekte / {{value0}}",
@@ -4744,10 +4772,7 @@
         },
         "UsageBreakdownSection": {
           "7765a4c3e1": "k. A.",
-          "247c93ca92": "• abgeleitete Preise",
-          "32176e1d44": "Dialogschritte",
-          "79a69522a5": "Ereignisse",
-          "02a046792e": "Sitzungen •"
+          "247c93ca92": "• abgeleitete Preise"
         },
         "GrokUsagePane": {
           "g8h9i0j1k2": "Grok-Nutzung",
@@ -5674,7 +5699,9 @@
         },
         "sidebarHostOptions": {
           "3e102f111c": "Alle Hosts",
-          "visibleHostsCount": "{{value0}} Hosts"
+          "hosts": "Hosts",
+          "visibleHosts_one": "{{count}} Host",
+          "visibleHosts_other": "{{count}} Hosts"
         },
         "SidebarWorkspaceOptionsMenu": {
           "hosts": "Hosts",
@@ -6541,7 +6568,7 @@
           "running": "Läuft",
           "stopped": "Gestoppt",
           "title": "WSL-Distribution hinzufügen",
-          "description": "Orca führt seinen Server innerhalb der Distribution aus, sodass git, Dateien und Terminals nativ unter Linux laufen. Für neue Projekte verwenden; über \\\\wsl.localhost geöffnete Projekte funktionieren wie bisher.",
+          "description": "Orca führt seinen Server innerhalb der Distribution aus, sodass git, Dateien und Terminals nativ unter Linux laufen. Projekte in dieser Distribution, die über \\\\wsl.localhost geöffnet wurden, werden automatisch auf diesen Host verschoben, sobald ihre Terminals inaktiv sind; Projekte auf einem Windows-Laufwerk (/mnt/…) bleiben auf diesem Computer. Ein verschobenes Projekt lässt sich über die Seitenleiste auf diesen Computer zurückholen.",
           "distro": "Distribution",
           "loading": "WSL-Distributionen werden gesucht…",
           "placeholder": "Distribution auswählen",
@@ -13292,10 +13319,10 @@
                 "dialog": {
                   "3bc61dc989": "Abbrechen",
                   "15efa778e3": "Verwerfen",
-                  "42f89dd030": "Dateien",
-                  "e7611dca35": "Datei",
                   "0d2d88cba5": "Dies kann nicht rückgängig gemacht werden.",
-                  "1551c14668": "Änderungen verwerfen?"
+                  "1551c14668": "Änderungen verwerfen?",
+                  "fileCount_one": "{{count}} Datei",
+                  "fileCount_other": "{{count}} Dateien"
                 }
               },
               "dropdown": {
@@ -13522,16 +13549,21 @@
             "unresolved": "Der zuständige Host für diesen Arbeitsbereich konnte nicht ermittelt werden. Verbindung prüfen und erneut versuchen."
           },
           "useFileDeletion": {
-            "72691dfebc": "Aktion „{{value0}}“ für „{{value1}}“ fehlgeschlagen.",
             "d979a4fbb5": "„{{value0}}“ dauerhaft löschen?",
             "92276aceb7": "Löschen",
             "7fb9435c86": "Das Verzeichnis und sein Inhalt werden auf dem Remote-Host dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
             "23e98f192f": "Die Datei wird auf dem Remote-Host dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
             "8b8ee9d22f": "Der zuständige Host für diese Datei konnte nicht ermittelt werden. Verbindung des Arbeitsbereichs prüfen und erneut versuchen.",
-            "af1270b90d": "{{count}} Elemente dauerhaft löschen?",
             "dd029aa5cd": "Die ausgewählten Elemente und sämtliche Verzeichnisinhalte werden auf dem Remote-Host dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
-            "77fdc36183": "{{count}} Elemente löschen?",
-            "fca915a67a": "Entfernte Elemente werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden. Lokale Elemente werden in den {{value0}} verschoben."
+            "deleteFailed": "„{{name}}“ konnte nicht gelöscht werden.",
+            "deleteItems_one": "{{count}} Element löschen?",
+            "deleteItems_other": "{{count}} Elemente löschen?",
+            "mixedRecycleBin": "Entfernte Elemente werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden. Lokale Elemente werden in den Papierkorb verschoben.",
+            "mixedTrash": "Entfernte Elemente werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden. Lokale Elemente werden in den Papierkorb verschoben.",
+            "permanentlyDeleteItems_one": "{{count}} Element dauerhaft löschen?",
+            "permanentlyDeleteItems_other": "{{count}} Elemente dauerhaft löschen?",
+            "recycleBinFailed": "„{{name}}“ konnte nicht in den Papierkorb verschoben werden.",
+            "trashFailed": "„{{name}}“ konnte nicht in den Papierkorb verschoben werden."
           },
           "useFileExplorerHandlers": {
             "32cd9fd991": "Ziel des symbolischen Links kann nicht geöffnet werden",
@@ -14506,13 +14538,13 @@
             "9ee54037a4": "Benutzerdefinierter Befehl",
             "4b2fc4b80c": "Denkaufwand",
             "be8917699e": "Modell",
-            "4d9b6d84df": "nicht unterstützt. Claude, Codex oder Benutzerdefiniert auswählen.",
             "560d4feb00": "Benutzerdefiniert",
             "29d119fe95": "Agent",
             "f9382b48a1": "KI-Autor aktivieren",
             "1c0cb4fabb": "KI-Autor",
             "bd14e9c42a": "Nicht konfiguriert",
-            "1f9468c5c9": "{{value0}} nicht unterstützt"
+            "1f9468c5c9": "{{value0}} nicht unterstützt",
+            "unsupportedAgent": "{{agent}} wird nicht unterstützt. Claude, Codex oder „Benutzerdefiniert“ auswählen."
           },
           "BrowserAnimatedVisual": {
             "46df009982": "Kostenlose Testphase starten",
@@ -15053,17 +15085,14 @@
         "ConflictComponents": {
           "f338288514": "Konfliktinhalte werden geladen…",
           "90d576adb2": "Aktualisieren",
-          "a1ce36f77d": "Momentaufnahme vom",
           "c8ca989aea": "Dateibaum anzeigen",
           "58ad5ad431": "Schließen",
           "28e7db4a90": "Quellcodeverwaltung",
           "31931dec46": "Diese Review-Momentaufnahme enthält keine aktuell ungelösten Konflikte mehr.",
           "992145ff5a": "Alle Konflikte gelöst",
-          "d5edd81755": "Umbenannt von",
           "6e459867ad": "Sitzungslokaler Zustand zur nahtlosen Fortsetzung. Git meldet diese Datei nicht mehr als ungemergt.",
           "9c2901ef8a": "Nächster Konflikt",
           "41d9af2e7a": "Vorheriger Konflikt",
-          "55d61a0ccd": "Konflikt ·",
           "da539359b6": "Für diesen Konflikt steht keine bearbeitbare Worktree-Datei zur Verfügung.",
           "unresolvedConflicts_one": "{{count}} ungelöster Konflikt",
           "unresolvedConflicts_other": "{{count}} ungelöste Konflikte"
@@ -18594,6 +18623,15 @@
         "settings": "Einstellungen im Terminal öffnen",
         "extensions": "Erweiterungs-Dashboard im Terminal öffnen",
         "hotkeys": "Tastenkürzel im Terminal anzeigen"
+      },
+      "modelDescriptions": {
+        "fable": "Am leistungsfähigsten für die schwierigsten und am längsten dauernden Aufgaben",
+        "grok_4_5": "Ein früheres Spitzenmodell von xAI",
+        "grok_4_6": "Das vorherige Spitzenmodell von xAI",
+        "grok_4_7": "Das neueste Spitzenmodell von xAI",
+        "haiku": "Schnellstes Modell für schnelle Antworten",
+        "opus": "Am besten für komplexe Aufgaben im Alltag",
+        "sonnet": "Effizient für Routineaufgaben"
       }
     },
     "tab": {
@@ -19258,7 +19296,9 @@
   },
   "quickOpen": {
     "moreMatchesAvailable": "Möglicherweise sind weitere Treffer verfügbar. Die Suche verfeinern, um die Ergebnisse einzugrenzen.",
-    "recentValidationFailed": "Zuletzt verwendete Dateien konnten nicht überprüft werden: {{error}}"
+    "recentValidationFailed": "Zuletzt verwendete Dateien konnten nicht überprüft werden: {{error}}",
+    "installRipgrepOnRemote": "<code>ripgrep</code> auf dem Remote-Host installieren, um Dateien schnell unter Beachtung der .gitignore-Regeln aufzulisten:",
+    "scanTooLarge": "Suchlauf für „Schnellöffnen“ zu umfangreich ({{reason}})."
   },
   "checksPanel": {
     "unlinked": {
@@ -19271,11 +19311,20 @@
     "actionSaveFailed": "Diese Aktion konnte nicht gespeichert werden. In den Einstellungen erneut speichern.",
     "discard": {
       "deleteUntrackedFileDescription": "Diese nicht versionierte Datei wird dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
-      "deleteUntrackedFilesDescription": "Diese {{count}} nicht versionierten Dateien werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
+      "deleteUntrackedFilesDescription_other": "Diese {{count}} nicht versionierten Dateien werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
       "restoreStagedVersionDescription": "Die zuletzt vorgemerkte Version wird wiederhergestellt und die Löschung verworfen. Dies kann nicht rückgängig gemacht werden.",
       "unstagedChangesDescription": "Die nicht vorgemerkten Änderungen an dieser Datei werden zurückgesetzt. Dies kann nicht rückgängig gemacht werden.",
       "unstagedSelectionIncludingUntrackedDescription": "Nicht vorgemerkte Änderungen werden zurückgesetzt und alle nicht versionierten Dateien in dieser Auswahl dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
-      "unstagedFilesIncludingUntrackedDescription": "Nicht vorgemerkte Änderungen werden zurückgesetzt und alle nicht versionierten Dateien unter diesen {{count}} Dateien dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden."
+      "unstagedFilesIncludingUntrackedDescription_other": "Nicht vorgemerkte Änderungen werden zurückgesetzt und alle nicht versionierten Dateien unter diesen {{count}} Dateien dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
+      "delete": "Löschen",
+      "deleteCount": "{{count}} löschen",
+      "deleteUntrackedFilesDescription_one": "{{count}} nicht versionierte Datei wird dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
+      "deleteUntrackedTitle_one": "{{count}} nicht versionierte Datei löschen?",
+      "deleteUntrackedTitle_other": "{{count}} nicht versionierte Dateien löschen?",
+      "discard": "Verwerfen",
+      "discardAll": "Alle verwerfen",
+      "restore": "Wiederherstellen",
+      "unstagedFilesIncludingUntrackedDescription_one": "Nicht vorgemerkte Änderungen an {{count}} Datei werden zurückgesetzt. Ist die Datei nicht versioniert, wird sie dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden."
     },
     "unlinkedPr": {
       "status": "Verknüpfung mit PR #{{number}} aufgehoben"
@@ -19309,6 +19358,34 @@
       "creationUnconfirmed": "{{shortLabel}} wurde möglicherweise erstellt. Der Review-Status des Branches wird aktualisiert…",
       "withDetail": "Erstellen von {{shortLabel}} fehlgeschlagen: {{detail}}",
       "pushFailed": "Push fehlgeschlagen. Den Push-Fehler beheben und erneut versuchen."
+    },
+    "model": {
+      "auto": "Automatisch",
+      "configDefault": "Standard der Konfiguration"
+    },
+    "thinking": {
+      "high": "Hoch",
+      "low": "Niedrig",
+      "max": "Maximal",
+      "medium": "Mittel",
+      "minimal": "Minimal",
+      "off": "Aus",
+      "xhigh": "Sehr hoch"
+    },
+    "variables": {
+      "assistantMessage": "Die erste Antwort des Agenten, sofern sie Orca vorliegt.",
+      "baseBranch": "Der im Editor „PR erstellen“ ausgewählte Ziel-Branch.",
+      "basePrompt": "Orcas integrierter Prompt für diese Aktion, einschließlich des Kontexts, den Orca sicher erfassen kann.",
+      "branch": "Der aktuelle Branch-Name in der Quellcodeverwaltung.",
+      "changedFiles": "Eine Zusammenfassung der zwischen dem Branch und dem Basis-Branch geänderten Dateien.",
+      "commitSummary": "Eine durch Zeilenumbrüche getrennte Liste der Commits auf dem Branch im Vergleich zum Basis-Branch.",
+      "currentBody": "Die aktuell im Editor eingegebene PR-Beschreibung vor Beginn der Generierung.",
+      "currentTitle": "Der aktuell im Editor eingegebene PR-Titel vor Beginn der Generierung.",
+      "firstPrompt": "Die erste Nutzeranfrage für diesen Arbeitsbereich oder Chat.",
+      "linkedIssue": "Die Nummer des mit diesem Arbeitsbereich verknüpften GitHub-Issues. Leer, wenn kein GitHub-Issue verknüpft ist (auch bei mit GitLab verknüpften Arbeitsbereichen). Vorlagen mit Anweisungen bevorzugen: Ein bloßes „Fixes #{linkedIssue}“ wird ohne Verknüpfung zu „Fixes #“.",
+      "patch": "Der Diff zwischen dem Branch und dem Basis-Branch für die Generierung der PR-Details.",
+      "stagedFiles": "Eine durch Zeilenumbrüche getrennte Liste der vorgemerkten Dateien für die Generierung der Commit-Nachricht.",
+      "stagedPatch": "Der vorgemerkte Git-Patch für die Generierung der Commit-Nachricht."
     }
   },
   "agentsSidebarIntro": {
@@ -19571,7 +19648,9 @@
       "confirmTitle": "Terminal-Daemon neu starten?",
       "confirmBody": "Ein Neustart beendet alle Prozesse, die über {{sessions}} laufen. Agenten, die das Fortsetzen unterstützen, können danach fortgesetzt werden. Shells und andere Aufgaben können nicht fortgesetzt werden und müssen neu gestartet werden. Den Neustart durchführen, wenn die Agenten inaktiv sind.",
       "cancel": "Abbrechen",
-      "confirm": "Neu starten und Prozesse beenden"
+      "confirm": "Neu starten und Prozesse beenden",
+      "count_one": "{{count}} laufendes Terminal",
+      "count_other": "{{count}} laufende Terminals"
     },
     "restartedInputNotSent": "Das Terminal wurde während der Eingabe neu gestartet. Daher hat es möglicherweise einen Teil der Eingabe nicht erhalten. Die neue Shell prüfen, bevor die Eingabe wiederholt wird."
   },
@@ -19851,7 +19930,11 @@
     "picker": {
       "pasteUnparseable": "Projekt-URL oder owner/number erwartet",
       "ownerLoadFailed": "Projekte von {{owner}} konnten nicht geladen werden.",
-      "organizationsLoadFailed": "Einige Organisationen konnten nicht geladen werden ({{failureCount}})."
+      "organizationsLoadFailed": "Einige Organisationen konnten nicht geladen werden ({{failureCount}}).",
+      "detailsFailed": "Laden der Details fehlgeschlagen",
+      "listFailed": "Auflisten der Projekte fehlgeschlagen",
+      "organizations": "Organisationen",
+      "viewFailed": "Abrufen der Projektansicht fehlgeschlagen"
     },
     "error": {
       "notFoundState": "Dieses Projekt oder diese Ansicht konnte nicht gefunden werden.",
@@ -19886,6 +19969,9 @@
       "tooLargeUnknownCount": "Diese Ansicht enthält zu viele Einträge, um in Orca dargestellt zu werden. Den Filter der Ansicht auf GitHub einschränken.",
       "tooLarge": "Diese Ansicht enthält {{itemCount}} Einträge — zu viele für die Darstellung in Orca. Den Filter der Ansicht auf GitHub einschränken.",
       "schemaDriftDetail": "Diese Projektansicht konnte nicht gelesen werden: {{detail}}."
+    },
+    "columns": {
+      "type": "Typ"
     }
   },
   "projectField": {
@@ -19968,6 +20054,27 @@
     "attachments": {
       "updateRuntime": "Die entfernte Laufzeitumgebung aktualisieren, um Verknüpfungen des Arbeitsbereichs zu ändern",
       "updateRuntimeSafely": "Die entfernte Laufzeitumgebung aktualisieren, um Verknüpfungen des Arbeitsbereichs sicher zu ändern"
+    },
+    "activity": {
+      "active": "Aktiv",
+      "done": "Abgeschlossen",
+      "failed": "Fehlgeschlagen",
+      "inactive": "Inaktiv",
+      "interrupted": "Unterbrochen",
+      "monitoring": "Hintergrundaufgaben werden überwacht",
+      "permission": "Genehmigung erforderlich",
+      "unconfirmed": "Bestätigung nicht möglich",
+      "unreadLabel": "{{status}} · ungelesen",
+      "working": "In Arbeit"
+    },
+    "reviewStatus": {
+      "checksFailed": "{{review}}-Checks: fehlgeschlagen",
+      "checksPassing": "{{review}}-Checks: erfolgreich",
+      "checksPending": "{{review}}-Checks: ausstehend",
+      "closed": "{{review}}: geschlossen",
+      "draft": "{{review}}: Entwurf",
+      "merged": "{{review}}: gemergt",
+      "open": "{{review}}: offen"
     }
   },
   "tabHoverCard": {
@@ -20017,7 +20124,9 @@
       "waitingAriaLabel": "Das Update wartet auf andere Orca-Instanzen. Zum Aufklappen klicken.",
       "preparingLabel": "Update wird vorbereitet",
       "preparingAriaLabel": "Das Update wird vorbereitet. Zum Aufklappen klicken."
-    }
+    },
+    "wslMoveInstallHeld": "Ein Projekt wird auf seinen WSL-Host verschoben. Das Update nach Abschluss des Verschiebens installieren.",
+    "wslMoveUndoInstallHeld": "Ein Projekt wird von seinem WSL-Host zurückgeholt. Das Update danach installieren."
   },
   "jira": {
     "connect": {
@@ -20678,5 +20787,185 @@
   },
   "startupFailure": {
     "title": "Orca konnte nicht gestartet werden"
+  },
+  "native": {
+    "about": {
+      "gpu": {
+        "disabled": "Deaktiviert",
+        "enabled": "Aktiviert",
+        "safeMode": "Deaktiviert (sicherer Grafikmodus)",
+        "software": "Software-Rendering",
+        "summary": "GPU-Beschleunigung: {{status}}",
+        "unavailable": "Nicht verfügbar",
+        "unknown": "Unbekannt ({{status}})",
+        "unknownStatus": "Status nicht verfügbar"
+      }
+    },
+    "dialog": {
+      "allFiles": "Alle Dateien",
+      "audio": "Audio",
+      "cookieFiles": "Cookie-Dateien",
+      "dashboardTitle": "Orca-Agenten-Dashboard",
+      "images": "Bilder",
+      "importCookies": "Cookies importieren",
+      "importPetBundle": "Ein .codex-pet-Paket auswählen",
+      "importWarpFolder": "Warp-Designordner importieren",
+      "importWarpTheme": "Warp-Design importieren",
+      "petImage": "Haustierbild",
+      "pickPet": "Haustier auswählen",
+      "repoIconImages": "Bilder für Repository-Symbole",
+      "spaceTitle": "Orca Space Beta",
+      "warpThemeYaml": "Warp-Design-YAML"
+    }
+  },
+  "runtime": {
+    "compat": {
+      "clientTooOld": "Dieser Orca-Client ist für den ausgewählten Server zu alt. Orca auf diesem Computer aktualisieren. Client-Protokoll: {{clientProtocol}}; der Server benötigt Client-Protokoll {{requiredProtocol}}.",
+      "compatible": "Client und Server der Laufzeitumgebung sind kompatibel.",
+      "serverTooOld": "Der ausgewählte Orca-Server ist für diesen Client zu alt. Orca auf dem Server aktualisieren. Server-Protokoll: {{serverProtocol}}; der Client benötigt Server-Protokoll {{requiredProtocol}}."
+    },
+    "health": {
+      "available": "Verbunden",
+      "connecting": "Verbindung wird hergestellt",
+      "disconnected": "Getrennt",
+      "error": "Aufmerksamkeit erforderlich",
+      "local": "Lokal",
+      "mixed": "Gemischt",
+      "repair": "Erneute Kopplung erforderlich",
+      "update": "Update erforderlich"
+    }
+  },
+  "taskProviders": {
+    "errors": {
+      "jira": {
+        "apiTokenRequired": "Ein API-Token ist erforderlich.",
+        "commentBodyRequired": "Ein Kommentartext ist erforderlich.",
+        "commentFailed": "Der Kommentar konnte nicht hinzugefügt werden.",
+        "connectionFailed": "Verbindung konnte nicht hergestellt werden.",
+        "createFailed": "Issue konnte nicht erstellt werden.",
+        "credentialsRequired": "Website-URL, E-Mail-Adresse und API-Token sind erforderlich.",
+        "incompleteIssuePage": "Jira hat eine unvollständige Issue-Seite zurückgegeben.",
+        "incompleteProjectPage": "Jira hat eine unvollständige Projektseite zurückgegeben.",
+        "invalidCloudId": "Die Website hat keine gültige Atlassian-Cloud-ID gemeldet.",
+        "invalidIssuePage": "Jira hat eine ungültige Issue-Seite zurückgegeben.",
+        "invalidProjectPage": "Jira hat eine ungültige Projektseite zurückgegeben.",
+        "invalidSiteIdentity": "Eine HTTP- oder HTTPS-URL einer Jira-Website ohne Zugangsdaten eingeben.",
+        "invalidSiteUrl": "Eine gültige URL einer Jira-Website eingeben.",
+        "issueKeyRequired": "Ein Issue-Schlüssel ist erforderlich.",
+        "issueSearchLimit": "Die Jira-Issue-Suche hat das Seitenlimit überschritten. Stattdessen ein Projekt mit JQL auswählen.",
+        "issueTypeRequired": "Ein Issue-Typ ist erforderlich.",
+        "labelsConflict": "labels oder labelOperations übergeben, nicht beides.",
+        "missingProjectIdentity": "Jira hat ein Projekt ohne ID oder Schlüssel zurückgegeben.",
+        "notConnected": "Nicht mit Jira verbunden.",
+        "passwordRequired": "Ein Passwort ist erforderlich.",
+        "personalTokenRequired": "Ein persönlicher Zugriffstoken ist erforderlich.",
+        "projectListLimit": "Die Jira-Projektliste hat das Seitenlimit überschritten. Stattdessen ein Projekt mit JQL auswählen.",
+        "projectRequired": "Ein Projekt ist erforderlich.",
+        "repeatedIssueToken": "Jira hat einen ungültigen oder wiederholt verwendeten Token für eine Issue-Seite zurückgegeben.",
+        "titleRequired": "Ein Titel ist erforderlich.",
+        "updateFailed": "Issue konnte nicht aktualisiert werden.",
+        "updatesRequired": "Ein Objekt mit Aktualisierungen ist erforderlich."
+      },
+      "linear": {
+        "commentFailed": "Der Kommentar konnte nicht erstellt werden.",
+        "createFailed": "Erstellen in Linear fehlgeschlagen",
+        "createdButUnavailable": "Das Issue wurde erstellt, konnte aber nicht abgerufen werden.",
+        "noApiKey": "Kein API-Schlüssel gespeichert.",
+        "notConnected": "Nicht mit Linear verbunden",
+        "projectCreateFailed": "Erstellen des Linear-Projekts fehlgeschlagen",
+        "projectIdRequired": "Eine Projekt-ID ist erforderlich.",
+        "projectNameRequired": "Ein Projektname ist erforderlich.",
+        "projectNotFound": "Das Projekt wurde nicht gefunden.",
+        "updateFailed": "Aktualisierung in Linear fehlgeschlagen",
+        "viewHasNoIssues": "Die benutzerdefinierte Ansicht enthält keine Issues.",
+        "viewHasNoProjects": "Die benutzerdefinierte Ansicht enthält keine Projekte.",
+        "viewIdRequired": "Die ID der benutzerdefinierten Ansicht ist erforderlich.",
+        "workspaceAuthExpired": "Die Linear-Authentifizierung für diesen Arbeitsbereich ist abgelaufen."
+      }
+    },
+    "jira": {
+      "connectionFailed": "Verbindung fehlgeschlagen",
+      "localTokenStorage": "Der Token wird lokal gespeichert und verschlüsselt, sofern der lokale Laufzeitspeicher dies unterstützt.",
+      "remoteTokenStorage": "Der Token wird an die ausgewählte entfernte Laufzeitumgebung gesendet und dort mit der von ihr unterstützten Verschlüsselung gespeichert."
+    },
+    "linear": {
+      "addAccess": "Linear-Zugriff hinzufügen",
+      "apiKeyHint": "Einen persönlichen API-Schlüssel für den Linear-Arbeitsbereich einfügen, den Orca verwenden soll. Ist dieser Arbeitsbereich bereits verbunden, ersetzt Orca den gespeicherten Schlüssel.",
+      "commentsLoadFailed": "Kommentare konnten nicht geladen werden.",
+      "connect": "Verbinden",
+      "connectionFailed": "Verbindung fehlgeschlagen",
+      "descriptionUpdateFailed": "Die Beschreibung konnte nicht aktualisiert werden.",
+      "fetchMore": "Weitere abrufen",
+      "issuesLoadFailed": "Linear-Issues konnten nicht geladen werden.",
+      "listLabel": "Linear-Liste",
+      "localKeyStorage": "Schlüssel der lokalen Laufzeitumgebung werden auf diesem Gerät gespeichert, nach Möglichkeit im verschlüsselten Speicher von Electron.",
+      "projectIssuesLoadFailed": "Projekt-Issues konnten nicht geladen werden.",
+      "projectLoadFailed": "Projekt konnte nicht geladen werden.",
+      "projectNotFound": "Das Projekt wurde nicht gefunden.",
+      "projectsLoadFailed": "Projekte konnten nicht geladen werden.",
+      "remoteKeyStorage": "Dieser Schlüssel wird von der aktiven entfernten Laufzeitumgebung gespeichert.",
+      "titleUpdateFailed": "Der Titel konnte nicht aktualisiert werden.",
+      "truncated": {
+        "issues_one": "Es wird nur {{count}} Issue vom Anfang der Liste angezeigt. Für die vollständige Liste die Suche nutzen oder Linear öffnen.",
+        "issues_other": "Die ersten {{count}} Issues werden angezeigt. Für die vollständige Liste die Suche nutzen oder Linear öffnen.",
+        "projectIssues_one": "Es wird nur {{count}} Projekt-Issue vom Anfang der Liste angezeigt. Für die vollständige Liste die Suche nutzen oder Linear öffnen.",
+        "projectIssues_other": "Die ersten {{count}} Projekt-Issues werden angezeigt. Für die vollständige Liste die Suche nutzen oder Linear öffnen.",
+        "projects_one": "Es wird nur {{count}} Projekt vom Anfang der Liste angezeigt. Für die vollständige Liste die Suche nutzen oder Linear öffnen.",
+        "projects_other": "Die ersten {{count}} Projekte werden angezeigt. Für die vollständige Liste die Suche nutzen oder Linear öffnen.",
+        "viewIssues_one": "Es wird nur {{count}} Issue vom Anfang der Ansicht angezeigt. Für die vollständige Liste die Suche nutzen oder Linear öffnen.",
+        "viewIssues_other": "Die ersten {{count}} Issues der Ansicht werden angezeigt. Für die vollständige Liste die Suche nutzen oder Linear öffnen.",
+        "views_one": "Es wird nur {{count}} Ansicht vom Anfang der Liste angezeigt. Für die vollständige Liste die Suche nutzen oder Linear öffnen.",
+        "views_other": "Die ersten {{count}} Ansichten werden angezeigt. Für die vollständige Liste die Suche nutzen oder Linear öffnen."
+      },
+      "updateAccess": "Zugriff aktualisieren",
+      "updateWorkspaceAccess": "Linear-Zugriff für {{workspace}} aktualisieren",
+      "viewContentsLoadFailed": "Inhalte der Ansicht konnten nicht geladen werden.",
+      "viewsLoadFailed": "Ansichten konnten nicht geladen werden.",
+      "workspaceApiKeyHint": "Einen persönlichen API-Schlüssel für {{workspace}} einfügen. Ist dieser Arbeitsbereich bereits verbunden, ersetzt Orca den gespeicherten Schlüssel."
+    }
+  },
+  "workspaceOptions": {
+    "activeFilterCount_one": "{{count}} Filter",
+    "activeFilterCount_other": "{{count}} Filter"
+  },
+  "editorConflicts": {
+    "kind": {
+      "addedByUs": "Auf eigener Seite hinzugefügt",
+      "bothAdded": "Beidseitig hinzugefügt",
+      "deletedByUs": "Auf eigener Seite gelöscht",
+      "addedByThem": "Auf der Gegenseite hinzugefügt",
+      "bothDeleted": "Beidseitig gelöscht",
+      "bothModified": "Beidseitig geändert",
+      "deletedByThem": "Auf der Gegenseite gelöscht"
+    },
+    "resolvedBanner": "Konflikt lokal gelöst · {{kind}}",
+    "hint": {
+      "addedByUs": "Prüfen, ob die hinzugefügte Datei beibehalten werden soll",
+      "bothModified": "Konfliktmarkierungen auflösen",
+      "addedByThem": "Die hinzugefügte Datei prüfen, bevor sie beibehalten wird",
+      "bothDeleted": "Den Konflikt in Git lösen oder vor dem Bearbeiten eine Seite wiederherstellen",
+      "deletedByThem": "Entscheiden, ob die Datei beibehalten oder die Löschung akzeptiert werden soll",
+      "deletedByUs": "Entscheiden, ob die Datei wiederhergestellt werden soll",
+      "bothAdded": "Auswählen, welche Version beibehalten werden soll, oder beide kombinieren"
+    },
+    "renamedFrom": "Umbenannt von {{path}}",
+    "snapshotCapturedAt": "Momentaufnahme um {{time}} erstellt",
+    "unresolvedBanner": "Ungelöster Konflikt · {{kind}}"
+  },
+  "stats": {
+    "usageBreakdown": {
+      "turns_one": "{{count}} Dialogschritt",
+      "events_one": "{{count}} Ereignis",
+      "sessions_one": "{{count}} Sitzung",
+      "events_other": "{{count}} Ereignisse",
+      "sessions_other": "{{count}} Sitzungen",
+      "turns_other": "{{count}} Dialogschritte"
+    }
+  },
+  "github": {
+    "viewed": {
+      "markFile": "{{path}} als angesehen markieren",
+      "unmarkFile": "Markierung „Angesehen“ für {{path}} aufheben"
+    }
   }
 }

@@ -114,6 +114,7 @@ export function MobileQueuedMessageComposer({
         isAttaching={images.isAttaching}
         onMicPress={context?.onMicPress}
         micActive={context?.micActive}
+        micStarting={context?.micStarting}
         micProcessing={context?.micProcessing}
         dictationMode={context?.dictationMode}
         onMicPressIn={context?.onMicPressIn}

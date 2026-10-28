@@ -1,3 +1,4 @@
+import { taskProviderFailure } from '../../shared/task-provider-failure'
 import type { LinearClient } from '@linear/sdk'
 import { createLinearClient, loadLinearSdk } from './linear-sdk'
 import { LEGACY_WORKSPACE_ID } from './linear-credential-paths'
@@ -196,7 +197,7 @@ export async function testConnection(
 > {
   const resolvedWorkspaceId = resolveWorkspaceId(workspaceId)
   if (!resolvedWorkspaceId) {
-    return { ok: false, error: 'No API key stored.' }
+    return taskProviderFailure('linear.noApiKey', 'No API key stored.')
   }
   let token: string | null
   try {
@@ -206,7 +207,7 @@ export async function testConnection(
     return { ok: false, error: message }
   }
   if (!token) {
-    return { ok: false, error: 'No API key stored.' }
+    return taskProviderFailure('linear.noApiKey', 'No API key stored.')
   }
 
   try {

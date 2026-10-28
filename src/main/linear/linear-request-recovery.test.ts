@@ -33,6 +33,8 @@ const viewer = { id: 'viewer-proof', displayName: 'Recovered viewer' }
 const nativeFetch = globalThis.fetch
 let traceDirectory: string
 let sink: ReturnType<typeof createLocalFileSink>
+// The longest timer Node accepts; longer than any test here.
+const NO_BACKGROUND_DRAIN_MS = 2 ** 31 - 1
 
 function records(): RedactableSpan[] {
   sink.flush()
@@ -89,7 +91,11 @@ beforeEach(async () => {
   reset = true
   backoff.started.mockReset()
   traceDirectory = mkdtempSync(join(tmpdir(), 'linear-recovery-'))
-  sink = createLocalFileSink({ filePath: join(traceDirectory, 'attempts.ndjson') })
+  // No background drain: records() reads after flushSync, which skips a batch still being written.
+  sink = createLocalFileSink({
+    filePath: join(traceDirectory, 'attempts.ndjson'),
+    batchWindowMs: NO_BACKGROUND_DRAIN_MS
+  })
   setActiveSink(sink)
   server = await serveLinearHttp((_receipt, response) => {
     if (reset) {
