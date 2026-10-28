@@ -26,6 +26,8 @@ import {
   isRevealOrEditorOpenBlocked
 } from '@/lib/local-path-open-guard'
 import { runtimeEnvironmentIdOrLocalUnlessTwin } from '@/lib/worktree-runtime-owner'
+import type { ConflictResolution } from '../../../../../../shared/source-control-entry-actions'
+import { CONFLICT_RESOLUTION_ICONS, getLocalizedConflictResolutionLabel } from './conflict-label'
 import { NO_OPEN_IN_APPLICATIONS } from '@/lib/open-in-application-selection'
 import {
   getOpenInEntryAvailability,
@@ -41,6 +43,8 @@ type SourceControlEntryContextMenuProps = {
   hasWorkingTreeFile: boolean
   connectionId?: string | null
   onView?: () => void
+  conflictResolutions?: readonly ConflictResolution[]
+  onResolveConflict?: (resolution: ConflictResolution) => void
   onRevealInExplorer: (worktreeId: string, absolutePath: string) => void
   onOpenChange?: (open: boolean) => void
   children: React.ReactNode
@@ -53,6 +57,8 @@ export function SourceControlEntryContextMenu({
   hasWorkingTreeFile,
   connectionId,
   onView,
+  conflictResolutions,
+  onResolveConflict,
   onRevealInExplorer,
   onOpenChange,
   children
@@ -127,6 +133,20 @@ export function SourceControlEntryContextMenu({
             'View'
           )}
         </ContextMenuItem>
+        {onResolveConflict && conflictResolutions && conflictResolutions.length > 0 ? (
+          <>
+            <ContextMenuSeparator />
+            {conflictResolutions.map((resolution) => {
+              const Icon = CONFLICT_RESOLUTION_ICONS[resolution]
+              return (
+                <ContextMenuItem key={resolution} onSelect={() => onResolveConflict(resolution)}>
+                  <Icon className="size-3.5" />
+                  {getLocalizedConflictResolutionLabel(resolution)}
+                </ContextMenuItem>
+              )
+            })}
+          </>
+        ) : null}
         <ContextMenuSeparator />
         <ContextMenuItem onSelect={handleCopyPath} disabled={!absolutePath}>
           <Copy className="size-3.5" />

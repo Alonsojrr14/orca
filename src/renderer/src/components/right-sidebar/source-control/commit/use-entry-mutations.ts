@@ -1,12 +1,16 @@
 import { useCallback } from 'react'
 import { requireGitOwnerTarget } from '../../worktree-git-owner-target'
 import type { RuntimeClientTarget } from '../../../../../../shared/runtime-client-target'
+import type { GitStatusEntry } from '../../../../../../shared/git-status-types'
+import type { ConflictResolution } from '../../../../../../shared/source-control-entry-actions'
 import {
   notifyEditorExternalFileChange,
   requestEditorSaveQuiesce
 } from '@/components/editor/editor-autosave'
 import { getConnectionId } from '@/lib/connection-context'
-import { basename } from '@/lib/path'
+import { basename, joinPath } from '@/lib/path'
+import { useAppStore } from '@/store'
+import { deleteRuntimePath } from '@/runtime/runtime-file-mutation-client'
 import {
   bulkDiscardRuntimeGitPaths,
   bulkUnstageRuntimeGitPaths,
@@ -90,6 +94,43 @@ export function useSourceControlEntryMutations({
           : unstageRuntimeGitPath
       ),
     [runEntryMutation]
+  )
+
+  const handleResolveConflict = useCallback(
+    (entry: GitStatusEntry, resolution: ConflictResolution): Promise<void> => {
+      if (!activeWorktreeId || !worktreePath || !entry.conflictKind) {
+        return Promise.resolve()
+      }
+      // Staging drops Git's u record; tracking keeps the row's Resolved locally continuity.
+      useAppStore.getState().trackConflictPath(activeWorktreeId, entry.path, entry.conflictKind)
+      if (resolution !== 'keep_deletion' || entry.status === 'deleted') {
+        return runEntryMutation('stage', entry.path, stageRuntimeGitPath)
+      }
+      const runtimeEnvironmentId =
+        activeRepoTarget?.kind === 'environment' ? activeRepoTarget.environmentId : null
+      return runEntryMutation('stage', entry.path, async (context, filePath) => {
+        const editorTarget = {
+          worktreeId: activeWorktreeId,
+          worktreePath,
+          relativePath: filePath,
+          runtimeEnvironmentId
+        }
+        // Hold autosave so an open tab cannot recreate the file after it is removed.
+        const releaseAutoSave = await requestEditorSaveQuiesce(editorTarget)
+        try {
+          // Permanent: the deleted side's content stays in Git history.
+          await deleteRuntimePath(context, joinPath(worktreePath, filePath), false, {
+            permanent: true
+          })
+          // With the worktree file gone, git add stages the removal and resolves the conflict.
+          await stageRuntimeGitPath(context, filePath)
+          notifyEditorExternalFileChange(editorTarget)
+        } finally {
+          releaseAutoSave()
+        }
+      })
+    },
+    [activeRepoTarget, activeWorktreeId, runEntryMutation, worktreePath]
   )
 
   // Throw for bulk callers to aggregate; per-row callers report their own failures.
@@ -191,5 +232,11 @@ export function useSourceControlEntryMutations({
     [activeRepoTarget, activeWorktreeId, worktreePath]
   )
 
-  return { handleStage, handleUnstage, discardSingle, discardMany }
+  return {
+    handleStage,
+    handleUnstage,
+    handleResolveConflict,
+    discardSingle,
+    discardMany
+  }
 }

@@ -3,14 +3,30 @@ import { gitOptionsForWorktree } from '../git-runtime-options'
 import { gitExecFileAsync } from '../runner'
 import { invalidateGitReadCaches } from './git-read-cache-invalidation'
 
-export async function commitChanges(
+export function commitChanges(
   worktreePath: string,
   message: string,
   options: GitRuntimeOptions = {}
 ): Promise<{ success: boolean; error?: string }> {
+  return runCommit(worktreePath, ['commit', '-m', message], options)
+}
+
+/** Concludes a paused merge with Git's MERGE_MSG; strip drops its "# Conflicts:" comments like an editor commit would. */
+export function completeMerge(
+  worktreePath: string,
+  options: GitRuntimeOptions = {}
+): Promise<{ success: boolean; error?: string }> {
+  return runCommit(worktreePath, ['commit', '--no-edit', '--cleanup=strip'], options)
+}
+
+async function runCommit(
+  worktreePath: string,
+  args: string[],
+  options: GitRuntimeOptions
+): Promise<{ success: boolean; error?: string }> {
   invalidateGitReadCaches()
   try {
-    await gitExecFileAsync(['commit', '-m', message], gitOptionsForWorktree(worktreePath, options))
+    await gitExecFileAsync(args, gitOptionsForWorktree(worktreePath, options))
     return { success: true }
   } catch (error) {
     // Hook/GPG failures use stderr; nothing-to-commit output can be on stdout.

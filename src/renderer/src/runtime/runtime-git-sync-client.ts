@@ -4,6 +4,7 @@ import { REBASE_FROM_BASE_RPC_TIMEOUT_MS } from '../../../shared/git-rebase-sour
 import type { GitPushTarget } from '../../../shared/worktree/types'
 import { resolveLocalWorktreePath, type RuntimeGitContext } from './runtime-git-client-context'
 import { callRuntimeRpc } from './runtime-rpc-client'
+import { RuntimeRpcCallError } from './runtime-rpc-result'
 import { toRuntimeWorktreeSelector } from './runtime-worktree-selector'
 
 export async function abortRuntimeGitMerge(context: RuntimeGitContext): Promise<void> {
@@ -226,4 +227,32 @@ export async function commitRuntimeGit(
     { worktree: toRuntimeWorktreeSelector(context.worktreeId), message },
     { timeoutMs: 30_000 }
   )
+}
+
+export async function completeRuntimeGitMerge(
+  context: RuntimeGitContext
+): Promise<{ success: boolean; error?: string }> {
+  const target = context.target
+  if (target.kind === 'local' || !context.worktreeId) {
+    return window.api.git.completeMerge({
+      worktreePath: resolveLocalWorktreePath(context),
+      connectionId: context.connectionId
+    })
+  }
+  try {
+    return await callRuntimeRpc<{ success: boolean; error?: string }>(
+      target,
+      'git.completeMerge',
+      { worktree: toRuntimeWorktreeSelector(context.worktreeId) },
+      { timeoutMs: 30_000 }
+    )
+  } catch (error) {
+    if (error instanceof RuntimeRpcCallError && error.code === 'method_not_found') {
+      return {
+        success: false,
+        error: 'Completing a merge needs a newer Orca on this host. Update Orca on that host.'
+      }
+    }
+    throw error
+  }
 }
