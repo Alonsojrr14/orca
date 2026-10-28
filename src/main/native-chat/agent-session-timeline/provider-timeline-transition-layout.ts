@@ -1,3 +1,5 @@
+import type { JournalLifecycleMutationInput } from '../agent-session-journal/journal-row-builders'
+import { estimateStructuredAgentSessionMutationBytes } from '../agent-session-wire/structured-agent-session-event-sink-estimate'
 import {
   providerTimelineSettlementId,
   type ProviderTimelineContext
@@ -10,9 +12,6 @@ import type { ProviderTimelinePlan } from './provider-timeline-plan'
 import { turnOf } from './provider-timeline-rows'
 import type { ProviderTimelineState } from './provider-timeline-state'
 import type { ProviderTimelineTextStreams } from './provider-timeline-text-streams'
-
-/** Pace admission; actual settlement mutations resolve from the journal. */
-const SETTLEMENT_RESERVED_BYTES = 64 * 1024
 
 /** Flush preceding text; separate anonymous messages by producer and release streams at their own boundaries. */
 export function planProviderTimelineBarrier(
@@ -68,11 +67,23 @@ export function planProviderTimelineWrites(
 ): void {
   const { settle } = decision
   if (settle) {
+    const settlementId = providerTimelineSettlementId(context, serial(), settle.what)
     plan.settlement({
-      settlementId: providerTimelineSettlementId(context, serial(), settle.what),
-      reservedBytes: SETTLEMENT_RESERVED_BYTES,
+      settlementId,
+      reservedBytes: Buffer.byteLength(settlementId, 'utf8') + 512,
       recovered: settle.recovered,
-      resolve: settle.resolve
+      reserveFromJournal: (journal) => {
+        let bytes = 2
+        settle.visit(journal, (mutation) => {
+          bytes += estimateStructuredAgentSessionMutationBytes(mutation)
+        })
+        return bytes
+      },
+      resolve: (journal) => {
+        const mutations: JournalLifecycleMutationInput[] = []
+        settle.visit(journal, (mutation) => mutations.push(mutation))
+        return mutations
+      }
     })
   }
   for (const write of decision.writes ?? []) {

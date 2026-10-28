@@ -70,7 +70,8 @@ export type ProviderTimelineDecision = {
   settle?: {
     what: string
     recovered?: true
-    resolve: (journal: Journal) => readonly JournalLifecycleMutationInput[]
+    /** Pure traversal: size and materialize on the same write lane without retaining a second batch. */
+    visit: (journal: Journal, emit: (mutation: JournalLifecycleMutationInput) => void) => void
   }
   writes?: readonly ProviderTimelineItemWrite[]
   /** Replace this stream with the event’s full snapshot. */

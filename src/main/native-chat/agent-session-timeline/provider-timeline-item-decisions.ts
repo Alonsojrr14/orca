@@ -183,23 +183,21 @@ export function decideWithdrawal(
   return {
     settle: {
       what: 'request-withdrawn',
-      resolve: (at) => {
+      visit: (at, emit) => {
         // Resolve after request-open; preserve client answers or turn settlement that landed first.
         const row = opened ? opened.row : context.rows.heldRequest(event.request, at)
         const held = row ? at.item(row.itemId) : null
         const cancelled =
           held && pendingPrompt(held.body) ? cancelledJournalPromptBody(held.body) : null
         if (!row || !held || !cancelled) {
-          return []
+          return
         }
-        return [
-          {
-            kind: 'item',
-            identity: row.identity,
-            body: cancelled,
-            turnScope: held.turnScope ?? AGENT_JOURNAL_THREAD_SCOPE
-          }
-        ]
+        emit({
+          kind: 'item',
+          identity: row.identity,
+          body: cancelled,
+          turnScope: held.turnScope ?? AGENT_JOURNAL_THREAD_SCOPE
+        })
       }
     },
     commit: (next) => next.items.delete(key)

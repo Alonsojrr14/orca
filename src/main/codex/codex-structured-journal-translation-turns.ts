@@ -22,7 +22,7 @@ const ADMITTED: StructuredAgentSessionSinkAdmission = { accepted: true }
 /** Reserve for Codex's context report; the larger shared bound would overrun history restores. */
 const CODEX_TURN_ROW_KEPT_BYTES = 1_024
 
-function codexTurnRowReservedBytes(
+export function codexTurnRowReservedBytes(
   identity: AgentJournalItemIdentity,
   lifecycle: AgentJournalTurnItem
 ): number {

@@ -15,7 +15,10 @@ import type {
 import type { AgentSessionTurnActivity } from '../../../shared/agent-session-wire'
 import type { AgentSessionJournal } from '../agent-session-journal/journal-store'
 import type { JournalLifecycleIdentityMutationInput } from '../agent-session-journal/journal-row-builders'
-import { estimateStructuredAgentSessionItemBytes } from './structured-agent-session-event-sink-estimate'
+import {
+  estimateStructuredAgentSessionItemBytes,
+  estimateStructuredAgentSessionLifecycleBatchBytes
+} from './structured-agent-session-event-sink-estimate'
 import { StructuredAgentSessionSinkQueue } from './structured-agent-session-event-sink-queue'
 import { structuredAgentSessionJournalAppendOptions } from './structured-agent-session-journal-append-options'
 import { createStructuredAgentSessionResolvedAppend } from './structured-agent-session-resolved-append'
@@ -213,7 +216,7 @@ export function createDeferredStructuredAgentSessionEventSink(deps: {
   ): StructuredAgentSessionSinkAdmission =>
     queue.submit(
       {
-        bytes: Buffer.byteLength(JSON.stringify({ settlementId, mutations }), 'utf8') + 512,
+        bytes: estimateStructuredAgentSessionLifecycleBatchBytes(settlementId, mutations),
         run: (bound) =>
           bound.journal.appendLifecycleBatch({
             settlementId,

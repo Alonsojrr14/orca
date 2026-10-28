@@ -28,7 +28,8 @@ import {
 import type { AgentSessionJournal } from '../agent-session-journal/journal-store'
 import {
   createDeferredStructuredAgentSessionEventSink,
-  type StructuredAgentSessionEventSink
+  type StructuredAgentSessionEventSink,
+  type StructuredAgentSessionSinkBarrier
 } from '../agent-session-wire/structured-agent-session-event-sink'
 import { testEventSinkLogging } from '../agent-session-wire/structured-agent-session-logger-test-support'
 import {
@@ -148,7 +149,7 @@ export async function closeProviderTimelineRigs(): Promise<void> {
 /** Admit before journal binding to simulate resume events without a journal view. */
 export type UnboundProviderTimelineAssembler = {
   assembler: ProviderTimelineAssembler
-  bind(): Promise<void>
+  bind(): Promise<StructuredAgentSessionSinkBarrier>
   drained(): Promise<void>
 }
 
@@ -179,7 +180,7 @@ export function openUnboundProviderTimelineAssembler(
     assembler,
     bind: async () => {
       deferred.bind({ journal, fence: 1, publish: () => {} })
-      await deferred.drained()
+      return deferred.drained()
     },
     drained: async () => {
       await deferred.drained()

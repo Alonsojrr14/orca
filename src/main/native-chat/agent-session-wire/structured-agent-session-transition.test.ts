@@ -88,6 +88,70 @@ async function rig(watermarks: Partial<StructuredAgentSessionSinkWatermarks> = {
 
 describe('structured agent-session transitions', () => {
   it.each([false, true])(
+    'charges and releases journal-derived bytes while retaining admission and overflow checks (overflow=%s)',
+    async (overflow) => {
+      const { journal, deferred, sink, publishes, bind } = await rig({
+        pauseQueuedBytes: 2048,
+        lowQueuedBytes: 0,
+        maxLifecycleQueuedOperations: 1
+      })
+      const id = identity('journal-derived')
+      await journal.appendItem(id, tool('read', 'running'), {
+        fence: 1,
+        turnScope: AGENT_JOURNAL_THREAD_SCOPE
+      })
+      const transition: StructuredAgentSessionTransition = {
+        lifecycle: true,
+        publish: true,
+        steps: [
+          {
+            kind: 'settlement',
+            settlementId: 'journal-derived',
+            reservedBytes: 512,
+            reserveFromJournal: (at) => {
+              expect(at.itemBody(agentJournalItemKey(id))).toMatchObject({ name: 'latest' })
+              return 16 * 1024
+            },
+            resolve: () => {
+              expect(deferred.state()).toMatchObject({
+                backpressured: true,
+                queuedOperations: 1,
+                queuedBytes: 16 * 1024 + 513
+              })
+              return [
+                {
+                  kind: 'item',
+                  identity: id,
+                  body: tool('x'.repeat(overflow ? 20_000 : 8_000), 'failed')
+                }
+              ]
+            }
+          }
+        ]
+      }
+      expect(sink.tryAppendTransition?.(transition)).toEqual({ accepted: true })
+      expect(sink.tryAppendTransition?.(transition)).toEqual({
+        accepted: false,
+        reason: 'backpressure'
+      })
+      await journal.appendItem(id, tool('latest', 'running'), { fence: 1 })
+      bind()
+      const written = await sink.written?.()
+      expect(written?.ok).toBe(!overflow)
+      expect(journal.itemBody(agentJournalItemKey(id))).toMatchObject({
+        state: overflow ? 'running' : 'failed'
+      })
+      expect(deferred.state()).toMatchObject({
+        queuedOperations: 0,
+        queuedBytes: 0,
+        failed: overflow
+      })
+      expect(publishes).toHaveLength(overflow ? 0 : 1)
+      deferred.close()
+    }
+  )
+
+  it.each([false, true])(
     'publishes every transition in commit order (queued=%s)',
     async (queued) => {
       const { journal, deferred, sink, publishes, bind } = await rig()

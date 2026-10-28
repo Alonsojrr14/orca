@@ -8,7 +8,10 @@ import type {
 import type { JournalLifecycleMutationInput } from '../agent-session-journal/journal-row-builders'
 import type { AgentSessionJournal } from '../agent-session-journal/journal-store'
 import type { JournalStep } from '../agent-session-journal/journal-step-writer'
-import { estimateStructuredAgentSessionItemBytes } from './structured-agent-session-event-sink-estimate'
+import {
+  estimateStructuredAgentSessionItemBytes,
+  estimateStructuredAgentSessionSettlementBytes
+} from './structured-agent-session-event-sink-estimate'
 import type {
   StructuredAgentSessionItemAppendOptions,
   StructuredAgentSessionSinkAdmission
@@ -48,8 +51,10 @@ export type StructuredAgentSessionTransitionStep =
       /** Journal deduplicates settlements by this ID. */
       settlementId: string
       recovered?: true
-      /** Bounds the execution-time mutations chosen by the journal. */
+      /** Admission charge; bounds mutations together with any journal-derived reservation. */
       reservedBytes: number
+      /** Reserve journal-derived bodies on the write lane, after preceding writes land. */
+      reserveFromJournal?: (journal: StructuredAgentSessionTransitionJournal) => number
       /** Resolve at execution; an empty result writes nothing. */
       resolve: (
         journal: StructuredAgentSessionTransitionJournal
@@ -93,7 +98,7 @@ function transitionAppend(
         (transition.publish ? 1 : 0),
       lifecycle: transition.lifecycle,
       finalTail: transition.finalTail,
-      run: async (bound) => {
+      run: async (bound, reserveBytes) => {
         const { journal, fence } = bound
         await journal.appendSteps(
           transition.steps.map((step): JournalStep =>
@@ -121,11 +126,14 @@ function transitionAppend(
                     ownerFence: fence,
                     recovered: step.recovered,
                     resolve: () => {
+                      const journalBytes = step.reserveFromJournal?.(journal) ?? 0
+                      if (step.reserveFromJournal) {
+                        reserveBytes(journalBytes)
+                      }
                       const mutations = step.resolve(journal)
                       if (
-                        Buffer.byteLength(JSON.stringify(mutations), 'utf8') +
-                          mutations.length * 512 >
-                        step.reservedBytes
+                        estimateStructuredAgentSessionSettlementBytes(mutations) >
+                        step.reservedBytes + journalBytes
                       ) {
                         throw new Error(STEP_OVERFLOW)
                       }

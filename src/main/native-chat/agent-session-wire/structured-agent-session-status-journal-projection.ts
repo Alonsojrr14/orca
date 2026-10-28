@@ -56,6 +56,13 @@ export class StructuredAgentSessionJournalProjections {
 
   noteRestart(sessionId: string, rest: StructuredAgentSessionAtRest): void {
     const previous = this.restored.get(sessionId)
+    // Completed startup summaries are placeholders; the opened journal owns their verdict and clock.
+    if (!rest.interrupted && rest.known !== false) {
+      if (previous?.rest.known === false) {
+        this.restored.delete(sessionId)
+      }
+      return
+    }
     if (!previous || (previous.rest.known === false && rest.known !== false)) {
       this.restored.set(sessionId, { rest, baseline: previous?.baseline })
     }

@@ -37,6 +37,75 @@ export function registerStatusFeedRestorationContracts({
   TURN_IDENTITY: typeof TURN
   USER_IDENTITY: typeof USER
 }): void {
+  it.each([
+    ['completed', 'failure', 'failure'],
+    ['completed', undefined, undefined],
+    ['unverifiable', undefined, 'unconfirmed']
+  ] as const)(
+    'replays %s/%s and its canonical clock after opening a known completed summary',
+    async (state, outcome, verdict) => {
+      let journal = await openJournal(SESSION, () => 1_000)
+      await journal.appendItem(
+        TURN_IDENTITY,
+        {
+          kind: 'turn',
+          turnId: 'turn-1',
+          state,
+          startedAt: 100,
+          ...(outcome ? { outcome } : {}),
+          ...(state === 'completed' ? { completedAt: 500 } : {})
+        },
+        { turnScope: AGENT_JOURNAL_THREAD_SCOPE, fence: 1 }
+      )
+      await journal.appendItem(
+        USER_IDENTITY,
+        {
+          kind: 'message',
+          role: 'assistant',
+          blocks: [{ type: 'text', text: 'later hygiene' }]
+        },
+        { turnScope: { kind: 'turn', turnItemId: agentJournalItemKey(TURN_IDENTITY) }, fence: 1 }
+      )
+      await journal.close()
+      const record = agentSessionRecordFixture()
+      record.sessionId = SESSION
+      record.lease.claimStatus = 'released'
+      const sessions = new Map<string, Indexed>()
+      const published: AgentSessionStatusSummary[] = []
+      const { feed, events } = feedFor(sessions, record, undefined, undefined, {
+        publish: (summary) => published.push(summary),
+        forget: vi.fn()
+      })
+      feed.publishAtRest(SESSION, {
+        known: true,
+        interrupted: false,
+        openTurn: null,
+        lastSequence: 3,
+        lastSavedAt: 1_000
+      })
+      expect(published.at(-1)).toMatchObject({ status: 'idle', statusStartedAt: 1_000 })
+      journal = await openJournal(SESSION, () => 9_000)
+      sessions.set(SESSION, { journal })
+      feed.publish(SESSION, journal)
+      const canonical = new StructuredAgentSessionJournalProjections().read(
+        journal,
+        agentSessionConversationView(record)
+      ).state.summary
+      expect(canonical.turnOutcome).toBe(verdict)
+      expect(canonical.statusStartedAt).toBe(state === 'completed' ? 500 : undefined)
+      const event = events.at(-1)
+      for (const summary of [
+        published.at(-1),
+        event?.type === 'status' ? event.session : undefined
+      ]) {
+        expect(summary?.status).toBe('idle')
+        expect(summary?.statusStartedAt).toBe(canonical.statusStartedAt)
+        expect(summary?.turnOutcome).toBe(verdict)
+        expect(summary?.restoredInterruption).toBeUndefined()
+      }
+    }
+  )
+
   it('normalizes only restarted requests for quit, crash and legacy handoff, preserving live-provider faults', async () => {
     for (const cause of ['quit', 'crash', 'legacy', 'live'] as const) {
       let journal = await openJournal(`provenance-${cause}`)
@@ -91,79 +160,77 @@ export function registerStatusFeedRestorationContracts({
     }
   })
 
-  it.each([false, true])(
-    'keeps saved public cut=%s through open, repair and eviction on both consumers',
-    async (cut) => {
-      let journal = await openJournal(SESSION, () => 100)
-      await journal.appendItem(
-        TURN_IDENTITY,
-        { kind: 'turn', turnId: 'turn-1', state: cut ? 'completed' : 'running', startedAt: 100 },
-        { turnScope: AGENT_JOURNAL_THREAD_SCOPE, fence: 1 }
+  it('keeps saved interruption through open, repair and eviction on both consumers', async () => {
+    let journal = await openJournal(SESSION, () => 100)
+    await journal.appendItem(
+      TURN_IDENTITY,
+      { kind: 'turn', turnId: 'turn-1', state: 'completed', startedAt: 100 },
+      { turnScope: AGENT_JOURNAL_THREAD_SCOPE, fence: 1 }
+    )
+    await journal.close()
+    const database = openTestJournalHostDatabase(join(directory(), SESSION))
+    database.db
+      .prepare(
+        'UPDATE journal_sessions SET open_turn_id = ?, open_turn_since = ? WHERE session_id = ?'
       )
-      await journal.close()
-      const database = openTestJournalHostDatabase(join(directory(), SESSION))
-      database.db
-        .prepare(
-          'UPDATE journal_sessions SET open_turn_id = ?, open_turn_since = ? WHERE session_id = ?'
-        )
-        .run(cut ? 'retained-cut' : null, cut ? 100 : 0, SESSION)
-      const record = agentSessionRecordFixture()
-      record.sessionId = SESSION
-      record.lease.claimStatus = 'released'
-      const sessions = new Map<string, Indexed>()
-      const published: AgentSessionStatusSummary[] = []
-      const { feed, events } = feedFor(sessions, record, undefined, undefined, {
-        publish: (summary) => published.push(summary),
-        forget: vi.fn()
-      })
-      feed.publishAtRest(SESSION, {
-        interrupted: cut,
-        known: true,
-        openTurn: cut ? { itemId: 'retained-cut', since: 100 } : null,
-        lastSequence: 2,
-        lastSavedAt: 100
-      })
-      const expected = {
-        status: 'idle',
-        statusStartedAt: 100,
-        ...(cut ? { turnOutcome: 'cancellation', restoredInterruption: true } : {})
-      }
-      const check = () => {
-        expect(published.at(-1)).toMatchObject(expected)
-        expect(events.at(-1)).toMatchObject({ type: 'status', session: expected })
-        expect(published.at(-1)?.restoredInterruption).toBe(cut ? true : undefined)
-      }
-      check()
-      journal = await openJournal(SESSION, () => 999)
-      sessions.set(SESSION, { journal })
-      feed.publish(SESSION, journal)
-      check()
-      await journal.appendItem(
-        { ...USER_IDENTITY, ordinal: 2 },
-        { kind: 'message', role: 'assistant', blocks: [{ type: 'text', text: 'hygiene' }] },
-        { turnScope: { kind: 'turn', turnItemId: agentJournalItemKey(TURN_IDENTITY) }, fence: 2 }
-      )
-      feed.publish(SESSION, journal)
-      check()
-      await journal.close()
-      sessions.delete(SESSION)
-      journal = await openJournal(SESSION, () => 2000)
-      sessions.set(SESSION, { journal })
-      feed.publish(SESSION, journal)
-      check()
-      record.lease.claimStatus = 'live'
-      record.lease.runtimeFence = 3
-      sessions.set(SESSION, { journal, child: { phase: 'ready', generation: 'new', fence: 3 } })
-      await journal.appendItem(
-        { ...TURN_IDENTITY, turnId: 'genuine-new' },
-        { kind: 'turn', turnId: 'genuine-new', state: 'running', startedAt: 2000 },
-        { turnScope: AGENT_JOURNAL_THREAD_SCOPE, fence: 3 }
-      )
-      feed.publish(SESSION, journal)
-      expect(published.at(-1)).toMatchObject({ status: 'working' })
-      expect(published.at(-1)?.restoredInterruption).toBeUndefined()
+      .run('retained-cut', 100, SESSION)
+    const record = agentSessionRecordFixture()
+    record.sessionId = SESSION
+    record.lease.claimStatus = 'released'
+    const sessions = new Map<string, Indexed>()
+    const published: AgentSessionStatusSummary[] = []
+    const { feed, events } = feedFor(sessions, record, undefined, undefined, {
+      publish: (summary) => published.push(summary),
+      forget: vi.fn()
+    })
+    feed.publishAtRest(SESSION, {
+      interrupted: true,
+      known: true,
+      openTurn: { itemId: 'retained-cut', since: 100 },
+      lastSequence: 2,
+      lastSavedAt: 100
+    })
+    const expected = {
+      status: 'idle',
+      statusStartedAt: 100,
+      turnOutcome: 'cancellation',
+      restoredInterruption: true
     }
-  )
+    const check = () => {
+      expect(published.at(-1)).toMatchObject(expected)
+      expect(events.at(-1)).toMatchObject({ type: 'status', session: expected })
+      expect(published.at(-1)?.restoredInterruption).toBe(true)
+    }
+    check()
+    journal = await openJournal(SESSION, () => 999)
+    sessions.set(SESSION, { journal })
+    feed.publish(SESSION, journal)
+    check()
+    await journal.appendItem(
+      { ...USER_IDENTITY, ordinal: 2 },
+      { kind: 'message', role: 'assistant', blocks: [{ type: 'text', text: 'hygiene' }] },
+      { turnScope: { kind: 'turn', turnItemId: agentJournalItemKey(TURN_IDENTITY) }, fence: 2 }
+    )
+    feed.publish(SESSION, journal)
+    check()
+    await journal.close()
+    sessions.delete(SESSION)
+    journal = await openJournal(SESSION, () => 2000)
+    sessions.set(SESSION, { journal })
+    feed.publish(SESSION, journal)
+    check()
+    record.lease.claimStatus = 'live'
+    record.lease.runtimeFence = 3
+    sessions.set(SESSION, { journal, child: { phase: 'ready', generation: 'new', fence: 3 } })
+    await journal.appendItem(
+      { ...TURN_IDENTITY, turnId: 'genuine-new' },
+      { kind: 'turn', turnId: 'genuine-new', state: 'running', startedAt: 2000 },
+      { turnScope: AGENT_JOURNAL_THREAD_SCOPE, fence: 3 }
+    )
+    feed.publish(SESSION, journal)
+    expect(published.at(-1)).toMatchObject({ status: 'working' })
+    expect(published.at(-1)?.restoredInterruption).toBeUndefined()
+  })
 
   it('persists exact raw held IDs through reversible Codex activity and overlapping host handovers', async () => {
     const journal = await openJournal(SESSION, () => 100)
