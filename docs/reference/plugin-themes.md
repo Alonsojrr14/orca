@@ -28,7 +28,11 @@ Each entry is `{ "id", "label", "path" }` pointing at a JSON file of at most 16 
 ## Terminal themes
 
 ```json
-{ "schemaVersion": 1, "mode": "dark", "terminal": { "background": "#1b1430", "foreground": "#e8e0ff", "red": "#ff6b8b" } }
+{
+  "schemaVersion": 1,
+  "mode": "dark",
+  "terminal": { "background": "#1b1430", "foreground": "#e8e0ff", "red": "#ff6b8b" }
+}
 ```
 
 Colors are hex. A palette needs `background`, `foreground` and at least one ANSI color. When a

@@ -1498,9 +1498,6 @@
         "3fdf777817": "GitHub で開く",
         "c43fe79ee0": "GitHub リンクをコピーする",
         "0caac1a18f": "PR からワークスペースを開始する",
-        "8223320f8d": "更新されました",
-        "10ef1afb8e": "· 更新されました",
-        "55962099bc": "この Issue を作成しました",
         "0ab4664a8b": "Issue からワークスペースを開始",
         "36182aa57f": "新規ワークスペースを開始",
         "fe6ff12dc2": "Issue ワークスペースのその他の操作",
@@ -1573,8 +1570,6 @@
         "52b20b56f7": "説明",
         "4d555d3796": "説明の編集",
         "9df4e74bdf": "保存",
-        "0ae387d8ca": "による",
-        "228e2f59d3": "解決済み",
         "a154ec5224": "GitHub でコメントを開く",
         "bca8eb39ac": "コメントに返信",
         "68cb993d61": "解決済み",
@@ -1590,7 +1585,6 @@
         "d43736d09c": "コードコンテキストコントロール",
         "bd7be7b1fd": "コメントL",
         "db61d76cd5": "コードコンテキストを読み込み中…",
-        "f2d02cdf8c": "閲覧したファイル",
         "1257d1435d": "ファイルツリーを表示",
         "a341343303": "レビューコメントを追加しました。",
         "d1fa2cf888": "PR ヘッドの SHA がないとコメントできません。",
@@ -1630,8 +1624,6 @@
         "ec5c4b3ab2": "PR 再開",
         "21860b58d0": "PR を閉じる",
         "5932578f51": "マージには登録済みのローカルリポジトリが必要です",
-        "e2bf3e41a9": "コメント",
-        "28d0d3374f": "スレッド",
         "080d071d48": "@{{value0}} に返信",
         "86f809e2ce": "このレビュースレッドに返信する",
         "136542c9ba": ":L{{value0}}",
@@ -1661,7 +1653,9 @@
           "from": "から",
           "to": "to",
           "activity": "アクティビティ",
-          "noActivity": "まだアクティビティはありません。"
+          "noActivity": "まだアクティビティはありません。",
+          "pullRequestReference": "PR #{{number}}",
+          "issueReference": "Issue #{{number}}"
         },
         "checkActionRequiredHint": "マージのブロックを解除するには、GitHub 上での手動操作（例: 実行の承認）が必要です。",
         "e15a8b77ef": "このチェックではインライン詳細は利用できません。",
@@ -1675,8 +1669,13 @@
         "09d67a0f9b": "PR をクローズできませんでした",
         "88809e79db": "PR の再開に失敗しました",
         "00f55cc17b": "この PR ではリポジトリにアクセスできません。",
-        "reactionCountSingular": "{{reaction}} 反応 {{count}} 件",
-        "reactionCountPlural": "{{reaction}} 反応 {{count}} 件"
+        "reactionCount_other": "{{reaction}} の反応 {{count}} 件",
+        "filesViewed_other": "{{viewed}} / {{count}} ファイルを閲覧済み",
+        "updatedRelativeTime": "{{time}} に更新",
+        "authorOpenedThisIssue": "<author/> がこの Issue を作成しました",
+        "middotUpdatedRelativeTime": "· {{time}} に更新",
+        "resolvedThreadBy": "{{author}} の解決済みスレッド",
+        "resolvedCommentBy": "{{author}} の解決済みコメント"
       },
       "GitLabItemDialog": {
         "65e784c1f1": "再度開く",
@@ -1732,14 +1731,13 @@
         "f23ea85341": "解決済み",
         "6de8ce0cc6": "{{value0}}は必須です",
         "22511537d2": "承認された",
-        "00f3bab87b": "{{value0}} 個が必要です",
         "3a051b8ade": "作業項目",
         "32f8bef818": "ログは出力されません。",
         "4168eb2c51": "解決",
         "commentTooLarge": "コメントが大きすぎるため安全に送信できません。",
         "gitlabActionFailed": "GitLab 操作が失敗しました。",
-        "approvalsRemainingSingular": "残り {{count}} 件の承認",
-        "approvalsRemainingPlural": "残り {{count}} 件の承認"
+        "approvalsRemainingOfRequired_other": "必要な承認 {{required}} 件のうち残り {{count}} 件",
+        "approvalsRemaining_other": "残り {{count}} 件の承認"
       },
       "JiraIssueWorkspace": {
         "b0b92666c9": "コメント",
@@ -1764,14 +1762,11 @@
         "69da9a208c": "Jira で開く",
         "fa132c8aed": "コメントの追加に失敗しました。",
         "ea21952aa3": "Jira Issue を更新できませんでした。",
-        "6c41a9bcea": "{{value0}} のコピーに失敗しました",
-        "2ff69a3545": "{{value0}} をコピーしました",
         "666cfdd835": "不明",
         "ef21405c6d": "Jira Issue",
         "commentTooLarge": "コメントが大きすぎるため安全に送信できません。"
       },
       "Landing": {
-        "76a95f7f47": "作成",
         "f9eaa9e12d": "プロジェクトを追加",
         "6ca6ff404e": "ORCA",
         "520304a067": "Orca のロゴ",
@@ -1787,7 +1782,12 @@
         "0d0ace8861": "GitHub でスターを付ける",
         "ec43b38ba7": "GitHub でスター済み",
         "157bb5ecbb": "GitHub を開く",
-        "preflightDismiss": "閉じる"
+        "preflightDismiss": "閉じる",
+        "moveUpWorkspace": "前のワークスペースを選択",
+        "moveDownWorkspace": "次のワークスペースを選択",
+        "installGit": "Git をインストール",
+        "installGitHubCli": "GitHub CLI をインストール",
+        "learnMore": "詳しく見る"
       },
       "LinearIssueMarkdownDescriptionEditor": {
         "d9c47069ef": "Markdown",
@@ -1818,7 +1818,6 @@
         "ad5dec37b7": "選択した Issue をプレビュー・編集し、そこから作業を開始します。",
         "c23e79e5c0": "操作",
         "b0eac92d85": "再試行",
-        "fabbd3f974": "Issue を更新しました ·",
         "543970c87a": "アクティビティ",
         "df4c86ed12": "閉じる",
         "7a4997d8bb": "Linear Issue のプレビューを閉じる",
@@ -1842,11 +1841,8 @@
         "b25e453c9d": "サブ Issue の作成に失敗しました",
         "aeed19d003": "{{value0}} を作成しました",
         "9a1317cdd3": "サブ Issue のロードに失敗しました",
-        "9bcbaa2737": "{{value0}} のコピーに失敗しました",
-        "7835483c43": "{{value0}} をコピーしました",
         "61f424f8ca": "Linear Issue",
         "ca8778c124": "不明",
-        "8a33c85e9c": "誰か",
         "65239a714b": "Linear",
         "76ffd3c937": "追加するプロジェクトを検索します。",
         "c11b4e3cc2": "プロジェクトが見つかりませんでした。",
@@ -1857,7 +1853,10 @@
         "moreWorkspaceActions": "Issue ワークスペースのその他の操作",
         "startNewWorkspace": "新規ワークスペースを開始",
         "workspaceSection": "ワークスペース",
-        "noWorkspaceYet": "まだありません"
+        "noWorkspaceYet": "まだありません",
+        "issueDescriptionLabel": "Issue の説明",
+        "namedUserUpdatedIssue": "{{name}} が Issue を更新 · {{time}}",
+        "someoneUpdatedIssue": "誰かが Issue を更新 · {{time}}"
       },
       "LinearItemDrawer": {
         "04008e6c46": "Issue からワークスペースを開始",
@@ -1893,7 +1892,9 @@
         "openAttachedWorkspace": "Issue にリンクされたワークスペースを開く",
         "openWorkspace": "ワークスペースを開く",
         "moreWorkspaceActions": "Issue ワークスペースのその他の操作",
-        "startNewWorkspace": "新規ワークスペースを開始"
+        "startNewWorkspace": "新規ワークスペースを開始",
+        "setEstimate": "見積もりを設定",
+        "estimateValue": "見積もり {{estimate}}"
       },
       "NewWorkspaceComposerCard": {
         "cbb47ee0dc": "ローカル Git プロジェクトでのみ使用できます。",
@@ -1955,7 +1956,22 @@
         "defaultBranchUpdateFailed": "プロジェクトのデフォルトブランチを更新できませんでした。再試行。",
         "setLocation": "プロジェクトの場所を設定する",
         "setLocationOnHost": "プロジェクトの場所を {{host}} に設定します",
-        "setLocationTooltip": "フォルダーを選択するか、このプロジェクトを {{host}} に複製します。"
+        "setLocationTooltip": "フォルダーを選択するか、このプロジェクトを {{host}} に複製します。",
+        "connect": "接続",
+        "reconnect": "再接続",
+        "setupConfigDefaultTabs": "デフォルトタブのコマンド",
+        "setupConfigSetupAndDefaultTabs": "セットアップとデフォルトタブのコマンド",
+        "setupConfigSetupScript": "セットアップスクリプト",
+        "runDefaultTabCommands": "デフォルトタブのコマンドを実行",
+        "runSetupAndDefaultTabCommands": "セットアップとデフォルトタブのコマンドを実行",
+        "runSetupCommand": "セットアップコマンドを実行",
+        "askRunDefaultTabCommands": "デフォルトタブのコマンドを今すぐ実行しますか？",
+        "askRunSetupAndDefaultTabCommands": "セットアップとデフォルトタブのコマンドを今すぐ実行しますか？",
+        "askRunSetup": "今すぐセットアップを実行しますか？",
+        "runSetupNow": "今すぐセットアップを実行",
+        "runCommandsNow": "今すぐコマンドを実行",
+        "skipForNow": "今はスキップ",
+        "skipCommands": "コマンドをスキップ"
       },
       "NewWorkspaceComposerModal": {
         "createWorktree": "ワークツリーを作成する",
@@ -2045,9 +2061,6 @@
         "778683ec84": "説明",
         "da9aaa8bcf": "説明の編集",
         "4a337ac05f": "保存",
-        "169a93b29a": "更新されました",
-        "3c891789f6": "による",
-        "f4fe47c2bb": "解決済み",
         "0ac19bb52e": "GitHub でコメントを開く",
         "d6c6679de7": "コメントに返信",
         "76b2a0ac5b": "解決済み",
@@ -2055,7 +2068,6 @@
         "6885c619e7": "リポジトリパスがないと返信できません。",
         "d94810f652": "説明の更新に失敗しました。",
         "9b4190dc98": "説明が更新されました。",
-        "89e80af1c7": "閲覧したファイル",
         "319cf2d54b": "ファイルツリーを表示",
         "eff839f438": "レビューコメントを追加しました。",
         "d8c3ba91c4": "PR ヘッドの SHA がないとコメントできません。",
@@ -2093,8 +2105,6 @@
         "9d5425918e": "PR 再開",
         "96d013ed28": "PR を閉じる",
         "eca289e593": "マージには登録済みのローカルリポジトリが必要です",
-        "e01e34f5fa": "コメント",
-        "345b68254c": "スレッド",
         "31a7b202f2": "@{{value0}} に返信",
         "408e634fbb": "このレビュースレッドに返信する",
         "34b9f7c264": ":L{{value0}}",
@@ -2120,7 +2130,18 @@
         "diffLoadTimedOut": "この差分の読み込みがタイムアウトしました。",
         "6b1d5ee3e4": "このチェックではインライン詳細は利用できません。",
         "e04c027d98": "チェックの詳細をロードできませんでした。",
-        "5df7c41d2a": "再試行"
+        "5df7c41d2a": "再試行",
+        "filesViewed_other": "{{viewed}} / {{count}} ファイルを閲覧済み",
+        "updatedRelativeTime": "{{time}} に更新",
+        "resolvedThreadBy": "{{author}} の解決済みスレッド",
+        "resolvedCommentBy": "{{author}} の解決済みコメント",
+        "mentionSource": {
+          "prAuthor": "PR 作成者",
+          "issueAuthor": "Issue 作成者",
+          "commenter": "コメント投稿者",
+          "participant": "参加者",
+          "teamMember": "チームメンバー"
+        }
       },
       "QuickOpen": {
         "1dbd3f59ff": "移動",
@@ -2134,9 +2155,11 @@
         "9e97f08d0f": "開くファイルを検索する",
         "ec31e058f7": "ファイルに移動",
         "73b44e7bde": "インストールコマンドのコピー",
-        "b227d88520": "{{value0}} ファイルが見つかりました",
         "995be8ea22": "コピー",
-        "cf144856dc": "コピーしました"
+        "cf144856dc": "コピーしました",
+        "filesFound_other": "{{count}} 件のファイルが見つかりました",
+        "hostCouldNotOpenPath": "ホストがこのファイルパスを開けませんでした。",
+        "chooseFileNotDirectory": "ディレクトリではなくファイルを選択してください。"
       },
       "SelectedTextCopyMenu": {
         "9b40d7b018": "コピー"
@@ -2154,7 +2177,6 @@
       "TaskPage": {
         "ff69a30681": "キャンセル",
         "8ff6fdc368": "作成中…",
-        "fc0d8a1fa4": "提出する。",
         "919a20dd5b": "{{value0}}と入力",
         "56cdb413a2": "カンマ区切りの値",
         "1f0fce91e3": "{{value0}} を選択",
@@ -2202,11 +2224,9 @@
         "bdebffcbfe": "選択したチームの Linear プロジェクトを作成します。",
         "1361275ec3": "新規 Linear プロジェクト",
         "7f3f7b4c18": "説明 (オプション、markdown)",
-        "9f2b4c03a6": "提出する",
         "d3d0998b7d": "GitHub の新規 Issue",
         "6244a02f46": "Linear で開く",
         "606a85c774": "オープン",
-        "5e8061b088": "{{value0}} {{value1}} からワークスペースを開始します",
         "592a55611b": "さらにチームを選択するか更新してみてください。チームフィルターは、現在取得されている Issue セットに適用されます。",
         "618107fab3": "選択したチームと一致する取得済み Issue はありません",
         "903c7af49f": "Linear Issue が見つかりません",
@@ -2215,7 +2235,6 @@
         "f362667d55": "更新済み",
         "b1eaa18ace": "Issue",
         "37e7ee311e": "キー",
-        "b7bae28b6a": "示されている",
         "a26a48252e": "表示プロパティ",
         "5d2d835467": "並べ替え",
         "5659da12fc": "グループ化",
@@ -2255,8 +2274,6 @@
         "054bf695cc": "下書き",
         "5b6b2af943": "再試行中…",
         "0c0de0fc0e": "からの Issue を読み込めませんでした",
-        "d1766fd62d": "プロジェクトのロードに失敗しました",
-        "7762f4b03a": "の",
         "443f7dd928": "マージ",
         "a7396b05c6": "チェック",
         "f6fa3c97d0": "レビュアー",
@@ -2438,10 +2455,36 @@
         "jiraColumnOriginalEstimate": "見積もり",
         "jiraColumnRemainingEstimate": "残り",
         "jiraBoardEmptyColumn": "Issue はありません",
-        "labelCountPlural": "{{count}} 個のラベル",
-        "labelCountSingular": "{{count}} 個のラベル",
-        "memberCountPlural": "{{count}} 人のメンバー",
-        "memberCountSingular": "{{count}} 人のメンバー"
+        "backToPullRequests": "PR",
+        "backToGitHubList": "GitHub の一覧",
+        "noGitHubRepositoryContext": "この Issue の GitHub リポジトリのコンテキストはありません。",
+        "filingInTarget": "{{target}} に作成",
+        "filingInThisRepository": "このリポジトリに作成",
+        "shortcutToSubmit": "{{shortcut}} で送信。",
+        "projectsFailedToLoad_other": "{{count}} 件中 {{failed}} 件のプロジェクトを読み込めませんでした",
+        "draftPullRequestNumber": "ドラフトの PR #{{number}}",
+        "pullRequestNumber": "PR #{{number}}",
+        "issueNumber": "Issue #{{number}}",
+        "loadGitHubWorkFailed": "GitHub の作業項目を読み込めませんでした。",
+        "gitlabViewIssues": "Issue",
+        "gitlabViewMrs": "MR",
+        "gitlabViewTodos": "自分の ToDo",
+        "startWorkspaceFromMr": "MR {{number}} からワークスペースを開始",
+        "startWorkspaceFromIssue": "Issue {{number}} からワークスペースを開始",
+        "shownCount_other": "{{count}} 件表示",
+        "linearProjectPlaceholder": "プロジェクト",
+        "labelCount_other": "{{count}} 個のラベル",
+        "memberCount_other": "{{count}} 人のメンバー",
+        "groupUnassigned": "未割り当て",
+        "linearProjectContext": "プロジェクト: {{name}}",
+        "linearViewContext": "ビュー: {{name}}",
+        "changedFileCount_other": "{{count}} ファイル",
+        "resumeRestoration": {
+          "linearProjectNotFound": "保存された Linear プロジェクトが見つかりませんでした。",
+          "linearProjectRestoreFailed": "保存された Linear プロジェクトを復元できませんでした。",
+          "linearViewNotFound": "保存された Linear ビューが見つかりませんでした。",
+          "linearViewRestoreFailed": "保存された Linear ビューを復元できませんでした。"
+        }
       },
       "Terminal": {
         "73768427cf": "閉じる",
@@ -2516,7 +2559,8 @@
         "b1e390250d": "ローカルビルドの切り替えを完了できませんでした。",
         "d29740d175": "選択したビルドを使用できませんでした。",
         "37d45c9ec1": "別のビルドを選択",
-        "7f1a4c9e02": "システムパッケージマネージャーによって Orca がインストールされているため、そこから更新してください。Orca はこのリリース自体をインストールできません。"
+        "7f1a4c9e02": "システムパッケージマネージャーによって Orca がインストールされているため、そこから更新してください。Orca はこのリリース自体をインストールできません。",
+        "compatibilityModeFailed": "互換モードを有効にできませんでした。{{message}}"
       },
       "WorktreeJumpPalette": {
         "ac037cfac2": "移動",
@@ -2542,8 +2586,6 @@
         "d7d496a451": "ブラウザページはもう存在しません",
         "50a1d11d5b": "開いているタブ",
         "088d66d980": "操作と設定",
-        "20af998bff": "{{value0}}アイテムが利用可能{{value1}}",
-        "bb72c08e63": "{{value0}} の結果が見つかりました{{value1}}",
         "34c8fbb46e": "SSH リモート",
         "63c2be1914": "SSH が切断されました",
         "95be6587d3": "ワークツリー「{{value0}}」を作成する",
@@ -2560,7 +2602,10 @@
         "27f10cca63": "チャット、ターミナル、ワークスペース、タスク、設定、操作を検索します…",
         "2770f02910": "チャット、ターミナル、ワークスペース、タスク、設定、操作を検索します",
         "recentChatsTerminalsHeader": "最近のチャットとターミナル",
-        "lastActiveTime": "最後にアクティブになったのは{{value0}}前です"
+        "lastActiveTime": "最後にアクティブになったのは{{value0}}前です",
+        "resultsFound_other": "{{count}} 件の結果が見つかりました。",
+        "itemsAvailable_other": "{{count}} 件の項目が利用可能です。",
+        "createActionAvailable": "ワークツリーの作成操作が利用可能です。"
       },
       "github": {
         "pr": {
@@ -2601,7 +2646,8 @@
               "8f6cb3772f": "要件が満たされると、この PR を自動的にマージします",
               "def355ff38": "マージ可能",
               "e42c5bae67": "GitHub によると、この PR はマージ可能で、チェックも成功しています",
-              "cbf0113af6": "GitHub によると、この PR はマージ可能です"
+              "cbf0113af6": "GitHub によると、この PR はマージ可能です",
+              "autoMergeOn": "自動マージ有効"
             }
           }
         },
@@ -2775,10 +2821,10 @@
           "imageUrlTooLarge": "画像 URL が大きすぎます。"
         },
         "IssueSourceSelector": {
-          "d6aeb2012b": "からの Issue を表示しています",
           "787c970baf": "Issue ソース",
           "51d1608920": "オリジン",
-          "30b2c9df91": "upstream"
+          "30b2c9df91": "upstream",
+          "showingIssuesFromRepo": "<repo/> の Issue を表示中"
         },
         "PRFilterDropdowns": {
           "979be3cf6b": "担当者",
@@ -2788,12 +2834,18 @@
           "01f3f3d161": "著者",
           "13b3ac0a84": "状態",
           "79c54552f7": "フィルター",
-          "8a2ffbf9b3": "{{value0}} フィルターを解除"
+          "8a2ffbf9b3": "{{value0}} フィルターを解除",
+          "anyState": "指定なし",
+          "currentUser": "現在のユーザー"
         },
         "PRFilterPickers": {
-          "fdf387297c": "クリア （",
           "472c12ae03": "クリア",
-          "2d1f58eda6": "使用"
+          "pressEnterToUseValue": "Enter を押すと入力した値を使用します。",
+          "useTypedValue": "<value/> を使用",
+          "clearSelected": "クリア ({{count}})",
+          "loading": "読み込み中…",
+          "searchTextTooLarge": "検索テキストが大きすぎます。",
+          "noMatches": "一致なし"
         },
         "PRFilterSections": {
           "a00830d3f7": "ユーザーがいません",
@@ -2803,7 +2855,6 @@
           "458ea3602b": "著者がいません",
           "b69fa4fa20": "戻る",
           "30ebb6ca44": "すべてのフィルターをクリア",
-          "8177eda37e": "フィルター",
           "ea3416d646": "担当者",
           "b1d9fdea08": "ラベル",
           "24754c44ad": "著者",
@@ -2815,7 +2866,14 @@
           "2b2f019091": "すべての状態",
           "0fd3249e2e": "クローズ",
           "d78b60b5c2": "オープン",
-          "bd162b7d5a": "マージ済み"
+          "bd162b7d5a": "マージ済み",
+          "draft": "下書き",
+          "labelCount_other": "{{count}} 個のラベル",
+          "allStates": "全て",
+          "filterPullRequests": "PR を絞り込む",
+          "filterIssues": "Issue を絞り込む",
+          "filterOrTypeLogin": "絞り込むかログイン名を入力…",
+          "filterLabels": "ラベルを絞り込む…"
         },
         "github": {
           "rate": {
@@ -2826,15 +2884,14 @@
                 "d12d3d6f33": "GitHub API 予算を更新する",
                 "d5e5de9070": "Orca は、GitHub CLI を通じて REST、Search、GraphQL を使用します。",
                 "58c5f88216": "GitHub API の予算",
-                "6da1858354": "左 · リセット",
-                "f42790d150": "の",
                 "01f7323e58": "GraphQL API",
                 "1daf0f22a9": "GraphQL",
                 "1f2f28a4de": "検索API",
                 "c377a4f06a": "検索",
                 "c392c749a6": "REST API",
                 "bb227706a6": "REST",
-                "budget_scope_prefix": "予算スコープ"
+                "budget_scope_prefix": "予算スコープ",
+                "remainingOfLimitResetsIn": "残り {{remaining}} / {{limit}} · {{reset}} 後にリセット"
               }
             }
           }
@@ -2842,7 +2899,29 @@
         "CommentReactions": {
           "addReaction": "リ操作を追加",
           "removeNamedReaction": "{{value0}} 反応を削除",
-          "addNamedReaction": "{{value0}} 反応を追加"
+          "addNamedReaction": "{{value0}} 反応を追加",
+          "reaction": {
+            "thumbsUp": "いいね",
+            "thumbsDown": "よくないね",
+            "laugh": "笑い",
+            "confused": "困惑",
+            "heart": "ハート",
+            "hooray": "やったー",
+            "rocket": "ロケット",
+            "eyes": "目"
+          }
+        },
+        "CommentCodeContext": {
+          "showSurroundingCodeBlock": "周囲のコードブロックを表示",
+          "showNearbyCodeContext": "近くのコードのコンテキストを表示"
+        },
+        "prCheckPresentation": {
+          "successful": "成功",
+          "inProgress": "進行中"
+        },
+        "IssueSourceIndicator": {
+          "issueFromRepo": "<repo/> の Issue",
+          "issuesFromRepo": "<repo/> の Issue"
         }
       },
       "linear": {
@@ -2860,11 +2939,6 @@
               "7d498f653c": "個人用APIキー",
               "c9889a09f8": "キーを作成する前に、[Linear] を使用して目的のワークスペースを選択します。"
             }
-          }
-        },
-        "priority": {
-          "icon": {
-            "c43d3e065b": "優先度："
           }
         },
         "project": {
@@ -2885,7 +2959,6 @@
               "c8db98b73b": "リソース",
               "bb1405eff8": "マイルストーン",
               "5d99315fb8": "企画",
-              "3ad562bdf4": "スコープされた Issue",
               "563501f191": "進捗",
               "bb5664d456": "プロジェクトの説明はありません。",
               "7b147907dc": "Linear",
@@ -2910,7 +2983,9 @@
               "df4bd63c1d": "未割り当て",
               "30402d2c6e": "検索または更新してみてください。",
               "a2f31c4cd6": "Linear プロジェクトが見つかりません",
-              "c9b6e9f90d": "Linear プロジェクトをロードできません"
+              "c9b6e9f90d": "Linear プロジェクトをロードできません",
+              "scopedIssueCount_other": "対象範囲内の Issue {{count}} 件",
+              "backlog": "バックログ"
             }
           }
         },
@@ -2923,7 +2998,13 @@
             "05baa5ae90": "ワークスペース",
             "89f6580dbf": "チームを検索…",
             "b3488fad3c": "チームはフェッチされませんでした。アクセスは、キーのスコープ、プライベートチームのメンバーシップ、アーカイブされたチーム、権限、またはフェッチの失敗によって異なります。",
-            "405b33c378": "検索に一致する取得チームはありません。"
+            "405b33c378": "検索に一致する取得チームはありません。",
+            "teamCount_other": "{{count}} チーム"
+          }
+        },
+        "priority": {
+          "icon": {
+            "priorityValue": "優先度: {{label}}"
           }
         }
       },
@@ -6305,7 +6386,11 @@
           "e8f25bd903": "ターミナルクリーンアップを完了できませんでした。",
           "a702d4196e": "これにより、すべてのワークスペースのターミナルタブが閉じられ、現在のターミナルセッションのシャットダウンがリクエストされます。保存されていないターミナル作業は失われます。デーモン自体は実行を続け、新規ターミナルはすぐに開けます。この操作は取り消せません。",
           "01d6b7c64e": "ターミナルを開くと Agent が再起動します。リモートホスト上のターミナルは影響を受けません。",
-          "922548bc66": "ターミナルサービスを再起動しますか?"
+          "922548bc66": "ターミナルサービスを再起動しますか?",
+          "confirmRestart": "再起動",
+          "busyRestarting": "再起動中…",
+          "confirmKillAll": "すべてのセッションを終了",
+          "busyKilling": "終了中…"
         },
         "MacFolderAccessFixDialog": {
           "stepAllow": "ファイルとフォルダーで Orca を許可する",
@@ -12130,14 +12215,13 @@
       "right": {
         "sidebar": {
           "BulkActionBar": {
-            "79a9f5f712": "アンステージ (",
-            "ef5f5bd06e": "ステージ（",
-            "60ed678138": "選択中"
+            "selectedCount_other": "{{count}} 件選択中",
+            "stageCount": "ステージ ({{count}})",
+            "unstageCount": "アンステージ ({{count}})"
           },
           "ChecksPanel": {
             "2ef90c9819": "失敗したチェックに対して AI Agent を開始しました。",
             "a0181a8d76": "競合の解決のために AI Agent を開始しました。",
-            "34464d00b9": "更新されました",
             "058039787c": "キャンセル",
             "2ab7fd4b6d": "保存",
             "dda5924a40": "チェックには Git ブランチとホストされたレビューコンテキストが必要です",
@@ -12183,7 +12267,8 @@
             "430f1a62d4": "選択したスレッドをホスト上で解決できませんでした。",
             "updateReactionFailed": "反応を更新できませんでした。",
             "gitlabMoreActions": "その他の MR 操作",
-            "gitlabLinkAnother": "別の MR をリンクする"
+            "gitlabLinkAnother": "別の MR をリンクする",
+            "reviewUpdatedAt": "{{review}} を {{time}} に更新"
           },
           "CreateHostedReviewComposer": {
             "741ff8a0d2": "プッシュして{{value0}}を作成"
@@ -12340,7 +12425,14 @@
             "740aca88ab": "ワークスペースのポートスキャンに失敗しました。",
             "5be4f7f727": "ポート {{value0}} メニュー",
             "1004af16ab": "{{value0}}をコピー",
-            "153d3a8026": "ワークスペースのホストが不明です"
+            "153d3a8026": "ワークスペースのホストが不明です",
+            "unknownProcess": "不明なプロセス",
+            "containerOrForwardedService": "コンテナーまたは転送されたサービス",
+            "unassigned": "未割り当て",
+            "remotePortOutOfRange": "リモートポートは 1–65535 の範囲で指定してください",
+            "localPortOutOfRange": "ローカルポートは 1–65535 の範囲で指定してください",
+            "localPortInUse": "ポート {{port}} は使用中です。別のローカルポートを選択してください。",
+            "localPortRequiresPrivileges": "ポート {{port}} には管理者権限が必要です。1024 以上のローカルポートを使用してください。"
           },
           "Search": {
             "1abfb25a66": "ファイル内を検索するために入力します",
@@ -12397,7 +12489,6 @@
             "476b77745b": "ベース参照の変更",
             "ed34038d0d": "ブランチ比較をリフレッシュ",
             "493f963029": "ベース参照を変更する",
-            "3278b2767b": "進んでいる",
             "11b5dd8e41": "と比較する",
             "a9bf7c171a": "コミット失敗",
             "011f9713fc": "コミットがブロックされました",
@@ -12442,7 +12533,6 @@
             "574d2f4413": "ノートをクリア",
             "05bb8f4a48": "キャンセル",
             "48db37cca9": "すべて見る",
-            "78ce2d37ac": "フォークにプッシュ",
             "c05fe04839": "{{value0}} (原点ではない) のフォークにプッシュします",
             "c35baf2f1e": "ファイルをフィルタリング…",
             "2fe2a67580": "その他のメモ操作",
@@ -12450,14 +12540,12 @@
             "cc474e0b8c": "ノート",
             "e131cd7128": "ソース管理は Git リポジトリでのみ使用できます",
             "c07b236287": "変更を表示するワークスペースを選択",
-            "dc5a6465fc": "{{value0}} (例: {{value1}}{{value2}})",
             "a5e5a11090": "失敗したすべての破棄 - 破棄する前にファイルをステージング解除できません",
             "8a5ba6a988": "コミット差分をロードできませんでした",
             "fe5bd1a610": "{{value0}} を作成しています…",
             "812cb992ee": "{{value0}} で開く",
             "eef5446523": "{{value0}} #{{value1}} はすでに開いています",
             "0453ca3a9a": "{{value0}} が作成されましたが、Orca はまだ更新できませんでした。",
-            "f99560ab29": "{{value0}} の中止に失敗しました",
             "eae7a1da5f": "メモを消去できませんでした。",
             "df5040e3c3": "アンステージ",
             "8cde1a2fb0": "ステージ",
@@ -12485,8 +12573,6 @@
             "aaf1451654": "ドラフト {{value0}} を作成する",
             "26511c22b4": "作成中…",
             "d7ae61269b": "コミット先のブランチ",
-            "branchFilesChangedVsBaseOne": "{{ref}} と比べて 1 ファイルが変更されています",
-            "branchFilesChangedVsBaseOther": "{{ref}} と比べて {{count}} ファイルが変更されています",
             "48a003c1b1": "ステージ済みの変更",
             "d4ef4bafc5": "変更点",
             "9339382454": "すべてのステージを解除する",
@@ -12496,7 +12582,6 @@
             "72f2bea3f4": "ノートを展開する",
             "d13edef890": "メモを折りたたむ",
             "d6fb1df5fe": "{{value0}} はすでに開いています",
-            "05838cfdeb": "{{value0}} コンフリクト",
             "0b5b8c234c": "{{value0}} ({{value1}}) を開く",
             "d97ef8f221": "{{value0}}-{{value1}} 行",
             "6f8bfa0eb9": "{{value0}} 行",
@@ -12509,7 +12594,6 @@
             "5b176fa431": "双方で削除",
             "31f6d46278": "未解決",
             "2c417432b7": "ローカルで解決済み",
-            "d206117f90": "{{value0}} コンフリクト ({{value1}})",
             "f3a8b2c1d0e5": "{{value0}} のタイトルを入力してください。",
             "e2b7a1c0d9f4": "{{value0}} の作成に失敗しました",
             "hugeRepoIgnorePrompt": "このリポジトリにはアクティブな変更が多すぎます。「{{value0}}」を .gitignore に追加しますか？",
@@ -12550,10 +12634,6 @@
             "b3c8f1a902": "ファイル名でフィルター",
             "d4f8c2a901": "フィルターをクリアして閉じる",
             "e8a1c4b203": "vs",
-            "compareBaseCommitsAheadOne": "{{ref}} より 1 コミット進んでいます",
-            "compareBaseCommitsAheadOther": "{{ref}}より{{count}}コミット進んでいます",
-            "compareBaseCommitsBehindOne": "{{ref}} より 1 コミット遅れています",
-            "compareBaseCommitsBehindOther": "{{ref}}より{{count}}コミット遅れています",
             "4b4a7de138": "ブラウザでレビューページを開く",
             "createPrIntentCommitBlockedSummary": "コミットがブロックされました：{{value0}} Issue を修正して、PR 作成を再試行してください。",
             "pushRecovery": {
@@ -12584,17 +12664,41 @@
             "diffCommentNotesCopyFailed": "メモのコピーに失敗しました",
             "conflictCount_one": "競合 {{count}} 件",
             "conflictCount_other": "競合 {{count}} 件",
-            "discardFailedSingular": "{{count}} 個のファイルを破棄できませんでした",
-            "discardFailedPlural": "{{count}} 個のファイルを破棄できませんでした",
-            "noteCountSingular": "メモ {{count}} 件",
-            "noteCountPlural": "メモ {{count}} 件"
+            "discardFailedSampleMore_other": "{{paths}}、ほか +{{count}} 件",
+            "discardFailed_other": "{{count}} 個のファイルの変更を破棄できませんでした",
+            "discardFailedWithSample": "{{error}} (例: {{paths}})",
+            "compareBaseCommitsAhead_other": "{{ref}} より {{count}} コミット進んでいます",
+            "compareBaseCommitsBehind_other": "{{ref}} より {{count}} コミット遅れています",
+            "branchFilesChangedVsBase_other": "{{ref}} と比べて {{count}} ファイルが変更されています",
+            "noteCount_other": "メモ {{count}} 件",
+            "comparingAgainstRef": "{{ref}} と比較中",
+            "commitsAheadShort_other": "{{count}} 件先行",
+            "unresolvedConflictOfKind": "未解決の競合 ({{kind}})",
+            "unresolvedConflict": "未解決の競合",
+            "locallyResolvedConflictOfKind": "ローカルで解決済みの競合 ({{kind}})",
+            "locallyResolvedConflict": "ローカルで解決済みの競合",
+            "pushesToForkTarget": "フォーク {{target}} にプッシュ",
+            "abortRebaseConfirmTitle": "リベースを中止しますか？",
+            "abortMergeConfirmTitle": "マージを中止しますか？",
+            "abortRebaseConfirmDescription": "進行中のリベースを中止します。このリベース中に行った競合の解決が破棄される場合があります。",
+            "abortMergeConfirmDescription": "進行中のマージを中止します。このマージ中に行った競合の解決が破棄される場合があります。",
+            "abortRebaseFailedFallback": "リベースを中止できませんでした",
+            "abortMergeFailedFallback": "マージを中止できませんでした",
+            "abortRebaseFailed": "リベースの中止に失敗しました",
+            "abortMergeFailed": "マージの中止に失敗しました",
+            "clearNotesFromWorkspace_other": "このワークスペースから {{count}} 件のメモを削除しますか？",
+            "clearNotesFromFile_other": "{{path}} から {{count}} 件のメモを削除しますか？"
           },
           "SourceControlAgentActionDialog": {
             "8e856842d1": "選択した Agent を開始できませんでした。",
             "c075d00de1": "ワークスペースの接続を解決できません。",
             "808cfe0a3b": "このリポジトリのみに保存",
             "994cddd1f7": "保存しないでください",
-            "38b899cc02": "すべてのリポジトリ"
+            "38b899cc02": "すべてのリポジトリ",
+            "agentNotEnabledOrDetected": "{{agent}} は、このワークスペースのホストで有効になっていないか、検出されませんでした。",
+            "workspaceConnectionUnresolved": "ワークスペースの接続を解決できません。",
+            "noEnabledAgentsDetected": "このワークスペースのホストで有効な Agent が検出されませんでした。",
+            "startAgent": "Agent を起動"
           },
           "SourceControlAgentActionDialogForm": {
             "7ec6abbf2a": "リセット",
@@ -12659,9 +12763,6 @@
                 "cbcc4ab3db": "最初の 100 件のチェックを表示しています",
                 "0dca6bfab5": "オープンチェックの詳細",
                 "991f50c7e4": "まだチェックは報告されていません",
-                "9ad98f2a17": "保留中",
-                "5e52f4ef7f": "失敗",
-                "02ca4f9074": "合格",
                 "e15a8b77ef": "このチェックではインライン詳細は利用できません。",
                 "679bf2093c": "ログの末尾をコピーする",
                 "d713f500b2": "ログテール (最後の 200 行)",
@@ -12678,7 +12779,6 @@
                 "1f2b980522": "チェックの詳細を読み込んでいます…",
                 "0c96cd25e5": "解決",
                 "3a71a6ed0b": "チェックとマージが完了する前に競合を解決してください。",
-                "60186d8498": "競合によりこれがブロックされます",
                 "c16762ac8c": "以下のチェックとコメントは、現在取得されているコンテキストを示しています。",
                 "9d0e7bcefc": "PR 操作をブロックしない",
                 "5856874b59": "Orca は、このパネルが開いている間、チェックを更新します。",
@@ -12703,7 +12803,6 @@
                 "084c516efb": "コマンドをコピー",
                 "5dc3af25c0": "コメントを選択",
                 "d7a2f9c401": "未解決の {{value0}} コメントを送信",
-                "d91f2a6c39": "キュー内の {{value0}} 件のコメントを AI に送信",
                 "a6de3e5a20": "キュー内のコメントをクリア",
                 "f8a2c91d04": "Agent のキューに追加",
                 "b4e8a1c902": "キュー待ち",
@@ -12718,7 +12817,6 @@
                 "b3195cba33": "作成者のボット指定を解除",
                 "f588b46a6c": "作成者をボットとして指定",
                 "e45324fbed": "チェック詳細の読み込みに失敗しました。",
-                "checksUnresolvedChip": "未解決",
                 "checksUnresolvedStripHint": "これらのチェックは、合格または不合格の判定なしで終了しました。",
                 "dcb3c546fe": "再試行",
                 "commitsBehind_one": "{{count}} コミット遅れ",
@@ -12729,7 +12827,23 @@
                 "pendingChecks_one": "保留中のチェック {{count}} 件",
                 "pendingChecks_other": "保留中のチェック {{count}} 件",
                 "unresolvedChecks_one": "未解決のチェック {{count}} 件",
-                "unresolvedChecks_other": "未解決のチェック {{count}} 件"
+                "unresolvedChecks_other": "未解決のチェック {{count}} 件",
+                "passingCount_other": "{{count}} 件合格",
+                "failingCount_other": "{{count}} 件失敗",
+                "pendingCount_other": "{{count}} 件保留中",
+                "unresolvedCount_other": "{{count}} 件未解決",
+                "sendQueuedCommentsToAi_other": "キュー内の {{count}} 件のコメントを AI に送信",
+                "conflictsBlockThisMr": "競合によりこの MR がブロックされています",
+                "conflictsBlockThisPr": "競合によりこの PR がブロックされています",
+                "copyComment": "コメントをコピー",
+                "sendComment": "送信",
+                "commentingRequiresGitHubPrTarget": "コメントするには、GitHub PR の対象リポジトリが必要です。",
+                "selectWorkspaceBeforeAiAction": "AI 操作を開始する前に、ワークスペースを選択してください。",
+                "operation": {
+                  "rebase": "リベース",
+                  "merge": "マージ",
+                  "cherryPick": "チェリーピック"
+                }
               },
               "empty": {
                 "state": {
@@ -13136,8 +13250,7 @@
               },
               "compare": {
                 "summary": {
-                  "commitsAheadSingular": "{{ref}}より{{count}}コミット進んでいます",
-                  "commitsAheadPlural": "{{ref}}より{{count}}コミット進んでいます"
+                  "commitsAhead_other": "{{ref}} より {{count}} コミット進んでいます"
                 }
               },
               "conflict": {
@@ -13220,8 +13333,9 @@
             "folderLinksOutsideProject": "このフォルダーはプロジェクト外へのリンクのため、ここでは開けません。"
           },
           "useFileExplorerImport": {
-            "25919b2050": "{{value0}} {{value1}} をスキップしました。",
-            "132fd0e1e9": "{{value0}} {{value1}} のインポートに失敗しました。"
+            "importFailedCount_other": "{{count}} 個のファイルのインポートに失敗しました。",
+            "importSkippedCount_other": "{{count}} 個のファイルをスキップしました。",
+            "importFailed": "ファイルのインポートに失敗しました。"
           },
           "useFileExplorerKeys": {
             "8adb953095": "操作が失敗しました"
@@ -13258,7 +13372,6 @@
             "refreshSessionHistory": "セッション履歴を更新",
             "searchSessions": "セッションを検索",
             "clearSearch": "検索をクリア",
-            "transcriptsSkipped": "{{count}} 件のトランスクリプトをスキップしました",
             "noAgentSessionsFound": "Agent のセッションが見つかりません",
             "noSessionsMatchFilters": "現在の絞り込み条件に一致するセッションはありません",
             "noAgentsSelected": "Agent が選択されていません",
@@ -13278,7 +13391,8 @@
             "resumeInChatFailed": "新規チャットでこのセッションを再開できませんでした。",
             "resumeInNewCliUnavailable": "このセッションは CLI で開けません。",
             "resumeInNewCliHostTooOld": "このチャットを新しい CLI で再開するには、チャットを実行しているホストの Orca を更新してください。",
-            "folderWorkspaceUnavailable": "フォルダーワークスペースは利用できなくなりました。"
+            "folderWorkspaceUnavailable": "フォルダーワークスペースは利用できなくなりました。",
+            "transcriptsSkippedCount_other": "{{count}} 件のトランスクリプトをスキップしました"
           },
           "AiVaultPanelControls": {
             "scanningSessions": "セッションをスキャンしています",
@@ -13324,11 +13438,8 @@
             "sessionRole": "セッション",
             "worktree": "ワークツリー",
             "conversationNotSaved": "会話が保存されていません",
-            "recoverableEmptyDetail": "このセッションには保存された会話がありませんが、{{value0}} 件の復元可能な項目が残っています。",
             "recoverableEmptyOpenLogHint": "ログを開いて復元できます。",
             "emptyConversationDetail": "このセッションには保存された会話がなく、再開できません。",
-            "queuedMessages": "キュー内のメッセージ {{value0}} 件",
-            "subagentTranscripts": "サブ Agent の履歴 {{value0}} 件",
             "prompt": "プロンプト",
             "firstPrompt": "最初のプロンプト",
             "recentPrompt": "最近のプロンプト",
@@ -13342,7 +13453,10 @@
             "noFirstPromptAvailable": "最初のプロンプトはありません",
             "loadingFirstPrompt": "最初のプロンプトを読み込み中…",
             "folder": "フォルダー",
-            "resumeInFolder": "フォルダーで再開"
+            "resumeInFolder": "フォルダーで再開",
+            "recoverableEmptyDetailCount_other": "このセッションには保存された会話がありませんが、{{count}} 件の復元可能な項目が残っています。",
+            "queuedMessageCount_other": "キュー内のメッセージ {{count}} 件",
+            "subagentTranscriptCount_other": "サブ Agent のトランスクリプト {{count}} 件"
           },
           "AiVaultSessionRow": {
             "resumeInNewTab": "新規タブで再開",
@@ -13476,26 +13590,21 @@
                 "confirmation": {
                   "84f6f5b9eb": "含まれるもの: {{numbers}}。",
                   "541984b2eb": "#{{pr}} をキューに入れますか?",
-                  "4809f55cdb": "{{included}}GitHub は、{{count}} PR を一緒にマージキューに追加します。キューはマージ方法を選択し、それらを別のグループにマージする場合があります。",
-                  "be8f2621be": "{{included}}GitHub は、{{count}} PR をまとめてマージキューに追加します。キューはマージ方法を選択し、それらを別のグループにマージする場合があります。",
-                  "92ca033e72": "キュー {{count}} PR",
-                  "478a527b15": "{{count}} PR をキューに入れる",
                   "1feef35ca4": "#{{pr}} を介してマージしますか?",
-                  "c3e036c99f": "{{included}}GitHub は、{{method}} を使用して {{count}} PR をアトミックにマージします。マージできない場合は、何もマージされません。",
-                  "369aba4b32": "{{included}}GitHub は、{{method}} を使用して {{count}} PR をアトミックにマージします。どれかがマージできない場合、どれもマージできません。",
-                  "493c78f521": "{{count}} PR をマージ",
-                  "eb7051d268": "{{count}} PR をマージする"
+                  "queueDescription_other": "{{included}}GitHub は {{count}} 件の PR をまとめてマージキューに追加します。キューはマージ方法を選択し、別々のグループに分けてマージする場合があります。",
+                  "queueConfirm_other": "{{count}} 件の PR をキューに入れる",
+                  "mergeDescription_other": "{{included}}GitHub は {{method}} を使用して {{count}} 件の PR をアトミックにマージします。いずれかをマージできない場合、どの PR もマージされません。",
+                  "mergeConfirm_other": "{{count}} 件の PR をマージ"
                 },
                 "merge": {
-                  "55ae29b907": "#{{pr}} · {{count}} PR を介してマージ",
-                  "b8446f6ec2": "#{{pr}} · {{count}} PR を介してマージ",
                   "189d0ec614": "#{{pr}} はまだ下書きです。",
                   "640fb50d9c": "#{{pr}} は閉店しています。",
                   "46ffcbda75": "#{{pr}} にはマージ競合があります。",
                   "6dabefd63e": "#{{pr}} が変更をリクエストしました。",
                   "2bb21fc326": "#{{pr}} はまだレビューの承認が必要です。",
                   "c23faf74df": "#{{pr}} を更新する必要があります。",
-                  "f561e80968": "#{{pr}} はブロックされています。"
+                  "f561e80968": "#{{pr}} はブロックされています。",
+                  "mergeThroughLabel_other": "#{{pr}} まで含めてマージ · {{count}} 件の PR"
                 }
               }
             }
@@ -13552,14 +13661,14 @@
             "sourceActionsUnavailable": "トランスクリプトのソースが利用できません。"
           },
           "AiVaultScanProgressStrip": {
-            "agentChecked": "{{agent}}: 履歴候補 {{total}} 件中 {{settled}} 件を確認済み",
             "fileCount_one": "{{value0}} 個のファイル",
             "fileCount_other": "{{value0}} 個のファイル",
             "databaseCount_one": "{{value0}} 個のデータベース",
             "databaseCount_other": "{{value0}} 個のデータベース",
             "scanning": "{{value0}}をスキャン中",
             "checking": "{{value0}} を確認中",
-            "scanned": "{{value0}}をスキャン済み"
+            "scanned": "{{value0}}をスキャン済み",
+            "agentCheckedCount_other": "{{agent}}: 履歴候補 {{total}} 件中 {{settled}} 件を確認済み"
           },
           "run": {
             "source": {
@@ -13588,6 +13697,14 @@
                 }
               }
             }
+          },
+          "fileExplorerMultiDrag": {
+            "moreItems_other": "ほか +{{count}} 件"
+          },
+          "CreatePullRequest": {
+            "createInProgress": "PR を作成中…",
+            "workspaceHostUnresolved": "ワークスペースのホストを特定できません。ワークスペースを更新して再試行してください。",
+            "branchDiscoveryFailed": "ブランチの検出に失敗しました。"
           }
         }
       },
@@ -14112,11 +14229,11 @@
                 "a2f68645ac": "GitLab API 予算を更新する",
                 "2f9c16d6c3": "Orca は GitLab CLI を通じて REST を使用します。",
                 "14e144f7a7": "GitLab API の予算",
-                "3e2c982cfa": "左、リセット",
-                "ea8ad0bae8": "の",
                 "0a891e8935": "REST API",
                 "953f7c6062": "この GitLab ホストはレート制限ヘッダーを返しませんでした。",
-                "budget_scope_prefix": "予算スコープ"
+                "budget_scope_prefix": "予算スコープ",
+                "resetUnknown": "不明",
+                "remainingOfLimit": "{{limit}} 中 {{remaining}} 残り、{{reset}} 後にリセット"
               }
             }
           }
@@ -15438,7 +15555,9 @@
             "6978871a3d": "オープン",
             "cce596969e": "メモの削除",
             "cad3384faa": "メモを編集する",
-            "508ee678a5": "ブラウザで開く"
+            "508ee678a5": "ブラウザで開く",
+            "noteAuthorFallback": "メモ",
+            "sentMeta": "送信済み"
           },
           "DiffCommentPopover": {
             "2b3ce6d394": "キャンセル",
@@ -15451,6 +15570,9 @@
           },
           "useDiffCommentDecorator": {
             "995fa28b50": "このメモ"
+          },
+          "diffCommentZoneCard": {
+            "noteAlreadySent": "メモは送信済みです"
           }
         }
       },
@@ -16045,7 +16167,18 @@
           "b09b2384fd": "一時停止中",
           "eaa02014f8": "有効",
           "29baf8f4c2": "ソース",
-          "lastRunFailed": "前回の実行は失敗しました。"
+          "lastRunFailed": "前回の実行は失敗しました。",
+          "noGrace": "猶予なし",
+          "graceMinutes_other": "{{count}} 分",
+          "graceHours_other": "{{count}} 時間",
+          "usageCoverageRuns_other": "{{known}}/{{count}} 回の実行",
+          "usageUnavailable": "利用不可",
+          "noRuns": "実行なし",
+          "projectDefault": "プロジェクトのデフォルト",
+          "reuseLiveSession": "実行中のセッションを再利用",
+          "freshEachRun": "実行ごとに新規作成",
+          "precheckEnabled": "有効、{{timeout}}",
+          "precheckNone": "なし"
         },
         "AutomationEditorDialog": {
           "fb1896a5e7": "キャンセル",
@@ -16146,11 +16279,8 @@
           "2faecab10b": "今すぐ実行",
           "13118faadf": "不明なプロジェクト",
           "73f630b49d": "キャンセル",
-          "1b586f0e2b": "の",
-          "02a33e3204": "から",
           "9adfab2596": "外部オートメーションの削除",
           "1e2e41392f": "今後表示しない",
-          "b264564427": "そしてその実行履歴。以前の実行で作成されたワークスペースは削除されません。",
           "080dcb5fbb": "オートメーションの削除",
           "19a6e30eae": "自動更新",
           "77c2778945": "自動化",
@@ -16185,7 +16315,6 @@
           "pendingAutomationRunMissing": "実行履歴は利用できなくなりました。",
           "paused": "一時停止中",
           "missingWorkspace": "ワークスペースがありません",
-          "runUsageSummary": "約 {{cost}} · {{tokens}} tokens",
           "usageUnavailable": "使用量を利用できません",
           "noRunUsageYet": "まだ実行の使用量がありません",
           "noWorkspace": "ワークスペースなし",
@@ -16200,7 +16329,10 @@
           "rowActions": "自動化の操作",
           "tableLastRun": "最後の実行",
           "ownerChanged": "この自動化によりホストが変更されました。更新して再試行してください。",
-          "runError": "エラー:"
+          "runError": "エラー:",
+          "deleteAutomationDescription": "<name/> とその実行履歴を削除します。過去の実行で作成されたワークスペースは削除されません。",
+          "deleteExternalAutomationDescription": "<host/> 上の <provider/> から <name/> を削除します。",
+          "runUsageSummaryTokens_other": "推定 {{cost}} · {{tokens}} トークン"
         },
         "CreateFromPicker": {
           "f061f49e3f": "リポジトリブランチを検索…",
@@ -16227,8 +16359,7 @@
           "92405f1431": "利用不可",
           "dbdcec22bd": "読み取り専用",
           "0a2d4359a8": "管理可能",
-          "e2532150ed": "自動化",
-          "701515f010": "オートメーション"
+          "automationCount_other": "{{count}} 件のオートメーション"
         },
         "WorkspaceCombobox": {
           "ee5b280eba": "ワークスペースが見つかりません。",
@@ -16280,7 +16411,8 @@
             "last": {
               "run": {
                 "done": "完了",
-                "failed": "失敗"
+                "failed": "失敗",
+                "statusWithRelative": "{{status}} · {{relative}}"
               }
             }
           }
@@ -16436,14 +16568,10 @@
         },
         "externalScope": {
           "uncheckedHost": "{{hostLabel}} の外部自動化マネージャーをチェックできませんでした。",
-          "uncheckedHosts": "{{count}} ホスト上の外部自動化マネージャーをチェックできませんでした。"
+          "uncheckedHostCount_other": "{{count}} 台のホスト上の外部オートメーションマネージャーを確認できませんでした。"
         },
         "enablement": {
           "paused": "一時停止中"
-        },
-        "runHistory": {
-          "occurrencesWithLatest": "{{times}} 回、最近では {{date}}",
-          "occurrences": "{{times}}回"
         },
         "extraAgentArgs": {
           "advanced": "詳細設定",
@@ -16454,6 +16582,67 @@
           "useFreshSessions": "新しいセッションを使用",
           "helper": "新しいセッションごとに、このホストのデフォルト引数に追加されます。",
           "detailLabel": "追加の引数"
+        },
+        "runHistory": {
+          "runCountSummary_other": "{{count}} 回実行 · {{completed}} 回完了",
+          "occurrencesWithLatestCount_other": "{{count}} 回、直近は {{date}}",
+          "occurrencesCount_other": "{{count}} 回"
+        },
+        "capabilityProbe": {
+          "createIdempotencyUpdateRequired": "このホストにオートメーションを移動するには、最新の Orca サーバーが必要です。HUB を更新して再試行してください。"
+        },
+        "editDraft": {
+          "unsupportedSchedule": "このオートメーションには未対応のスケジュールが保存されています。変更を保存する前に、対応するスケジュールを選択してください。"
+        },
+        "hostCatalog": {
+          "orphanEntryLabel": "未割り当ての旧オートメーション"
+        },
+        "automationPageParts": {
+          "never": "なし",
+          "now": "たった今",
+          "runStatusPending": "キュー待ち",
+          "runStatusDispatching": "起動中",
+          "runStatusDispatched": "起動済み",
+          "runStatusCompleted": "完了",
+          "runStatusSkippedPrecheck": "事前チェックによりスキップ",
+          "runStatusSkippedMissed": "スキップ済み",
+          "runStatusSkippedUnavailable": "利用不可",
+          "runStatusSkippedNeedsInteractiveAuth": "認証情報が必要",
+          "runStatusDispatchFailed": "失敗"
+        },
+        "runContent": {
+          "noOutput": "出力内容はありません。"
+        },
+        "runViewState": {
+          "viewRun": "実行を表示",
+          "runOpen": "実行は開いています",
+          "terminalOnPairedServer": "実行ターミナルはペアリング済みサーバーにあります。",
+          "terminalUnavailable": "実行ターミナルは利用できません。",
+          "openWorkspace": "ワークスペースを開く",
+          "workspaceAvailable": "ワークスペースは利用可能です。",
+          "snapshotSaved": "スナップショット保存済み",
+          "showingSnapshot": "保存された実行スナップショットを表示しています。",
+          "namedWorkspaceGone": "{{name}} は利用できなくなりました",
+          "workspaceGone": "ワークスペースは利用できなくなりました",
+          "noWorkspaceLaunched": "ワークスペースは起動されていません"
+        },
+        "runWorkspaceDisplay": {
+          "notLaunched": "未起動",
+          "namedWorkspaceGone": "{{name}}（利用できなくなりました）"
+        },
+        "usage": {
+          "tokensAndCost_other": "{{tokens}} トークン · {{cost}}"
+        },
+        "externalDisplay": {
+          "sshHost": "SSH ホスト",
+          "local": "ローカル"
+        },
+        "externalActionDisabled": {
+          "actionInProgress": "別のオートメーション操作が実行中です。",
+          "sshConnecting": "この SSH ホストの接続が完了するまでお待ちください。",
+          "connectSshHost": "{{provider}} のオートメーションを管理する前に、この SSH ホストに接続してください。",
+          "cannotManageOnSshHost": "{{provider}} はこの SSH ホストでオートメーションを管理できません。",
+          "cannotManageLocally": "{{provider}} はこのマシンでオートメーションを管理できません。"
         }
       },
       "agent": {
@@ -16594,8 +16783,6 @@
             "63ce735809": "接続",
             "4a2ab52781": "確認中…",
             "79e7aaed39": "キャンセル",
-            "fdd26d81cc": "Atlassian のアカウント設定",
-            "8090504a3e": "でトークンを作成します",
             "7b3967c12f": "Atlassian API トークン",
             "3d81bf3ab3": "APIトークン",
             "e91b9a4073": "you@example.com",
@@ -16620,17 +16807,17 @@
             "be9eba0a1b": "username",
             "70035652d7": "パスワード",
             "c50abbf340": "Jira アカウントのパスワード",
-            "d8737db691": "Jira Server または Data Center のアカウントのユーザー名とパスワードを使用します。"
+            "d8737db691": "Jira Server または Data Center のアカウントのユーザー名とパスワードを使用します。",
+            "createTokenInSettings": "<link>Atlassian アカウント設定</link>でトークンを作成してください。"
           }
         }
       },
       "rightSidebar": {
         "FolderWorkspaceWorktreesPanel": {
           "unavailable": "ワークスペースは、フォルダーワークスペースの場合にのみ表示されます。",
-          "countOne": "紐づくワークツリー 1 件",
-          "countMany": "紐づくワークツリー {{value0}} 件",
           "emptyTitle": "紐づくワークツリーはまだありません",
-          "emptyCopy": "このワークスペースから作成したワークツリーが、ここに表示されます。"
+          "emptyCopy": "このワークスペースから作成したワークツリーが、ここに表示されます。",
+          "attachedCount_other": "紐づくワークツリー {{count}} 件"
         },
         "FolderWorkspacePrChecksPanel": {
           "unavailable": "PR チェックはフォルダーワークスペースでのみ表示されます。",
@@ -16642,12 +16829,9 @@
           "hideDetails": "{{value0}} の PR チェック詳細を非表示",
           "reviewChecks": "レビューのチェック",
           "allChecksPassing": "すべてのチェックが成功",
-          "oneWorktree": "1 件のワークツリー",
-          "worktreeCount": "{{value0}} 件のワークツリー",
-          "oneFailing": "1 件失敗",
-          "failingCount": "{{value0}} 件失敗",
-          "onePending": "保留中 1 件",
-          "pendingCount": "{{value0}} 件保留中"
+          "worktreeCountLabel_other": "{{count}} 件のワークツリー",
+          "failingCountLabel_other": "{{count}} 件失敗",
+          "pendingCountLabel_other": "{{count}} 件保留中"
         },
         "parentPrChecks": {
           "rowSummary": {
@@ -16729,10 +16913,10 @@
             "combobox": {
               "noProjects": "プロジェクトがありません",
               "allProjects": "すべてのプロジェクト",
-              "hostCount": "{{value0}} 台のホスト",
               "searchProjects": "プロジェクトを検索…",
               "noMatches": "検索条件に一致するプロジェクトはありません。",
-              "chooseSource": "タスクソースを選択"
+              "chooseSource": "タスクソースを選択",
+              "hostCount_other": "{{count}} 台のホスト"
             }
           }
         },
@@ -16769,7 +16953,31 @@
       "taskSourceContextSummary": {
         "sourceUnavailable": "{{value0}} のソースを利用できません: {{value1}}",
         "someSourceHostsUnavailable": "一部の {{value0}} ソースホストを利用できません: {{value1}}",
-        "reconnectOrUpdateTitle": "このソースを読み込むには、{{value0}} を再接続するか更新してください。"
+        "reconnectOrUpdateTitle": "このソースを読み込むには、{{value0}} を再接続するか更新してください。",
+        "providerSourceTitle": "{{provider}} ソース",
+        "hostTitle": "ホスト: {{hosts}}",
+        "accountTitle": "アカウント: {{accounts}}",
+        "sourceTitle": "ソース: {{source}}",
+        "sourceHostCount_other": "{{count}} 台のソースホスト",
+        "noHost": "ホストなし",
+        "projectCount_other": "{{count}} 件のプロジェクト",
+        "selectedProject": "選択したプロジェクト",
+        "selectedProjectCount_other": "選択したプロジェクト {{count}} 件",
+        "currentAccount": "現在のアカウント",
+        "statusCheckingCapabilities": "サーバーの機能を確認中",
+        "statusServerUpdateForTaskSources": "タスクソースの利用にはサーバーの更新が必要",
+        "statusProviderAuthNeeded": "プロバイダー認証が必要",
+        "statusSourceToolUnavailable": "ソースツールが利用不可",
+        "statusProviderUnsupported": "このホストではプロバイダー未対応",
+        "statusServerUpdateNeeded": "サーバーの更新が必要",
+        "unavailableCount_other": "{{count}} 件が利用不可",
+        "statusConnected": "接続済み",
+        "statusAuthNeeded": "認証が必要",
+        "statusConnecting": "接続中",
+        "statusConnectionIssue": "接続に問題あり",
+        "statusDisconnected": "未接続",
+        "hostStatus": "{{host}} {{status}}",
+        "availabilityTitle": "利用可否: {{hosts}}"
       },
       "ShortcutKeyCombo": {
         "07eb4985a1": "{{value0}} を 2 回押す"
@@ -17025,16 +17233,8 @@
         "listLabel": "再開されるチャット",
         "dontAskAgain": "二度と質問しないでください (自動的に再開します)",
         "dontAskAgainHint": "設定 → チャット → 動作でオフにできます。",
-        "continuedOne": "1 件のチャットを再開しました",
-        "continuedMany": "{{value0}} 件のチャットを再開しました",
         "selectAgent": "{{value0}} チャット「{{value1}}」を {{value2}} で再開します",
         "dismissAll": "すべて閉じる",
-        "notContinuedOne": "1 件のチャットを再開できませんでした",
-        "notContinuedMany": "{{value0}} 件のチャットを再開できませんでした",
-        "notConfirmedOne": "1 件のチャットが再開されたことを確認できませんでした",
-        "notConfirmedMany": "{{value0}} 件のチャットが再開されたことを確認できませんでした",
-        "notConfirmedOtherOne": "他のチャット 1 件が再開されたことを確認できませんでした",
-        "notConfirmedOtherMany": "他のチャット {{value0}} 件が再開されたことを確認できませんでした",
         "viewChats": "チャットを表示",
         "review": "確認",
         "activityUnnamed": "名前なし",
@@ -17042,9 +17242,7 @@
         "activityQuestion": "回答待ち: {{value0}}",
         "activityMidReply": "返信の途中でした",
         "activitySubagentOne": "サブ Agent 実行中: {{value0}}",
-        "activitySubagentMany": "{{value0}} 個のサブ Agent が実行中",
         "activityMonitorOne": "監視中: {{value0}}",
-        "activityMonitorMany": "{{value0}} 個のバックグラウンドタスクを監視中",
         "selectWorkspace": "{{value0}} のチャットをすべて選択",
         "workspaceSelectedCount": "{{value0}}/{{value1}}",
         "selectAll": "すべてのチャットを選択",
@@ -17061,10 +17259,15 @@
         "serverBody": "{{machine}} の Orca が再起動したとき、これらのチャットは作業中でした。再開すると、各チャットを停止した位置から復元し、Agent に作業の続行を依頼します。あなたのプロンプトは再送信されません。",
         "serverDismiss": "閉じる",
         "serverResumeAll": "{{machine}} の {{count}} 件をすべて再開",
-        "serverResumeHereOne": "ここで開始したチャット 1 件を再開",
-        "serverResumeHere": "ここで開始したチャット {{count}} 件を再開",
         "resumeChats_one": "{{count}} 件のチャットを再開",
-        "resumeChats_other": "{{count}} 件のチャットを再開"
+        "resumeChats_other": "{{count}} 件のチャットを再開",
+        "serverResumeHereCount_other": "ここで開始した {{count}} 件のチャットを再開",
+        "continuedCount_other": "{{count}} 件のチャットを再開しました",
+        "notContinuedCount_other": "{{count}} 件のチャットを再開できませんでした",
+        "notConfirmedCount_other": "{{count}} 件のチャットの再開を確認できませんでした",
+        "notConfirmedOtherCount_other": "ほかの {{count}} 件のチャットの再開を確認できませんでした",
+        "activitySubagentCount_other": "{{count}} 個のサブ Agent が実行中",
+        "activityMonitorCount_other": "{{count}} 件のバックグラウンドタスクを監視中"
       },
       "linear-issue-attribute-filter-coverage-notice": {
         "statusPartialTeamCoverage": "{{value0}}/{{value1}} チームステータスをフィルタリングしています。残りのチームからの問題は含まれません。",
@@ -17216,15 +17419,13 @@
         }
       },
       "NativeChatResumeRunPanel": {
-        "resumedTitle": "{{value1}} 件中 {{value0}} 件のチャットを再開しました",
-        "resumedTitleOne": "1 件中 {{value0}} 件のチャットを再開しました",
-        "resumingTitleOne": "1 件のチャットを再開中",
-        "resumingTitle": "{{value0}} 件のチャットを再開中",
         "description": "各チャットは全コンテキストとともに復元され、中断した箇所を確認するよう依頼されます。このダイアログは閉じても構いません。進行状況はステータスバーで確認できます。",
         "finished": "これらのチャットは Orca が終了したときに作業中でした。Orca は各チャットを停止した時点から、すべてのコンテキストとともに復元し、続行する前に何をしていたかを確認するよう Agent に依頼しました。あなた自身のプロンプトは再送信されていません。",
         "finishedUpdate": "これらのチャットは Orca がアップデートをインストールしたときに作業中でした。Orca は各チャットを停止した時点から、すべてのコンテキストとともに復元し、続行する前に何をしていたかを確認するよう Agent に依頼しました。あなた自身のプロンプトは再送信されていません。",
         "finishedPartial": "これらのチャットは Orca が終了したときに作業中でした。Orca が再開したチャットは停止した時点から、すべてのコンテキストとともに復元され、続行する前に何をしていたかを確認するよう依頼されました。あなた自身のプロンプトは再送信されていません。対応が必要なチャットや再開できるチャットは、この一覧で確認してください。",
-        "finishedPartialUpdate": "これらのチャットは Orca がアップデートをインストールしたときに作業中でした。Orca が再開したチャットは停止した時点から、すべてのコンテキストとともに復元され、続行する前に何をしていたかを確認するよう依頼されました。あなた自身のプロンプトは再送信されていません。対応が必要なチャットや再開できるチャットは、この一覧で確認してください。"
+        "finishedPartialUpdate": "これらのチャットは Orca がアップデートをインストールしたときに作業中でした。Orca が再開したチャットは停止した時点から、すべてのコンテキストとともに復元され、続行する前に何をしていたかを確認するよう依頼されました。あなた自身のプロンプトは再送信されていません。対応が必要なチャットや再開できるチャットは、この一覧で確認してください。",
+        "resumedOfTotal_other": "{{count}} 件中 {{resumed}} 件のチャットを再開しました",
+        "resumingCount_other": "{{count}} 件のチャットを再開中"
       },
       "NativeChatResumeRunStatusIcon": {
         "waitingForReply": "返信を待っています",
@@ -17289,6 +17490,68 @@
         "cancelled": "この通常の SSH ターミナルは開始前に閉じられました。",
         "terminalUnavailable": "Orca はここでターミナルを開けませんでした。",
         "openHint": "Orca がホスト上でセットアップできない間も、ホストで作業を続けられます。"
+      },
+      "AgentStateDot": {
+        "working": "作業中",
+        "monitoring": "バックグラウンドタスクを監視中",
+        "blocked": "ブロック中",
+        "waiting": "入力待ち",
+        "interrupted": "中断",
+        "failed": "失敗",
+        "done": "完了",
+        "idle": "待機中",
+        "unverifiable": "最近の更新なし",
+        "unconfirmed": "確認できませんでした",
+        "permission": "対応が必要"
+      },
+      "issueComments": {
+        "you": "あなた"
+      },
+      "ZoomOverlay": {
+        "uiZoom": "UI ズーム",
+        "editorZoom": "エディターのズーム",
+        "terminalZoom": "ターミナルのズーム"
+      },
+      "issueCopy": {
+        "urlCopied": "URL をコピーしました",
+        "keyCopied": "キーをコピーしました",
+        "identifierCopied": "識別子をコピーしました",
+        "branchNameCopied": "ブランチ名をコピーしました",
+        "promptCopied": "プロンプトをコピーしました",
+        "urlCopyFailed": "URL をコピーできませんでした",
+        "keyCopyFailed": "キーをコピーできませんでした",
+        "identifierCopyFailed": "識別子をコピーできませんでした",
+        "branchNameCopyFailed": "ブランチ名をコピーできませんでした",
+        "promptCopyFailed": "プロンプトをコピーできませんでした"
+      },
+      "prCheckCounts": {
+        "noChecksFound": "チェックが見つかりません",
+        "checksFailing_other": "{{count}} 件のチェックが失敗",
+        "checksNeedAction_other": "{{count}} 件のチェックに対応が必要",
+        "checksPending_other": "{{count}} 件のチェックが保留中",
+        "allChecksPassing": "すべてのチェックに成功",
+        "checksPassingOfTotal_other": "{{count}} 件中 {{passing}} 件のチェックに成功"
+      },
+      "taskPageJiraBoard": {
+        "changeStatusFailed": "ステータスを変更できませんでした。"
+      },
+      "jiraIssue": {
+        "loadStatusChangesFailed": "ステータスの変更を読み込めませんでした。",
+        "loadCommentsFailed": "コメントを読み込めませんでした。"
+      },
+      "taskPageJiraLinkedIssues": {
+        "someIssuesFailed": "ワークスペースにリンクされた一部の Jira Issue を読み込めませんでした。更新して再試行してください。"
+      },
+      "taskPageJiraLoadState": {
+        "failedToLoadIssues": "Jira Issue を読み込めませんでした。",
+        "authFailed": "Jira の認証に失敗しました。設定で Jira に再接続してから再試行してください。",
+        "accessDenied": "Jira がこの Issue 検索へのアクセスを拒否しました。プロジェクトの権限を確認するか、別の JQL クエリをお試しください。",
+        "rateLimited": "この Issue 検索は Jira のレート制限に達しました。しばらくしてから再試行してください。",
+        "serverError": "Issue の読み込み中に Jira のサーバーエラーが発生しました。しばらくしてから再試行してください。",
+        "jqlFailed": "Jira がこの JQL クエリを実行できませんでした。構文を確認して再試行してください。",
+        "unreachable": "Jira に接続できませんでした。接続を確認して再試行してください。",
+        "loadFailed": "Jira Issue を読み込めませんでした。しばらくしてから再試行してください。",
+        "errorWithCode": "エラー {{code}}: {{summary}}"
       }
     },
     "i18n": {
@@ -19387,8 +19650,6 @@
   },
   "sessionSearch": {
     "panel": {
-      "resultsOne": "{{count}} 結果",
-      "resultsOther": "{{count}} の結果",
       "noMatches": "インデックス付けされた履歴に一致するセッションがありません。別のクエリまたはスコープを試してください。",
       "loadMore": "さらに一致をロードする",
       "indexedHistory": "インデックス付き履歴",
@@ -19409,12 +19670,21 @@
       "retry": "再試行",
       "scopeUnknown": "このコンピュータにはこのワークスペースまたはプロジェクトがありません。範囲を [すべて] に切り替えて、その範囲内のすべてを検索します。",
       "sortSessionsAriaLabel": "セッションの並べ替え: {{value0}}",
-      "sessionsOne": "{{count}} セッション",
-      "sessionsOther": "{{count}} セッション",
-      "sessionsOfLoaded": "{{value0}}/{{value1}} セッション",
       "showMoreSessions": "さらにセッションを表示",
       "loadingMoreSessions": "さらにセッションを読み込んでいます…",
-      "unsupportedAgent": "このコンピュータは、選択した Agent の履歴検索をサポートしていません。そのコンピュータで Orca を更新するか、別の Agent を選択します。"
+      "unsupportedAgent": "このコンピュータは、選択した Agent の履歴検索をサポートしていません。そのコンピュータで Orca を更新するか、別の Agent を選択します。",
+      "resultCount_other": "{{count}} 件の結果",
+      "sessionCount_other": "{{count}} セッション",
+      "sessionsShownOfLoaded_other": "{{shown}} / {{count}} セッション",
+      "hostSkipReason": {
+        "indexChanged": "インデックスが変更されました",
+        "searchOff": "検索が無効",
+        "notReady": "準備未完了",
+        "unavailable": "利用不可",
+        "unreachable": "接続不可",
+        "scopeNotFound": "そのホストに検索範囲が見つかりません",
+        "agentNotSupported": "Agent 未対応"
+      }
     }
   },
   "sessionHistory": {
@@ -19536,9 +19806,9 @@
     "pathAdded": "Added",
     "openFolder": "Open {{name}}",
     "findOrTypePath": "フォルダーを検索するか、パスを直接入力…",
-    "addTypedPath": "Add",
     "noDirectories": "まだフォルダーは追加されていません。",
-    "removePath": "Remove {{name}}"
+    "removePath": "Remove {{name}}",
+    "addTypedPathCode": "<path/> を追加"
   },
   "accounts": {
     "wslAccountNotApplied": {
@@ -19637,14 +19907,11 @@
         "settingAsk": "確認する",
         "title": "{{account}} に切り替えました",
         "dontAskAgainHint": "これは、「設定」→「AI プロバイダーアカウント」でオフにできます。",
-        "bodyOther": "{{previous}} で Claude セッションが {{count}} 件まだ実行中です。再起動すると、{{next}} で各会話が続きます。作業中のセッションは、アイドル状態になってから再起動します。",
-        "bodyOne": "{{previous}} で Claude セッションが 1 件まだ実行中です。再起動すると、{{next}} で会話が続きます。作業中のセッションは、アイドル状態になってから再起動します。",
         "dontAskAgain": "今後は確認しない（自動で再起動する）",
         "listLabel": "再起動する Claude セッション",
         "restartOne": "セッションを再起動",
         "keep": "そのままにする",
         "session": "Claude セッション",
-        "restartOther": "{{count}} 件のセッションを再起動",
         "settingDescription": "再起動すると、新規アカウントで実行中の各会話が継続されます。",
         "settingTitle": "Claude の実行中にアカウントを切り替える場合",
         "restartingOne": "{{account}} で Claude セッションを 1 件再起動中",
@@ -19659,13 +19926,14 @@
         "reasonOwnFolder": "独自の Claude フォルダーを使用",
         "reasonUnknownAccount": "アカウント不明",
         "reasonNoSession": "再開できません",
-        "reviewBodyOne": "他の Claude セッション 1 件は {{next}} に移動されませんでした。",
-        "reviewBodyOther": "他の Claude セッション {{count}} 件は {{next}} に移動されませんでした。",
         "notMovedOne": "他の 1 件のセッションは移動されませんでした。",
         "notMovedOther": "他の {{count}} 件のセッションは移動されませんでした。",
         "review": "確認",
         "uncheckedOne": "1 つのターミナルで Claude を確認できませんでした。そこで Claude が実行中の場合、再起動するまで {{previous}} のままになります。",
-        "uncheckedOther": "{{count}} 個のターミナルで Claude を確認できませんでした。そこで実行中の Claude は、再起動するまで {{previous}} のままになります。"
+        "uncheckedOther": "{{count}} 個のターミナルで Claude を確認できませんでした。そこで実行中の Claude は、再起動するまで {{previous}} のままになります。",
+        "restartCount_other": "{{count}} 件のセッションを再起動",
+        "reviewBody_other": "ほかの {{count}} 件の Claude セッションは {{next}} に移動されませんでした。",
+        "body_other": "{{count}} 件の Claude セッションがまだ {{previous}} で実行中です。再起動すると、各会話が {{next}} で続行されます。処理中のセッションは待機状態になってから再起動します。"
       }
     },
     "hostSignIn": {
@@ -19935,8 +20203,8 @@
       "rateLimited": "GitHub のレート制限に達しました。数分後にもう一度お試しください。",
       "network": "ネットワークエラー — 接続を確認してください。",
       "tooLargeUnknownCount": "このビューはアイテムが多すぎて Orca で表示できません。GitHub でビューのフィルターを絞り込んでください。",
-      "tooLarge": "このビューには {{itemCount}} 件のアイテムがあり、Orca で表示するには多すぎます。GitHub でビューのフィルターを絞り込んでください。",
-      "schemaDriftDetail": "このプロジェクトビューを読み取れませんでした: {{detail}}。"
+      "schemaDriftDetail": "このプロジェクトビューを読み取れませんでした: {{detail}}。",
+      "tooLargeCount_other": "このビューには {{count}} 件のアイテムがあり、Orca で表示するには多すぎます。GitHub でビューのフィルターを絞り込んでください。"
     },
     "columns": {
       "type": "タイプ"
@@ -20090,13 +20358,12 @@
       "optionalEmail": "Atlassian のメールアドレス (スコープ付きトークンではオプション)"
     },
     "workspace": {
-      "count": "{{key}} にリンクされたワークスペース {{count}} 件",
       "startAnother": "新規ワークスペースを開始",
       "empty": "Jira Issue をワークスペースにリンクするか、別のビューを選択してください。",
       "openFailed": "この Jira Issue にリンクされたワークスペースを開けませんでした。",
       "mode": "ワークスペースあり",
       "search": "リンクされた Issue を検索",
-      "single": "{{key}} にリンクされたワークスペース 1 件"
+      "linkedCount_other": "{{count}} 件のワークスペースが {{key}} にリンク済み"
     },
     "prompt": {
       "dialogTitle": "テンプレートからプロンプトをコピー",
@@ -20574,7 +20841,7 @@
       "email": "メールアドレスの取得",
       "allSites": "すべてのウェブサイト上にある自分のすべてのデータの読み取りと変更",
       "someSites": "{{hosts}} 上にある自分のデータの読み取りと変更",
-      "manySites": "{{hosts}} とほか {{count}} 件のサイト上にある自分のデータの読み取りと変更"
+      "manyOtherSites_other": "{{hosts}} とほかの {{count}} 個のサイト上にある自分のデータの読み取りと変更"
     },
     "install": {
       "title": "{{name}} を追加しますか？",

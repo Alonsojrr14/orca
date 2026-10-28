@@ -1799,9 +1799,6 @@
         "3fdf777817": "Auf GitHub öffnen",
         "c43fe79ee0": "GitHub-Link kopieren",
         "0caac1a18f": "Arbeitsbereich aus PR starten",
-        "8223320f8d": "aktualisiert",
-        "10ef1afb8e": "· aktualisiert",
-        "55962099bc": "hat dieses Issue geöffnet",
         "0ab4664a8b": "Arbeitsbereich aus Issue starten",
         "36182aa57f": "Neuen Arbeitsbereich starten",
         "fe6ff12dc2": "Weitere Aktionen für den Issue-Arbeitsbereich",
@@ -1874,8 +1871,6 @@
         "52b20b56f7": "Beschreibung",
         "4d555d3796": "Beschreibung bearbeiten",
         "9df4e74bdf": "Speichern",
-        "0ae387d8ca": "von",
-        "228e2f59d3": "Erledigt",
         "a154ec5224": "Kommentar auf GitHub öffnen",
         "bca8eb39ac": "Auf Kommentar antworten",
         "68cb993d61": "erledigt",
@@ -1891,7 +1886,6 @@
         "d43736d09c": "Steuerelemente für den Codekontext",
         "bd7be7b1fd": "Kommentar L",
         "db61d76cd5": "Codekontext wird geladen…",
-        "f2d02cdf8c": "Dateien angesehen",
         "1257d1435d": "Dateibaum anzeigen",
         "a341343303": "Review-Kommentar hinzugefügt.",
         "d1fa2cf888": "Ohne PR-Head-SHA ist kein Kommentar möglich.",
@@ -1931,8 +1925,6 @@
         "ec5c4b3ab2": "PR erneut öffnen",
         "21860b58d0": "Pull Request schließen",
         "5932578f51": "Zum Mergen ist ein registriertes lokales Repository erforderlich",
-        "e2bf3e41a9": "Kommentar",
-        "28d0d3374f": "Diskussion",
         "080d071d48": "Auf @{{value0}} antworten",
         "86f809e2ce": "In dieser Review-Diskussion antworten",
         "136542c9ba": ":L{{value0}}",
@@ -1962,7 +1954,9 @@
           "from": "von",
           "to": "nach",
           "activity": "Aktivität",
-          "noActivity": "Noch keine Aktivität."
+          "noActivity": "Noch keine Aktivität.",
+          "pullRequestReference": "PR #{{number}}",
+          "issueReference": "Issue #{{number}}"
         },
         "checkActionRequiredHint": "Erfordert eine manuelle Aktion auf GitHub (z. B. die Genehmigung der Ausführung), um das Mergen zu ermöglichen.",
         "e15a8b77ef": "Für diesen Check sind keine eingebetteten Details verfügbar.",
@@ -1976,8 +1970,15 @@
         "09d67a0f9b": "Pull Request konnte nicht geschlossen werden",
         "88809e79db": "Pull Request konnte nicht erneut geöffnet werden",
         "00f55cc17b": "Für diesen Pull Request ist kein Zugriff auf das Repository verfügbar.",
-        "reactionCountSingular": "{{count}} {{reaction}} Reaktion",
-        "reactionCountPlural": "{{count}} {{reaction}} Reaktionen"
+        "reactionCount_one": "{{count}} Reaktion „{{reaction}}“",
+        "reactionCount_other": "{{count}} Reaktionen „{{reaction}}“",
+        "filesViewed_one": "{{viewed}} / {{count}} Datei angesehen",
+        "filesViewed_other": "{{viewed}} / {{count}} Dateien angesehen",
+        "updatedRelativeTime": "aktualisiert {{time}}",
+        "authorOpenedThisIssue": "<author/> hat dieses Issue geöffnet",
+        "middotUpdatedRelativeTime": "· aktualisiert {{time}}",
+        "resolvedThreadBy": "Erledigte Diskussion von {{author}}",
+        "resolvedCommentBy": "Erledigter Kommentar von {{author}}"
       },
       "GitLabItemDialog": {
         "65e784c1f1": "Erneut öffnen",
@@ -2033,14 +2034,15 @@
         "f23ea85341": "erledigt",
         "6de8ce0cc6": "{{value0}} erforderlich",
         "22511537d2": "Genehmigt",
-        "00f3bab87b": " von {{value0}} erforderlich",
         "3a051b8ade": "Arbeitselement",
         "32f8bef818": "Keine Protokollausgabe.",
         "4168eb2c51": "Erledigen",
         "commentTooLarge": "Der Kommentar ist zu groß, um ihn sicher zu senden.",
         "gitlabActionFailed": "Die GitLab-Aktion ist fehlgeschlagen.",
-        "approvalsRemainingSingular": "{{count}} Genehmigung ausstehend",
-        "approvalsRemainingPlural": "{{count}} Genehmigungen ausstehend"
+        "approvalsRemainingOfRequired_one": "Noch {{count}} Genehmigung ausstehend, {{required}} erforderlich",
+        "approvalsRemainingOfRequired_other": "Noch {{count}} Genehmigungen ausstehend, {{required}} erforderlich",
+        "approvalsRemaining_one": "{{count}} Genehmigung ausstehend",
+        "approvalsRemaining_other": "{{count}} Genehmigungen ausstehend"
       },
       "JiraIssueWorkspace": {
         "b0b92666c9": "Kommentieren",
@@ -2065,14 +2067,11 @@
         "69da9a208c": "In Jira öffnen",
         "fa132c8aed": "Der Kommentar konnte nicht hinzugefügt werden.",
         "ea21952aa3": "Das Jira-Issue konnte nicht aktualisiert werden.",
-        "6c41a9bcea": "{{value0}} konnte nicht kopiert werden",
-        "2ff69a3545": "{{value0}} kopiert",
         "666cfdd835": "Unbekannt",
         "ef21405c6d": "Jira-Issue",
         "commentTooLarge": "Der Kommentar ist zu groß, um ihn sicher zu senden."
       },
       "Landing": {
-        "76a95f7f47": "Erstellen",
         "f9eaa9e12d": "Projekt hinzufügen",
         "6ca6ff404e": "ORCA",
         "520304a067": "Orca-Logo",
@@ -2088,7 +2087,12 @@
         "0d0ace8861": "Stern auf GitHub vergeben",
         "ec43b38ba7": "Auf GitHub mit einem Stern markiert",
         "157bb5ecbb": "GitHub öffnen",
-        "preflightDismiss": "Ausblenden"
+        "preflightDismiss": "Ausblenden",
+        "moveUpWorkspace": "Vorherigen Arbeitsbereich auswählen",
+        "moveDownWorkspace": "Nächsten Arbeitsbereich auswählen",
+        "installGit": "Git installieren",
+        "installGitHubCli": "GitHub CLI installieren",
+        "learnMore": "Mehr erfahren"
       },
       "LinearIssueMarkdownDescriptionEditor": {
         "d9c47069ef": "Markdown",
@@ -2119,7 +2123,6 @@
         "ad5dec37b7": "Das ausgewählte Issue in der Vorschau anzeigen, bearbeiten und die Arbeit daran starten.",
         "c23e79e5c0": "Aktionen",
         "b0eac92d85": "Erneut versuchen",
-        "fabbd3f974": "hat das Issue aktualisiert ·",
         "543970c87a": "Aktivität",
         "df4c86ed12": "Schließen",
         "7a4997d8bb": "Vorschau des Linear-Issues schließen",
@@ -2143,11 +2146,8 @@
         "b25e453c9d": "Erstellen des Unter-Issues fehlgeschlagen",
         "aeed19d003": "{{value0}} erstellt",
         "9a1317cdd3": "Laden des Unter-Issues fehlgeschlagen",
-        "9bcbaa2737": "{{value0}} konnte nicht kopiert werden",
-        "7835483c43": "{{value0}} kopiert",
         "61f424f8ca": "Linear-Issue",
         "ca8778c124": "Unbekannt",
-        "8a33c85e9c": "Jemand",
         "65239a714b": "Linear",
         "76ffd3c937": "Nach einem Projekt zum Hinzufügen suchen.",
         "c11b4e3cc2": "Keine Projekte gefunden.",
@@ -2158,7 +2158,10 @@
         "moreWorkspaceActions": "Weitere Aktionen für den Issue-Arbeitsbereich",
         "startNewWorkspace": "Neuen Arbeitsbereich starten",
         "workspaceSection": "Arbeitsbereich",
-        "noWorkspaceYet": "Noch keiner"
+        "noWorkspaceYet": "Noch keiner",
+        "issueDescriptionLabel": "Issue-Beschreibung",
+        "namedUserUpdatedIssue": "{{name}} hat das Issue aktualisiert · {{time}}",
+        "someoneUpdatedIssue": "Jemand hat das Issue aktualisiert · {{time}}"
       },
       "LinearItemDrawer": {
         "04008e6c46": "Arbeitsbereich aus Issue starten",
@@ -2194,7 +2197,9 @@
         "openAttachedWorkspace": "Mit dem Issue verknüpften Arbeitsbereich öffnen",
         "openWorkspace": "Arbeitsbereich öffnen",
         "moreWorkspaceActions": "Weitere Aktionen für den Issue-Arbeitsbereich",
-        "startNewWorkspace": "Neuen Arbeitsbereich starten"
+        "startNewWorkspace": "Neuen Arbeitsbereich starten",
+        "setEstimate": "Schätzung festlegen",
+        "estimateValue": "Schätzung {{estimate}}"
       },
       "NewWorkspaceComposerCard": {
         "reuseExistingBranch": "Branch wiederverwenden",
@@ -2256,7 +2261,22 @@
         "addSshHostHint": "Einen vorhandenen Rechner über SSH verwenden",
         "addRemoteOrcaServer": "Entfernten Orca-Server hinzufügen",
         "addRemoteOrcaServerHint": "Eine weitere Orca-Laufzeitumgebung koppeln",
-        "hostConnectionFailed": "Verbindung fehlgeschlagen"
+        "hostConnectionFailed": "Verbindung fehlgeschlagen",
+        "connect": "Verbinden",
+        "reconnect": "Erneut verbinden",
+        "setupConfigDefaultTabs": "Standard-Tab-Befehle",
+        "setupConfigSetupAndDefaultTabs": "Einrichtung und Standard-Tab-Befehle",
+        "setupConfigSetupScript": "Einrichtungsskript",
+        "runDefaultTabCommands": "Standard-Tab-Befehle ausführen",
+        "runSetupAndDefaultTabCommands": "Einrichtung und Standard-Tab-Befehle ausführen",
+        "runSetupCommand": "Einrichtungsbefehl ausführen",
+        "askRunDefaultTabCommands": "Standard-Tab-Befehle jetzt ausführen?",
+        "askRunSetupAndDefaultTabCommands": "Einrichtung und Standard-Tab-Befehle jetzt ausführen?",
+        "askRunSetup": "Einrichtung jetzt ausführen?",
+        "runSetupNow": "Einrichtung jetzt ausführen",
+        "runCommandsNow": "Befehle jetzt ausführen",
+        "skipForNow": "Vorerst überspringen",
+        "skipCommands": "Befehle überspringen"
       },
       "NewWorkspaceComposerModal": {
         "createWorktree": "Worktree erstellen",
@@ -2350,9 +2370,6 @@
         "778683ec84": "Beschreibung",
         "da9aaa8bcf": "Beschreibung bearbeiten",
         "4a337ac05f": "Speichern",
-        "169a93b29a": "aktualisiert",
-        "3c891789f6": "von",
-        "f4fe47c2bb": "Erledigt",
         "0ac19bb52e": "Kommentar auf GitHub öffnen",
         "d6c6679de7": "Auf Kommentar antworten",
         "76b2a0ac5b": "erledigt",
@@ -2360,7 +2377,6 @@
         "6885c619e7": "Ohne Repository-Pfad ist keine Antwort möglich.",
         "d94810f652": "Die Beschreibung konnte nicht aktualisiert werden.",
         "9b4190dc98": "Beschreibung aktualisiert.",
-        "89e80af1c7": "Dateien angesehen",
         "319cf2d54b": "Dateibaum anzeigen",
         "eff839f438": "Review-Kommentar hinzugefügt.",
         "d8c3ba91c4": "Ohne PR-Head-SHA ist kein Kommentar möglich.",
@@ -2398,8 +2414,6 @@
         "9d5425918e": "PR erneut öffnen",
         "96d013ed28": "Pull Request schließen",
         "eca289e593": "Zum Mergen ist ein registriertes lokales Repository erforderlich",
-        "e01e34f5fa": "Kommentar",
-        "345b68254c": "Diskussion",
         "31a7b202f2": "Auf @{{value0}} antworten",
         "408e634fbb": "In dieser Review-Diskussion antworten",
         "34b9f7c264": ":L{{value0}}",
@@ -2421,7 +2435,19 @@
         "4b8ae7303f": "Der Diff konnte nicht geladen werden.",
         "closePullRequestFailed": "Pull Request konnte nicht geschlossen werden",
         "reopenPullRequestFailed": "Pull Request konnte nicht erneut geöffnet werden",
-        "diffLoadTimedOut": "Zeitüberschreitung beim Laden dieses Diffs."
+        "diffLoadTimedOut": "Zeitüberschreitung beim Laden dieses Diffs.",
+        "filesViewed_one": "{{viewed}} / {{count}} Datei angesehen",
+        "filesViewed_other": "{{viewed}} / {{count}} Dateien angesehen",
+        "updatedRelativeTime": "aktualisiert {{time}}",
+        "resolvedThreadBy": "Erledigte Diskussion von {{author}}",
+        "resolvedCommentBy": "Erledigter Kommentar von {{author}}",
+        "mentionSource": {
+          "prAuthor": "PR-Autor",
+          "issueAuthor": "Issue-Autor",
+          "commenter": "Kommentarautor",
+          "participant": "Teilnehmer",
+          "teamMember": "Teammitglied"
+        }
       },
       "QuickOpen": {
         "1dbd3f59ff": "Navigieren",
@@ -2435,9 +2461,12 @@
         "9e97f08d0f": "Nach einer Datei zum Öffnen suchen",
         "ec31e058f7": "Zu Datei wechseln",
         "73b44e7bde": "Installationsbefehl kopieren",
-        "b227d88520": "{{value0}} Dateien gefunden",
         "995be8ea22": "Kopieren",
-        "cf144856dc": "Kopiert"
+        "cf144856dc": "Kopiert",
+        "filesFound_one": "{{count}} Datei gefunden",
+        "filesFound_other": "{{count}} Dateien gefunden",
+        "hostCouldNotOpenPath": "Der Host konnte diesen Dateipfad nicht öffnen.",
+        "chooseFileNotDirectory": "Eine Datei statt eines Verzeichnisses auswählen."
       },
       "SelectedTextCopyMenu": {
         "9b40d7b018": "Kopieren"
@@ -2447,8 +2476,6 @@
         "serverBody": "Diese Chats waren aktiv, als Orca auf {{machine}} neu gestartet wurde. Beim Fortsetzen wird jeder Chat an der Stelle wiederhergestellt, an der er unterbrochen wurde, und der Agent wird zum Fortfahren aufgefordert. Der ursprüngliche Prompt wird nicht erneut gesendet.",
         "serverDismiss": "Verwerfen",
         "serverResumeAll": "Alle {{count}} auf {{machine}} fortsetzen",
-        "serverResumeHereOne": "1 hier gestarteten Chat fortsetzen",
-        "serverResumeHere": "{{count}} hier gestartete Chats fortsetzen",
         "title": "Unterbrochene Chats fortsetzen?",
         "body": "Diese Chats waren aktiv, als Orca geschlossen wurde. Beim Fortsetzen wird jeder Chat mit seinem vollständigen Kontext an der Stelle wiederhergestellt, an der er unterbrochen wurde. Der Agent wird aufgefordert, vor dem Fortfahren seine bisherige Tätigkeit zu prüfen. Der ursprüngliche Prompt wird nicht erneut gesendet.",
         "updateBody": "Diese Chats waren aktiv, als Orca ein Update installiert hat. Beim Fortsetzen wird jeder Chat mit seinem vollständigen Kontext an der Stelle wiederhergestellt, an der er unterbrochen wurde. Der Agent wird aufgefordert, vor dem Fortfahren seine bisherige Tätigkeit zu prüfen. Der ursprüngliche Prompt wird nicht erneut gesendet.",
@@ -2457,16 +2484,8 @@
         "listLabel": "Chats, die fortgesetzt würden",
         "dontAskAgain": "Nicht erneut fragen (automatisch fortsetzen)",
         "dontAskAgainHint": "Lässt sich unter Einstellungen → Experimentell → Chat-Oberfläche deaktivieren.",
-        "continuedOne": "1 Chat fortgesetzt",
-        "continuedMany": "{{value0}} Chats fortgesetzt",
         "selectAgent": "{{value0}}-Chat „{{value1}}“ in {{value2}} fortsetzen",
         "dismissAll": "Alle verwerfen",
-        "notContinuedOne": "1 Chat konnte nicht fortgesetzt werden",
-        "notContinuedMany": "{{value0}} Chats konnten nicht fortgesetzt werden",
-        "notConfirmedOne": "Fortsetzen von 1 Chat konnte nicht bestätigt werden",
-        "notConfirmedMany": "Fortsetzen von {{value0}} Chats konnte nicht bestätigt werden",
-        "notConfirmedOtherOne": "Es konnte nicht bestätigt werden, dass 1 weiterer Chat fortgesetzt wurde",
-        "notConfirmedOtherMany": "Fortsetzen von {{value0}} weiteren Chats konnte nicht bestätigt werden",
         "viewChats": "Chats anzeigen",
         "review": "Prüfen",
         "activityUnnamed": "unbenannt",
@@ -2474,9 +2493,7 @@
         "activityQuestion": "Wartet auf Antwort: {{value0}}",
         "activityMidReply": "Wurde während einer Antwort unterbrochen",
         "activitySubagentOne": "Unteragent aktiv: {{value0}}",
-        "activitySubagentMany": "{{value0}} Unteragenten aktiv",
         "activityMonitorOne": "Wird überwacht: {{value0}}",
-        "activityMonitorMany": "{{value0}} Hintergrundaufgaben werden überwacht",
         "selectWorkspace": "Alle Chats in {{value0}} auswählen",
         "workspaceSelectedCount": "{{value0}} von {{value1}}",
         "selectAll": "Alle Chats auswählen",
@@ -2490,7 +2507,21 @@
         "done": "Abschließen",
         "resultListLabel": "Chats dieses Fortsetzungsvorgangs",
         "resumeChats_one": "{{count}} Chat fortsetzen",
-        "resumeChats_other": "{{count}} Chats fortsetzen"
+        "resumeChats_other": "{{count}} Chats fortsetzen",
+        "serverResumeHereCount_one": "{{count}} hier gestarteten Chat fortsetzen",
+        "serverResumeHereCount_other": "{{count}} hier gestartete Chats fortsetzen",
+        "continuedCount_one": "{{count}} Chat fortgesetzt",
+        "continuedCount_other": "{{count}} Chats fortgesetzt",
+        "notContinuedCount_one": "{{count}} Chat konnte nicht fortgesetzt werden",
+        "notContinuedCount_other": "{{count}} Chats konnten nicht fortgesetzt werden",
+        "notConfirmedCount_one": "Fortsetzung von {{count}} Chat konnte nicht bestätigt werden",
+        "notConfirmedCount_other": "Fortsetzung von {{count}} Chats konnte nicht bestätigt werden",
+        "notConfirmedOtherCount_one": "Fortsetzung von {{count}} weiteren Chat konnte nicht bestätigt werden",
+        "notConfirmedOtherCount_other": "Fortsetzung von {{count}} weiteren Chats konnte nicht bestätigt werden",
+        "activitySubagentCount_one": "{{count}} Unteragent läuft",
+        "activitySubagentCount_other": "{{count}} Unteragenten laufen",
+        "activityMonitorCount_one": "{{count}} Hintergrundaufgabe wird überwacht",
+        "activityMonitorCount_other": "{{count}} Hintergrundaufgaben werden überwacht"
       },
       "StarNagCard": {
         "30c36231c1": "Orca ist Open Source. Wenn es heute hilfreich war, hilft ein Stern auf GitHub anderen Entwicklern, Orca zu finden.",
@@ -2505,7 +2536,6 @@
       "TaskPage": {
         "ff69a30681": "Abbrechen",
         "8ff6fdc368": "Wird erstellt…",
-        "fc0d8a1fa4": "zum Absenden.",
         "919a20dd5b": "{{value0}} eingeben",
         "56cdb413a2": "Durch Kommas getrennte Werte",
         "1f0fce91e3": "{{value0}} auswählen",
@@ -2553,11 +2583,9 @@
         "bdebffcbfe": "Ein Linear-Projekt für das ausgewählte Team erstellen.",
         "1361275ec3": "Neues Linear-Projekt",
         "7f3f7b4c18": "Beschreibung (optional, Markdown)",
-        "9f2b4c03a6": "Erstellen in",
         "d3d0998b7d": "Neues GitHub-Issue",
         "6244a02f46": "In Linear öffnen",
         "606a85c774": "Offen",
-        "5e8061b088": "Arbeitsbereich aus {{value0}} {{value1}} starten",
         "592a55611b": "Weitere Teams auswählen oder aktualisieren; Teamfilter gelten für die aktuell abgerufenen Issues.",
         "618107fab3": "Keine abgerufenen Issues entsprechen den ausgewählten Teams",
         "903c7af49f": "Keine Linear-Issues gefunden",
@@ -2566,7 +2594,6 @@
         "f362667d55": "Aktualisiert",
         "b1eaa18ace": "Issue",
         "37e7ee311e": "Schlüssel",
-        "b7bae28b6a": "angezeigt",
         "a26a48252e": "Anzeigeeigenschaften",
         "5d2d835467": "Sortierung",
         "5659da12fc": "Gruppierung",
@@ -2606,8 +2633,6 @@
         "054bf695cc": "Entwurf",
         "5b6b2af943": "Wird erneut versucht…",
         "0c0de0fc0e": "Fehler beim Laden der Issues aus",
-        "d1766fd62d": "Projekte konnten nicht geladen werden",
-        "7762f4b03a": "von",
         "443f7dd928": "Merge",
         "a7396b05c6": "Checks",
         "f6fa3c97d0": "Prüfer",
@@ -2789,10 +2814,41 @@
         "linearOpenAttachedWorkspace": "Mit {{value0}} verknüpften Arbeitsbereich öffnen",
         "linearWorktreesColumn": "Arbeitsbereiche",
         "jiraBoardEmptyColumn": "Keine Issues",
-        "labelCountPlural": "{{count}} Labels",
-        "labelCountSingular": "{{count}} Label",
-        "memberCountPlural": "{{count}} Mitglieder",
-        "memberCountSingular": "{{count}} Mitglied"
+        "backToPullRequests": "Pull Requests",
+        "backToGitHubList": "GitHub-Liste",
+        "noGitHubRepositoryContext": "Für dieses Issue ist kein GitHub-Repository-Kontext verfügbar.",
+        "filingInTarget": "Wird in {{target}} erstellt",
+        "filingInThisRepository": "Wird in diesem Repository erstellt",
+        "shortcutToSubmit": "{{shortcut}} zum Absenden.",
+        "projectsFailedToLoad_one": "Projekte nicht geladen: {{failed}} von {{count}}",
+        "projectsFailedToLoad_other": "Projekte nicht geladen: {{failed}} von {{count}}",
+        "draftPullRequestNumber": "Pull-Request-Entwurf #{{number}}",
+        "pullRequestNumber": "Pull Request #{{number}}",
+        "issueNumber": "Issue #{{number}}",
+        "loadGitHubWorkFailed": "GitHub-Aufgaben konnten nicht geladen werden.",
+        "gitlabViewIssues": "Issues",
+        "gitlabViewMrs": "MRs",
+        "gitlabViewTodos": "Meine Aufgaben",
+        "startWorkspaceFromMr": "Arbeitsbereich aus MR {{number}} starten",
+        "startWorkspaceFromIssue": "Arbeitsbereich aus Issue {{number}} starten",
+        "shownCount_one": "{{count}} angezeigt",
+        "shownCount_other": "{{count}} angezeigt",
+        "linearProjectPlaceholder": "Projekt",
+        "labelCount_one": "{{count}} Label",
+        "labelCount_other": "{{count}} Labels",
+        "memberCount_one": "{{count}} Mitglied",
+        "memberCount_other": "{{count}} Mitglieder",
+        "groupUnassigned": "Nicht zugewiesen",
+        "linearProjectContext": "Projekt: {{name}}",
+        "linearViewContext": "Ansicht: {{name}}",
+        "changedFileCount_one": "{{count}} Datei",
+        "changedFileCount_other": "{{count}} Dateien",
+        "resumeRestoration": {
+          "linearProjectNotFound": "Gespeichertes Linear-Projekt wurde nicht gefunden.",
+          "linearProjectRestoreFailed": "Gespeichertes Linear-Projekt konnte nicht wiederhergestellt werden.",
+          "linearViewNotFound": "Gespeicherte Linear-Ansicht wurde nicht gefunden.",
+          "linearViewRestoreFailed": "Gespeicherte Linear-Ansicht konnte nicht wiederhergestellt werden."
+        }
       },
       "Terminal": {
         "73768427cf": "Schließen",
@@ -2867,7 +2923,8 @@
         "b1e390250d": "Der Wechsel zum lokalen Build konnte nicht abgeschlossen werden.",
         "d29740d175": "Der ausgewählte Build konnte nicht verwendet werden.",
         "37d45c9ec1": "Anderen Build auswählen",
-        "7f1a4c9e02": "Orca wurde über die Paketverwaltung des Systems installiert und muss darüber aktualisiert werden — Orca kann diese Version nicht selbst installieren."
+        "7f1a4c9e02": "Orca wurde über die Paketverwaltung des Systems installiert und muss darüber aktualisiert werden — Orca kann diese Version nicht selbst installieren.",
+        "compatibilityModeFailed": "Kompatibilitätsmodus konnte nicht aktiviert werden. {{message}}"
       },
       "WorktreeJumpPalette": {
         "ac037cfac2": "Navigieren",
@@ -2893,8 +2950,6 @@
         "d7d496a451": "Browser-Seite existiert nicht mehr",
         "50a1d11d5b": "Offene Tabs",
         "088d66d980": "Aktionen & Einstellungen",
-        "20af998bff": "{{value0}} Elemente verfügbar{{value1}}",
-        "bb72c08e63": "{{value0}} Ergebnisse gefunden{{value1}}",
         "34c8fbb46e": "SSH-Host",
         "63c2be1914": "SSH-Verbindung getrennt",
         "95be6587d3": "Worktree „{{value0}}“ erstellen",
@@ -2911,7 +2966,12 @@
         "recentChatsTerminalsHeader": "Zuletzt verwendete Chats & Terminals",
         "27f10cca63": "Chats, Terminals, Arbeitsbereiche, Aufgaben, Einstellungen und Aktionen suchen…",
         "2770f02910": "Chats, Terminals, Arbeitsbereiche, Aufgaben, Einstellungen und Aktionen suchen",
-        "lastActiveTime": "Zuletzt vor {{value0}} aktiv"
+        "lastActiveTime": "Zuletzt vor {{value0}} aktiv",
+        "resultsFound_one": "{{count}} Ergebnis gefunden.",
+        "resultsFound_other": "{{count}} Ergebnisse gefunden.",
+        "itemsAvailable_one": "{{count}} Eintrag verfügbar.",
+        "itemsAvailable_other": "{{count}} Einträge verfügbar.",
+        "createActionAvailable": "Aktion zum Erstellen eines Worktrees verfügbar."
       },
       "github": {
         "pr": {
@@ -2952,7 +3012,8 @@
               "8f6cb3772f": "Diesen Pull Request automatisch mergen, sobald die Anforderungen erfüllt sind",
               "def355ff38": "Merge möglich",
               "e42c5bae67": "Laut GitHub ist ein Merge dieses PRs möglich und die Checks sind bestanden",
-              "cbf0113af6": "Laut GitHub ist ein Merge dieses PRs möglich"
+              "cbf0113af6": "Laut GitHub ist ein Merge dieses PRs möglich",
+              "autoMergeOn": "Auto-Merge aktiviert"
             }
           }
         },
@@ -3126,10 +3187,10 @@
           "imageUrlTooLarge": "Die Bild-URL ist zu lang."
         },
         "IssueSourceSelector": {
-          "d6aeb2012b": "Angezeigte Issues aus",
           "787c970baf": "Issue-Quelle",
           "51d1608920": "Origin",
-          "30b2c9df91": "Upstream"
+          "30b2c9df91": "Upstream",
+          "showingIssuesFromRepo": "Angezeigte Issues aus <repo/>"
         },
         "PRFilterDropdowns": {
           "979be3cf6b": "Zuständige Person",
@@ -3139,12 +3200,18 @@
           "01f3f3d161": "Autor",
           "13b3ac0a84": "Status",
           "79c54552f7": "Filter",
-          "8a2ffbf9b3": "Filter „{{value0}}“ entfernen"
+          "8a2ffbf9b3": "Filter „{{value0}}“ entfernen",
+          "anyState": "Beliebig",
+          "currentUser": "Aktueller Benutzer"
         },
         "PRFilterPickers": {
-          "fdf387297c": "Zurücksetzen (",
           "472c12ae03": "Zurücksetzen",
-          "2d1f58eda6": "Verwenden"
+          "pressEnterToUseValue": "Enter drücken, um den eingegebenen Wert zu verwenden.",
+          "useTypedValue": "<value/> verwenden",
+          "clearSelected": "Zurücksetzen ({{count}})",
+          "loading": "Wird geladen…",
+          "searchTextTooLarge": "Der Suchtext ist zu lang.",
+          "noMatches": "Keine Treffer"
         },
         "PRFilterSections": {
           "a00830d3f7": "Keine Benutzer",
@@ -3154,7 +3221,6 @@
           "458ea3602b": "Keine Autoren",
           "b69fa4fa20": "Zurück",
           "30ebb6ca44": "Alle Filter zurücksetzen",
-          "8177eda37e": "Filtern",
           "ea3416d646": "Zuständige Person",
           "b1d9fdea08": "Label",
           "24754c44ad": "Autor",
@@ -3166,7 +3232,15 @@
           "2b2f019091": "Beliebiger Status",
           "0fd3249e2e": "Geschlossen",
           "d78b60b5c2": "Offen",
-          "bd162b7d5a": "Gemergt"
+          "bd162b7d5a": "Gemergt",
+          "draft": "Entwurf",
+          "labelCount_one": "{{count}} Label",
+          "labelCount_other": "{{count}} Labels",
+          "allStates": "Alle",
+          "filterPullRequests": "Pull Requests filtern",
+          "filterIssues": "Issues filtern",
+          "filterOrTypeLogin": "Filtern oder Anmeldenamen eingeben...",
+          "filterLabels": "Labels filtern..."
         },
         "github": {
           "rate": {
@@ -3177,15 +3251,14 @@
                 "d12d3d6f33": "GitHub-API-Kontingent aktualisieren",
                 "d5e5de9070": "Orca verwendet REST, Search und GraphQL über die GitHub CLI.",
                 "58c5f88216": "GitHub-API-Kontingent",
-                "6da1858354": "übrig · Zurücksetzung in",
-                "f42790d150": "von",
                 "01f7323e58": "GraphQL-API",
                 "1daf0f22a9": "GraphQL",
                 "1f2f28a4de": "Such-API",
                 "c377a4f06a": "Suche",
                 "c392c749a6": "REST-API",
                 "bb227706a6": "REST",
-                "budget_scope_prefix": "Geltungsbereich des Kontingents"
+                "budget_scope_prefix": "Geltungsbereich des Kontingents",
+                "remainingOfLimitResetsIn": "{{remaining}} von {{limit}} übrig · Zurücksetzung in {{reset}}"
               }
             }
           }
@@ -3193,7 +3266,29 @@
         "CommentReactions": {
           "addReaction": "Reaktion hinzufügen",
           "removeNamedReaction": "Reaktion {{value0}} entfernen",
-          "addNamedReaction": "Reaktion {{value0}} hinzufügen"
+          "addNamedReaction": "Reaktion {{value0}} hinzufügen",
+          "reaction": {
+            "thumbsUp": "Daumen hoch",
+            "thumbsDown": "Daumen runter",
+            "laugh": "Lachen",
+            "confused": "verwirrt",
+            "heart": "Herz",
+            "hooray": "hurra",
+            "rocket": "Rakete",
+            "eyes": "Augen"
+          }
+        },
+        "CommentCodeContext": {
+          "showSurroundingCodeBlock": "Umliegenden Codeblock anzeigen",
+          "showNearbyCodeContext": "Benachbarten Codekontext anzeigen"
+        },
+        "prCheckPresentation": {
+          "successful": "Erfolgreich",
+          "inProgress": "In Bearbeitung"
+        },
+        "IssueSourceIndicator": {
+          "issueFromRepo": "Issue aus <repo/>",
+          "issuesFromRepo": "Issues aus <repo/>"
         }
       },
       "linear": {
@@ -3211,11 +3306,6 @@
               "7d498f653c": "Persönlicher API-Schlüssel",
               "c9889a09f8": "Vor dem Erstellen des Schlüssels den gewünschten Arbeitsbereich in Linear auswählen."
             }
-          }
-        },
-        "priority": {
-          "icon": {
-            "c43d3e065b": "Priorität:"
           }
         },
         "project": {
@@ -3236,7 +3326,6 @@
               "c8db98b73b": "Ressourcen",
               "bb1405eff8": "Meilensteine",
               "5d99315fb8": "Planung",
-              "3ad562bdf4": "berücksichtigte Issues",
               "563501f191": "Fortschritt",
               "bb5664d456": "Keine Projektbeschreibung.",
               "7b147907dc": "Linear",
@@ -3261,7 +3350,10 @@
               "df4bd63c1d": "Nicht zugewiesen",
               "30402d2c6e": "Suche oder Aktualisierung versuchen.",
               "a2f31c4cd6": "Keine Linear-Projekte gefunden",
-              "c9b6e9f90d": "Linear-Projekte konnten nicht geladen werden"
+              "c9b6e9f90d": "Linear-Projekte konnten nicht geladen werden",
+              "scopedIssueCount_one": "{{count}} Issue im ausgewählten Bereich",
+              "scopedIssueCount_other": "{{count}} Issues im ausgewählten Bereich",
+              "backlog": "Backlog"
             }
           }
         },
@@ -3274,7 +3366,14 @@
             "05baa5ae90": "Arbeitsbereich",
             "89f6580dbf": "Teams suchen…",
             "b3488fad3c": "Es wurden keine Teams abgerufen. Der Zugriff kann vom Berechtigungsumfang des Schlüssels, der Mitgliedschaft in privaten Teams, archivierten Teams, Berechtigungen oder einem Fehler beim Abrufen abhängen.",
-            "405b33c378": "Keines der abgerufenen Teams entspricht der Suche."
+            "405b33c378": "Keines der abgerufenen Teams entspricht der Suche.",
+            "teamCount_one": "{{count}} Team",
+            "teamCount_other": "{{count}} Teams"
+          }
+        },
+        "priority": {
+          "icon": {
+            "priorityValue": "Priorität: {{label}}"
           }
         }
       },
@@ -6658,7 +6757,11 @@
           "c34fb1098d": "Terminal-Tabs geschlossen und Beenden angefordert.",
           "d9657ac204": "Beenden der Terminalsitzung angefordert.",
           "e8f25bd903": "Terminalbereinigung konnte nicht abgeschlossen werden.",
-          "a702d4196e": "Dies schließt alle Terminal-Tabs in sämtlichen Arbeitsbereichen und fordert das Beenden ihrer aktuellen Terminalsitzungen an. Nicht gespeicherte Arbeit in Terminals geht verloren. Der Daemon selbst läuft weiter, und neue Terminals können sofort geöffnet werden. Dies kann nicht rückgängig gemacht werden."
+          "a702d4196e": "Dies schließt alle Terminal-Tabs in sämtlichen Arbeitsbereichen und fordert das Beenden ihrer aktuellen Terminalsitzungen an. Nicht gespeicherte Arbeit in Terminals geht verloren. Der Daemon selbst läuft weiter, und neue Terminals können sofort geöffnet werden. Dies kann nicht rückgängig gemacht werden.",
+          "confirmRestart": "Neu starten",
+          "busyRestarting": "Neustart läuft…",
+          "confirmKillAll": "Alle Sitzungen beenden",
+          "busyKilling": "Wird beendet…"
         },
         "MacFolderAccessFixDialog": {
           "stepAllow": "Orca unter „Files and Folders“ zulassen",
@@ -12478,14 +12581,14 @@
       "right": {
         "sidebar": {
           "BulkActionBar": {
-            "79a9f5f712": "Vormerkung aufheben (",
-            "ef5f5bd06e": "Vormerken (",
-            "60ed678138": "ausgewählt"
+            "selectedCount_one": "{{count}} ausgewählt",
+            "selectedCount_other": "{{count}} ausgewählt",
+            "stageCount": "Vormerken ({{count}})",
+            "unstageCount": "Vormerkung aufheben ({{count}})"
           },
           "ChecksPanel": {
             "2ef90c9819": "Ein KI-Agent für die fehlgeschlagenen Checks wurde gestartet.",
             "a0181a8d76": "Ein KI-Agent für die Konflikte wurde gestartet.",
-            "34464d00b9": "aktualisiert",
             "058039787c": "Abbrechen",
             "2ab7fd4b6d": "Speichern",
             "dda5924a40": "Checks erfordern einen Git-Branch und den Kontext eines gehosteten Reviews",
@@ -12531,7 +12634,8 @@
             "430f1a62d4": "Der ausgewählte Thread auf der Plattform konnte nicht als erledigt markiert werden.",
             "updateReactionFailed": "Die Reaktion konnte nicht aktualisiert werden.",
             "gitlabMoreActions": "Weitere MR-Aktionen",
-            "gitlabLinkAnother": "Weiteren MR verknüpfen"
+            "gitlabLinkAnother": "Weiteren MR verknüpfen",
+            "reviewUpdatedAt": "{{review}} aktualisiert {{time}}"
           },
           "CreateHostedReviewComposer": {
             "741ff8a0d2": "Pushen und {{value0}} erstellen"
@@ -12688,7 +12792,14 @@
             "740aca88ab": "Der Port-Scan im Arbeitsbereich ist fehlgeschlagen.",
             "5be4f7f727": "Menü für Port {{value0}}",
             "1004af16ab": "{{value0}} kopieren",
-            "153d3a8026": "Host des Arbeitsbereichs unbekannt"
+            "153d3a8026": "Host des Arbeitsbereichs unbekannt",
+            "unknownProcess": "Unbekannter Prozess",
+            "containerOrForwardedService": "Container oder weitergeleiteter Dienst",
+            "unassigned": "Nicht zugewiesen",
+            "remotePortOutOfRange": "Remote-Port muss im Bereich 1–65535 liegen",
+            "localPortOutOfRange": "Lokaler Port muss im Bereich 1–65535 liegen",
+            "localPortInUse": "Port {{port}} wird bereits verwendet. Einen anderen lokalen Port wählen.",
+            "localPortRequiresPrivileges": "Port {{port}} erfordert erhöhte Rechte. Einen lokalen Port ≥ 1024 verwenden."
           },
           "Search": {
             "1abfb25a66": "Suchbegriff eingeben, um Dateien zu durchsuchen",
@@ -12745,7 +12856,6 @@
             "476b77745b": "Basisreferenz ändern",
             "ed34038d0d": "Branch-Vergleich aktualisieren",
             "493f963029": "Basisreferenz ändern",
-            "3278b2767b": "voraus",
             "11b5dd8e41": "Vergleich mit",
             "a9bf7c171a": "Commit fehlgeschlagen",
             "011f9713fc": "Commit blockiert",
@@ -12790,7 +12900,6 @@
             "574d2f4413": "Notizen löschen",
             "05bb8f4a48": "Abbrechen",
             "48db37cca9": "Alle anzeigen",
-            "78ce2d37ac": "Pusht zum Fork",
             "c05fe04839": "Pusht zum Fork unter {{value0}} (nicht zu origin)",
             "c35baf2f1e": "Dateien filtern…",
             "2fe2a67580": "Weitere Notizaktionen",
@@ -12798,14 +12907,12 @@
             "cc474e0b8c": "Notizen",
             "e131cd7128": "Die Quellcodeverwaltung ist nur für Git-Repositorys verfügbar",
             "c07b236287": "Einen Arbeitsbereich auswählen, um Änderungen anzuzeigen",
-            "dc5a6465fc": "{{value0}} (z. B. {{value1}}{{value2}})",
             "a5e5a11090": "Verwerfen aller Änderungen fehlgeschlagen — die Vormerkung der Dateien konnte vor dem Verwerfen nicht aufgehoben werden",
             "8a5ba6a988": "Commit-Diff konnte nicht geladen werden",
             "fe5bd1a610": "{{value0}} wird erstellt…",
             "812cb992ee": "Auf {{value0}} öffnen",
             "eef5446523": "{{value0}} #{{value1}} ist bereits offen",
             "0453ca3a9a": "{{value0}} wurde erstellt, konnte aber von Orca noch nicht aktualisiert werden.",
-            "f99560ab29": "Abbruch von {{value0}} fehlgeschlagen",
             "eae7a1da5f": "Die Notizen konnten nicht gelöscht werden.",
             "df5040e3c3": "Vormerkung aufheben",
             "8cde1a2fb0": "Vormerken",
@@ -12833,8 +12940,6 @@
             "aaf1451654": "{{value0}} als Entwurf erstellen",
             "26511c22b4": "Wird erstellt…",
             "d7ae61269b": "Auf Branch committet",
-            "branchFilesChangedVsBaseOne": "1 Datei gegenüber {{ref}} geändert",
-            "branchFilesChangedVsBaseOther": "{{count}} Dateien gegenüber {{ref}} geändert",
             "48a003c1b1": "Vorgemerkte Änderungen",
             "d4ef4bafc5": "Änderungen",
             "9339382454": "Alle Vormerkungen aufheben",
@@ -12844,8 +12949,6 @@
             "72f2bea3f4": "Notizen ausklappen",
             "d13edef890": "Notizen einklappen",
             "d6fb1df5fe": "{{value0}} ist bereits offen",
-            "05838cfdeb": "{{value0}}-Konflikt",
-            "d206117f90": "{{value0}}-Konflikt ({{value1}})",
             "0b5b8c234c": "{{value0}} öffnen ({{value1}})",
             "d97ef8f221": "Zeilen {{value0}}-{{value1}}",
             "6f8bfa0eb9": "Zeile {{value0}}",
@@ -12898,10 +13001,6 @@
             "b3c8f1a902": "Dateien nach Namen filtern",
             "d4f8c2a901": "Filter leeren und schließen",
             "e8a1c4b203": "gegenüber",
-            "compareBaseCommitsAheadOne": "1 Commit vor {{ref}}",
-            "compareBaseCommitsAheadOther": "{{count}} Commits vor {{ref}}",
-            "compareBaseCommitsBehindOne": "1 Commit hinter {{ref}}",
-            "compareBaseCommitsBehindOther": "{{count}} Commits hinter {{ref}}",
             "4b4a7de138": "Review-Seite im Browser öffnen",
             "createPrIntentCommitBlockedSummary": "Commit blockiert: {{value0}} Problem beheben und anschließend „PR erstellen“ erneut versuchen.",
             "pushRecovery": {
@@ -12932,17 +13031,50 @@
             "diffCommentNotesCopyFailed": "Notizen konnten nicht kopiert werden",
             "conflictCount_one": "{{count}} Konflikt",
             "conflictCount_other": "{{count}} Konflikte",
-            "discardFailedSingular": "Änderungen an {{count}} Datei konnten nicht verworfen werden",
-            "discardFailedPlural": "Änderungen an {{count}} Dateien konnten nicht verworfen werden",
-            "noteCountSingular": "{{count}} Notiz",
-            "noteCountPlural": "{{count}} Notizen"
+            "discardFailedSampleMore_one": "{{paths}}, +{{count}} weitere",
+            "discardFailedSampleMore_other": "{{paths}}, +{{count}} weitere",
+            "discardFailed_one": "Änderungen an {{count}} Datei konnten nicht verworfen werden",
+            "discardFailed_other": "Änderungen an {{count}} Dateien konnten nicht verworfen werden",
+            "discardFailedWithSample": "{{error}} (z. B. {{paths}})",
+            "compareBaseCommitsAhead_one": "{{count}} Commit vor {{ref}}",
+            "compareBaseCommitsAhead_other": "{{count}} Commits vor {{ref}}",
+            "compareBaseCommitsBehind_one": "{{count}} Commit hinter {{ref}}",
+            "compareBaseCommitsBehind_other": "{{count}} Commits hinter {{ref}}",
+            "branchFilesChangedVsBase_one": "{{count}} Datei gegenüber {{ref}} geändert",
+            "branchFilesChangedVsBase_other": "{{count}} Dateien gegenüber {{ref}} geändert",
+            "noteCount_one": "{{count}} Notiz",
+            "noteCount_other": "{{count}} Notizen",
+            "comparingAgainstRef": "Vergleich mit {{ref}}",
+            "commitsAheadShort_one": "{{count}} voraus",
+            "commitsAheadShort_other": "{{count}} voraus",
+            "unresolvedConflictOfKind": "Ungelöster Konflikt ({{kind}})",
+            "unresolvedConflict": "Ungelöster Konflikt",
+            "locallyResolvedConflictOfKind": "Konflikt lokal gelöst ({{kind}})",
+            "locallyResolvedConflict": "Konflikt lokal gelöst",
+            "pushesToForkTarget": "Pusht zum Fork {{target}}",
+            "abortRebaseConfirmTitle": "Rebase abbrechen?",
+            "abortMergeConfirmTitle": "Merge abbrechen?",
+            "abortRebaseConfirmDescription": "Dies bricht den laufenden Rebase ab und kann dabei vorgenommene Konfliktlösungen verwerfen.",
+            "abortMergeConfirmDescription": "Dies bricht den laufenden Merge ab und kann dabei vorgenommene Konfliktlösungen verwerfen.",
+            "abortRebaseFailedFallback": "Rebase konnte nicht abgebrochen werden",
+            "abortMergeFailedFallback": "Merge konnte nicht abgebrochen werden",
+            "abortRebaseFailed": "Rebase-Abbruch fehlgeschlagen",
+            "abortMergeFailed": "Merge-Abbruch fehlgeschlagen",
+            "clearNotesFromWorkspace_one": "{{count}} Notiz aus diesem Arbeitsbereich löschen?",
+            "clearNotesFromWorkspace_other": "{{count}} Notizen aus diesem Arbeitsbereich löschen?",
+            "clearNotesFromFile_one": "{{count}} Notiz aus {{path}} löschen?",
+            "clearNotesFromFile_other": "{{count}} Notizen aus {{path}} löschen?"
           },
           "SourceControlAgentActionDialog": {
             "8e856842d1": "Der ausgewählte Agent konnte nicht gestartet werden.",
             "c075d00de1": "Die Verbindung zum Arbeitsbereich konnte nicht ermittelt werden.",
             "38b899cc02": "Alle Repositorys",
             "808cfe0a3b": "Dieses Repository",
-            "994cddd1f7": "Nicht speichern"
+            "994cddd1f7": "Nicht speichern",
+            "agentNotEnabledOrDetected": "{{agent}} ist auf dem Host dieses Arbeitsbereichs nicht aktiviert oder wurde nicht erkannt.",
+            "workspaceConnectionUnresolved": "Die Verbindung zum Arbeitsbereich konnte nicht ermittelt werden.",
+            "noEnabledAgentsDetected": "Auf dem Host dieses Arbeitsbereichs wurden keine aktivierten Agenten erkannt.",
+            "startAgent": "Agent starten"
           },
           "SourceControlAgentActionDialogForm": {
             "013c9ac04a": "Speichern für",
@@ -13008,10 +13140,6 @@
                 "cbcc4ab3db": "Die ersten 100 Checks werden angezeigt",
                 "0dca6bfab5": "Check-Details öffnen",
                 "991f50c7e4": "Keine Checks konfiguriert",
-                "9ad98f2a17": "ausstehend",
-                "5e52f4ef7f": "fehlgeschlagen",
-                "02ca4f9074": "erfolgreich",
-                "checksUnresolvedChip": "ungeklärt",
                 "checksUnresolvedStripHint": "Diese Checks wurden ohne Einstufung als erfolgreich oder fehlgeschlagen abgeschlossen.",
                 "e15a8b77ef": "Für diesen Check sind keine eingebetteten Details verfügbar.",
                 "dcb3c546fe": "Erneut versuchen",
@@ -13030,7 +13158,6 @@
                 "1f2b980522": "Check-Details werden geladen…",
                 "0c96cd25e5": "Lösen",
                 "3a71a6ed0b": "Konflikte lösen, damit Checks und Merge abgeschlossen werden können.",
-                "60186d8498": "Durch Konflikte blockiert",
                 "c16762ac8c": "Die Checks und Kommentare unten zeigen den aktuell abgerufenen Kontext.",
                 "9d0e7bcefc": "Keine blockierende PR-Aktion",
                 "5856874b59": "Orca aktualisiert die Checks, solange dieses Panel geöffnet bleibt.",
@@ -13055,7 +13182,6 @@
                 "084c516efb": "Befehle kopieren",
                 "5dc3af25c0": "Kommentar auswählen",
                 "d7a2f9c401": "Ungelöste {{value0}}-Kommentare senden",
-                "d91f2a6c39": "{{value0}} Kommentare aus der Warteschlange an die KI senden",
                 "a6de3e5a20": "Kommentarwarteschlange leeren",
                 "f8a2c91d04": "Für den Agenten einreihen",
                 "b4e8a1c902": "In der Warteschlange",
@@ -13078,7 +13204,28 @@
                 "pendingChecks_one": "{{count}} Check ausstehend",
                 "pendingChecks_other": "{{count}} Checks ausstehend",
                 "unresolvedChecks_one": "{{count}} Check ungeklärt",
-                "unresolvedChecks_other": "{{count}} Checks ungeklärt"
+                "unresolvedChecks_other": "{{count}} Checks ungeklärt",
+                "passingCount_one": "{{count}} erfolgreich",
+                "passingCount_other": "{{count}} erfolgreich",
+                "failingCount_one": "{{count}} fehlgeschlagen",
+                "failingCount_other": "{{count}} fehlgeschlagen",
+                "pendingCount_one": "{{count}} ausstehend",
+                "pendingCount_other": "{{count}} ausstehend",
+                "unresolvedCount_one": "{{count}} ungelöst",
+                "unresolvedCount_other": "{{count}} ungelöst",
+                "sendQueuedCommentsToAi_one": "{{count}} Kommentar aus der Warteschlange an die KI senden",
+                "sendQueuedCommentsToAi_other": "{{count}} Kommentare aus der Warteschlange an die KI senden",
+                "conflictsBlockThisMr": "Konflikte blockieren diesen MR",
+                "conflictsBlockThisPr": "Konflikte blockieren diesen PR",
+                "copyComment": "Kommentar kopieren",
+                "sendComment": "Senden",
+                "commentingRequiresGitHubPrTarget": "Zum Kommentieren muss ein GitHub-PR-Repository als Ziel feststehen.",
+                "selectWorkspaceBeforeAiAction": "Vor dem Start einer KI-Aktion einen Arbeitsbereich auswählen.",
+                "operation": {
+                  "rebase": "Rebase",
+                  "merge": "Merge",
+                  "cherryPick": "Cherry-pick"
+                }
               },
               "empty": {
                 "state": {
@@ -13484,8 +13631,8 @@
               },
               "compare": {
                 "summary": {
-                  "commitsAheadSingular": "{{count}} Commit vor {{ref}}",
-                  "commitsAheadPlural": "{{count}} Commits vor {{ref}}"
+                  "commitsAhead_one": "{{count}} Commit vor {{ref}}",
+                  "commitsAhead_other": "{{count}} Commits vor {{ref}}"
                 }
               },
               "conflict": {
@@ -13570,8 +13717,11 @@
             "folderLinksOutsideProject": "Dieser Ordner verweist auf ein Ziel außerhalb des Projekts und kann daher hier nicht geöffnet werden."
           },
           "useFileExplorerImport": {
-            "25919b2050": "{{value0}} {{value1}} übersprungen.",
-            "132fd0e1e9": "Import von {{value0}} {{value1}} fehlgeschlagen."
+            "importFailedCount_one": "Import von {{count}} Datei fehlgeschlagen.",
+            "importFailedCount_other": "Import von {{count}} Dateien fehlgeschlagen.",
+            "importSkippedCount_one": "{{count}} Datei übersprungen.",
+            "importSkippedCount_other": "{{count}} Dateien übersprungen.",
+            "importFailed": "Import der Dateien fehlgeschlagen."
           },
           "useFileExplorerKeys": {
             "8adb953095": "Vorgang fehlgeschlagen"
@@ -13609,7 +13759,6 @@
             "refreshSessionHistory": "Sitzungsverlauf aktualisieren",
             "searchSessions": "Sitzungen suchen",
             "clearSearch": "Suche leeren",
-            "transcriptsSkipped": "{{count}} Transkript übersprungen",
             "noAgentSessionsFound": "Keine Agentensitzungen gefunden",
             "noSessionsMatchFilters": "Keine Sitzungen entsprechen den aktuellen Filtern",
             "noAgentsSelected": "Keine Agenten ausgewählt",
@@ -13628,7 +13777,9 @@
             "resumeInChatFailed": "Diese Sitzung konnte nicht in einem neuen Chat fortgesetzt werden.",
             "resumeInNewCliUnavailable": "Diese Sitzung kann nicht in der CLI geöffnet werden.",
             "resumeInNewCliHostTooOld": "Orca auf dem Host aktualisieren, auf dem dieser Chat läuft, um ihn in einer neuen CLI fortzusetzen.",
-            "folderWorkspaceUnavailable": "Der Ordner-Arbeitsbereich ist nicht mehr verfügbar."
+            "folderWorkspaceUnavailable": "Der Ordner-Arbeitsbereich ist nicht mehr verfügbar.",
+            "transcriptsSkippedCount_one": "{{count}} Transkript übersprungen",
+            "transcriptsSkippedCount_other": "{{count}} Transkripte übersprungen"
           },
           "AiVaultPanelControls": {
             "scanningSessions": "Sitzungen werden durchsucht",
@@ -13659,11 +13810,8 @@
             "latestTurns": "Letzte Gesprächsbeiträge",
             "noPreviewAvailable": "Keine Unterhaltungsvorschau verfügbar",
             "conversationNotSaved": "Unterhaltung nicht gespeichert",
-            "recoverableEmptyDetail": "Für diese Sitzung ist keine Unterhaltung gespeichert, es sind jedoch noch Elemente wiederherstellbar: {{value0}}.",
             "recoverableEmptyOpenLogHint": "Zum Wiederherstellen das Protokoll öffnen.",
             "emptyConversationDetail": "Für diese Sitzung ist keine Unterhaltung gespeichert. Sie kann nicht fortgesetzt werden.",
-            "queuedMessages": "Nachrichten in der Warteschlange: {{value0}}",
-            "subagentTranscripts": "Transkripte von Unteragenten: {{value0}}",
             "resumeInWorktree": "Im Worktree fortsetzen",
             "viewLog": "Protokoll anzeigen",
             "unknownTime": "Unbekannter Zeitpunkt",
@@ -13692,7 +13840,13 @@
             "noFirstPromptAvailable": "Kein erster Prompt verfügbar",
             "loadingFirstPrompt": "Erster Prompt wird geladen…",
             "folder": "Ordner",
-            "resumeInFolder": "Im Ordner fortsetzen"
+            "resumeInFolder": "Im Ordner fortsetzen",
+            "recoverableEmptyDetailCount_one": "Für diese Sitzung ist keine Unterhaltung gespeichert, es ist jedoch noch {{count}} Element wiederherstellbar.",
+            "recoverableEmptyDetailCount_other": "Für diese Sitzung ist keine Unterhaltung gespeichert, es sind jedoch noch {{count}} Elemente wiederherstellbar.",
+            "queuedMessageCount_one": "{{count}} Nachricht in der Warteschlange",
+            "queuedMessageCount_other": "{{count}} Nachrichten in der Warteschlange",
+            "subagentTranscriptCount_one": "{{count}} Transkript eines Unteragenten",
+            "subagentTranscriptCount_other": "{{count}} Transkripte von Unteragenten"
           },
           "AiVaultSessionRow": {
             "noPreviewAvailable": "Keine Unterhaltungsvorschau verfügbar",
@@ -13826,26 +13980,26 @@
                 "confirmation": {
                   "84f6f5b9eb": "Enthalten: {{numbers}}. ",
                   "541984b2eb": "Bis einschließlich #{{pr}} einreihen?",
-                  "4809f55cdb": "{{included}}GitHub reiht {{count}} Pull Request gemeinsam in die Merge-Warteschlange ein. Diese wählt die Merge-Methode und kann die Pull Requests in getrennten Gruppen mergen.",
-                  "be8f2621be": "{{included}}GitHub reiht {{count}} Pull Requests gemeinsam in die Merge-Warteschlange ein. Diese wählt die Merge-Methode und kann die Pull Requests in getrennten Gruppen mergen.",
-                  "92ca033e72": "{{count}} PR einreihen",
-                  "478a527b15": "{{count}} PRs einreihen",
                   "1feef35ca4": "Bis einschließlich #{{pr}} mergen?",
-                  "c3e036c99f": "{{included}}GitHub mergt {{count}} Pull Request mit {{method}} atomar. Wenn er nicht gemergt werden kann, wird nichts gemergt.",
-                  "369aba4b32": "{{included}}GitHub mergt {{count}} Pull Requests mit {{method}} atomar. Wenn einer nicht gemergt werden kann, wird keiner gemergt.",
-                  "493c78f521": "{{count}} PR mergen",
-                  "eb7051d268": "{{count}} PRs mergen"
+                  "queueDescription_one": "{{included}}GitHub reiht {{count}} Pull Request gemeinsam in die Merge-Warteschlange ein. Diese wählt die Merge-Methode und kann Pull Requests in getrennten Gruppen mergen.",
+                  "queueDescription_other": "{{included}}GitHub reiht {{count}} Pull Requests gemeinsam in die Merge-Warteschlange ein. Diese wählt die Merge-Methode und kann die Pull Requests in getrennten Gruppen mergen.",
+                  "queueConfirm_one": "{{count}} PR einreihen",
+                  "queueConfirm_other": "{{count}} PRs einreihen",
+                  "mergeDescription_one": "{{included}}GitHub mergt {{count}} Pull Request mit {{method}} atomar. Wenn er nicht gemergt werden kann, wird nichts gemergt.",
+                  "mergeDescription_other": "{{included}}GitHub mergt {{count}} Pull Requests mit {{method}} atomar. Wenn einer nicht gemergt werden kann, wird keiner gemergt.",
+                  "mergeConfirm_one": "{{count}} PR mergen",
+                  "mergeConfirm_other": "{{count}} PRs mergen"
                 },
                 "merge": {
-                  "55ae29b907": "Bis einschließlich #{{pr}} mergen · {{count}} PR",
-                  "b8446f6ec2": "Bis einschließlich #{{pr}} mergen · {{count}} PRs",
                   "189d0ec614": "#{{pr}} ist noch ein Entwurf.",
                   "640fb50d9c": "#{{pr}} ist geschlossen.",
                   "46ffcbda75": "#{{pr}} enthält Merge-Konflikte.",
                   "6dabefd63e": "Für #{{pr}} wurden Änderungen angefordert.",
                   "2bb21fc326": "#{{pr}} benötigt noch eine Review-Genehmigung.",
                   "c23faf74df": "#{{pr}} muss aktualisiert werden.",
-                  "f561e80968": "#{{pr}} ist blockiert."
+                  "f561e80968": "#{{pr}} ist blockiert.",
+                  "mergeThroughLabel_one": "Bis einschließlich #{{pr}} mergen · {{count}} PR",
+                  "mergeThroughLabel_other": "Bis einschließlich #{{pr}} mergen · {{count}} PRs"
                 }
               }
             }
@@ -13902,14 +14056,15 @@
             "sourceActionsUnavailable": "Die Transkriptquelle ist nicht verfügbar."
           },
           "AiVaultScanProgressStrip": {
-            "agentChecked": "{{agent}}: {{settled}} von {{total}} möglichen Verlaufseinträgen geprüft",
             "fileCount_one": "{{value0}} Datei",
             "fileCount_other": "{{value0}} Dateien",
             "databaseCount_one": "{{value0}} Datenbank",
             "databaseCount_other": "{{value0}} Datenbanken",
             "scanning": "{{value0}} wird durchsucht",
             "checking": "{{value0}} wird geprüft",
-            "scanned": "{{value0}} durchsucht"
+            "scanned": "{{value0}} durchsucht",
+            "agentCheckedCount_one": "{{agent}}: {{settled}} von {{total}} möglichem Verlaufseintrag geprüft",
+            "agentCheckedCount_other": "{{agent}}: {{settled}} von {{total}} möglichen Verlaufseinträgen geprüft"
           },
           "run": {
             "source": {
@@ -13938,6 +14093,15 @@
                 }
               }
             }
+          },
+          "fileExplorerMultiDrag": {
+            "moreItems_one": "+{{count}} weitere",
+            "moreItems_other": "+{{count}} weitere"
+          },
+          "CreatePullRequest": {
+            "createInProgress": "PR wird erstellt...",
+            "workspaceHostUnresolved": "Der Host des Arbeitsbereichs konnte nicht ermittelt werden. Den Arbeitsbereich aktualisieren und erneut versuchen.",
+            "branchDiscoveryFailed": "Branch-Erkennung fehlgeschlagen."
           }
         }
       },
@@ -14462,11 +14626,11 @@
                 "a2f68645ac": "GitLab-API-Kontingent aktualisieren",
                 "2f9c16d6c3": "Orca nutzt REST über die GitLab-CLI.",
                 "14e144f7a7": "GitLab-API-Kontingent",
-                "3e2c982cfa": "übrig, Zurücksetzung in",
-                "ea8ad0bae8": "von",
                 "0a891e8935": "REST-API",
                 "953f7c6062": "Dieser GitLab-Host hat keine Header zum Ratenlimit zurückgegeben.",
-                "budget_scope_prefix": "Geltungsbereich des Kontingents"
+                "budget_scope_prefix": "Geltungsbereich des Kontingents",
+                "resetUnknown": "unbekannt",
+                "remainingOfLimit": "{{remaining}} von {{limit}} übrig, Zurücksetzung in {{reset}}"
               }
             }
           }
@@ -15788,7 +15952,9 @@
             "6978871a3d": "Öffnen",
             "cce596969e": "Notiz löschen",
             "cad3384faa": "Notiz bearbeiten",
-            "508ee678a5": "Im Browser öffnen"
+            "508ee678a5": "Im Browser öffnen",
+            "noteAuthorFallback": "Notiz",
+            "sentMeta": "gesendet"
           },
           "DiffCommentPopover": {
             "2b3ce6d394": "Abbrechen",
@@ -15801,6 +15967,9 @@
           },
           "useDiffCommentDecorator": {
             "995fa28b50": "Diese Notiz"
+          },
+          "diffCommentZoneCard": {
+            "noteAlreadySent": "Notiz bereits gesendet"
           }
         }
       },
@@ -16366,7 +16535,21 @@
           "b09b2384fd": "Pausiert",
           "eaa02014f8": "Aktiviert",
           "29baf8f4c2": "Quelle",
-          "lastRunFailed": "Die letzte Ausführung ist fehlgeschlagen."
+          "lastRunFailed": "Die letzte Ausführung ist fehlgeschlagen.",
+          "noGrace": "Keine Nachholfrist",
+          "graceMinutes_one": "{{count}} Minute",
+          "graceMinutes_other": "{{count}} Minuten",
+          "graceHours_one": "{{count}} Stunde",
+          "graceHours_other": "{{count}} Stunden",
+          "usageCoverageRuns_one": "{{known}}/{{count}} Ausführung",
+          "usageCoverageRuns_other": "{{known}}/{{count}} Ausführungen",
+          "usageUnavailable": "Nicht verfügbar",
+          "noRuns": "Keine Ausführungen",
+          "projectDefault": "Projektstandard",
+          "reuseLiveSession": "Laufende Sitzung wiederverwenden",
+          "freshEachRun": "Bei jeder Ausführung neu",
+          "precheckEnabled": "Aktiviert, {{timeout}}",
+          "precheckNone": "Keine"
         },
         "AutomationEditorDialog": {
           "fb1896a5e7": "Abbrechen",
@@ -16470,11 +16653,8 @@
           "2faecab10b": "Jetzt ausführen",
           "13118faadf": "Unbekanntes Projekt",
           "73f630b49d": "Abbrechen",
-          "1b586f0e2b": "auf",
-          "02a33e3204": "von",
           "9adfab2596": "Externe Automatisierung löschen",
           "1e2e41392f": "Nicht erneut fragen",
-          "b264564427": "und ihren Ausführungsverlauf. Arbeitsbereiche aus früheren Ausführungen werden nicht gelöscht.",
           "080dcb5fbb": "Automatisierung löschen",
           "19a6e30eae": "Automatisierungen aktualisieren",
           "77c2778945": "Automatisierungen",
@@ -16509,7 +16689,6 @@
           "pendingAutomationRunMissing": "Der Ausführungsverlauf ist nicht mehr verfügbar.",
           "paused": "Pausiert",
           "missingWorkspace": "Arbeitsbereich fehlt",
-          "runUsageSummary": "{{cost}} geschätzt · {{tokens}} Token",
           "usageUnavailable": "Nutzungsdaten nicht verfügbar",
           "noRunUsageYet": "Noch keine Nutzungsdaten zu Ausführungen",
           "noWorkspace": "Kein Arbeitsbereich",
@@ -16524,7 +16703,11 @@
           "rowActions": "Automatisierungsaktionen",
           "tableLastRun": "Letzte Ausführung",
           "ownerChanged": "Der Host dieser Automatisierung hat sich geändert. Aktualisieren und erneut versuchen.",
-          "runError": "Fehler:"
+          "runError": "Fehler:",
+          "deleteAutomationDescription": "<name/> und den Ausführungsverlauf löschen. Arbeitsbereiche aus früheren Ausführungen werden nicht gelöscht.",
+          "deleteExternalAutomationDescription": "<name/> aus <provider/> auf <host/> löschen.",
+          "runUsageSummaryTokens_one": "ca. {{cost}} · {{tokens}} Token",
+          "runUsageSummaryTokens_other": "ca. {{cost}} · {{tokens}} Tokens"
         },
         "AutomationsPageSkeleton": {
           "55527b7bcf": "Automatisierungen werden geladen"
@@ -16554,8 +16737,8 @@
           "92405f1431": "Nicht verfügbar",
           "dbdcec22bd": "Schreibgeschützt",
           "0a2d4359a8": "Verwaltbar",
-          "e2532150ed": "Automatisierungen",
-          "701515f010": "Automatisierung"
+          "automationCount_one": "{{count}} Automatisierung",
+          "automationCount_other": "{{count}} Automatisierungen"
         },
         "WorkspaceCombobox": {
           "ee5b280eba": "Keine Arbeitsbereiche gefunden.",
@@ -16597,7 +16780,8 @@
             "last": {
               "run": {
                 "done": "Abgeschlossen",
-                "failed": "Fehlgeschlagen"
+                "failed": "Fehlgeschlagen",
+                "statusWithRelative": "{{status}} · {{relative}}"
               }
             }
           },
@@ -16742,14 +16926,11 @@
         },
         "externalScope": {
           "uncheckedHost": "Externe Automatisierungsmanager auf {{hostLabel}} konnten nicht geprüft werden.",
-          "uncheckedHosts": "Externe Automatisierungsmanager auf {{count}} Hosts konnten nicht geprüft werden."
+          "uncheckedHostCount_one": "Externe Automatisierungsmanager auf {{count}} Host konnten nicht geprüft werden.",
+          "uncheckedHostCount_other": "Externe Automatisierungsmanager auf {{count}} Hosts konnten nicht geprüft werden."
         },
         "enablement": {
           "paused": "Pausiert"
-        },
-        "runHistory": {
-          "occurrencesWithLatest": "{{times}} Mal, zuletzt {{date}}",
-          "occurrences": "{{times}} Mal"
         },
         "createDestination": {
           "label": "Host",
@@ -16804,6 +16985,71 @@
           "useFreshSessions": "Neue Sitzungen verwenden",
           "helper": "Werden bei jeder neuen Sitzung zu den Standardargumenten dieses Hosts hinzugefügt.",
           "detailLabel": "Zusätzliche Argumente"
+        },
+        "runHistory": {
+          "runCountSummary_one": "{{count}} Ausführung · {{completed}} abgeschlossen",
+          "runCountSummary_other": "{{count}} Ausführungen · {{completed}} abgeschlossen",
+          "occurrencesWithLatestCount_one": "{{count}} Mal, zuletzt {{date}}",
+          "occurrencesWithLatestCount_other": "{{count}} Mal, zuletzt {{date}}",
+          "occurrencesCount_one": "{{count}} Mal",
+          "occurrencesCount_other": "{{count}} Mal"
+        },
+        "capabilityProbe": {
+          "createIdempotencyUpdateRequired": "Zum Verschieben von Automatisierungen auf diesen Host ist ein neuerer Orca-Server erforderlich. HUB aktualisieren und erneut versuchen."
+        },
+        "editDraft": {
+          "unsupportedSchedule": "Diese Automatisierung hat einen nicht unterstützten gespeicherten Zeitplan. Vor dem Speichern einen unterstützten Zeitplan auswählen."
+        },
+        "hostCatalog": {
+          "orphanEntryLabel": "Nicht zugewiesene ältere Automatisierungen"
+        },
+        "automationPageParts": {
+          "never": "Nie",
+          "now": "gerade eben",
+          "runStatusPending": "In der Warteschlange",
+          "runStatusDispatching": "Wird gestartet",
+          "runStatusDispatched": "Gestartet",
+          "runStatusCompleted": "Erledigt",
+          "runStatusSkippedPrecheck": "Durch Vorabprüfung übersprungen",
+          "runStatusSkippedMissed": "Übersprungen",
+          "runStatusSkippedUnavailable": "Nicht verfügbar",
+          "runStatusSkippedNeedsInteractiveAuth": "Zugangsdaten erforderlich",
+          "runStatusDispatchFailed": "Fehlgeschlagen"
+        },
+        "runContent": {
+          "noOutput": "Keine Ausgabe verfügbar."
+        },
+        "runViewState": {
+          "viewRun": "Ausführung anzeigen",
+          "runOpen": "Ausführung ist geöffnet",
+          "terminalOnPairedServer": "Das Ausführungsterminal befindet sich auf dem gekoppelten Server.",
+          "terminalUnavailable": "Das Ausführungsterminal ist nicht verfügbar.",
+          "openWorkspace": "Arbeitsbereich öffnen",
+          "workspaceAvailable": "Arbeitsbereich ist verfügbar.",
+          "snapshotSaved": "Snapshot gespeichert",
+          "showingSnapshot": "Gespeicherter Ausführungs-Snapshot wird angezeigt.",
+          "namedWorkspaceGone": "{{name}} nicht mehr verfügbar",
+          "workspaceGone": "Arbeitsbereich nicht mehr verfügbar",
+          "noWorkspaceLaunched": "Kein Arbeitsbereich gestartet"
+        },
+        "runWorkspaceDisplay": {
+          "notLaunched": "Nicht gestartet",
+          "namedWorkspaceGone": "{{name}} (nicht mehr verfügbar)"
+        },
+        "usage": {
+          "tokensAndCost_one": "{{tokens}} Token · {{cost}}",
+          "tokensAndCost_other": "{{tokens}} Tokens · {{cost}}"
+        },
+        "externalDisplay": {
+          "sshHost": "SSH-Host",
+          "local": "Lokal"
+        },
+        "externalActionDisabled": {
+          "actionInProgress": "Eine andere Automatisierungsaktion läuft noch.",
+          "sshConnecting": "Warten, bis dieser SSH-Host verbunden ist.",
+          "connectSshHost": "Diesen SSH-Host verbinden, um Automatisierungen von {{provider}} zu verwalten.",
+          "cannotManageOnSshHost": "{{provider}} kann auf diesem SSH-Host keine Automatisierungen verwalten.",
+          "cannotManageLocally": "{{provider}} kann auf diesem Rechner keine Automatisierungen verwalten."
         }
       },
       "agent": {
@@ -16944,8 +17190,6 @@
             "63ce735809": "Verbinden",
             "4a2ab52781": "Wird überprüft…",
             "79e7aaed39": "Abbrechen",
-            "fdd26d81cc": "Atlassian-Kontoeinstellungen",
-            "8090504a3e": "Token erstellen unter",
             "7b3967c12f": "Atlassian-API-Token",
             "3d81bf3ab3": "API-Token",
             "e91b9a4073": "you@example.com",
@@ -16970,17 +17214,18 @@
             "be9eba0a1b": "Benutzername",
             "70035652d7": "Passwort",
             "c50abbf340": "Passwort des Jira-Kontos",
-            "d8737db691": "Benutzernamen und Passwort des Kontos für Jira Server oder Data Center verwenden."
+            "d8737db691": "Benutzernamen und Passwort des Kontos für Jira Server oder Data Center verwenden.",
+            "createTokenInSettings": "In den <link>Atlassian-Kontoeinstellungen</link> einen Token erstellen."
           }
         }
       },
       "rightSidebar": {
         "FolderWorkspaceWorktreesPanel": {
           "unavailable": "Arbeitsbereiche werden nur für Ordnerarbeitsbereiche angezeigt.",
-          "countOne": "1 zugeordneter Worktree",
-          "countMany": "{{value0}} zugeordnete Worktrees",
           "emptyTitle": "Noch keine zugeordneten Worktrees",
-          "emptyCopy": "Aus diesem Arbeitsbereich erstellte Worktrees werden hier angezeigt."
+          "emptyCopy": "Aus diesem Arbeitsbereich erstellte Worktrees werden hier angezeigt.",
+          "attachedCount_one": "{{count}} zugeordneter Worktree",
+          "attachedCount_other": "{{count}} zugeordnete Worktrees"
         },
         "FolderWorkspacePrChecksPanel": {
           "unavailable": "PR-Checks werden nur für Ordnerarbeitsbereiche angezeigt.",
@@ -16992,12 +17237,12 @@
           "hideDetails": "Details zu den PR-Checks von {{value0}} ausblenden",
           "reviewChecks": "Review-Checks",
           "allChecksPassing": "Alle Checks erfolgreich",
-          "oneWorktree": "1 Worktree",
-          "worktreeCount": "{{value0}} Worktrees",
-          "oneFailing": "1 fehlgeschlagen",
-          "failingCount": "{{value0}} fehlgeschlagen",
-          "onePending": "1 ausstehend",
-          "pendingCount": "{{value0}} ausstehend"
+          "worktreeCountLabel_one": "{{count}} Worktree",
+          "worktreeCountLabel_other": "{{count}} Worktrees",
+          "failingCountLabel_one": "{{count}} fehlgeschlagen",
+          "failingCountLabel_other": "{{count}} fehlgeschlagen",
+          "pendingCountLabel_one": "{{count}} ausstehend",
+          "pendingCountLabel_other": "{{count}} ausstehend"
         },
         "parentPrChecks": {
           "rowSummary": {
@@ -17079,10 +17324,11 @@
             "combobox": {
               "noProjects": "Keine Projekte",
               "allProjects": "Alle Projekte",
-              "hostCount": "{{value0}} Hosts",
               "searchProjects": "Projekte suchen…",
               "noMatches": "Keine Projekte entsprechen der Suche.",
-              "chooseSource": "Aufgabenquelle auswählen"
+              "chooseSource": "Aufgabenquelle auswählen",
+              "hostCount_one": "{{count}} Host",
+              "hostCount_other": "{{count}} Hosts"
             }
           }
         },
@@ -17119,7 +17365,35 @@
       "taskSourceContextSummary": {
         "sourceUnavailable": "{{value0}}-Quelle nicht verfügbar: {{value1}}",
         "someSourceHostsUnavailable": "Einige Hosts der {{value0}}-Quelle sind nicht verfügbar: {{value1}}",
-        "reconnectOrUpdateTitle": "{{value0}} erneut verbinden oder aktualisieren, um diese Quelle zu laden."
+        "reconnectOrUpdateTitle": "{{value0}} erneut verbinden oder aktualisieren, um diese Quelle zu laden.",
+        "providerSourceTitle": "{{provider}}-Quelle",
+        "hostTitle": "Host: {{hosts}}",
+        "accountTitle": "Konto: {{accounts}}",
+        "sourceTitle": "Quelle: {{source}}",
+        "sourceHostCount_one": "{{count}} Quellhost",
+        "sourceHostCount_other": "{{count}} Quellhosts",
+        "noHost": "Kein Host",
+        "projectCount_one": "{{count}} Projekt",
+        "projectCount_other": "{{count}} Projekte",
+        "selectedProject": "Ausgewähltes Projekt",
+        "selectedProjectCount_one": "{{count}} ausgewähltes Projekt",
+        "selectedProjectCount_other": "{{count}} ausgewählte Projekte",
+        "currentAccount": "Aktuelles Konto",
+        "statusCheckingCapabilities": "prüft Serverfunktionen",
+        "statusServerUpdateForTaskSources": "benötigt Serverupdate für Aufgabenquellen",
+        "statusProviderAuthNeeded": "benötigt Anbieteranmeldung",
+        "statusSourceToolUnavailable": "Quellwerkzeug nicht verfügbar",
+        "statusProviderUnsupported": "Anbieter auf diesem Host nicht unterstützt",
+        "statusServerUpdateNeeded": "benötigt Serverupdate",
+        "unavailableCount_one": "{{count}} nicht verfügbar",
+        "unavailableCount_other": "{{count}} nicht verfügbar",
+        "statusConnected": "verbunden",
+        "statusAuthNeeded": "Anmeldung erforderlich",
+        "statusConnecting": "verbindet",
+        "statusConnectionIssue": "Verbindungsproblem",
+        "statusDisconnected": "getrennt",
+        "hostStatus": "{{host}} {{status}}",
+        "availabilityTitle": "Verfügbarkeit: {{hosts}}"
       },
       "ShortcutKeyCombo": {
         "07eb4985a1": "{{value0}} zweimal drücken"
@@ -17512,15 +17786,15 @@
         }
       },
       "NativeChatResumeRunPanel": {
-        "resumedTitle": "{{value0}} von {{value1}} Chats fortgesetzt",
-        "resumingTitleOne": "1 Chat wird fortgesetzt",
-        "resumingTitle": "{{value0}} Chats werden fortgesetzt",
         "description": "Jeder Chat wird mit seinem vollständigen Kontext wiederhergestellt und aufgefordert, zu prüfen, wo er aufgehört hat. Dieses Panel kann geschlossen werden; der Fortschritt wird in der Statusleiste angezeigt.",
-        "resumedTitleOne": "{{value0}} von 1 Chat fortgesetzt",
         "finished": "Diese Chats waren aktiv, als Orca geschlossen wurde. Orca hat jeden Chat mit seinem vollständigen Kontext an der Stelle wiederhergestellt, an der er aufgehört hatte, und den Agenten gebeten, vor dem Fortfahren die zuletzt ausgeführte Aufgabe zu prüfen. Eigene Prompts wurden nicht erneut gesendet.",
         "finishedUpdate": "Diese Chats waren aktiv, als Orca ein Update installierte. Orca hat jeden Chat mit seinem vollständigen Kontext an der Stelle wiederhergestellt, an der er aufgehört hatte, und den Agenten gebeten, vor dem Fortfahren die zuletzt ausgeführte Aufgabe zu prüfen. Eigene Prompts wurden nicht erneut gesendet.",
         "finishedPartial": "Diese Chats waren aktiv, als Orca geschlossen wurde. Die von Orca fortgesetzten Chats wurden mit ihrem vollständigen Kontext an der Stelle wiederhergestellt, an der sie aufgehört hatten, und aufgefordert, vor dem Fortfahren die zuletzt ausgeführte Aufgabe zu prüfen. Eigene Prompts wurden nicht erneut gesendet. In der Liste prüfen, welche Chats noch Aufmerksamkeit benötigen oder fortgesetzt werden können.",
-        "finishedPartialUpdate": "Diese Chats waren aktiv, als Orca ein Update installierte. Die von Orca fortgesetzten Chats wurden mit ihrem vollständigen Kontext an der Stelle wiederhergestellt, an der sie aufgehört hatten, und aufgefordert, vor dem Fortfahren die zuletzt ausgeführte Aufgabe zu prüfen. Eigene Prompts wurden nicht erneut gesendet. In der Liste prüfen, welche Chats noch Aufmerksamkeit benötigen oder fortgesetzt werden können."
+        "finishedPartialUpdate": "Diese Chats waren aktiv, als Orca ein Update installierte. Die von Orca fortgesetzten Chats wurden mit ihrem vollständigen Kontext an der Stelle wiederhergestellt, an der sie aufgehört hatten, und aufgefordert, vor dem Fortfahren die zuletzt ausgeführte Aufgabe zu prüfen. Eigene Prompts wurden nicht erneut gesendet. In der Liste prüfen, welche Chats noch Aufmerksamkeit benötigen oder fortgesetzt werden können.",
+        "resumedOfTotal_one": "{{resumed}} von {{count}} Chat fortgesetzt",
+        "resumedOfTotal_other": "{{resumed}} von {{count}} Chats fortgesetzt",
+        "resumingCount_one": "{{count}} Chat wird fortgesetzt",
+        "resumingCount_other": "{{count}} Chats werden fortgesetzt"
       },
       "NativeChatResumeRunStatusIcon": {
         "waitingForReply": "Warten auf eine Antwort",
@@ -17585,6 +17859,72 @@
         "cancelled": "Dieses einfache SSH-Terminal wurde vor dem Start geschlossen.",
         "terminalUnavailable": "Orca konnte hier kein Terminal öffnen.",
         "openHint": "Ermöglicht die weitere Arbeit auf dem Host, während Orca dort nicht eingerichtet werden kann."
+      },
+      "AgentStateDot": {
+        "working": "Arbeitet",
+        "monitoring": "Überwacht Hintergrundaufgaben",
+        "blocked": "Blockiert",
+        "waiting": "Wartet auf Eingabe",
+        "interrupted": "Unterbrochen",
+        "failed": "Fehlgeschlagen",
+        "done": "Erledigt",
+        "idle": "Inaktiv",
+        "unverifiable": "Keine aktuelle Meldung",
+        "unconfirmed": "Nicht bestätigt",
+        "permission": "Aufmerksamkeit erforderlich"
+      },
+      "issueComments": {
+        "you": "du"
+      },
+      "ZoomOverlay": {
+        "uiZoom": "Oberflächenzoom",
+        "editorZoom": "Editorzoom",
+        "terminalZoom": "Terminalzoom"
+      },
+      "issueCopy": {
+        "urlCopied": "URL kopiert",
+        "keyCopied": "Schlüssel kopiert",
+        "identifierCopied": "Kennung kopiert",
+        "branchNameCopied": "Branch-Name kopiert",
+        "promptCopied": "Prompt kopiert",
+        "urlCopyFailed": "URL konnte nicht kopiert werden",
+        "keyCopyFailed": "Schlüssel konnte nicht kopiert werden",
+        "identifierCopyFailed": "Kennung konnte nicht kopiert werden",
+        "branchNameCopyFailed": "Branch-Name konnte nicht kopiert werden",
+        "promptCopyFailed": "Prompt konnte nicht kopiert werden"
+      },
+      "prCheckCounts": {
+        "noChecksFound": "Keine Checks gefunden",
+        "checksFailing_one": "{{count}} Check fehlgeschlagen",
+        "checksFailing_other": "{{count}} Checks fehlgeschlagen",
+        "checksNeedAction_one": "{{count}} Check erfordert eine Aktion",
+        "checksNeedAction_other": "{{count}} Checks erfordern eine Aktion",
+        "checksPending_one": "{{count}} Check ausstehend",
+        "checksPending_other": "{{count}} Checks ausstehend",
+        "allChecksPassing": "Alle Checks erfolgreich",
+        "checksPassingOfTotal_one": "{{passing}} von {{count}} Check erfolgreich",
+        "checksPassingOfTotal_other": "{{passing}} von {{count}} Checks erfolgreich"
+      },
+      "taskPageJiraBoard": {
+        "changeStatusFailed": "Status konnte nicht geändert werden."
+      },
+      "jiraIssue": {
+        "loadStatusChangesFailed": "Statusänderungen konnten nicht geladen werden.",
+        "loadCommentsFailed": "Kommentare konnten nicht geladen werden."
+      },
+      "taskPageJiraLinkedIssues": {
+        "someIssuesFailed": "Einige mit Arbeitsbereichen verknüpfte Jira-Issues konnten nicht geladen werden. Zum erneuten Versuchen aktualisieren."
+      },
+      "taskPageJiraLoadState": {
+        "failedToLoadIssues": "Jira-Issues konnten nicht geladen werden.",
+        "authFailed": "Jira-Authentifizierung fehlgeschlagen. Jira in den Einstellungen erneut verbinden und erneut versuchen.",
+        "accessDenied": "Jira hat den Zugriff auf diese Issue-Suche verweigert. Projektberechtigungen prüfen oder eine andere JQL-Abfrage versuchen.",
+        "rateLimited": "Jira hat diese Issue-Suche wegen des Ratenlimits eingeschränkt. In Kürze erneut versuchen.",
+        "serverError": "Beim Laden der Issues ist ein Jira-Serverfehler aufgetreten. In Kürze erneut versuchen.",
+        "jqlFailed": "Jira konnte diese JQL-Abfrage nicht ausführen. Syntax prüfen und erneut versuchen.",
+        "unreachable": "Jira konnte nicht erreicht werden. Verbindung prüfen und erneut versuchen.",
+        "loadFailed": "Jira-Issues konnten nicht geladen werden. In Kürze erneut versuchen.",
+        "errorWithCode": "Fehler {{code}}: {{summary}}"
       }
     },
     "i18n": {
@@ -19451,8 +19791,6 @@
   },
   "sessionSearch": {
     "panel": {
-      "resultsOne": "{{count}} Ergebnis",
-      "resultsOther": "{{count}} Ergebnisse",
       "noMatches": "Keine passenden Sitzungen im indexierten Verlauf. Eine andere Suchanfrage oder einen anderen Suchbereich verwenden.",
       "loadMore": "Weitere Treffer laden",
       "indexedHistory": "Indexierter Verlauf",
@@ -19474,11 +19812,23 @@
       "retry": "Erneut versuchen",
       "scopeUnknown": "Dieser Computer enthält diesen Arbeitsbereich oder dieses Projekt nicht. Den Suchbereich auf „Alle“ umstellen, um alles auf diesem Computer zu durchsuchen.",
       "sortSessionsAriaLabel": "Sitzungen sortieren: {{value0}}",
-      "sessionsOne": "{{count}} Sitzung",
-      "sessionsOther": "{{count}} Sitzungen",
-      "sessionsOfLoaded": "{{value0}} von {{value1}} Sitzungen",
       "showMoreSessions": "Weitere Sitzungen anzeigen",
-      "loadingMoreSessions": "Weitere Sitzungen werden geladen…"
+      "loadingMoreSessions": "Weitere Sitzungen werden geladen…",
+      "resultCount_one": "{{count}} Ergebnis",
+      "resultCount_other": "{{count}} Ergebnisse",
+      "sessionCount_one": "{{count}} Sitzung",
+      "sessionCount_other": "{{count}} Sitzungen",
+      "sessionsShownOfLoaded_one": "{{shown}} von {{count}} Sitzung",
+      "sessionsShownOfLoaded_other": "{{shown}} von {{count}} Sitzungen",
+      "hostSkipReason": {
+        "indexChanged": "Index geändert",
+        "searchOff": "Suche deaktiviert",
+        "notReady": "nicht bereit",
+        "unavailable": "nicht verfügbar",
+        "unreachable": "nicht erreichbar",
+        "scopeNotFound": "Suchbereich dort nicht gefunden",
+        "agentNotSupported": "Agent nicht unterstützt"
+      }
     }
   },
   "sessionHistory": {
@@ -19707,9 +20057,9 @@
     "pathAdded": "Hinzugefügt",
     "openFolder": "{{name}} öffnen",
     "findOrTypePath": "Ordner suchen oder einen beliebigen Pfad eingeben…",
-    "addTypedPath": "Hinzufügen",
     "noDirectories": "Noch keine Ordner hinzugefügt.",
-    "removePath": "{{name}} entfernen"
+    "removePath": "{{name}} entfernen",
+    "addTypedPathCode": "<path/> hinzufügen"
   },
   "accounts": {
     "wslAccountNotApplied": {
@@ -19786,13 +20136,10 @@
       "signInLinkCopyFailed": "Der Link konnte nicht kopiert werden.",
       "switchSessions": {
         "title": "Zu {{account}} gewechselt",
-        "bodyOne": "1 Claude-Sitzung läuft noch mit {{previous}}. Ein Neustart setzt das Gespräch mit {{next}} fort. Beschäftigte Sitzungen werden erst im Leerlauf neu gestartet.",
-        "bodyOther": "{{count}} Claude-Sitzungen laufen noch mit {{previous}}. Ein Neustart setzt jedes Gespräch mit {{next}} fort. Beschäftigte Sitzungen werden erst im Leerlauf neu gestartet.",
         "dontAskAgain": "Nicht erneut fragen (automatisch neu starten)",
         "dontAskAgainHint": "Dies lässt sich unter Einstellungen → Konten für KI-Anbieter deaktivieren.",
         "keep": "Beibehalten",
         "restartOne": "Sitzung neu starten",
-        "restartOther": "{{count}} Sitzungen neu starten",
         "listLabel": "Neu zu startende Claude-Sitzungen",
         "session": "Claude-Sitzung",
         "busy": "In Arbeit",
@@ -19818,11 +20165,15 @@
         "reasonOwnFolder": "Verwendet den eigenen Claude-Ordner",
         "reasonUnknownAccount": "Konto unbekannt",
         "reasonNoSession": "Fortsetzen nicht möglich",
-        "reviewBodyOne": "1 weitere Claude-Sitzung wurde nicht auf {{next}} umgestellt.",
-        "reviewBodyOther": "{{count}} weitere Claude-Sitzungen wurden nicht auf {{next}} umgestellt.",
         "notMovedOne": "1 weitere Sitzung wurde nicht umgestellt.",
         "notMovedOther": "{{count}} weitere Sitzungen wurden nicht umgestellt.",
-        "review": "Prüfen"
+        "review": "Prüfen",
+        "restartCount_one": "{{count}} Sitzung neu starten",
+        "restartCount_other": "{{count}} Sitzungen neu starten",
+        "reviewBody_one": "{{count}} weitere Claude-Sitzung wurde nicht zu {{next}} verschoben.",
+        "reviewBody_other": "{{count}} weitere Claude-Sitzungen wurden nicht zu {{next}} verschoben.",
+        "body_one": "{{count}} Claude-Sitzung läuft noch auf {{previous}}. Ein Neustart setzt das Gespräch auf {{next}} fort. Beschäftigte Sitzungen warten vor dem Neustart, bis sie inaktiv sind.",
+        "body_other": "{{count}} Claude-Sitzungen laufen noch auf {{previous}}. Ein Neustart setzt jedes Gespräch auf {{next}} fort. Beschäftigte Sitzungen warten vor dem Neustart, bis sie inaktiv sind."
       }
     },
     "managedData": {
@@ -19967,8 +20318,9 @@
       "rateLimited": "GitHub-Ratenlimit erreicht. In einigen Minuten erneut versuchen.",
       "network": "Netzwerkfehler — Verbindung überprüfen.",
       "tooLargeUnknownCount": "Diese Ansicht enthält zu viele Einträge, um in Orca dargestellt zu werden. Den Filter der Ansicht auf GitHub einschränken.",
-      "tooLarge": "Diese Ansicht enthält {{itemCount}} Einträge — zu viele für die Darstellung in Orca. Den Filter der Ansicht auf GitHub einschränken.",
-      "schemaDriftDetail": "Diese Projektansicht konnte nicht gelesen werden: {{detail}}."
+      "schemaDriftDetail": "Diese Projektansicht konnte nicht gelesen werden: {{detail}}.",
+      "tooLargeCount_one": "Diese Ansicht enthält {{count}} Eintrag — zu groß für die Darstellung in Orca. Den Filter der Ansicht auf GitHub einschränken.",
+      "tooLargeCount_other": "Diese Ansicht enthält {{count}} Einträge — zu viele für die Darstellung in Orca. Den Filter der Ansicht auf GitHub einschränken."
     },
     "columns": {
       "type": "Typ"
@@ -20136,13 +20488,13 @@
       "optionalEmail": "Atlassian-E-Mail-Adresse (bei Token mit Geltungsbereichen optional)"
     },
     "workspace": {
-      "count": "{{count}} Arbeitsbereiche mit {{key}} verknüpft",
       "startAnother": "Neuen Arbeitsbereich starten",
       "empty": "Ein Jira-Issue mit einem Arbeitsbereich verknüpfen oder eine andere Ansicht auswählen.",
       "openFailed": "Der mit diesem Jira-Issue verknüpfte Arbeitsbereich konnte nicht geöffnet werden.",
       "mode": "Mit Arbeitsbereich",
       "search": "Verknüpfte Issues suchen",
-      "single": "1 Arbeitsbereich mit {{key}} verknüpft"
+      "linkedCount_one": "{{count}} Arbeitsbereich mit {{key}} verknüpft",
+      "linkedCount_other": "{{count}} Arbeitsbereiche mit {{key}} verknüpft"
     },
     "prompt": {
       "dialogTitle": "Prompt aus Vorlage kopieren",
@@ -20359,6 +20711,7 @@
       "startFailed": "Orca hat die Verbindung zum Verschiebevorgang verloren. Diesen Dialog erneut öffnen, um den aktuellen Stand zu sehen.",
       "unavailable": "Das Verschieben von Projekten auf einen WSL-Host ist in diesem Fenster nicht verfügbar.",
       "alreadyRunning": "Ein Verschiebevorgang nach {{distro}} läuft bereits. Den Abschluss abwarten und dann erneut versuchen.",
+      "undoRunning": "Ein Projekt wird von {{distro}} zurückgeholt. Danach erneut versuchen.",
       "alreadyInFlightPreview": "Ein Verschiebevorgang für {{distro}} wird noch abgeschlossen. Beim Start dieses Verschiebevorgangs schließt Orca den vorherigen zunächst ab oder macht ihn rückgängig, soweit möglich.",
       "alreadyInFlight": "Da ein Verschiebevorgang für {{distro}} noch abgeschlossen wird, wurde dieser Vorgang nicht gestartet. Den {{distro}}-Host verbunden lassen und später erneut versuchen.",
       "nothingNew": "Diese Projekte befinden sich bereits auf dem {{distro}}-Host.",
@@ -20536,7 +20889,8 @@
       "email": "E-Mail-Adresse einsehen",
       "allSites": "Alle Daten auf allen Websites lesen und ändern",
       "someSites": "Daten auf {{hosts}} lesen und ändern",
-      "manySites": "Daten auf {{hosts}} und {{count}} weiteren Websites lesen und ändern"
+      "manyOtherSites_one": "Deine Daten auf {{hosts}} und {{count}} weiteren Website lesen und ändern",
+      "manyOtherSites_other": "Deine Daten auf {{hosts}} und {{count}} weiteren Websites lesen und ändern"
     },
     "install": {
       "title": "{{name}} hinzufügen?",

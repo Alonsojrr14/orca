@@ -1,4 +1,16 @@
 {
+  "accounts": {
+    "claude": {
+      "switchSessions": {
+        "body_one": "{{count}} Claude session is still running on {{previous}}. Restarting continues the conversation on {{next}}. Busy sessions wait for idle before restarting.",
+        "body_other": "{{count}} Claude sessions are still running on {{previous}}. Restarting continues each conversation on {{next}}. Busy sessions wait for idle before restarting.",
+        "restartCount_one": "Restart {{count}} session",
+        "restartCount_other": "Restart {{count}} sessions",
+        "reviewBody_one": "{{count}} other Claude session wasn't moved to {{next}}.",
+        "reviewBody_other": "{{count}} other Claude sessions weren't moved to {{next}}."
+      }
+    }
+  },
   "agentLaunch": {
     "opencode": {
       "invalidConfig": "OpenCode could not apply this model choice to the launch configuration. Check the OpenCode launch configuration and try again, or omit the model choice.",
@@ -8,11 +20,67 @@
   },
   "auto": {
     "components": {
+      "GitHubItemDialog": {
+        "filesViewed_one": "{{viewed}} / {{count}} file viewed",
+        "filesViewed_other": "{{viewed}} / {{count}} files viewed",
+        "reactionCount_one": "{{count}} {{reaction}} reaction",
+        "reactionCount_other": "{{count}} {{reaction}} reactions"
+      },
+      "GitLabItemDialog": {
+        "approvalsRemainingOfRequired_one": "{{count}} approval remaining of {{required}} required",
+        "approvalsRemainingOfRequired_other": "{{count}} approvals remaining of {{required}} required",
+        "approvalsRemaining_one": "{{count}} approval remaining",
+        "approvalsRemaining_other": "{{count}} approvals remaining"
+      },
       "NativeChatResumeOnRestartModal": {
+        "activityMonitorCount_one": "Monitoring {{count}} background task",
+        "activityMonitorCount_other": "Monitoring {{count}} background tasks",
+        "activitySubagentCount_one": "{{count}} subagent running",
+        "activitySubagentCount_other": "{{count}} subagents running",
+        "continuedCount_one": "Resumed {{count}} chat",
+        "continuedCount_other": "Resumed {{count}} chats",
+        "notConfirmedCount_one": "Couldn’t confirm {{count}} chat was resumed",
+        "notConfirmedCount_other": "Couldn’t confirm {{count}} chats were resumed",
+        "notConfirmedOtherCount_one": "Couldn’t confirm {{count}} other chat was resumed",
+        "notConfirmedOtherCount_other": "Couldn’t confirm {{count}} other chats were resumed",
+        "notContinuedCount_one": "{{count}} chat couldn’t be resumed",
+        "notContinuedCount_other": "{{count}} chats couldn’t be resumed",
         "resumeChats_one": "Resume {{count}} chat",
         "resumeChats_other": "Resume {{count}} chats",
-        "serverResumeHere": "Resume {{count}} chats started here",
-        "serverResumeHereOne": "Resume 1 chat started here"
+        "serverResumeHereCount_one": "Resume {{count}} chat started here",
+        "serverResumeHereCount_other": "Resume {{count}} chats started here"
+      },
+      "NativeChatResumeRunPanel": {
+        "resumedOfTotal_one": "Resumed {{resumed}} of {{count}} chat",
+        "resumedOfTotal_other": "Resumed {{resumed}} of {{count}} chats",
+        "resumingCount_one": "Resuming {{count}} chat",
+        "resumingCount_other": "Resuming {{count}} chats"
+      },
+      "QuickOpen": {
+        "filesFound_one": "{{count}} file found",
+        "filesFound_other": "{{count}} files found"
+      },
+      "TaskPage": {
+        "changedFileCount_one": "{{count}} file",
+        "changedFileCount_other": "{{count}} files",
+        "labelCount_one": "{{count}} label",
+        "labelCount_other": "{{count}} labels",
+        "memberCount_one": "{{count}} member",
+        "memberCount_other": "{{count}} members",
+        "projectsFailedToLoad_one": "{{failed}} of {{count}} project failed to load",
+        "projectsFailedToLoad_other": "{{failed}} of {{count}} projects failed to load",
+        "shownCount_one": "{{count}} shown",
+        "shownCount_other": "{{count}} shown"
+      },
+      "WorktreeJumpPalette": {
+        "itemsAvailable_one": "{{count}} item available.",
+        "itemsAvailable_other": "{{count}} items available.",
+        "resultsFound_one": "{{count}} result found.",
+        "resultsFound_other": "{{count}} results found."
+      },
+      "PullRequestPage": {
+        "filesViewed_one": "{{viewed}} / {{count}} file viewed",
+        "filesViewed_other": "{{viewed}} / {{count}} files viewed"
       },
       "activity": {
         "ActivityThreadContextMenu": {
@@ -25,6 +93,14 @@
         }
       },
       "automations": {
+        "AutomationDetail": {
+          "graceHours_one": "{{count}} hour",
+          "graceHours_other": "{{count}} hours",
+          "graceMinutes_one": "{{count}} minute",
+          "graceMinutes_other": "{{count}} minutes",
+          "usageCoverageRuns_one": "{{known}}/{{count}} run",
+          "usageCoverageRuns_other": "{{known}}/{{count}} runs"
+        },
         "AutomationRunsDashboard": {
           "local": "Local",
           "remote": "Remote"
@@ -39,9 +115,31 @@
         "AutomationsPage": {
           "moveOriginalKept": "Created on {host}, but the original could not be deleted. Remove it on the old host.",
           "moveOriginalUnverified": "Created on {host}, but the original deletion could not be verified. Check the old host before retrying.",
+          "runUsageSummaryTokens_one": "{{cost}} est. · {{tokens}} token",
+          "runUsageSummaryTokens_other": "{{cost}} est. · {{tokens}} tokens",
           "tableLastRun": "Last run",
           "tableName": "Name",
           "tableProject": "Project"
+        },
+        "ExternalAutomationManagers": {
+          "automationCount_one": "{{count}} automation",
+          "automationCount_other": "{{count}} automations"
+        },
+        "externalScope": {
+          "uncheckedHostCount_one": "External automation managers on {{count}} host could not be checked.",
+          "uncheckedHostCount_other": "External automation managers on {{count}} hosts could not be checked."
+        },
+        "runHistory": {
+          "occurrencesCount_one": "{{count}} time",
+          "occurrencesCount_other": "{{count}} times",
+          "occurrencesWithLatestCount_one": "{{count}} time, most recently {{date}}",
+          "occurrencesWithLatestCount_other": "{{count}} times, most recently {{date}}",
+          "runCountSummary_one": "{{count}} run · {{completed}} completed",
+          "runCountSummary_other": "{{count}} runs · {{completed}} completed"
+        },
+        "usage": {
+          "tokensAndCost_one": "{{tokens}} token · {{cost}}",
+          "tokensAndCost_other": "{{tokens}} tokens · {{cost}}"
         }
       },
       "browser-pane": {
@@ -101,6 +199,10 @@
         }
       },
       "github": {
+        "PRFilterSections": {
+          "labelCount_one": "{{count}} label",
+          "labelCount_other": "{{count}} labels"
+        },
         "project": {
           "ProjectPicker": {
             "b787682111": "Browse all",
@@ -112,13 +214,57 @@
         "moreHosts_one": "{{count}} more host. Search by name to find it.",
         "moreHosts_other": "{{count}} more hosts. Search by name to find one."
       },
+      "linear": {
+        "project": {
+          "view": {
+            "surfaces": {
+              "scopedIssueCount_one": "{{count}} scoped issue",
+              "scopedIssueCount_other": "{{count}} scoped issues"
+            }
+          }
+        },
+        "scope": {
+          "selector": {
+            "teamCount_one": "{{count}} team",
+            "teamCount_other": "{{count}} teams"
+          }
+        }
+      },
+      "prCheckCounts": {
+        "checksFailing_one": "{{count}} check failing",
+        "checksFailing_other": "{{count}} checks failing",
+        "checksNeedAction_one": "{{count}} check needs action",
+        "checksNeedAction_other": "{{count}} checks need action",
+        "checksPassingOfTotal_one": "{{passing}} of {{count}} check passing",
+        "checksPassingOfTotal_other": "{{passing}} of {{count}} checks passing",
+        "checksPending_one": "{{count}} check pending",
+        "checksPending_other": "{{count}} checks pending"
+      },
       "right": {
         "sidebar": {
+          "AiVaultPanel": {
+            "transcriptsSkippedCount_one": "{{count}} transcript skipped",
+            "transcriptsSkippedCount_other": "{{count}} transcripts skipped"
+          },
           "AiVaultScanProgressStrip": {
+            "agentCheckedCount_one": "{{agent}}: {{settled}} of {{total}} history candidate checked",
+            "agentCheckedCount_other": "{{agent}}: {{settled}} of {{total}} history candidates checked",
             "databaseCount_one": "{{value0}} database",
             "databaseCount_other": "{{value0}} databases",
             "fileCount_one": "{{value0}} file",
             "fileCount_other": "{{value0}} files"
+          },
+          "AiVaultSessionDetails": {
+            "queuedMessageCount_one": "{{count}} queued message",
+            "queuedMessageCount_other": "{{count}} queued messages",
+            "recoverableEmptyDetailCount_one": "This session has no saved conversation, but {{count}} recoverable item survives.",
+            "recoverableEmptyDetailCount_other": "This session has no saved conversation, but {{count}} recoverable items survive.",
+            "subagentTranscriptCount_one": "{{count}} subagent transcript",
+            "subagentTranscriptCount_other": "{{count}} subagent transcripts"
+          },
+          "BulkActionBar": {
+            "selectedCount_one": "{{count}} selected",
+            "selectedCount_other": "{{count}} selected"
           },
           "Search": {
             "fileCount_one": "{{count}} file",
@@ -128,12 +274,30 @@
           },
           "SourceControl": {
             "48a003c1b1": "Staged Changes",
+            "branchFilesChangedVsBase_one": "{{count}} file changed vs {{ref}}",
+            "branchFilesChangedVsBase_other": "{{count}} files changed vs {{ref}}",
+            "clearNotesFromFile_one": "Clear {{count}} note from {{path}}?",
+            "clearNotesFromFile_other": "Clear {{count}} notes from {{path}}?",
+            "clearNotesFromWorkspace_one": "Clear {{count}} note from this workspace?",
+            "clearNotesFromWorkspace_other": "Clear {{count}} notes from this workspace?",
+            "commitsAheadShort_one": "{{count}} ahead",
+            "commitsAheadShort_other": "{{count}} ahead",
+            "compareBaseCommitsAhead_one": "{{count}} commit ahead of {{ref}}",
+            "compareBaseCommitsAhead_other": "{{count}} commits ahead of {{ref}}",
+            "compareBaseCommitsBehind_one": "{{count}} commit behind {{ref}}",
+            "compareBaseCommitsBehind_other": "{{count}} commits behind {{ref}}",
             "conflictCount_one": "{{count}} conflict",
             "conflictCount_other": "{{count}} conflicts",
             "conflictsSection": "Conflicts",
             "createPrIntentConfigureAi": "Add a commit message or configure Source Control AI settings.",
             "createPrIntentGenerateFailed": "Could not generate a commit message. Add one and retry.",
-            "d4ef4bafc5": "Changes"
+            "d4ef4bafc5": "Changes",
+            "discardFailedSampleMore_one": "{{paths}}, +{{count}} more",
+            "discardFailedSampleMore_other": "{{paths}}, +{{count}} more",
+            "discardFailed_one": "Failed to discard {{count}} file",
+            "discardFailed_other": "Failed to discard {{count}} files",
+            "noteCount_one": "{{count}} note",
+            "noteCount_other": "{{count}} notes"
           },
           "checks": {
             "panel": {
@@ -142,10 +306,20 @@
                 "commitsBehind_other": "{{count}} commits behind",
                 "failingChecks_one": "{{count}} failing check",
                 "failingChecks_other": "{{count}} failing checks",
+                "failingCount_one": "{{count}} failing",
+                "failingCount_other": "{{count}} failing",
+                "passingCount_one": "{{count}} passing",
+                "passingCount_other": "{{count}} passing",
                 "pendingChecks_one": "{{count}} check pending",
                 "pendingChecks_other": "{{count}} checks pending",
+                "pendingCount_one": "{{count}} pending",
+                "pendingCount_other": "{{count}} pending",
+                "sendQueuedCommentsToAi_one": "Send {{count}} queued comment to AI",
+                "sendQueuedCommentsToAi_other": "Send {{count}} queued comments to AI",
                 "unresolvedChecks_one": "{{count}} check unresolved",
-                "unresolvedChecks_other": "{{count}} checks unresolved"
+                "unresolvedChecks_other": "{{count}} checks unresolved",
+                "unresolvedCount_one": "{{count}} unresolved",
+                "unresolvedCount_other": "{{count}} unresolved"
               },
               "review": {
                 "auth": {
@@ -225,6 +399,30 @@
               }
             }
           },
+          "fileExplorerMultiDrag": {
+            "moreItems_one": "+{{count}} more",
+            "moreItems_other": "+{{count}} more"
+          },
+          "github": {
+            "pr": {
+              "stack": {
+                "confirmation": {
+                  "mergeConfirm_one": "Merge {{count}} PR",
+                  "mergeConfirm_other": "Merge {{count}} PRs",
+                  "mergeDescription_one": "{{included}}GitHub will merge {{count}} pull request atomically using {{method}}. If it cannot merge, nothing will be merged.",
+                  "mergeDescription_other": "{{included}}GitHub will merge {{count}} pull requests atomically using {{method}}. If any cannot merge, none will.",
+                  "queueConfirm_one": "Queue {{count}} PR",
+                  "queueConfirm_other": "Queue {{count}} PRs",
+                  "queueDescription_one": "{{included}}GitHub will add {{count}} pull request to the merge queue together. The queue chooses the merge method and may merge them in separate groups.",
+                  "queueDescription_other": "{{included}}GitHub will add {{count}} pull requests to the merge queue together. The queue chooses the merge method and may merge them in separate groups."
+                },
+                "merge": {
+                  "mergeThroughLabel_one": "Merge through #{{pr}} · {{count}} PR",
+                  "mergeThroughLabel_other": "Merge through #{{pr}} · {{count}} PRs"
+                }
+              }
+            }
+          },
           "pull": {
             "policy": {
               "notice": {
@@ -239,6 +437,12 @@
           },
           "source": {
             "control": {
+              "compare": {
+                "summary": {
+                  "commitsAhead_one": "{{count}} commit ahead of {{ref}}",
+                  "commitsAhead_other": "{{count}} commits ahead of {{ref}}"
+                }
+              },
               "discard": {
                 "dialog": {
                   "fileCount_one": "{{count}} file",
@@ -268,7 +472,27 @@
           "useFileDeletion": {
             "deleteItems_other": "Delete {{count}} items?",
             "permanentlyDeleteItems_other": "Permanently delete {{count}} items?"
+          },
+          "useFileExplorerImport": {
+            "importFailedCount_one": "Failed to import {{count}} file.",
+            "importFailedCount_other": "Failed to import {{count}} files.",
+            "importSkippedCount_one": "Skipped {{count}} file.",
+            "importSkippedCount_other": "Skipped {{count}} files."
           }
+        }
+      },
+      "rightSidebar": {
+        "FolderWorkspacePrChecksPanel": {
+          "failingCountLabel_one": "{{count}} failing",
+          "failingCountLabel_other": "{{count}} failing",
+          "pendingCountLabel_one": "{{count}} pending",
+          "pendingCountLabel_other": "{{count}} pending",
+          "worktreeCountLabel_one": "{{count}} worktree",
+          "worktreeCountLabel_other": "{{count}} worktrees"
+        },
+        "FolderWorkspaceWorktreesPanel": {
+          "attachedCount_one": "{{count}} attached worktree",
+          "attachedCount_other": "{{count}} attached worktrees"
         }
       },
       "settings": {
@@ -522,6 +746,26 @@
           }
         }
       },
+      "task": {
+        "project": {
+          "source": {
+            "combobox": {
+              "hostCount_one": "{{count}} host",
+              "hostCount_other": "{{count}} hosts"
+            }
+          }
+        }
+      },
+      "taskSourceContextSummary": {
+        "projectCount_one": "{{count}} project",
+        "projectCount_other": "{{count}} projects",
+        "selectedProjectCount_one": "{{count}} selected project",
+        "selectedProjectCount_other": "{{count}} selected projects",
+        "sourceHostCount_one": "{{count}} source host",
+        "sourceHostCount_other": "{{count}} source hosts",
+        "unavailableCount_one": "{{count}} unavailable",
+        "unavailableCount_other": "{{count}} unavailable"
+      },
       "terminal": {
         "pane": {
           "TerminalErrorToast": {
@@ -584,6 +828,12 @@
       "waitingForHost": "Reloads when the SSH host reconnects",
       "waitingForNetwork": "Reloads when you're back online",
       "waitingForServer": "Reloads when the server starts"
+    }
+  },
+  "browserExtensions": {
+    "permission": {
+      "manyOtherSites_one": "Read and change your data on {{hosts}} and {{count}} other site",
+      "manyOtherSites_other": "Read and change your data on {{hosts}} and {{count}} other sites"
     }
   },
   "components": {
@@ -984,12 +1234,24 @@
       "subagents_other": "{{count}} subagents"
     }
   },
+  "jira": {
+    "workspace": {
+      "linkedCount_one": "{{count}} workspace linked to {{key}}",
+      "linkedCount_other": "{{count}} workspaces linked to {{key}}"
+    }
+  },
   "localBuild": {
     "liveTerminals_one": "{{count}} live terminal will reconnect after restart.",
     "liveTerminals_other": "{{count}} live terminals will reconnect after restart."
   },
   "menu": {
     "quitApp": "Quit {{appName}}"
+  },
+  "projectViews": {
+    "error": {
+      "tooLargeCount_one": "This view has {{count}} item — too large to render in Orca. Narrow the view's filter on GitHub.",
+      "tooLargeCount_other": "This view has {{count}} items — too large to render in Orca. Narrow the view's filter on GitHub."
+    }
   },
   "resourceManager": {
     "pty": {
@@ -1006,6 +1268,16 @@
         "storageUnavailable": "Your disk may be full or read-only. Free up space, then restart Orca.",
         "unknown": "Restart Orca to try again."
       }
+    }
+  },
+  "sessionSearch": {
+    "panel": {
+      "resultCount_one": "{{count}} result",
+      "resultCount_other": "{{count}} results",
+      "sessionCount_one": "{{count}} session",
+      "sessionCount_other": "{{count}} sessions",
+      "sessionsShownOfLoaded_one": "{{shown}} of {{count}} session",
+      "sessionsShownOfLoaded_other": "{{shown}} of {{count}} sessions"
     }
   },
   "settings": {
