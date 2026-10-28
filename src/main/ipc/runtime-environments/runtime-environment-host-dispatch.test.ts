@@ -68,10 +68,9 @@ import { wslHostRemovalPendingMessage } from '../../wsl/wsl-host-add-admission'
 import { WSL_HOSTS_GATED_OFF_MESSAGE } from '../../wsl/wsl-host-gate'
 import { WSL_HOSTS_INTERNAL_GATE_ENV } from '../../../shared/wsl-host-internal-gate'
 
-const { resolveEnvironment: resolveActualEnvironment } =
-  await vi.importActual<typeof RuntimeEnvironmentStore>(
-    '../../../shared/runtime-environment-store'
-  )
+const { resolveEnvironment: resolveActualEnvironment } = await vi.importActual<
+  typeof RuntimeEnvironmentStore
+>('../../../shared/runtime-environment-store')
 
 const endpoints = [
   {
