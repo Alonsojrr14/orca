@@ -27,6 +27,7 @@ vi.mock('@/store', () => {
 })
 
 import { startWslHostAndReloadProjects } from './wsl-host-user-start'
+import { connectRuntimeHostAndReloadProjects } from '../components/status-bar/runtime-environment-explicit-connect'
 
 const START_FAILED = 'Couldn’t start Ubuntu. Check it in Settings → Remote Orca Servers.'
 
@@ -41,6 +42,17 @@ beforeEach(() => {
         runtimeEnvironments: { connect: connectRuntime, wslHosts: { connect: connectWslHost } }
       }
     }
+  })
+})
+
+describe('generic Connect and offline Reconnect failure', () => {
+  it('keeps the generic toast when the caller omits the failure message', async () => {
+    connectRuntime.mockRejectedValueOnce(new Error('host unavailable'))
+
+    await expect(connectRuntimeHostAndReloadProjects('env-1')).resolves.toBe(false)
+
+    expect(toastError.mock.calls).toEqual([['Remote host is not reachable']])
+    expect(fetchRepos).not.toHaveBeenCalled()
   })
 })
 
