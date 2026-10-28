@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type * as RuntimeEnvironmentStore from '../../../shared/runtime-environment-store'
+import type { WslHostServerStop } from '../../../shared/wsl-host-types'
 
 type WslServiceFake = { connect: ReturnType<typeof vi.fn>; remove: ReturnType<typeof vi.fn> }
 
@@ -233,7 +234,12 @@ describe('runtimeEnvironments:remove by host kind', () => {
 
   it('carries what the WSL service kept, so the UI can say the host stays', async () => {
     useHost('wsl')
-    const serverStop = { stopped: false, reason: 'busy', verdict: 'live', kept: true }
+    const serverStop: WslHostServerStop = {
+      stopped: false,
+      reason: 'busy',
+      verdict: 'live',
+      kept: true
+    }
     vi.mocked(mocks.wsl.service!.remove).mockResolvedValueOnce(serverStop)
     await expect(
       handler('runtimeEnvironments:remove')(null, { selector: 'wsl:ubuntu' })
