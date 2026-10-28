@@ -14,3 +14,15 @@ export type LinkPreviewRequest = { url: string }
 
 /** `unavailable` covers blocked addresses, non-HTML responses, timeouts and pages with no title. */
 export type LinkPreviewResult = { kind: 'page'; preview: LinkPreview } | { kind: 'unavailable' }
+
+/** Characters held by a preview; data URLs are ASCII, so this tracks its memory closely. */
+export function linkPreviewSize(preview: LinkPreview): number {
+  return [
+    preview.url,
+    preview.title,
+    preview.description,
+    preview.siteName,
+    preview.imageDataUrl,
+    preview.faviconDataUrl
+  ].reduce((total, text) => total + (text?.length ?? 0), 0)
+}

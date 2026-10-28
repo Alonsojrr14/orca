@@ -1,4 +1,8 @@
-import type { LinkPreviewRequest, LinkPreviewResult } from '../../shared/link-preview'
+import {
+  linkPreviewSize,
+  type LinkPreviewRequest,
+  type LinkPreviewResult
+} from '../../shared/link-preview'
 import { fetchLinkPreviewResource } from './link-preview-page-fetch'
 import { decodeHtmlBody, readLinkPreviewMetadata } from './link-preview-page-metadata'
 
@@ -10,6 +14,8 @@ const MAX_FAVICON_BYTES = 64 * 1024
 const PAGE_TTL_MS = 10 * 60_000
 const UNAVAILABLE_TTL_MS = 60_000
 const MAX_CACHE_ENTRIES = 300
+// Preview images are kept as data URLs; bound their total, not just their count.
+const MAX_CACHE_BYTES = 20 * 1024 * 1024
 const PAGE_TYPES = new Set(['text/html', 'application/xhtml+xml'])
 const IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/avif'])
 const FAVICON_TYPES = new Set([
@@ -20,8 +26,24 @@ const FAVICON_TYPES = new Set([
 ])
 const UNAVAILABLE: LinkPreviewResult = { kind: 'unavailable' }
 
-type CacheEntry = { promise: Promise<LinkPreviewResult>; expiresAt: number }
+type CacheEntry = { promise: Promise<LinkPreviewResult>; expiresAt: number; bytes: number }
 const cache = new Map<string, CacheEntry>()
+let cacheBytes = 0
+
+function removeCacheEntry(key: string): void {
+  cacheBytes -= cache.get(key)?.bytes ?? 0
+  cache.delete(key)
+}
+
+function evictOldest(keep: string): void {
+  while (cache.size > MAX_CACHE_ENTRIES || cacheBytes > MAX_CACHE_BYTES) {
+    const oldest = cache.keys().next().value
+    if (oldest === undefined || oldest === keep) {
+      return
+    }
+    removeCacheEntry(oldest)
+  }
+}
 
 /** Never throws; blocked, failed and title-less pages are all `unavailable`. */
 export function getLinkPreview(request: LinkPreviewRequest): Promise<LinkPreviewResult> {
@@ -34,24 +56,24 @@ export function getLinkPreview(request: LinkPreviewRequest): Promise<LinkPreview
   if (cached && cached.expiresAt > now) {
     return cached.promise
   }
-  cache.delete(key)
+  removeCacheEntry(key)
   const entry: CacheEntry = {
     promise: loadLinkPreview(key)
       .catch(() => UNAVAILABLE)
       .then((result) => {
         entry.expiresAt = Date.now() + (result.kind === 'page' ? PAGE_TTL_MS : UNAVAILABLE_TTL_MS)
+        if (result.kind === 'page' && cache.get(key) === entry) {
+          entry.bytes = linkPreviewSize(result.preview)
+          cacheBytes += entry.bytes
+          evictOldest(key)
+        }
         return result
       }),
-    expiresAt: Number.POSITIVE_INFINITY
+    expiresAt: Number.POSITIVE_INFINITY,
+    bytes: 0
   }
   cache.set(key, entry)
-  while (cache.size > MAX_CACHE_ENTRIES) {
-    const oldest = cache.keys().next().value
-    if (oldest === undefined) {
-      break
-    }
-    cache.delete(oldest)
-  }
+  evictOldest(key)
   return entry.promise
 }
 

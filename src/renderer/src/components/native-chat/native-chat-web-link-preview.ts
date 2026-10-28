@@ -1,8 +1,17 @@
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
-import type { LinkPreview, LinkPreviewResult } from '../../../../shared/link-preview'
+import {
+  linkPreviewSize,
+  type LinkPreview,
+  type LinkPreviewResult
+} from '../../../../shared/link-preview'
 import { createHoverPreviewCache } from './native-chat-hover-preview-cache'
 
-const previews = createHoverPreviewCache<LinkPreview>({ freshMs: 10 * 60_000, maxEntries: 200 })
+const previews = createHoverPreviewCache<LinkPreview>({
+  freshMs: 10 * 60_000,
+  maxEntries: 200,
+  // Preview images are kept as data URLs; bound their total, not just their count.
+  budget: { maxBytes: 20 * 1024 * 1024, sizeOf: linkPreviewSize }
+})
 
 // Hosts only reachable on the user's own network never get a card; main refuses them anyway.
 const PRIVATE_SUFFIXES = ['.localhost', '.local', '.internal', '.lan', '.home.arpa']
