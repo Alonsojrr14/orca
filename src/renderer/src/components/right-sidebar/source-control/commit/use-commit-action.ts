@@ -167,38 +167,39 @@ export function useSourceControlCommitAction({
     }
     commitInFlightRef.current[activeWorktreeId] = true
     setCommitInFlightByWorktree((prev) => ({ ...prev, [activeWorktreeId]: true }))
-    let error: string | null = null
+    let result: { success: boolean; error?: string }
     try {
-      const result = await completeRuntimeGitMerge({
+      result = await completeRuntimeGitMerge({
         target: requireGitOwnerTarget(activeRepoTarget),
         worktreeId: activeWorktreeId,
         worktreePath,
         connectionId: getConnectionId(activeWorktreeId) ?? undefined
       })
-      error = result.success ? null : (result.error ?? 'Commit failed')
-    } catch (caught) {
-      error = caught instanceof Error ? caught.message : 'Commit failed'
+    } catch (error) {
+      result = { success: false, error: error instanceof Error ? error.message : undefined }
     } finally {
       setCommitInFlightByWorktree((prev) => ({ ...prev, [activeWorktreeId]: false }))
       commitInFlightRef.current[activeWorktreeId] = false
     }
-    if (!error && compareBaseRef) {
+    void refreshActiveGitStatusAfterMutation()
+    if (!result.success) {
+      // The commit area and its inline error stay hidden while the merge is paused.
+      toast.error(
+        translate(
+          'auto.components.right.sidebar.source.control.commit.completeMergeFailed',
+          'Complete merge failed'
+        ),
+        { description: result.error ?? 'Commit failed' }
+      )
+      return
+    }
+    if (compareBaseRef) {
       beginGitBranchCompareRequest(
         activeWorktreeId,
         `${activeWorktreeId}:${compareBaseRef}:${Date.now()}:post-commit`,
         compareBaseRef
       )
     }
-    if (error) {
-      toast.error(
-        translate(
-          'auto.components.right.sidebar.source.control.commit.completeMergeFailed',
-          'Complete merge failed'
-        ),
-        { description: error }
-      )
-    }
-    void refreshActiveGitStatusAfterMutation()
     void refreshBranchCompareRef.current()
     void refreshGitHistoryRef.current()
   }, [

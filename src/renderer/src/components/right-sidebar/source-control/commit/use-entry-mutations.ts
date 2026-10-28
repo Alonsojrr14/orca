@@ -3,9 +3,8 @@ import { requireGitOwnerTarget } from '../../worktree-git-owner-target'
 import type { RuntimeClientTarget } from '../../../../../../shared/runtime-client-target'
 import type { GitStatusEntry } from '../../../../../../shared/git-status-types'
 import type { ConflictResolution } from '../../../../../../shared/source-control-entry-actions'
-import { editorFileHoldKey, editorPathHoldKey } from '@/components/editor/editor-autosave-holds'
+import { editorFileHoldKey, pathMutationHoldKeys } from '@/components/editor/editor-autosave-holds'
 import {
-  getOpenFilesForExternalFileChange,
   notifyEditorExternalFileChange,
   requestEditorFileSave,
   requestEditorSaveQuiesce
@@ -107,25 +106,19 @@ export function useSourceControlEntryMutations({
       const state = useAppStore.getState()
       // Staging drops Git's u record; tracking keeps the row's Resolved locally continuity.
       state.trackConflictPath(activeWorktreeId, entry.path, entry.conflictKind)
-      const runtimeEnvironmentId =
-        activeRepoTarget?.kind === 'environment' ? activeRepoTarget.environmentId : null
+      const editorTarget = {
+        worktreeId: activeWorktreeId,
+        worktreePath,
+        relativePath: entry.path,
+        runtimeEnvironmentId:
+          activeRepoTarget?.kind === 'environment' ? activeRepoTarget.environmentId : null
+      }
       if (resolution !== 'keep_deletion') {
-        // Match by physical file so views from other workspaces count and another host's twin path does not.
-        const physicalKey = editorPathHoldKey(
-          state,
-          { worktreeId: activeWorktreeId, runtimeEnvironmentId },
-          joinPath(worktreePath, entry.path)
-        )
-        const views =
-          physicalKey === null
-            ? getOpenFilesForExternalFileChange(state.openFiles, {
-                worktreeId: activeWorktreeId,
-                worktreePath,
-                relativePath: entry.path,
-                runtimeEnvironmentId
-              })
-            : state.openFiles.filter((file) => editorFileHoldKey(state, file) === physicalKey)
-        const dirtyFileIds = views.filter((file) => file.isDirty).map((file) => file.id)
+        // Same view match as autosave holds: every workspace's view of this physical file, not another host's.
+        const keys = pathMutationHoldKeys(state, editorTarget)
+        const dirtyFileIds = state.openFiles
+          .filter((file) => file.isDirty && keys.has(editorFileHoldKey(state, file)))
+          .map((file) => file.id)
         return runEntryMutation('stage', entry.path, async (context, filePath) => {
           // Stage what the user sees: an unsaved resolution must reach disk before git add reads it.
           await Promise.all(dirtyFileIds.map((fileId) => requestEditorFileSave({ fileId })))
@@ -133,12 +126,6 @@ export function useSourceControlEntryMutations({
         })
       }
       return runEntryMutation('stage', entry.path, async (context, filePath) => {
-        const editorTarget = {
-          worktreeId: activeWorktreeId,
-          worktreePath,
-          relativePath: filePath,
-          runtimeEnvironmentId
-        }
         // Hold autosave so an open tab cannot recreate the file after it is removed.
         const releaseAutoSave = await requestEditorSaveQuiesce(editorTarget)
         try {
