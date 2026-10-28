@@ -85,7 +85,7 @@ function TerminalLimitField({ scope }: { scope: SettingsHostScope }): React.JSX.
     const request = controller.current
     if (
       !status?.editable ||
-      draft === null ||
+      (draft === null && !status.savedUnreadable) ||
       saving.current ||
       !request ||
       request.signal.aborted
@@ -96,12 +96,13 @@ function TerminalLimitField({ scope }: { scope: SettingsHostScope }): React.JSX.
       setFailed(true)
       return
     }
-    if (draft === '' || !Number.isFinite(Number(draft))) {
+    const text = draft ?? String(status.maxTerminals)
+    if (text === '' || !Number.isFinite(Number(text))) {
       setDraft(null)
       return
     }
-    const value = Math.max(1, Math.min(maximum, Math.trunc(Number(draft))))
-    if (value === status.maxTerminals) {
+    const value = Math.max(1, Math.min(maximum, Math.trunc(Number(text))))
+    if (value === status.maxTerminals && !status.savedUnreadable) {
       setDraft(null)
       return
     }
@@ -198,6 +199,15 @@ function TerminalLimitField({ scope }: { scope: SettingsHostScope }): React.JSX.
               )}
             </span>
             {unavailable ? <span className="mt-2 block">{unavailable}</span> : null}
+            {status?.savedUnreadable && !failed ? (
+              <span className="mt-2 block" role="status">
+                {translate(
+                  'settings.terminal.limit.savedUnreadable',
+                  'Couldn’t read this host’s saved terminal limit. Using {{value}}. Enter a value and press Enter to replace it.',
+                  { value: status.maxTerminals.toLocaleString() }
+                )}
+              </span>
+            ) : null}
             {failed ? (
               <span className="mt-2 block text-destructive" role="status">
                 {translate(

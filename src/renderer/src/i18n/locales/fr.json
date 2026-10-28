@@ -250,6 +250,7 @@
         "disconnected": "Cet hôte est déconnecté. Reconnectez-le pour consulter ou modifier sa limite de terminaux.",
         "unsupported": "Le service de terminal de cet hôte ne permet pas encore de modifier cette limite.",
         "environment": "L’environnement définit la limite de terminaux de cette instance d’Orca. Supprimez cette configuration sur cet hôte pour la modifier ici.",
+        "savedUnreadable": "Impossible de lire la limite de terminaux enregistrée sur cet hôte. Valeur utilisée : {{value}}. Saisissez une valeur et appuyez sur Entrée pour la remplacer.",
         "failed": "Impossible de confirmer la limite de terminaux. Réessayez.",
         "retry": "Réessayer",
         "unit": "terminaux",

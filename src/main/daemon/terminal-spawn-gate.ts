@@ -68,7 +68,7 @@ type TerminalSpawnGateOptions = {
   /** Runs synchronously before the first automatic fork is admitted. */
   armAutomaticWork?: () => void
   /** The execution host's terminal cap; defaults to capping this daemon alone. */
-  resolveMaximum?: () => Promise<number>
+  resolveMaximum?: () => number
   hostTerminals?: HostTerminalLedger
   /** Retain refused restores for clients that already discarded their own resume records. */
   legacyRestores?: LegacyRestoreRecords
@@ -109,7 +109,7 @@ export class TerminalSpawnGate {
     )
   }
 
-  /** A maximum resolver or paced wait adds an async boundary; callers recheck shutdown after await. */
+  /** Only pacing adds an async boundary; callers recheck shutdown after await. */
   admit(
     facts: SpawnRequestFacts,
     cancel?: { signal: AbortSignal; error: () => Error },
@@ -117,13 +117,11 @@ export class TerminalSpawnGate {
   ): TerminalSpawnLease | Promise<TerminalSpawnLease> {
     return admitRecordingLegacyRestore(
       () => {
-        const admit = (maximum?: number): TerminalSpawnLease | Promise<TerminalSpawnLease> => {
-          const attempt = this.attempt(facts, cancel, false, maximum)
-          return attempt.kind === 'lease'
-            ? attempt.lease
-            : this.admitAfterWait(facts, cancel, attempt)
-        }
-        return this.options.resolveMaximum ? this.options.resolveMaximum().then(admit) : admit()
+        const maximum = this.options.resolveMaximum?.() ?? this.host.maxTerminals
+        const attempt = this.attempt(facts, cancel, false, maximum)
+        return attempt.kind === 'lease'
+          ? attempt.lease
+          : this.admitAfterWait(facts, cancel, attempt)
       },
       this.options.legacyRestores,
       facts,
@@ -139,7 +137,8 @@ export class TerminalSpawnGate {
     let attempt: ReturnType<TerminalSpawnGate['attempt']> = first
     while (attempt.kind === 'wait') {
       await this.waiters.waitForChange(attempt.untilMs, cancel?.signal)
-      attempt = this.attempt(facts, cancel, true, await this.options.resolveMaximum?.())
+      const maximum = this.options.resolveMaximum?.() ?? this.host.maxTerminals
+      attempt = this.attempt(facts, cancel, true, maximum)
     }
     return attempt.lease
   }
@@ -148,7 +147,7 @@ export class TerminalSpawnGate {
     facts: SpawnRequestFacts,
     cancel: { signal: AbortSignal; error: () => Error } | undefined,
     alreadyWaited: boolean,
-    maximum = this.host.maxTerminals
+    maximum: number
   ): { kind: 'lease'; lease: TerminalSpawnLease } | { kind: 'wait'; untilMs: number } {
     if (cancel?.signal.aborted) {
       throw cancel.error()

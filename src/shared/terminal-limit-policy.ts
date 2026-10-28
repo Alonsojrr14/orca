@@ -5,6 +5,7 @@ export type TerminalLimitStatus = {
   maxTerminals: number
   systemPtyLimit: number | null
   source: 'environment' | 'saved' | 'default'
+  savedUnreadable?: boolean
   editable: boolean
   daemonNonce: string
 }

@@ -2,7 +2,6 @@ import { createHash, randomUUID } from 'node:crypto'
 import { lstat, mkdir, rm, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { InFlightPromiseDedupe } from '../../shared/in-flight-promise-dedupe'
 import { readNodeFileWithinLimit } from '../../shared/node-bounded-file-reader'
 import { renameFileWithWindowsRetryAsync } from '../../shared/windows-retry-file-operations'
 import {
@@ -92,7 +91,14 @@ async function withPolicyOperation<T>(
 }
 
 export class HostTerminalPolicy {
-  private readonly reads = new InFlightPromiseDedupe<number | null>(0, 1)
+  private savedMaximum: number | null = null
+  private savedUnreadable = false
+  private revision = 0
+  private disposed = false
+  private reading = false
+  private initialization?: Promise<void>
+  private timer?: ReturnType<typeof setInterval>
+  private log: (event: string, details: Record<string, unknown>) => void = () => {}
   private readonly environment: number | null
 
   constructor(
@@ -111,32 +117,83 @@ export class HostTerminalPolicy {
         : null
   }
 
-  private saved(): Promise<number | null> {
+  start(log = this.log): Promise<void> {
+    this.log = log
+    return (this.initialization ??= this.refresh().then(() => {
+      if (!this.disposed && this.path && this.environment === null) {
+        this.timer = setInterval(() => void this.refresh(), 3_000)
+        this.timer.unref?.()
+      }
+    }))
+  }
+
+  dispose(): void {
+    this.disposed = true
+    this.revision += 1
+    clearInterval(this.timer)
+  }
+
+  private async refresh(): Promise<void> {
+    if (this.disposed || this.reading || !this.path || this.environment !== null) {
+      return
+    }
     const path = this.path
-    return path ? this.reads.run('policy', () => this.readSaved(path)) : Promise.resolve(null)
-  }
-
-  async admissionMaximum(): Promise<number> {
-    if (this.environment !== null) {
-      return this.environment
-    }
+    const revision = this.revision
+    this.reading = true
+    const raw = Promise.resolve().then(() => this.readSaved(path))
+    void raw
+      .finally(() => {
+        this.reading = false
+        if (revision !== this.revision) {
+          void this.refresh()
+        }
+      })
+      .catch(() => undefined)
     try {
-      const read = await awaitDaemonValueWithinCallerDeadline(this.saved(), Date.now() + 250)
-      return (read.completed ? read.value : null) ?? DEFAULT_MAX_HOST_TERMINALS
+      const read = await awaitDaemonValueWithinCallerDeadline(raw, Date.now() + 250)
+      if (this.disposed || revision !== this.revision) {
+        return
+      }
+      if (!read.completed || (read.value === null && this.savedMaximum !== null)) {
+        throw new Error('Saved terminal limit unavailable')
+      }
+      this.savedMaximum = read.value
+      this.setReadHealth(false)
     } catch {
-      // Settings storage cannot prevent a user from starting a terminal.
-      return DEFAULT_MAX_HOST_TERMINALS
+      if (!this.disposed && revision === this.revision) {
+        this.setReadHealth(true)
+      }
     }
   }
 
-  private observedStatus(
-    saved: number | null,
-    systemPtyLimit: number | null,
-    daemonNonce: string
-  ): TerminalLimitStatus {
+  private setReadHealth(failed: boolean): void {
+    if (failed === this.savedUnreadable) {
+      return
+    }
+    this.savedUnreadable = failed
+    try {
+      this.log(failed ? 'terminal-policy-read-failed' : 'terminal-policy-read-recovered', {
+        maxTerminals: this.admissionMaximum()
+      })
+    } catch {
+      // Diagnostics cannot change the applied limit.
+    }
+  }
+
+  admissionMaximum(): number {
+    return this.environment ?? this.savedMaximum ?? DEFAULT_MAX_HOST_TERMINALS
+  }
+
+  private observedStatus(systemPtyLimit: number | null, daemonNonce: string): TerminalLimitStatus {
     return {
-      maxTerminals: this.environment ?? saved ?? DEFAULT_MAX_HOST_TERMINALS,
-      source: this.environment !== null ? 'environment' : saved !== null ? 'saved' : 'default',
+      maxTerminals: this.admissionMaximum(),
+      source:
+        this.environment !== null
+          ? 'environment'
+          : this.savedMaximum !== null
+            ? 'saved'
+            : 'default',
+      ...(this.savedUnreadable ? { savedUnreadable: true } : {}),
       systemPtyLimit,
       editable: this.environment === null && this.path !== null,
       daemonNonce
@@ -149,13 +206,8 @@ export class HostTerminalPolicy {
     deadline = Date.now() + 2_000
   ): Promise<TerminalLimitStatus> {
     return withPolicyOperation(isCurrent, deadline, async (operation) => {
-      const [saved, systemPtyLimit] = await operation.wait(() =>
-        Promise.all([
-          this.environment === null ? this.saved() : Promise.resolve(null),
-          this.system.read()
-        ])
-      )
-      return this.observedStatus(saved, systemPtyLimit, daemonNonce)
+      const systemPtyLimit = await operation.wait(() => this.system.read())
+      return this.observedStatus(systemPtyLimit, daemonNonce)
     })
   }
 
@@ -165,7 +217,9 @@ export class HostTerminalPolicy {
     daemonNonce = '',
     deadline = Date.now() + 2_000
   ): Promise<TerminalLimitStatus> {
-    return withPolicyOperation(isCurrent, deadline, async (operation) => {
+    this.revision += 1
+    const current = (): boolean => !this.disposed && isCurrent()
+    return withPolicyOperation(current, deadline, async (operation) => {
       const path = this.path
       if (!path || this.environment !== null) {
         throw new Error('Terminal setting unavailable')
@@ -198,16 +252,25 @@ export class HostTerminalPolicy {
         })
         const replaced = await operation.wait(() => {
           const rename = renameFileWithWindowsRetryAsync(temporary, path, operation.isCurrent)
-          staging = rename
-          return rename
+          const committed = rename.then((replaced) => {
+            if (replaced && !this.disposed) {
+              this.revision += 1
+              if (operation.isCurrent()) {
+                this.savedMaximum = maximum
+                this.setReadHealth(false)
+              } else {
+                void this.refresh()
+              }
+            }
+            return replaced
+          })
+          staging = committed
+          return committed
         })
         if (!replaced) {
           throw new Error('Terminal host changed')
         }
-        // Drain pre-replacement observations without evicting their raw I/O.
-        await operation.wait(() => this.saved().catch(() => null))
-        const saved = await operation.wait(() => this.saved())
-        return this.observedStatus(saved, systemPtyLimit, daemonNonce)
+        return this.observedStatus(systemPtyLimit, daemonNonce)
       } finally {
         // A late staging write must settle before removal can consume its temporary file.
         void staging

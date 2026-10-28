@@ -1,13 +1,17 @@
 import type * as FileSystem from 'node:fs/promises'
-import { mkdtemp, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readdir, rename, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { HostTerminalPolicy, hostTerminalPolicyPath } from './host-terminal-policy'
 import { SystemPtyLimit, parseLinuxPtyLimit } from './system-pty-limit'
+import * as deadlines from './daemon-request-deadline'
 import { HostTerminalLedger } from './host-terminal-ledger'
 import { TerminalSpawnGate } from './terminal-spawn-gate'
-import type { SpawnRequestFacts } from '../../shared/host-spawn-admission'
+import {
+  DEFAULT_SPAWN_ADMISSION_LIMITS,
+  type SpawnRequestFacts
+} from '../../shared/host-spawn-admission'
 
 vi.mock('node:fs/promises', async (original) => {
   const fs = await original<typeof FileSystem>()
@@ -32,8 +36,17 @@ const facts: SpawnRequestFacts = {
   deadlineAt: Number.POSITIVE_INFINITY
 }
 const system = () => new SystemPtyLimit(async () => 511)
+const policies: HostTerminalPolicy[] = []
+function createPolicy(
+  ...args: ConstructorParameters<typeof HostTerminalPolicy>
+): HostTerminalPolicy {
+  const value = new HostTerminalPolicy(...args)
+  policies.push(value)
+  return value
+}
 const directories: string[] = []
 afterEach(async () => {
+  policies.splice(0).forEach((value) => value.dispose())
   vi.useRealTimers()
   await Promise.all(
     directories.splice(0).map((path) => fs.rm(path, { recursive: true, force: true }))
@@ -51,8 +64,9 @@ describe('host terminal policy', () => {
   it('shares live raises and decreases across daemons and retains the policy after reconstruction', async () => {
     const root = await home()
     const path = hostTerminalPolicyPath(root, 'machine-a')
-    const first = new HostTerminalPolicy(path, {}, system())
-    const second = new HostTerminalPolicy(path, {}, system())
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
+    const first = createPolicy(path, {}, system())
+    const second = createPolicy(path, {}, system())
     const gate = (policy: HostTerminalPolicy, pid: number) =>
       new TerminalSpawnGate({
         log: vi.fn(),
@@ -65,23 +79,35 @@ describe('host terminal policy', () => {
           log: vi.fn()
         })
       })
+    const log = vi.fn()
+    await Promise.all([first.start(log), second.start()])
+    expect(log).not.toHaveBeenCalled()
     const desktop = gate(first, 100)
     const server = gate(second, 200)
     await first.save(1, () => true)
     const running = await desktop.admit(facts)
     running.commit('existing-shell', true)
-    await expect(server.admit(facts)).rejects.toThrow()
+    await vi.advanceTimersByTimeAsync(3_000)
+    await vi.waitFor(() => expect(second.admissionMaximum()).toBe(first.admissionMaximum()))
+    expect(() => server.admit(facts)).toThrow()
     await first.save(2, () => true)
+    expect(first.admissionMaximum()).toBe(2)
+    expect(second.admissionMaximum()).toBe(1)
+    await vi.advanceTimersByTimeAsync(3_000)
+    await vi.waitFor(() => expect(second.admissionMaximum()).toBe(2))
     const setup = await server.admit(facts)
     setup.commit('setup-script', true)
     await first.save(1, () => true)
-    await expect(server.admit(facts)).rejects.toThrow()
+    await vi.advanceTimersByTimeAsync(3_000)
+    await vi.waitFor(() => expect(second.admissionMaximum()).toBe(first.admissionMaximum()))
+    expect(() => server.admit(facts)).toThrow()
     expect(desktop.snapshot().terminals).toBe(1)
     expect(server.snapshot().terminals).toBe(1)
-    const restarted = new HostTerminalPolicy(path, {}, system())
-    expect(await restarted.admissionMaximum()).toBe(1)
+    const restarted = createPolicy(path, {}, system())
+    await restarted.start()
+    expect(restarted.admissionMaximum()).toBe(1)
     desktop.onSessionExit('existing-shell')
-    await expect(server.admit(facts)).rejects.toThrow()
+    expect(() => server.admit(facts)).toThrow()
     server.onSessionExit('setup-script')
     const next = await server.admit(facts)
     next.abandon()
@@ -94,7 +120,7 @@ describe('host terminal policy', () => {
     const path = hostTerminalPolicyPath(root, 'machine-a')
     expect(path).not.toBe(hostTerminalPolicyPath(root, 'machine-b'))
     expect(hostTerminalPolicyPath(root, null)).toBeNull()
-    const policy = new HostTerminalPolicy(path, {}, system())
+    const policy = createPolicy(path, {}, system())
     await expect(policy.save(512, () => true)).rejects.toThrow('capacity')
     await policy.save(384, () => true)
     expect(await policy.status('nonce')).toMatchObject({
@@ -102,60 +128,141 @@ describe('host terminal policy', () => {
       source: 'saved',
       systemPtyLimit: 511
     })
-    const override = new HostTerminalPolicy(
-      path,
-      { ORCA_DAEMON_MAX_HOST_TERMINALS: '600' },
-      system()
-    )
+    const read = vi.fn()
+    const override = createPolicy(path, { ORCA_DAEMON_MAX_HOST_TERMINALS: '600' }, system(), read)
+    await override.start()
+    expect(read).not.toHaveBeenCalled()
     expect(await override.status('nonce')).toMatchObject({
       maxTerminals: 600,
       source: 'environment',
       editable: false
     })
     await expect(override.save(20, () => true)).rejects.toThrow('unavailable')
-    const unidentified = new HostTerminalPolicy(null, {}, system())
+    const unidentified = createPolicy(null, {}, system())
     expect(await unidentified.status('nonce')).toMatchObject({ maxTerminals: 256, editable: false })
     await expect(unidentified.save(10, () => true)).rejects.toThrow()
-    const reduced = new HostTerminalPolicy(path, {}, new SystemPtyLimit(async () => 128))
+    const reduced = createPolicy(path, {}, new SystemPtyLimit(async () => 128))
+    await reduced.start()
     expect(await reduced.status('nonce')).toMatchObject({ maxTerminals: 384, systemPtyLimit: 128 })
-    const defaults = new HostTerminalPolicy(null, {}, new SystemPtyLimit(async () => 128))
+    const defaults = createPolicy(null, {}, new SystemPtyLimit(async () => 128))
     expect(await defaults.status('nonce')).toMatchObject({ maxTerminals: 256, systemPtyLimit: 128 })
   })
 
-  it('bounds admission wait while retaining one stalled underlying read', async () => {
-    vi.useFakeTimers()
-    const read = vi.fn(() => new Promise<number | null>(() => {}))
-    const policy = new HostTerminalPolicy('/unreachable/terminal-policy', {}, system(), read)
-    const attempts = Promise.all([policy.admissionMaximum(), policy.admissionMaximum()])
-    await vi.advanceTimersByTimeAsync(251)
-    expect(await attempts).toEqual([256, 256])
-    const retry = policy.admissionMaximum()
-    await vi.advanceTimersByTimeAsync(251)
-    expect(await retry).toBe(256)
-    expect(read).toHaveBeenCalledOnce()
-  })
-
-  it('drains a held admission snapshot after replacement before confirming the saved value', async () => {
+  it('bounds shared startup and retains one raw read/observer across ticks, admissions and saves', async () => {
     const path = join(await home(), 'policy.json')
+    vi.useFakeTimers()
     const old = deferred<number | null>()
     const read = vi
       .fn()
       .mockImplementationOnce(() => old.promise)
-      .mockImplementation(async () => JSON.parse(await readFile(path, 'utf8')).maxTerminals)
-    const policy = new HostTerminalPolicy(path, {}, system(), read)
-    const admission = policy.admissionMaximum()
-    const replaced = deferred<void>()
-    vi.mocked(rename).mockImplementationOnce(async (...args) => {
-      await fs.rename(...args)
-      replaced.resolve()
+      .mockResolvedValue(384)
+    const value = createPolicy(path, {}, system(), read)
+    const observed = vi.spyOn(deadlines, 'awaitDaemonValueWithinCallerDeadline')
+    const startup = value.start()
+    expect(value.start()).toBe(startup)
+    await vi.advanceTimersByTimeAsync(251)
+    await startup
+    expect(await value.status('nonce')).toMatchObject({ maxTerminals: 256, savedUnreadable: true })
+    expect(await value.save(384, () => true)).toMatchObject({ maxTerminals: 384 })
+    const observers = observed.mock.calls.length
+    const maximum = vi.fn(() => value.admissionMaximum())
+    const gate = new TerminalSpawnGate({
+      log: vi.fn(),
+      mode: 'enforce',
+      limits: { ...DEFAULT_SPAWN_ADMISSION_LIMITS, automaticConcurrency: 1 },
+      resolveMaximum: maximum
     })
-    const save = policy.save(3, () => true, 'nonce')
-    await replaced.promise
-    await new Promise(setImmediate)
+    for (const n of [30, 300]) {
+      for (let i = 0; i < n; i++) {
+        const lease = gate.admit(facts)
+        if (lease instanceof Promise) {
+          throw new Error('Admission must be synchronous')
+        }
+        lease.commit(`${n}-${i}`, true)
+      }
+      await vi.advanceTimersByTimeAsync(30_000)
+      expect(read).toHaveBeenCalledOnce()
+      expect(observed).toHaveBeenCalledTimes(observers)
+    }
+    expect(gate.snapshot().terminals).toBe(330)
+    const automatic = { ...facts, declaredIntent: 'automatic-restore' as const }
+    const first = await gate.admit(automatic)
+    const waiting = gate.admit(automatic)
+    expect(waiting).toBeInstanceOf(Promise)
+    expect(gate.snapshot().waiting).toBe(1)
+    const beforeWake = maximum.mock.calls.length
+    first.commit('first', true)
+    const next = await waiting
+    next.commit('next', true)
+    gate.onSessionExit('first')
+    gate.onSessionExit('next')
+    expect(maximum).toHaveBeenCalledTimes(beforeWake + 1)
+    expect(maximum.mock.results.at(-1)?.value).toBe(384)
+    expect(read).toHaveBeenCalledOnce()
+    expect(gate.snapshot()).toMatchObject({
+      terminals: 330,
+      waiting: 0,
+      inFlight: { automatic: 0 }
+    })
     old.resolve(2)
-    expect(await admission).toBe(2)
-    expect(await save).toMatchObject({ maxTerminals: 3, source: 'saved', daemonNonce: 'nonce' })
+    await vi.advanceTimersByTimeAsync(0)
+    expect(value.admissionMaximum()).toBe(384)
     expect(read).toHaveBeenCalledTimes(2)
+    value.dispose()
+    await vi.advanceTimersByTimeAsync(30_000)
+    expect(read).toHaveBeenCalledTimes(2)
+  })
+
+  it('retains last good through failures, fences stale reads against save and disposal, and recovers', async () => {
+    const path = join(await home(), 'policy.json')
+    vi.useFakeTimers()
+    const held = deferred<number | null>()
+    const read = vi.fn<() => Promise<number | null>>().mockResolvedValue(384)
+    const value = createPolicy(path, {}, system(), read)
+    const log = vi.fn()
+    await value.start(log)
+    read.mockRejectedValue(new SyntaxError('Invalid JSON'))
+    await vi.advanceTimersByTimeAsync(6_000)
+    read.mockRejectedValue(Object.assign(new Error('denied'), { code: 'EACCES' }))
+    await vi.advanceTimersByTimeAsync(3_000)
+    read.mockResolvedValue(null)
+    await vi.advanceTimersByTimeAsync(3_000)
+    read.mockReturnValue(held.promise)
+    await vi.advanceTimersByTimeAsync(3_251)
+    expect(value.admissionMaximum()).toBe(384)
+    expect(await value.status('nonce')).toMatchObject({
+      maxTerminals: 384,
+      source: 'saved',
+      savedUnreadable: true,
+      editable: true
+    })
+    expect(log).toHaveBeenCalledTimes(1)
+    held.resolve(2)
+    read.mockResolvedValue(400)
+    await vi.advanceTimersByTimeAsync(3_000)
+    const recovered = await value.status('nonce')
+    expect(recovered.maxTerminals).toBe(400)
+    expect(recovered.savedUnreadable).toBeUndefined()
+    expect(log.mock.calls.map(([event]) => event)).toEqual([
+      'terminal-policy-read-failed',
+      'terminal-policy-read-recovered'
+    ])
+    const stale = deferred<number | null>()
+    read.mockReturnValueOnce(stale.promise).mockResolvedValue(384)
+    await vi.advanceTimersToNextTimerAsync()
+    expect(await value.save(384, () => true)).toMatchObject({ maxTerminals: 384 })
+    stale.resolve(2)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(value.admissionMaximum()).toBe(384)
+    const late = deferred<number | null>()
+    read.mockReturnValue(late.promise)
+    await vi.advanceTimersToNextTimerAsync()
+    value.dispose()
+    const count = read.mock.calls.length
+    late.resolve(2)
+    await vi.advanceTimersByTimeAsync(30_000)
+    expect(read).toHaveBeenCalledTimes(count)
+    expect(value.admissionMaximum()).toBe(384)
   })
 
   it('expires staging without a late rename or orphan, and permits retry while cleanup stalls', async () => {
@@ -183,7 +290,7 @@ describe('host terminal policy', () => {
       }
     })
     vi.useFakeTimers()
-    const policy = new HostTerminalPolicy(path, {}, system())
+    const policy = createPolicy(path, {}, system())
     const save = policy.save(10, () => true)
     const failed = expect(save).rejects.toThrow('confirm')
     await started.promise
@@ -226,7 +333,7 @@ describe('host terminal policy', () => {
           cleaned.resolve()
         }
       })
-      const policy = new HostTerminalPolicy(path, {}, system())
+      const policy = createPolicy(path, {}, system())
       vi.useFakeTimers()
       const save = policy.save(10, () => true)
       const failed = expect(save).rejects.toThrow('confirm')
@@ -243,7 +350,9 @@ describe('host terminal policy', () => {
       } finally {
         Object.defineProperty(process, 'platform', { configurable: true, value: platform })
       }
-      expect(await policy.admissionMaximum()).toBe(outcome === 'completed' ? 10 : 20)
+      await vi.waitFor(() =>
+        expect(policy.admissionMaximum()).toBe(outcome === 'completed' ? 10 : 20)
+      )
       expect(rename).toHaveBeenCalledTimes(2)
     }
   )

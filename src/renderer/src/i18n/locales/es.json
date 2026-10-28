@@ -110,6 +110,7 @@
         "disconnected": "Este equipo está desconectado. Vuelve a conectarlo para ver o cambiar su límite de terminales.",
         "unsupported": "El servicio de terminal de este equipo aún no permite cambiar este límite.",
         "environment": "El entorno establece el límite de terminales de esta instancia de Orca. Elimina esa configuración en este equipo para editarlo aquí.",
+        "savedUnreadable": "No se pudo leer el límite de terminales guardado de este host. Se usa {{value}}. Introduce un valor y pulsa Intro para reemplazarlo.",
         "failed": "No se pudo confirmar el límite de terminales. Inténtalo de nuevo.",
         "retry": "Reintentar",
         "unit": "terminales",

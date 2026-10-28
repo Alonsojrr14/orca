@@ -36,6 +36,8 @@ afterEach(async () => {
 it('reads and saves on the attached daemon socket, refusing stale identity and lost endpoint writes', async () => {
   directory = mkdtempSync(join(tmpdir(), 'terminal-limit-rpc-'))
   const path = join(directory, 'policy', 'terminals.json')
+  await fs.mkdir(join(directory, 'policy'), { mode: 0o700 })
+  await fs.writeFile(path, 'invalid JSON')
   server = new DaemonServer({
     socketPath: getDaemonSocketPath(directory),
     tokenPath: join(directory, 'token'),
@@ -53,8 +55,15 @@ it('reads and saves on the attached daemon socket, refusing stale identity and l
     maxTerminals: 256,
     systemPtyLimit: 511,
     source: 'default',
-    editable: true
+    editable: true,
+    savedUnreadable: true
   })
+  const repaired = await client.request<TerminalLimitStatus>('setTerminalLimit', {
+    daemonNonce: before.daemonNonce,
+    maxTerminals: 256
+  })
+  expect(repaired.maxTerminals).toBe(256)
+  expect(repaired.savedUnreadable).toBeUndefined()
   const update = { daemonNonce: before.daemonNonce, maxTerminals: 384 }
   await expect(client.request('setTerminalLimit', update)).resolves.toMatchObject({
     maxTerminals: 384,

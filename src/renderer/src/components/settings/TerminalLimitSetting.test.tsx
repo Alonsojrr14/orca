@@ -4,6 +4,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { TerminalLimitSetting } from './TerminalLimitSetting'
 import { readTerminalLimit, saveTerminalLimit } from './terminal-limit-transport'
+import type * as TerminalLimitTransport from './terminal-limit-transport'
 import type { SettingsHostScope } from './settings-host-scope'
 import type { TerminalLimitStatus } from '../../../../shared/terminal-limit-policy'
 import { useAppStore } from '@/store'
@@ -11,8 +12,10 @@ import { i18n } from '@/i18n/i18n'
 import { getTerminalAdvancedSearchEntries } from './terminal-advanced-platform-search'
 import { matchesSettingsSearch } from './settings-search'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
+import { callHostRoute } from '@/runtime/host-route-call'
 import { advanceRuntimeEnvironmentConnectionGeneration } from '@/store/slices/runtime-status-connection-generation'
 
+vi.mock('@/runtime/host-route-call', () => ({ callHostRoute: vi.fn() }))
 vi.mock('./terminal-limit-transport', () => ({
   readTerminalLimit: vi.fn(),
   saveTerminalLimit: vi.fn()
@@ -94,7 +97,7 @@ it('clamps in the input, confirms Enter and blur saves once, and omits the capti
   expect(input().value).toBe('256')
   expect(input().max).toBe('511')
   expect(container.textContent).toContain('System PTY limit: 511')
-  expect(container.textContent).not.toMatch(/Reset|Default:|1–511/)
+  expect(container.textContent).not.toMatch(/Reset|Default:|1–511|Couldn’t read/)
   await type('9999')
   expect(input().value).toBe('511')
   await enter()
@@ -239,4 +242,37 @@ it('finds localized capacity in both the catalog and the rendered row filter', a
   search.query = 'aucun-résultat'
   await render()
   expect(container.querySelector('input')).toBeNull()
+})
+
+it.each([256, 384])(
+  'repairs an unreadable saved limit by committing %s, including the effective value',
+  async (maximum) => {
+    vi.mocked(readTerminalLimit).mockResolvedValue({ ...base, savedUnreadable: true })
+    await render()
+    expect(input().disabled).toBe(false)
+    expect(container.textContent).toContain('Using 256')
+    await type(String(maximum))
+    await enter()
+    expect(saveTerminalLimit).toHaveBeenCalledWith(
+      expect.anything(),
+      { maxTerminals: maximum, daemonNonce: 'daemon-a' },
+      expect.any(AbortSignal)
+    )
+    expect(input().value).toBe(String(maximum))
+    expect(container.textContent).not.toContain('Couldn’t read')
+  }
+)
+
+it('uses the selected-host transport and refuses unsupported capability without issuing a policy RPC', async () => {
+  const transport = await vi.importActual<typeof TerminalLimitTransport>(
+    './terminal-limit-transport'
+  )
+  const route = {
+    target: { kind: 'environment' as const, environmentId: 'old-server' },
+    at: 'local' as const
+  }
+  const signal = new AbortController().signal
+  vi.mocked(callHostRoute).mockResolvedValue({ capabilities: [] })
+  await expect(transport.readTerminalLimit(route, signal)).resolves.toBeNull()
+  expect(callHostRoute).toHaveBeenCalledExactlyOnceWith(route, 'status.get', undefined, { signal })
 })
