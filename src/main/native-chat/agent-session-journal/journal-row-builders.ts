@@ -17,19 +17,20 @@ import { agentJournalLinkageFields } from '../../../shared/agent-session-journal
 import { agentJournalItemKey } from '../../../shared/agent-session-journal-item-key'
 import { journalItemOwnerFence } from './journal-item-provenance'
 import type { JournalReducerState } from './journal-reducer'
-import type {
-  JournalDispatchRow,
-  JournalItemRow,
-  JournalLifecycleBatchRow,
-  JournalLifecycleMutation,
-  JournalSubmissionRow,
-  JournalTombstoneRow
-} from './journal-row-schema'
 import {
+  type JournalDispatchRow,
+  type JournalItemRow,
+  type JournalLifecycleBatchRow,
+  type JournalSubmissionRow,
+  type JournalTombstoneRow,
   MAX_JOURNAL_LIFECYCLE_BATCH_BYTES,
   MAX_JOURNAL_LIFECYCLE_BATCH_MUTATIONS
 } from './journal-row-schema'
-import { boundInlineText, JOURNAL_DISPATCH_REASON_LIMITS } from './journal-payload-bounds'
+import {
+  boundInlineText,
+  boundRunningToolOutput,
+  JOURNAL_DISPATCH_REASON_LIMITS
+} from './journal-payload-bounds'
 import { assertSubmissionIdUnused } from './journal-write-guards'
 import { turnEndAfterStop } from './journal-stop-turn-end'
 import { nextJournalItemRevision } from './journal-item-revision'
@@ -185,7 +186,7 @@ export function journalLifecycleBatchRowBuilder(
     }
     const current = state()
     const runningRevisions = revisions ?? new Map<string, number>()
-    const built: JournalLifecycleMutation[] = mutations.map((mutation) => {
+    const built = mutations.map((mutation) => {
       const itemId = journalLifecycleMutationItemId(mutation)
       const resolved = current.aliases.get(itemId) ?? itemId
       const revision = nextJournalItemRevision(current, itemId, runningRevisions)
@@ -252,7 +253,7 @@ export function buildJournalItemRow(
   const resolved = input.state.aliases.get(itemId) ?? itemId
   // Recreated items must outrank tombstones or the reducer will discard them.
   const revision = nextJournalItemRevision(input.state, itemId, input.revisions)
-  const body = turnEndAfterStop(input.state, resolved, input.body)
+  const body = boundRunningToolOutput(turnEndAfterStop(input.state, resolved, input.body))
   return {
     kind: 'item',
     ...journalItemEchoFields(input),
