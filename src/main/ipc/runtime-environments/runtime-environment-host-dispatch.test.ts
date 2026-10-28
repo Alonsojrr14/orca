@@ -2,6 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type * as RuntimeEnvironmentStore from '../../../shared/runtime-environment-store'
 
 type WslServiceFake = { connect: ReturnType<typeof vi.fn>; remove: ReturnType<typeof vi.fn> }
 
@@ -26,7 +27,7 @@ vi.mock('electron', () => ({
   ipcMain: { handle: mocks.handle, removeHandler: vi.fn() }
 }))
 vi.mock('../../../shared/runtime-environment-store', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../../../shared/runtime-environment-store')>()),
+  ...(await importOriginal<typeof RuntimeEnvironmentStore>()),
   removeEnvironment: mocks.removeEnvironment,
   resolveEnvironment: mocks.resolveEnvironment
 }))
@@ -66,6 +67,11 @@ import { UBUNTU, makeConnector } from '../../wsl/wsl-host-service-test-connector
 import { wslHostRemovalPendingMessage } from '../../wsl/wsl-host-add-admission'
 import { WSL_HOSTS_GATED_OFF_MESSAGE } from '../../wsl/wsl-host-gate'
 import { WSL_HOSTS_INTERNAL_GATE_ENV } from '../../../shared/wsl-host-internal-gate'
+
+const { resolveEnvironment: resolveActualEnvironment } =
+  await vi.importActual<typeof RuntimeEnvironmentStore>(
+    '../../../shared/runtime-environment-store'
+  )
 
 const endpoints = [
   {
@@ -303,10 +309,7 @@ describe('stopped WSL Start admission through direct and generic IPC', () => {
     await connector.disconnect('Ubuntu')
     connector.distro.state = 'stopped'
     mocks.wsl.service = service
-    const { resolveEnvironment } = await vi.importActual<
-      typeof import('../../../shared/runtime-environment-store')
-    >('../../../shared/runtime-environment-store')
-    mocks.resolveEnvironment.mockImplementation(resolveEnvironment)
+    mocks.resolveEnvironment.mockImplementation(resolveActualEnvironment)
     mocks.handle.mockClear()
     register(undefined, userDataPath)
     registerWslHostHandlers({
