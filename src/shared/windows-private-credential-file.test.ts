@@ -1,6 +1,6 @@
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, toNamespacedPath } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createFakeWindowsSecurity, FAKE_USER_SID } from './windows-security-addon.test-fixture'
 import {
@@ -39,7 +39,7 @@ describe('Windows private credential-file contract', () => {
     expect(result?.byteLength).toBe(data.byteLength)
     data[0] = 70
     expect(result?.toString('utf8')).toBe('Fixture-only')
-    expect(read).toHaveBeenCalledExactlyOnceWith('owned-fixture', 100)
+    expect(read).toHaveBeenCalledExactlyOnceWith(toNamespacedPath('owned-fixture'), 100)
   })
   it('reads once and traverses at most twice the ACE population at N and 10N', () => {
     const fake = createFakeWindowsSecurity()
