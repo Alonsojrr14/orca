@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { acpLaunchSpecFor } from './acp-launch-specs'
 import { copyAcpConversation } from './acp-conversation-copy'
+import { OpenCodeCopyServerRouteError } from '../../shared/opencode-launch-command'
 import {
   FakeAcpChild,
   openAcpAdapterRig,
@@ -171,31 +172,34 @@ describe('copying a chat conversation for the CLI', () => {
     async (agent) => {
       const spec = acpLaunchSpecFor(agent)!
       const connect = vi.fn()
-      for (const [prefixArgs, args] of [
-        [[], ['--server', 'https://other-host:4096']],
-        [
-          ['run', '--', 'opencode'],
-          ['--server', 'https://other-host:4096']
-        ],
-        [['run', '--', 'opencode', '--server=https://prefix-host:4096'], []]
-      ]) {
+      for (const [prefixArgs, args, launchReads] of [
+        [[], ['--server', 'https://other-host:4096'], 0],
+        [['run', '--', 'opencode'], ['--server', 'https://other-host:4096'], 0],
+        [['run', '--', 'opencode', '--server=https://prefix-host:4096'], [], 1]
+      ] as const) {
+        const readLaunch = vi.fn(async () => {
+          if (launchReads === 0) {
+            throw new Error('launch preparation failed')
+          }
+          return {
+            spec,
+            command: 'launcher',
+            prefixArgs: [...prefixArgs],
+            args: [],
+            cwd: '/workspace',
+            env: {},
+            envToDelete: [],
+            fullAccess: true,
+            resume: null
+          }
+        })
         await expect(
           copyAcpConversation(
             {
               spec,
               dataDirectory: '/orca-data',
-              resolveLaunchArgs: () => args,
-              readLaunch: async () => ({
-                spec,
-                command: 'launcher',
-                prefixArgs,
-                args: [],
-                cwd: '/workspace',
-                env: {},
-                envToDelete: [],
-                fullAccess: true,
-                resume: null
-              }),
+              resolveLaunchArgs: () => [...args],
+              readLaunch,
               connect
             },
             {
@@ -205,7 +209,8 @@ describe('copying a chat conversation for the CLI', () => {
             },
             { track: () => {} }
           )
-        ).rejects.toThrow('--server')
+        ).rejects.toBeInstanceOf(OpenCodeCopyServerRouteError)
+        expect(readLaunch).toHaveBeenCalledTimes(launchReads)
         expect(connect).not.toHaveBeenCalled()
       }
     }
