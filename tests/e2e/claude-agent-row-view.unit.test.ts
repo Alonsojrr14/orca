@@ -4,33 +4,43 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useAppStore } from '@/store'
 import type { DashboardAgentRow } from '@/components/dashboard/useDashboardData'
-import type { HostAuthority } from '../../../shared/host-authority'
-import type { AgentStatusEntry } from '../../../shared/agent-status-types'
-import type { ClaudeAgentViewResult } from '../../../shared/claude-agent-view'
-import { TerminalViewClaudeAgent } from '../../../shared/rpc-contract/terminal-unary-params'
-import { createHookListenerState } from '../../../shared/agent-hook-listener/listener-state'
-import { seedClaudeSubagentRosterFromSnapshots } from '../../../shared/agent-hook-listener/providers/claude-roster-state'
-import { claudeRosterToSnapshots } from '../../../shared/claude-subagent-roster'
-import { decodeAgentSubagentsField } from '../../../shared/agent-status-subagent-snapshot'
-import { makePaneKey } from '../../../shared/stable-pane-id'
-import { ClaudeAgentViewBridge } from '../../../main/claude/agent-view-bridge'
+import type { HostAuthority } from '../../src/shared/host-authority'
+import type { AgentStatusEntry } from '../../src/shared/agent-status-types'
+import type { ClaudeAgentViewResult } from '../../src/shared/claude-agent-view'
+import { TerminalViewClaudeAgent } from '../../src/shared/rpc-contract/terminal-unary-params'
+import { createHookListenerState } from '../../src/shared/agent-hook-listener/listener-state'
+import { seedClaudeSubagentRosterFromSnapshots } from '../../src/shared/agent-hook-listener/providers/claude-roster-state'
+import { claudeRosterToSnapshots } from '../../src/shared/claude-subagent-roster'
+import { decodeAgentSubagentsField } from '../../src/shared/agent-status-subagent-snapshot'
+import { makePaneKey } from '../../src/shared/stable-pane-id'
+import { ClaudeAgentViewBridge } from '../../src/main/claude/agent-view-bridge'
 import { replaceRuntimeEnvironmentRevisions } from '@/runtime/runtime-environment-revision'
-import { RUNTIME_PROTOCOL_VERSION } from '../../../shared/protocol-version'
+import { RUNTIME_PROTOCOL_VERSION } from '../../src/shared/protocol-version'
 import { buildSubagentChildRows } from '@/components/sidebar/worktree-subagent-child-rows'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { CompactAgentRow } from '@/components/sidebar/worktree-card-compact-agent-row'
 import FullAgentRow from '@/components/dashboard/DashboardAgentRow'
-import { viewClaudeAgentFromRow } from './claude-agent-row-view'
-import type * as WorktreeRuntimeOwner from './worktree-runtime-owner'
+import { opensClaudeParentConversation, viewClaudeAgentFromRow } from '@/lib/claude-agent-row-view'
+import type * as WorktreeRuntimeOwner from '@/lib/worktree-runtime-owner'
 import { makeWorktree, TEST_REPO } from '@/store/slices/worktrees-slice-test-fixtures'
+import WorktreeCardAgents from '@/components/sidebar/WorktreeCardAgents'
+import { i18n, translate } from '@/i18n/i18n'
 
 const mocks = vi.hoisted(() => ({ info: vi.fn(), transport: vi.fn(), owner: vi.fn() }))
 vi.mock('sonner', () => ({ toast: { info: mocks.info } }))
-vi.mock('@/i18n/i18n', () => ({
-  i18n: { language: 'en' },
-  translate: (_key: string, fallback: string) => fallback
+vi.mock('@/lib/worktree-activation', () => ({
+  activateAndRevealWorktree: vi.fn(),
+  activateAndRevealWorkspace: vi.fn()
 }))
-vi.mock('@/i18n/use-ui-language-revision', () => ({ useUiLanguageRevision: () => 0 }))
+vi.mock('@/lib/activate-tab-and-focus-pane', () => ({ activateTabAndFocusPane: vi.fn() }))
+vi.mock('@/lib/terminal-tab-owner-activation', () => ({ activateTerminalTabOnOwner: vi.fn() }))
+vi.mock('@/lib/agent-session/structured-agent-session-tab-activation', () => ({
+  activateStructuredAgentSessionTab: vi.fn()
+}))
+vi.mock('@/components/terminal-pane/stale-agent-row', () => ({
+  dismissStaleAgentRowByKey: vi.fn()
+}))
+vi.mock('@/hooks/use-now', () => ({ useNow: () => 1000 }))
 vi.mock('@/store', async () => {
   const { create } = await import('zustand')
   return { useAppStore: create(() => ({})) }
@@ -170,7 +180,7 @@ function rows(layout: 'compact' | 'full', workflow: DashboardAgentRow) {
     root.render(
       createElement(
         TooltipProvider,
-        {},
+        null,
         [parent, child('legacy', 'general-purpose', 'A'), workflow].map((agent, index) =>
           createElement(
             'section',
@@ -179,6 +189,12 @@ function rows(layout: 'compact' | 'full', workflow: DashboardAgentRow) {
               ? createElement(CompactAgentRow, {
                   agent,
                   now: 1000,
+                  parentConversationDescription: opensClaudeParentConversation(agent)
+                    ? translate(
+                        'auto.lib.claudeAgentRowView.openParentConversation',
+                        'Open parent conversation'
+                      )
+                    : undefined,
                   onActivate: activate,
                   cacheTimerActive: false
                 })
@@ -214,7 +230,8 @@ const actualOwner = await vi.importActual<typeof WorktreeRuntimeOwner>(
   '@/lib/worktree-runtime-owner'
 )
 
-beforeEach(() => {
+beforeEach(async () => {
+  await i18n.changeLanguage('en')
   vi.clearAllMocks()
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   forced = undefined
@@ -243,6 +260,10 @@ beforeEach(() => {
     worktreesByRepo: {},
     detectedWorktreesByRepo: {},
     repos: [],
+    agentActivityDisplayMode: 'compact',
+    acknowledgedAgentsByPaneKey: {},
+    agentSendPopoverTargetMode: null,
+    agentStatusEpoch: 0,
     activeTabType: 'terminal',
     activeTabId: parent.tab.id,
     tabsByWorktree: { [parent.tab.worktreeId]: [parent.tab] },
@@ -330,6 +351,37 @@ afterEach(async () => {
   bridge.clear()
   host.remove()
   expect(listeners).toBe(0)
+})
+
+it('updates a mounted compact workflow description through the subscribed production parent', async () => {
+  const key = 'auto.lib.claudeAgentRowView.openParentConversation'
+  const resources = structuredClone(i18n.getResourceBundle('en', 'translation'))
+  const agents = [child('modern', 'workflow-subagent')]
+  try {
+    await act(async () => {
+      root = createRoot(host)
+      root.render(
+        createElement(
+          TooltipProvider,
+          null,
+          createElement(WorktreeCardAgents, { worktreeId: parent.tab.worktreeId, agents })
+        )
+      )
+    })
+    const row = host.querySelector('.compact-agent-row')
+    expect(row?.getAttribute('aria-description')).toBe('Open parent conversation')
+    await act(async () => {
+      i18n.addResource('en', 'translation', key, 'Open the parent thread')
+    })
+    expect(host.querySelector('.compact-agent-row')).toBe(row)
+    expect(row?.getAttribute('aria-description')).toBe('Open the parent thread')
+    expect(requests).toHaveLength(0)
+  } finally {
+    await act(async () => {
+      i18n.removeResourceBundle('en', 'translation')
+      i18n.addResourceBundle('en', 'translation', resources)
+    })
+  }
 })
 
 it('settles real child and parent refusals once while observed A remains current', async () => {

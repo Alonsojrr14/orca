@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef } from 'react'
-import { translate } from '@/i18n/i18n'
 import { DashboardAgentChildDisclosure } from '@/components/dashboard/DashboardAgentChildDisclosure'
 import { AgentStateDot, agentStateLabel } from '@/components/AgentStateDot'
 import { AgentChildRowContent } from '@/components/AgentChildRowContent'
@@ -7,7 +6,7 @@ import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/da
 import { AgentTypeIcon } from '@/lib/agent-type-icon'
 import { formatAgentTypeLabel } from '@/lib/agent-status'
 import { cn } from '@/lib/utils'
-import { opensClaudeParentConversation, viewClaudeAgentFromRow } from '@/lib/claude-agent-row-view'
+import { viewClaudeAgentFromRow } from '@/lib/claude-agent-row-view'
 import { useClaudeAgentRowView } from '@/components/dashboard/use-claude-agent-row-view'
 import { getAgentDotState } from './worktree-card-agent-summary'
 import { getAgentRowPrimaryText } from '../../../../shared/agent-row-primary-text'
@@ -91,6 +90,7 @@ function getCompactAgentTime(agent: DashboardAgentRowData, now: number): string 
 type CompactAgentRowProps = {
   agent: DashboardAgentRowData
   now: number
+  parentConversationDescription?: string
   onActivate: (tabId: string, paneKey: string) => void
   // Send-target mode temporarily turns compact rows into the picker, matching full agent rows.
   sendTargetStatus?: 'eligible' | 'disabled' | 'sending'
@@ -108,6 +108,7 @@ type CompactAgentRowProps = {
 export const CompactAgentRow = React.memo(function CompactAgentRow({
   agent,
   now,
+  parentConversationDescription,
   onActivate,
   sendTargetStatus,
   sendTargetDisabledReason,
@@ -305,14 +306,7 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
       data-focused-agent-pane={highlighted ? 'true' : undefined}
       data-current={view?.current ? 'true' : undefined}
       aria-current={view?.current ? 'true' : undefined}
-      aria-description={
-        opensClaudeParentConversation(agent)
-          ? translate(
-              'auto.lib.claudeAgentRowView.openParentConversation',
-              'Open parent conversation'
-            )
-          : undefined
-      }
+      aria-description={parentConversationDescription}
       data-agent-send-target={sendTargetStatus}
       role={agent.lineage ? 'treeitem' : undefined}
       aria-level={agent.lineage ? agent.lineage.depth + 1 : undefined}
