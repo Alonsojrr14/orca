@@ -33,6 +33,9 @@ export async function prepareAdoptedTranscript(
   | { ok: true; items: JournalReplacementItem[] | null }
   | { ok: false; refusal: AgentSessionWireRefusal }
 > {
+  if (!params.adopt) {
+    return { ok: true, items: null }
+  }
   try {
     throwIfSignalAborted(signal)
     const items = await readAdoptedTranscript(params, signal)
