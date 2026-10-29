@@ -356,8 +356,9 @@ describe('already-wedged profiles become usable on load', () => {
       expect(published.filter((summary) => summary.sessionId === SESSION)).not.toEqual([])
       expect(published.map((summary) => summary.status)).not.toContain('working')
       // Crash evidence must never become a user-attributed cancellation.
-      expect(published.map((summary) => summary.turnOutcome)).toEqual(
-        published.map(() => (verdict.state === 'interrupted' ? 'interruption' : 'unconfirmed'))
+      expect(published[0]?.turnOutcome).toBeUndefined() // Legacy list is neutral until opened.
+      expect(published.at(-1)?.turnOutcome).toBe(
+        verdict.state === 'interrupted' ? 'interruption' : 'unconfirmed'
       )
     }
   )

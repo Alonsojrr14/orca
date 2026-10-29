@@ -6,6 +6,7 @@ import type { AgentSessionWireRefusal } from '../../../shared/agent-session-wire
 import type { AgentSessionRecordStore } from '../../runtime/agent-session-record-store'
 import { classifyStoreFailure } from './structured-agent-session-attach'
 import type { StructuredAgentSessionLogger } from './structured-agent-session-logger'
+import { mapWithConcurrency } from '../../../shared/map-with-concurrency'
 
 const MAX_RECONCILIATION_PASSES = 8
 
@@ -134,12 +135,41 @@ function hasUnreconciledLease(store: AgentSessionRecordStore, sessionId?: string
     : store.getRecord(sessionId)?.lease.unreconciled === true
 }
 
-export function createStartupLeaseReconcile(
-  reconcile: () => Promise<AgentSessionWireRefusal | null>,
-  logger: StructuredAgentSessionLogger
-): () => Promise<void> {
-  const read = createReaderReconcile(reconcile, reportEachFailureOnce(logger))
-  return async () => {
-    await read()
+/** Keep lost-transport cleanup independent of history; reader bookkeeping never grants ownership. */
+export function createStartupRecovery(
+  deps: { store: Pick<AgentSessionRecordStore, 'getRecord'>; logger: StructuredAgentSessionLogger },
+  reconcileLeases: (sessionId?: string) => Promise<AgentSessionWireRefusal | null>,
+  runtime: { resolveRecovery: (sessionId: string) => Promise<unknown> }
+): {
+  reconcileRestartLeases: () => Promise<void>
+  recover: (ids: readonly string[]) => Promise<void>
+} {
+  const failures = reportEachFailureOnce(deps.logger)
+  const reconcile = createReaderReconcile(reconcileLeases, failures)
+  return {
+    reconcileRestartLeases: async () => {
+      await reconcile()
+    },
+    recover: async (ids) => {
+      if (!ids.length || !(await reconcile())) {
+        return
+      }
+      let settled = true
+      await mapWithConcurrency(ids, 4, async (id) => {
+        if (!settled || deps.store.getRecord(id)?.lease.handoffStage !== 'recovering') {
+          return
+        }
+        if (!(await reconcile(id))) {
+          settled = false
+          return
+        }
+        try {
+          await runtime.resolveRecovery(id)
+        } catch (error) {
+          settled = false
+          failures.report(error)
+        }
+      })
+    }
   }
 }

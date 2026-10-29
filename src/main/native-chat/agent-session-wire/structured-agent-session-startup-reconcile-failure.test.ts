@@ -191,7 +191,7 @@ it('opens no chat from records a newer Orca wrote, and writes nothing trying', a
   expect(await readFile(path)).toEqual(bytes)
 })
 
-it('lists a chat without resolving recovery that cannot write the store', async () => {
+it('keeps a chat readable when recovery cannot write the store', async () => {
   const { host, store, leaseReconcileLogged } = await relaunch(false, async () => ({
     outcome: 'indeterminate',
     reason: 'probe'
@@ -204,7 +204,8 @@ it('lists a chat without resolving recovery that cannot write the store', async 
 
   expect(host.hasSession(SESSION)).toBe(false)
   expect(store.getRecord(SESSION)?.lease.handoffStage).toBe('recovering')
-  expect(leaseReconcileLogged).not.toHaveBeenCalled()
+  expect(leaseReconcileLogged).toHaveBeenCalledExactlyOnceWith(IO_ERROR)
+  expect(await host.revealSession(SESSION)).toMatchObject({ readable: true })
 })
 
 it.each([

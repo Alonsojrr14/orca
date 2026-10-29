@@ -78,7 +78,8 @@ export function createStructuredAgentSessionTabSurface(
   },
   sessions: TabSessions,
   forgetStatus: (sessionId: string) => void,
-  publishSavedStatus: (record: AgentSessionConversationView, markerAt?: number) => void
+  publishSavedStatus: (record: AgentSessionConversationView, markerAt?: number) => void,
+  recover: (ids: readonly string[]) => Promise<void>
 ) {
   // Legacy profile tabs remain addressable before their index is seeded.
   const unopened = new Set<string>()
@@ -97,10 +98,15 @@ export function createStructuredAgentSessionTabSurface(
       ]
     },
     seedSessionTabs: (ids?: readonly string[]): Promise<void> =>
-      seedSavedStructuredSessionTabs(host.deps, ids, (record, markerAt) => {
-        unopened.add(record.sessionId)
-        publishSavedStatus(record, markerAt)
-      }),
+      seedSavedStructuredSessionTabs(
+        host.deps,
+        ids,
+        (record, markerAt) => {
+          unopened.add(record.sessionId)
+          publishSavedStatus(record, markerAt)
+        },
+        recover
+      ),
     getPersistedVisibleSessionTabIndex: () => host.deps.store.getVisibleSessionTabIndex(),
     getSessionTabId: (sessionId: string): string | null =>
       host.deps.store.getSessionTabId(sessionId),

@@ -137,7 +137,8 @@ export async function seedSavedStructuredSessionTabs(
     >
   },
   ids: readonly string[] | undefined,
-  visit: (record: AgentSessionConversationView, markerAt?: number) => void
+  visit: (record: AgentSessionConversationView, markerAt?: number) => void,
+  recover: (ids: readonly string[]) => Promise<void>
 ): Promise<void> {
   const index = deps.store.getVisibleSessionTabIndex()
   const targets =
@@ -145,6 +146,7 @@ export async function seedSavedStructuredSessionTabs(
     (index.present
       ? index.sessionIds
       : deps.store.listConversations().map((record) => record.sessionId))
+  await recover(targets)
   const markers = new Map<string, number>()
   try {
     const capsule = deps.recoveryCapsule

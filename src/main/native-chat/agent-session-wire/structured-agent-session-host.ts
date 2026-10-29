@@ -67,7 +67,8 @@ export class StructuredAgentSessionHost {
   private readonly tasks = new StructuredAgentSessionTaskQueue()
   private readonly runtimeState: StructuredAgentSessionHostRuntimeState
   private readonly reconcileLeases: ReturnType<typeof leases.createRestartReconciler>
-  readonly reconcileRestartLeases: () => Promise<void>
+  private readonly startup: ReturnType<typeof leases.createStartupRecovery>
+  readonly reconcileRestartLeases = () => this.startup.reconcileRestartLeases()
   private readonly lifetime: lifetime.StructuredAgentSessionConversationLifetime
   private readonly conversationDelivery: conversation.StructuredAgentSessionConversationDelivery
   private readonly eventRecovery: StructuredAgentSessionEventRecovery
@@ -114,10 +115,7 @@ export class StructuredAgentSessionHost {
       stopOutgrownAgent: (id) => this.lifetime.stopAgent(id, { cause: 'evict', resting: true }),
       clientDelivery: this.clientDelivery
     })
-    this.reconcileRestartLeases = leases.createStartupLeaseReconcile(
-      () => this.reconcileLeases(),
-      deps.logger
-    )
+    this.startup = leases.createStartupRecovery(deps, this.reconcileLeases, this.runtimeState)
     this.eventRecovery = new StructuredAgentSessionEventRecovery({
       deps,
       store: deps.store,
@@ -224,7 +222,8 @@ export class StructuredAgentSessionHost {
     this,
     this.sessions,
     this.clientDelivery.forgetStatus,
-    this.clientDelivery.publishSavedStatus
+    this.clientDelivery.publishSavedStatus,
+    (ids) => this.startup.recover(ids)
   )
   listSessionTabs = this.tabs.listSessionTabs
   getPersistedVisibleSessionTabIndex = this.tabs.getPersistedVisibleSessionTabIndex
