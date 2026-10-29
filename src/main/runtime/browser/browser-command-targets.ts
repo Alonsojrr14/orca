@@ -160,7 +160,8 @@ export class RuntimeBrowserCommandTargets {
 
   async ensureBrowserPageActive(
     worktreeId: string | undefined,
-    browserPageId: string
+    browserPageId: string,
+    options: { waitForFirstLoad?: boolean } = {}
   ): Promise<void> {
     if (!(await this.host.serveBrowserTabs?.start(worktreeId, browserPageId))) {
       const win = this.host.getAuthoritativeWindow()
@@ -170,8 +171,10 @@ export class RuntimeBrowserCommandTargets {
       )
       await waitForTabRegistration(browserPageId)
     }
-    // Why: a woken tab should behave like one that was open all along, not a blank page mid-load.
-    await waitForTabFirstLoad(browserPageId)
+    // Why opt-in: a switched-to tab should read like one open all along, but streaming panes must not wait.
+    if (options.waitForFirstLoad) {
+      await waitForTabFirstLoad(browserPageId)
+    }
   }
 
   // Automation may bypass Electron navigation events; publish authoritative URL/title updates.
