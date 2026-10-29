@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/index'
 import { toast } from 'sonner'
 import { translate } from '@/i18n/i18n'
 import type { GitHubWorkItem } from '../../../../../shared/github/work-item-types'
+import { codeHostErrorText } from '@/lib/code-host-error-copy'
 type TaskPageGitHubIssueCreationInput = Pick<
   TaskPageWorkspaceActionsModel,
   | 'setTaskRefreshNonce'
@@ -92,7 +93,7 @@ export function useTaskPageGitHubIssueCreation<Model extends TaskPageGitHubIssue
           })
       if (!result.ok) {
         toast.error(
-          result.error ||
+          codeHostErrorText(result) ||
             translate('auto.components.TaskPage.7437e340b4', 'Failed to create issue.')
         )
         return

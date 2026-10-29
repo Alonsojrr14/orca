@@ -15,6 +15,27 @@ export function resolveLocaleSourceKey(enEntries, localeName, key) {
   return pluralCategories(localeName).includes(plural[2]) ? `${plural[1]}_other` : undefined
 }
 
+// translate('x', other, { count, defaultValue_one }) names the English catalog keys x_one and x_other.
+export function pluralFamilyDefaults(ts, key, fallback, options) {
+  if (PLURAL_KEY_RE.test(key) || !options || !ts.isObjectLiteralExpression(options)) {
+    return undefined
+  }
+  const property = (name) => options.properties.find((entry) => entry.name?.getText() === name)
+  const one = property('defaultValue_one')
+  // Without defaultValue_one, count only fills {{count}} in a singular key; without count, i18next reads the base key.
+  if (!one || !property('count')) {
+    return undefined
+  }
+  const oneDefault =
+    ts.isPropertyAssignment(one) && ts.isStringLiteralLike(one.initializer)
+      ? one.initializer.text
+      : undefined
+  return [
+    [`${key}_one`, oneDefault],
+    [`${key}_other`, fallback]
+  ]
+}
+
 const COUNT_PLACEHOLDER_RE = /^\{\{\s*count\s*[,}]/
 
 // i18next always passes count to plural forms, so a locale may add it where English omits it (ru 21 uses _one).

@@ -1,3 +1,5 @@
+import { AGENT_OUTPUT_FAILURE_COPY } from './agent-output-failure-copy'
+
 // One English table for AI text-generation failures: main builds the wire `error`, the renderer translates by code.
 export const TEXT_GENERATION_FAILURE_COPY = {
   promptTooLargeForWindows:
@@ -33,7 +35,34 @@ export const TEXT_GENERATION_FAILURE_COPY = {
   jiraSummaryBusyInOtherDraft: 'A Jira title is already being generated in another draft.',
   stagedChangesReadFailed: 'Failed to read staged changes.',
   noStagedChanges: 'No staged changes to summarize.',
-  noBranchChanges: 'No branch changes to summarize.'
+  noBranchChanges: 'No branch changes to summarize.',
+  commandTemplateEmptyCommitMessage: 'Command template is empty for commit messages.',
+  commandTemplateEmptyPullRequest: 'Command template is empty for pull request details.',
+  commandTemplateEmptyBranchName: 'Command template is empty for branch names.',
+  commandTemplateEmptyChatName: 'Command template is empty for chat names.',
+  sourceControlAgentUnsupported:
+    'Choose a supported Source Control AI agent for this action in Settings -> Git -> Source Control AI. Supported agents: {{agents}}, or Custom command.',
+  chatNameAgentUnsupported:
+    'Choose a supported chat name agent for this action in Settings -> Chat -> Chat names. Supported agents: {{agents}}, or Custom command.',
+  sourceControlCustomCommandEmpty:
+    'Custom command is empty. Add one in Settings -> Git -> Source Control AI.',
+  chatNameCustomCommandEmpty: 'Custom command is empty. Add one in Settings -> Chat -> Chat names.',
+  agentCannotGenerateCommitMessage:
+    'Agent "{{agent}}" does not support Source Control AI commit messages. Supported agents: {{agents}}, or Custom command.',
+  agentCannotGeneratePullRequest:
+    'Agent "{{agent}}" does not support Source Control AI pull request details. Supported agents: {{agents}}, or Custom command.',
+  agentCannotGenerateBranchName:
+    'Agent "{{agent}}" does not support Source Control AI branch names. Supported agents: {{agents}}, or Custom command.',
+  agentCannotGenerateChatName:
+    'Agent "{{agent}}" does not support chat names. Supported agents: {{agents}}, or Custom command.',
+  noModelForAgent: 'No model is available for {{label}}.',
+  planCustomCommandEmpty:
+    'Custom command is empty. Add one in Settings → Git → AI Commit Messages.',
+  planAgentUnsupported: 'Agent "{{agent}}" does not support AI commit messages.',
+  planModelUnavailable: 'Model "{{model}}" is not available for {{label}}.',
+  planModelWithoutThinking: 'Model "{{model}}" does not support a thinking effort level.',
+  planThinkingLevelInvalid: 'Thinking level "{{level}}" is not valid for {{model}}.',
+  ...AGENT_OUTPUT_FAILURE_COPY
 } as const
 
 export type TextGenerationFailureCode = keyof typeof TEXT_GENERATION_FAILURE_COPY

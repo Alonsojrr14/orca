@@ -258,7 +258,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
         repo: 'orca',
         host: 'github.com'
       })
-    ).resolves.toEqual({
+    ).resolves.toMatchObject({
       ok: false,
       error: 'GitHub does not support auto-merge for stacked pull requests.'
     })
@@ -279,7 +279,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
         repo: 'orca',
         host: 'github.com'
       })
-    ).resolves.toEqual({
+    ).resolves.toMatchObject({
       ok: false,
       error: 'This pull request can already be merged. Use Merge instead of auto-merge.'
     })
@@ -301,7 +301,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
         repo: 'orca',
         host: 'github.com'
       })
-    ).resolves.toEqual({
+    ).resolves.toMatchObject({
       ok: false,
       error: `Failed to enable auto-merge for pull request: ${providerError}`
     })
@@ -318,9 +318,11 @@ describe('GitHub GraphQL rate-limit guard', () => {
         repo: 'orca',
         host: 'github.com'
       })
-    ).resolves.toEqual({
+    ).resolves.toMatchObject({
       ok: false,
-      error: 'Failed to disable auto-merge for pull request: gh: pull request is already closed'
+      error: 'Failed to disable auto-merge for pull request: gh: pull request is already closed',
+      errorCode: 'github.autoMergeDisableFailed',
+      errorDetail: 'gh: pull request is already closed'
     })
   })
 

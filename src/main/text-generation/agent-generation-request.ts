@@ -1,3 +1,4 @@
+import { textGenerationFailureCodeFields } from '../../shared/text-generation-failure-copy'
 import { runClaudeBackgroundAttempts } from '../../shared/claude-background-run-isolation'
 import {
   cleanGeneratedCommitMessage,
@@ -44,7 +45,7 @@ export async function runGenerationRequest(input: {
   }
   const planned = planCommitMessageGeneration(params, input.prompt)
   if (!planned.ok) {
-    return { success: false, error: planned.error }
+    return { success: false, error: planned.error, ...textGenerationFailureCodeFields(planned) }
   }
   const plan = planned.plan
   const execute = (plan: CommitMessagePlan): Promise<InternalTextGenerationResult> =>
@@ -73,7 +74,11 @@ export async function runGenerationRequest(input: {
       })
       return retry.ok
         ? execute(retry.plan)
-        : Promise.resolve({ success: false, error: retry.error })
+        : Promise.resolve({
+            success: false,
+            error: retry.error,
+            ...textGenerationFailureCodeFields(retry)
+          })
     },
     failedExit: (outcome) => (outcome.success ? undefined : outcome.failureOutput)
   })

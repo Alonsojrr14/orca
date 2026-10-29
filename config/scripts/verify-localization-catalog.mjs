@@ -11,6 +11,7 @@ import { LOCALIZATION_SURFACES, readLocalizationSurface } from './localization-s
 import { repairTranslatedValue } from './locale-translation-policy.mjs'
 import {
   interpolationVariablesMatch,
+  pluralFamilyDefaults,
   resolveLocaleSourceKey,
   syncLocalePluralForms
 } from './locale-plural-forms.mjs'
@@ -123,16 +124,13 @@ export function collectLocalizationKeyReferences(filePath, sourceText, root = pr
         ts.isStringLiteralLike(firstArg)
       ) {
         const secondArg = node.arguments[1]
-        references.push(
-          reportAt(
-            root,
-            filePath,
-            sourceFile,
-            firstArg,
-            firstArg.text,
-            secondArg && ts.isStringLiteralLike(secondArg) ? secondArg.text : undefined
-          )
-        )
+        const fallback = secondArg && ts.isStringLiteralLike(secondArg) ? secondArg.text : undefined
+        const keys = pluralFamilyDefaults(ts, firstArg.text, fallback, node.arguments[2]) ?? [
+          [firstArg.text, fallback]
+        ]
+        for (const [key, value] of keys) {
+          references.push(reportAt(root, filePath, sourceFile, firstArg, key, value))
+        }
       }
     }
 

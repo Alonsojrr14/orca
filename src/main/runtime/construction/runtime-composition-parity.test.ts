@@ -98,6 +98,12 @@ const DECLARED_HOST_DIFFERENCES: readonly DeclaredDifference[] = [
       'Sleep reaches paired servers and suspends VMs from the desktop only; orcad refuses those parts.'
   },
   {
+    wiring: 'ctor:headlessTerminalScrollbackRows',
+    missingOn: 'electron',
+    reason:
+      "Desktop reveals hidden panes from its model at desktop depth; renderer-less orcad needs only the daemon's live window."
+  },
+  {
     wiring: 'rpc-option:exposeNetworkByDefault',
     missingOn: 'orcad',
     reason: 'orcad pins its bind host instead, so exposure never widens itself.'

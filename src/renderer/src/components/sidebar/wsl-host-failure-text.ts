@@ -76,16 +76,11 @@ const DETAIL_COPY: Record<WslHostStatusDetailCode, (values: Values) => string | 
     if (distro === null || count === null) {
       return null
     }
-    return count === 1
-      ? translate('sidebar.wslHosts.statusDetails.restartGaveUp_one', DETAIL.restartGaveUp.one, {
-          distro,
-          count
-        })
-      : translate(
-          'sidebar.wslHosts.statusDetails.restartGaveUp_other',
-          DETAIL.restartGaveUp.other,
-          { distro, count }
-        )
+    return translate('sidebar.wslHosts.statusDetails.restartGaveUp', DETAIL.restartGaveUp.other, {
+      distro,
+      count,
+      defaultValue_one: DETAIL.restartGaveUp.one
+    })
   },
   serviceUnconfirmed: () =>
     translate('sidebar.wslHosts.statusDetails.serviceUnconfirmed', DETAIL.serviceUnconfirmed),

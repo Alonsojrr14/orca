@@ -3,6 +3,7 @@ import {
   TEXT_GENERATION_FAILURE_COPY as EN,
   type TextGenerationFailureCode
 } from '../../../shared/text-generation-failure-copy'
+import { AGENT_OUTPUT_ERROR_COPY } from './agent-output-error-copy'
 
 type CopyValues = Record<string, string | number>
 
@@ -146,7 +147,112 @@ const COPY: Record<TextGenerationFailureCode, (values: CopyValues) => string> = 
   noStagedChanges: (values) =>
     translate('sourceControl.textGeneration.errors.noStagedChanges', EN.noStagedChanges, values),
   noBranchChanges: (values) =>
-    translate('sourceControl.textGeneration.errors.noBranchChanges', EN.noBranchChanges, values)
+    translate('sourceControl.textGeneration.errors.noBranchChanges', EN.noBranchChanges, values),
+  commandTemplateEmptyCommitMessage: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.commandTemplateEmptyCommitMessage',
+      EN.commandTemplateEmptyCommitMessage,
+      values
+    ),
+  commandTemplateEmptyPullRequest: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.commandTemplateEmptyPullRequest',
+      EN.commandTemplateEmptyPullRequest,
+      values
+    ),
+  commandTemplateEmptyBranchName: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.commandTemplateEmptyBranchName',
+      EN.commandTemplateEmptyBranchName,
+      values
+    ),
+  commandTemplateEmptyChatName: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.commandTemplateEmptyChatName',
+      EN.commandTemplateEmptyChatName,
+      values
+    ),
+  sourceControlAgentUnsupported: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.sourceControlAgentUnsupported',
+      EN.sourceControlAgentUnsupported,
+      values
+    ),
+  chatNameAgentUnsupported: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.chatNameAgentUnsupported',
+      EN.chatNameAgentUnsupported,
+      values
+    ),
+  sourceControlCustomCommandEmpty: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.sourceControlCustomCommandEmpty',
+      EN.sourceControlCustomCommandEmpty,
+      values
+    ),
+  chatNameCustomCommandEmpty: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.chatNameCustomCommandEmpty',
+      EN.chatNameCustomCommandEmpty,
+      values
+    ),
+  agentCannotGenerateCommitMessage: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.agentCannotGenerateCommitMessage',
+      EN.agentCannotGenerateCommitMessage,
+      values
+    ),
+  agentCannotGeneratePullRequest: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.agentCannotGeneratePullRequest',
+      EN.agentCannotGeneratePullRequest,
+      values
+    ),
+  agentCannotGenerateBranchName: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.agentCannotGenerateBranchName',
+      EN.agentCannotGenerateBranchName,
+      values
+    ),
+  agentCannotGenerateChatName: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.agentCannotGenerateChatName',
+      EN.agentCannotGenerateChatName,
+      values
+    ),
+  noModelForAgent: (values) =>
+    translate('sourceControl.textGeneration.errors.noModelForAgent', EN.noModelForAgent, values),
+  planCustomCommandEmpty: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.planCustomCommandEmpty',
+      EN.planCustomCommandEmpty,
+      values
+    ),
+  planAgentUnsupported: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.planAgentUnsupported',
+      EN.planAgentUnsupported,
+      values
+    ),
+  planModelUnavailable: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.planModelUnavailable',
+      EN.planModelUnavailable,
+      values
+    ),
+  planModelWithoutThinking: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.planModelWithoutThinking',
+      EN.planModelWithoutThinking,
+      values
+    ),
+  planThinkingLevelInvalid: (values) =>
+    translate(
+      'sourceControl.textGeneration.errors.planThinkingLevelInvalid',
+      EN.planThinkingLevelInvalid,
+      values
+    ),
+  ...AGENT_OUTPUT_ERROR_COPY
 }
 
 function isTextGenerationFailureCode(code: unknown): code is TextGenerationFailureCode {
@@ -158,6 +264,14 @@ type TextGenerationFailure = {
   errorCode?: unknown
   errorParams?: unknown
   errorDetail?: unknown
+}
+
+/** Localized copy for a failure the renderer detects itself. */
+export function textGenerationCopyText(
+  code: TextGenerationFailureCode,
+  values: CopyValues = {}
+): string {
+  return COPY[code](values)
 }
 
 /** Unknown codes (newer host), uncoded results (older host), or missing values show the host's English. */

@@ -5,7 +5,10 @@ import type {
   JiraIssueSummaryGenerationCancellation,
   JiraIssueSummaryGenerationResult
 } from '../../shared/jira/jira-issue-summary-generation'
-import { textGenerationFailure } from '../../shared/text-generation-failure-copy'
+import {
+  textGenerationFailure,
+  textGenerationFailureCodeFields
+} from '../../shared/text-generation-failure-copy'
 import { getStatus } from '../jira/client'
 import {
   prepareLocalCommitMessageAgentEnv,
@@ -93,7 +96,7 @@ export async function generateJiraIssueSummaryRequest(
       null
     )
     if (!resolved.ok) {
-      return { success: false, error: resolved.error }
+      return { success: false, error: resolved.error, ...textGenerationFailureCodeFields(resolved) }
     }
     const localEnv = await prepareLocalCommitMessageAgentEnv(
       resolved.params.agentId,

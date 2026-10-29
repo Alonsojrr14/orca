@@ -76,6 +76,7 @@ function useReview({ count, rendered }: { count: number; rendered: number[] }) {
   const loader = useCombinedDiffSectionLoader({
     entrySet,
     file,
+    generation: 0,
     registry,
     sectionCount: count,
     setSectionHeights,

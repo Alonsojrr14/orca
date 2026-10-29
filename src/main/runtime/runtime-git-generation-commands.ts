@@ -1,4 +1,7 @@
-import { textGenerationFailure } from '../../shared/text-generation-failure-copy'
+import {
+  textGenerationFailure,
+  textGenerationFailureCodeFields
+} from '../../shared/text-generation-failure-copy'
 import type { CommitMessageDraftContext } from '../../shared/commit-message-generation'
 import { getCommitMessageModelDiscoveryHostKey } from '../../shared/commit-message-host-key'
 import type { HostedReviewProvider } from '../../shared/hosted-review'
@@ -64,7 +67,11 @@ export class RuntimeGitGenerationCommands {
           target.repo ?? null
         )
     if (!resolvedSettings.ok) {
-      return { success: false, error: resolvedSettings.error }
+      return {
+        success: false,
+        error: resolvedSettings.error,
+        ...textGenerationFailureCodeFields(resolvedSettings)
+      }
     }
 
     if (route.kind === 'ssh') {
@@ -147,7 +154,11 @@ export class RuntimeGitGenerationCommands {
           target.repo ?? null
         )
     if (!resolvedSettings.ok) {
-      return { success: false, error: resolvedSettings.error }
+      return {
+        success: false,
+        error: resolvedSettings.error,
+        ...textGenerationFailureCodeFields(resolvedSettings)
+      }
     }
 
     if (route.kind === 'ssh') {
