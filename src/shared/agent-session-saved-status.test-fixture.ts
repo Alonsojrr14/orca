@@ -1,4 +1,5 @@
 import type { AgentSessionLastTurn } from './agent-session-last-turn'
+import type { AgentSessionRecord } from './agent-session-record'
 import type { AgentSessionStatusSummary } from './agent-session-wire'
 import type { AgentTurnOutcome } from './agent-turn-outcome'
 import {
@@ -34,11 +35,11 @@ export const savedStatusContracts = (
       executionHostId: 'local',
       wslDistro: null,
       workspaceId: 'wt-1',
-      workspaceKind: 'git-worktree' as const
+      workspaceKind: 'git-worktree'
     },
     updatedAt: SAVED_STATUS_AT + 60_000,
     lastTurn: { ...lastTurn, prompt: 'saved prompt', reply: 'saved reply' }
-  },
+  } satisfies AgentSessionRecord,
   summary: {
     sessionId: 'session-1',
     workspaceId: 'wt-1',

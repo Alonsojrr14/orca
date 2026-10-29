@@ -21,7 +21,10 @@ import { AGENT_SESSION_NOT_ATTACHED } from './structured-agent-session-mutation-
 import { StructuredAgentSessionSendSettlement } from './structured-agent-session-send-settlement'
 import { heldStructuredAgentSessionCurrentWork } from './structured-agent-session-host-current-work'
 import { structuredAgentSessionConversationFence } from './structured-agent-session-provider-child'
-import type { StructuredAgentSessionStatusSubscriber } from './structured-agent-session-status-feed'
+import type {
+  StructuredAgentSessionStatusFeed,
+  StructuredAgentSessionStatusSubscriber
+} from './structured-agent-session-status-feed'
 import type { CapturedChildWorkStops } from './structured-agent-session-status-ownership'
 import { createStructuredAgentSessionHostStatusFeed } from './structured-agent-session-host-status-feed'
 import type { StructuredAgentSessionChildWorkProducer } from './structured-agent-session-subagent-rows'
