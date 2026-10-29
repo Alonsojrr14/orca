@@ -44,19 +44,6 @@ export type StructuredAgentSessionTab = {
   agent: AgentSessionRecord['provider']
 }
 
-export function listStructuredAgentSessionTabs(
-  sessions: ReadonlyMap<
-    string,
-    { params: { location: { workspaceId: string }; provider: AgentSessionRecord['provider'] } }
-  >
-): StructuredAgentSessionTab[] {
-  return [...sessions.entries()].map(([sessionId, session]) => ({
-    sessionId,
-    workspaceId: session.params.location.workspaceId,
-    agent: session.params.provider
-  }))
-}
-
 type TabSessions = ReadonlyMap<
   string,
   {
@@ -75,6 +62,8 @@ export function createStructuredAgentSessionTabSurface(
         | 'showSessionTabs'
         | 'getConversation'
         | 'listConversations'
+        | 'listVisibleSessionIds'
+        | 'isSessionTabVisible'
       >
     }
   },
@@ -83,22 +72,15 @@ export function createStructuredAgentSessionTabSurface(
   publishSavedStatusGroup: SavedStructuredStatusGroup,
   recover: (ids: readonly string[]) => Promise<void>
 ) {
-  // Legacy profile tabs remain addressable before their index is seeded.
-  const unopened = new Set<string>()
   return {
-    listSessionTabs: (): StructuredAgentSessionTab[] => {
-      const index = host.deps.store.getVisibleSessionTabIndex()
-      const listed = index.present ? index.sessionIds : [...unopened]
-      return [
-        ...listStructuredAgentSessionTabs(sessions),
-        ...listed.flatMap((sessionId) => {
-          const record = sessions.has(sessionId) ? null : host.deps.store.getConversation(sessionId)
-          return record
-            ? [{ sessionId, workspaceId: record.location.workspaceId, agent: record.provider }]
-            : []
-        })
-      ]
-    },
+    listSessionTabs: (): StructuredAgentSessionTab[] =>
+      host.deps.store.listVisibleSessionIds().flatMap((sessionId) => {
+        const record = host.deps.store.getConversation(sessionId)
+        return record
+          ? [{ sessionId, workspaceId: record.location.workspaceId, agent: record.provider }]
+          : []
+      }),
+    isSessionTabVisible: (id: string) => host.deps.store.isSessionTabVisible(id),
     seedSessionTabs: (ids?: readonly string[]): Promise<void> =>
       seedSavedStructuredSessionTabs(
         host.deps,
@@ -106,7 +88,6 @@ export function createStructuredAgentSessionTabSurface(
         (visit) =>
           publishSavedStatusGroup((publish) =>
             visit((record, markerAt) => {
-              unopened.add(record.sessionId)
               publish(record, markerAt)
             })
           ),
@@ -126,7 +107,6 @@ export function createStructuredAgentSessionTabSurface(
     ): Promise<void> => {
       await setStructuredAgentSessionTabVisibility(host, sessionId, visible, tabId)
       if (!visible) {
-        unopened.delete(sessionId)
         if (!options?.deferHiddenNotice) {
           notifyTabHidden(host, sessionId)
         }

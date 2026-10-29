@@ -298,6 +298,7 @@ describe('real conversation inventory work', () => {
       sessionTabs: [{ tabId: 'cold-tab', sessionId: successor }]
     })
     const opened = await openAgentSessionRecordStoreOnce({
+      legacySessionTabIds: [],
       stateDirectory: root,
       hostId: 'local',
       logger: createStructuredAgentSessionLogger()

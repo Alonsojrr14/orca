@@ -53,7 +53,9 @@ async function relaunchWith(
     filter: (source) => !source.includes('.lock')
   })
   edit(openTestJournalHostDatabase(relaunched).db)
-  const store = await openTestAgentSessionRecordStore(relaunched)
+  const store = await openTestAgentSessionRecordStore(relaunched, {
+    legacySessionTabIds: [SESSION]
+  })
   const host = new StructuredAgentSessionHost({
     agents: NO_STRUCTURED_AGENTS,
     logger: createStructuredAgentSessionLogger(),

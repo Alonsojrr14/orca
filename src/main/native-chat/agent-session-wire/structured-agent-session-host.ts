@@ -226,6 +226,7 @@ export class StructuredAgentSessionHost {
     (ids) => this.startup.recover(ids)
   )
   listSessionTabs = this.tabs.listSessionTabs
+  isSessionTabVisible = this.tabs.isSessionTabVisible
   getPersistedVisibleSessionTabIndex = this.tabs.getPersistedVisibleSessionTabIndex
   getSessionTabId = this.tabs.getSessionTabId
   showSessionTabs = this.tabs.showSessionTabs

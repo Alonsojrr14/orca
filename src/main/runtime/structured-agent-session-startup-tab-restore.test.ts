@@ -1,3 +1,5 @@
+import { partialRuntimeStore } from './runtime-store-partial-fixture'
+import type { WorkspaceSessionState } from '../../shared/workspace-session-state-types'
 // Startup chat-tab restore must write nothing with an existing index and bound failed writes per step rather than per chat.
 
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
@@ -5,7 +7,6 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AgentSessionRecord } from '../../shared/agent-session-record'
-import type { RuntimeMobileSessionTabsSnapshot } from '../../shared/runtime-types'
 import {
   agentSessionLeaseFixture,
   agentSessionRecordFixture
@@ -162,59 +163,55 @@ async function seedProfile(
 
 function startupRuntime(options: { afterInstall?: () => void; profileChats?: string[] } = {}) {
   const log = recordingStructuredAgentSessionLogger()
-  const runtime = new OrcaRuntimeService()
-  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: these are the runtime's own protected members; the test roots the host at `root`, stubs the PTY daemon and gives it a profile.
-  const internal = runtime as unknown as {
-    hasPersistedStructuredAgentSessionStore(): boolean
-    ensureStructuredAgentSessionHost(): Promise<unknown>
-    refreshMobileSessionPtyRecords(): Promise<Set<string> | null>
-    mobileSessionTabsByWorktree: Map<string, RuntimeMobileSessionTabsSnapshot>
-    store: { getWorkspaceSession: () => unknown }
-  }
-  internal.hasPersistedStructuredAgentSessionStore = () => true
-  internal.ensureStructuredAgentSessionHost = async () => {
-    const installed = await ensureStructuredAgentSessionHost({
-      logger: log.logger,
-      stateDirectory: root,
-      hostId: 'local',
-      claimKeyId: 'key-1',
-      resolveWorkspacePath: async () => root,
-      resolveEnvironment: async () => ({}),
-      resolveLaunchArgs: () => [],
-      resolveClaudeAuthPolicy: () => ({ account: 'managed' })
-    })
-    options.afterInstall?.()
-    return installed
-  }
-  internal.refreshMobileSessionPtyRecords = async () => new Set<string>()
   // A legacy profile's saved chat tabs, which a store with no tab index restores from.
-  internal.store = {
-    getWorkspaceSession: () => ({
-      activeRepoId: null,
-      activeWorktreeId: 'workspace-1',
-      activeTabId: null,
-      tabsByWorktree: {},
-      terminalLayoutsByTabId: {},
-      unifiedTabs: {
-        'workspace-1': (options.profileChats ?? []).map((sessionId, index) => ({
-          id: `agent-session:${sessionId}`,
-          entityId: sessionId,
-          groupId: 'group-1',
-          worktreeId: 'workspace-1',
-          contentType: 'agent-session',
-          label: 'Codex Chat',
-          customLabel: null,
-          color: null,
-          sortOrder: index,
-          createdAt: 1
-        }))
-      }
-    })
+  const profile: WorkspaceSessionState = {
+    activeRepoId: null,
+    activeWorktreeId: 'workspace-1',
+    activeTabId: null,
+    tabsByWorktree: {},
+    terminalLayoutsByTabId: {},
+    unifiedTabs: {
+      'workspace-1': (options.profileChats ?? []).map((sessionId, index) => ({
+        id: `agent-session:${sessionId}`,
+        entityId: sessionId,
+        groupId: 'group-1',
+        worktreeId: 'workspace-1',
+        contentType: 'agent-session',
+        label: 'Codex Chat',
+        customLabel: null,
+        color: null,
+        sortOrder: index,
+        createdAt: 1
+      }))
+    }
   }
+  class StartupRuntime extends OrcaRuntimeService {
+    protected override hasPersistedStructuredAgentSessionStore() {
+      return true
+    }
+    protected override async refreshMobileSessionPtyRecords() {
+      return new Set<string>()
+    }
+    override async ensureStructuredAgentSessionHost() {
+      await ensureStructuredAgentSessionHost({
+        logger: log.logger,
+        stateDirectory: root,
+        hostId: 'local',
+        claimKeyId: 'key-1',
+        legacySessionTabIds: this.legacyStructuredSessionTabIds,
+        resolveWorkspacePath: async () => root,
+        resolveEnvironment: async () => ({}),
+        resolveLaunchArgs: () => [],
+        resolveClaudeAuthPolicy: () => ({ account: 'managed' })
+      })
+      options.afterInstall?.()
+    }
+  }
+  const runtime = new StartupRuntime(partialRuntimeStore({ getWorkspaceSession: () => profile }))
   return {
     runtime,
     log,
-    published: () => internal.mobileSessionTabsByWorktree.get('workspace-1')?.tabs ?? []
+    published: () => runtime.mobileSessionTabsByWorktree.get('workspace-1')?.tabs ?? []
   }
 }
 
@@ -226,7 +223,7 @@ async function expectHistory(sessionId: string): Promise<void> {
 function spyOnTabWrites() {
   return {
     visibility: vi.spyOn(AgentSessionRecordStore.prototype, 'setSessionTabVisibility'),
-    seed: vi.spyOn(AgentSessionRecordStore.prototype, 'showSessionTabs')
+    seed: vi.spyOn(AgentSessionRecordStore.prototype, 'initializeSessionTabs')
   }
 }
 
@@ -384,7 +381,6 @@ describe('restoring the chat tabs open at quit', () => {
         message: 'recording restored chat tabs failed',
         fields: {
           scope: 'tab-index-seed',
-          sessionIds: [CHAT_A, CHAT_B],
           error: expect.objectContaining({ message: 'disk I/O error' })
         }
       })

@@ -1,3 +1,4 @@
+import { closeStructuredAgentSessionChild } from '../../agent-session/structured-agent-session-close'
 /** Create structured workers directly; attach is not readiness, so hold the preamble until the agent takes it.
  * Open dispatches retain agents through the idle sweep; settled workers rest and restart on mail. The preamble is a turn, never keystrokes. */
 
@@ -157,14 +158,12 @@ export async function discardStructuredWorkerSession(
   if (!host) {
     return
   }
-  try {
-    await host.setSessionTabVisibility?.(sessionId, false)
-    await host.close(sessionId, 'evict')
-  } catch (error) {
+  const outcome = await closeStructuredAgentSessionChild(sessionId, { runtime })
+  if (!outcome.stopped) {
     console.warn(
       '[orchestration] failed to discard a half-started structured worker',
       sessionId,
-      error
+      outcome.reason
     )
     return
   }

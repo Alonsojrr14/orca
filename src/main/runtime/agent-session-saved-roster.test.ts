@@ -103,6 +103,7 @@ it.each([
       ...record,
       lastTurn: { state: 'settled', outcome: 'cancellation', at: 300 }
     }))
+    await host.setSessionTabVisibility('closed-chat', true)
     await host.seedSessionTabs([...ids, 'closed-chat'])
     expect(rosters).toHaveBeenCalledTimes(2)
     expect(rosters.mock.calls[1]?.[0]).toHaveLength(existing + n + 1)
@@ -160,6 +161,7 @@ it.each(['recovery', 'capsule'] as const)(
     expect(roster).toHaveBeenCalledTimes(2)
     if (phase === 'capsule') {
       vi.spyOn(capsule, 'listFailed').mockRejectedValueOnce(new Error('advisory capsule failed'))
+      await host.setSessionTabVisibility('closed-chat', true)
       await host.seedSessionTabs(['closed-chat'])
       expect(host.readStatusSummary('closed-chat')).toBeDefined()
     }

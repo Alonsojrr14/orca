@@ -164,19 +164,14 @@ export async function seedSavedStructuredSessionTabs(
   deps: Pick<StructuredAgentSessionHostDeps, 'logger' | 'recoveryCapsule' | 'now'> & {
     store: Pick<
       AgentSessionRecordStore,
-      'getVisibleSessionTabIndex' | 'listConversations' | 'getConversation'
+      'listVisibleSessionIds' | 'isSessionTabVisible' | 'getConversation'
     >
   },
   ids: readonly string[] | undefined,
   publishGroup: SavedStructuredStatusGroup,
   recover: (ids: readonly string[]) => Promise<void>
 ): Promise<void> {
-  const index = deps.store.getVisibleSessionTabIndex()
-  const targets =
-    ids ??
-    (index.present
-      ? index.sessionIds
-      : deps.store.listConversations().map((record) => record.sessionId))
+  const targets = ids ?? deps.store.listVisibleSessionIds()
   await recover(targets)
   const markers = new Map<string, number>()
   try {
@@ -192,7 +187,7 @@ export async function seedSavedStructuredSessionTabs(
   publishGroup((publish) => {
     for (const id of targets) {
       const record = deps.store.getConversation(id)
-      if (record) {
+      if (record && deps.store.isSessionTabVisible(id)) {
         publish(record, markers.get(id))
       }
     }

@@ -182,6 +182,7 @@ it.each(['quit', 'stop', 'failure', 'provider-death'] as const)(
   async (ending) => {
     await attach()
     const { host: original, store, acquire } = hostTestState()
+    await store.setSessionTabVisibility(SESSION, true)
     const body = hostTestMessage('finish this after restart')
     await original.send(CALLER, { envelope: envelope('agentSession.send', { body }), body })
     const events = acquire.mock.calls.at(-1)?.[0].events
@@ -273,6 +274,7 @@ it.each(['quit', 'stop', 'failure', 'provider-death'] as const)(
 it('lists only indexed unopened chats, keeps legacy targets, and opens history on demand', async () => {
   await attach()
   const { host: original, store, acquire } = hostTestState()
+  await store.setSessionTabVisibility(SESSION, true)
   const sink = acquire.mock.calls.at(-1)?.[0].events
   sink?.appendItem(
     { provider: 'codex', threadId: THREAD, turnId: 'finished', ordinal: 1 },
@@ -343,6 +345,7 @@ it('lists only indexed unopened chats, keeps legacy targets, and opens history o
 
 it('keeps queued leftovers closed at startup and shows their paused cards on demand', async () => {
   const { host, store } = await interruptedRestart('queued-cards')
+  await host.setSessionTabVisibility(SESSION, true)
   await store.transitionHandoff(SESSION, ({ lastTurn: _lastTurn, ...record }) => record)
   const openJournal = vi.spyOn(journalFactory, 'openAgentSessionJournal')
   openJournal.mockClear()
