@@ -875,7 +875,9 @@ describe('launchWorkItemDirect', () => {
         createdWithAgent: currentDefault
       })
       expect(beginDirectWorkItemStructuredLaunch).toHaveBeenCalledWith(
-        expect.objectContaining({ plan: expect.objectContaining({ agent: currentDefault }) })
+        expect.objectContaining({
+          plan: expect.objectContaining({ agent: currentDefault, route: 'structured-native-chat' })
+        })
       )
     }
   )
