@@ -40,6 +40,7 @@ vi.mock('@/store/host-catalog-fencing', () => ({
   captureHostIdentityFence: () => ({}),
   isHostIdentityFenceCurrent: () => true
 }))
+const transport = await vi.importActual<typeof TerminalLimitTransport>('./terminal-limit-transport')
 const local: SettingsHostScope = { target: { kind: 'local' }, available: true }
 const base: TerminalLimitStatus = {
   maxTerminals: 256,
@@ -273,9 +274,6 @@ it.each([
 )
 
 it('uses the selected-host transport and refuses unsupported capability without issuing a policy RPC', async () => {
-  const transport = await vi.importActual<typeof TerminalLimitTransport>(
-    './terminal-limit-transport'
-  )
   const route = {
     target: { kind: 'environment' as const, environmentId: 'old-server' },
     at: 'local' as const

@@ -176,6 +176,7 @@ describe('host terminal policy', () => {
     let latency = 300
     const read = vi.fn(() => {
       const maximum = saved
+      // ast-grep-ignore: test-no-real-time-wait -- Fake timers model read latency across startup and refresh ticks.
       return new Promise<number>((resolve) => setTimeout(() => resolve(maximum), latency))
     })
     const value = createPolicy(join(await home(), 'policy.json'), {}, system(), read)
@@ -466,6 +467,7 @@ describe('host terminal policy', () => {
           throw new Error('Invalid fixture')
         }
         reconciling.resolve()
+        // ast-grep-ignore: test-no-real-time-wait -- Fake timers verify delayed actual-file reconciliation after an expired rename.
         await new Promise((resolve) => setTimeout(resolve, 300))
         return saved.maxTerminals
       })
