@@ -17,6 +17,7 @@ import {
   isDictationSetupRequiredError
 } from '../dictation/mobile-dictation-setup'
 import { useMobileNativeChatController } from './use-mobile-native-chat-controller'
+import { useMobileDictationLeaveHold } from './mobile-dictation-leave-hold'
 import { useMobileNativeChatReadability } from './use-mobile-native-chat-readability'
 import { useMobileNativeChatInputLease } from './native-chat/use-mobile-native-chat-input-lease'
 import { useMobileNativeChatSendError } from './native-chat/use-mobile-native-chat-send-error'
@@ -51,6 +52,7 @@ export function useMobileSessionNativeChatDictation(
     activeSessionTab,
     flushPendingLiveInputBeforeExternalSend,
     canSend,
+    canCompose,
     liveInputEnabled,
     showToast,
     resetLiveInputFocus
@@ -129,10 +131,11 @@ export function useMobileSessionNativeChatDictation(
   }
 
   const chatDictationDestination = useRef<((text: string) => boolean | void) | undefined>(undefined)
-  const dictationTargetReady = showNativeChat ? connState === 'connected' : canSend
+  // Starting needs the host, but a reconnect must not end a recording: the host keeps the session through it.
+  const dictationCanStart = showNativeChat ? connState === 'connected' : canSend
   const dictation = useMobileDictation({
     client,
-    enabled: dictationTargetReady && dictationEnabled,
+    enabled: (showNativeChat || canCompose) && dictationEnabled,
     onTranscript: (text) => {
       // Route dictation to the visible chat composer locally; terminal mode retains live-input routing.
       if (showNativeChatRef.current || chatDictationDestination.current) {
@@ -181,10 +184,15 @@ export function useMobileSessionNativeChatDictation(
     }
   })
 
+  const dictationLeaveHold = useMobileDictationLeaveHold(dictation)
+
   // Only a host setup read sets this; while false, the host's start refusal decides (older hosts, first tap before the read).
   const dictationNeedsSetupRef = useRef(false)
 
   const startDictation = useCallback(() => {
+    if (!dictationCanStart) {
+      return
+    }
     if (dictationNeedsSetupRef.current) {
       // Explain setup before the OS microphone prompt: mic access cannot help until the host can transcribe.
       setShowDictationSetup(true)
@@ -204,6 +212,7 @@ export function useMobileSessionNativeChatDictation(
   }, [
     activeHandle,
     dictation,
+    dictationCanStart,
     liveInputTerminalHandles,
     reportDictationFailure,
     setShowDictationSetup
@@ -299,6 +308,7 @@ export function useMobileSessionNativeChatDictation(
     showNativeChat,
     showNativeChatRef,
     dictation,
+    dictationLeaveHold,
     startDictation,
     cancelDictation,
     handleDictationToggle,

@@ -1,6 +1,6 @@
 import { View, TextInput, Pressable } from 'react-native'
 import { hostOs } from '../platform/host-os'
-import { ArrowUp, Keyboard as KeyboardIcon } from 'lucide-react-native'
+import { ArrowUp } from 'lucide-react-native'
 import {
   getTerminalCommandKeyboardType,
   getTerminalLiveInputKeyboardType
@@ -46,7 +46,6 @@ export function MobileSessionCommandDock({
     canSend,
     canCompose,
     liveInputEnabled,
-    focusLiveInput,
     dictation,
     cancelDictation,
     handleDictationToggle,
@@ -69,26 +68,43 @@ export function MobileSessionCommandDock({
         {keysInRail ? null : <MobileSessionAccessoryKeys controller={controller} />}
         {}
         {liveInputEnabled ? (
-          <View style={[styles.inputBar, styles.liveInputBar]}>
-            <Pressable
-              style={({ pressed }) => [
-                styles.liveInputFocusTarget,
-                pressed && styles.liveInputFocusTargetPressed,
-                !canSend && styles.liveInputFocusTargetDisabled
-              ]}
-              disabled={!canSend}
-              onPress={focusLiveInput}
-              accessibilityRole="button"
-              accessibilityLabel="Show keyboard for live terminal input"
-              accessibilityHint="Typed text is sent directly to the active terminal"
-            >
-              <KeyboardIcon size={16} color={colors.textSecondary} strokeWidth={2} />
+          <View style={styles.inputBar}>
+            <View style={styles.liveInputField}>
+              <TextInput
+                ref={bindLiveInputField}
+                style={[
+                  styles.textInput,
+                  styles.liveInputCapture,
+                  !canSend && styles.liveInputCaptureDisabled
+                ]}
+                value={liveInputCapture}
+                onChange={handleLiveInputChange}
+                onKeyPress={handleLiveInputKeyPress}
+                onSubmitEditing={submitLiveInput}
+                placeholder="Live input"
+                placeholderTextColor={colors.textMuted}
+                selectionColor={colors.accentBlue}
+                accessibilityLabel="Live terminal input"
+                accessibilityHint="Typed text is sent directly to the active terminal"
+                showSoftInputOnFocus
+                autoCapitalize="none"
+                autoCorrect={false}
+                spellCheck={false}
+                smartInsertDelete={false}
+                // Why: iOS textContentType overrides autoComplete and can narrow the keyboard; keep IME switching available.
+                autoComplete="off"
+                keyboardType={getTerminalLiveInputKeyboardType(hostOs())}
+                returnKeyType="default"
+                blurOnSubmit={false}
+                editable={canSend}
+                importantForAutofill="no"
+              />
               <MobileTerminalLiveInputStatus
                 dictation={dictation}
+                dictationMode={dictationMode}
                 isAttaching={isAttaching}
-                liveInputText={liveInputCapture}
               />
-            </Pressable>
+            </View>
             <MobileTerminalInputActions
               canSend={canSend}
               isAttaching={isAttaching}
@@ -104,27 +120,6 @@ export function MobileSessionCommandDock({
               onDictationPressIn={handleDictationPressIn}
               onDictationPressOut={handleDictationPressOut}
               onDictationCancel={cancelDictation}
-            />
-            <TextInput
-              ref={bindLiveInputField}
-              style={styles.liveInputCapture}
-              value={liveInputCapture}
-              onChange={handleLiveInputChange}
-              onKeyPress={handleLiveInputKeyPress}
-              onSubmitEditing={submitLiveInput}
-              placeholder=""
-              showSoftInputOnFocus
-              autoCapitalize="none"
-              autoCorrect={false}
-              spellCheck={false}
-              smartInsertDelete={false}
-              // Why: iOS textContentType overrides autoComplete and can narrow the keyboard; keep IME switching available.
-              autoComplete="off"
-              keyboardType={getTerminalLiveInputKeyboardType(hostOs())}
-              returnKeyType="default"
-              blurOnSubmit={false}
-              editable={canSend}
-              importantForAutofill="no"
             />
           </View>
         ) : (

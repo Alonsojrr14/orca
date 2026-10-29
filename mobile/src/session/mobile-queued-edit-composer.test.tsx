@@ -122,6 +122,7 @@ describe('real phone inline composer from More through picker pruning and host b
             onError: error,
             onMicPress: undefined,
             micActive: false,
+            micStarting: false,
             micProcessing: false,
             dictationMode: undefined,
             onMicPressIn: () => {},

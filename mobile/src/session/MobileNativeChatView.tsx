@@ -181,6 +181,7 @@ export function MobileNativeChatView({
   isAttaching,
   onMicPress,
   micActive,
+  micStarting,
   micProcessing,
   dictationMode,
   onMicPressIn,
@@ -402,6 +403,7 @@ export function MobileNativeChatView({
         isAttaching={isAttaching}
         onMicPress={onMicPress}
         micActive={micActive}
+        micStarting={micStarting}
         micProcessing={micProcessing}
         dictationMode={dictationMode}
         onMicPressIn={onMicPressIn}

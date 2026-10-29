@@ -6,7 +6,10 @@ import { mobileNativeChatComposerStyles as styles } from './mobile-native-chat-c
 
 export type MobileNativeChatMicProps = {
   onMicPress?: () => void
+  /** Starting or recording: the mic is live and its release must reach the hook. */
   micActive?: boolean
+  /** Still opening the mic; taps are ignored until recording begins. */
+  micStarting?: boolean
   /** Transcribing after stop; taps are ignored until the transcript lands. */
   micProcessing?: boolean
   dictationMode?: string
@@ -17,6 +20,7 @@ export type MobileNativeChatMicProps = {
 export function MobileNativeChatComposerMic({
   onMicPress,
   micActive = false,
+  micStarting = false,
   micProcessing = false,
   dictationMode = 'toggle',
   onMicPressIn,
@@ -25,8 +29,16 @@ export function MobileNativeChatComposerMic({
 }: MobileNativeChatMicProps & { disabled: boolean }): React.JSX.Element {
   return (
     <Pressable
+      accessibilityRole="button"
+      aria-busy={micStarting || micProcessing}
       accessibilityLabel={
-        micActive ? 'Stop dictation' : micProcessing ? 'Transcribing dictation' : 'Dictate'
+        micStarting
+          ? 'Starting dictation'
+          : micActive
+            ? 'Stop dictation'
+            : micProcessing
+              ? 'Transcribing dictation'
+              : 'Dictate'
       }
       style={({ pressed }) => [styles.ghostButton, pressed && styles.pressed]}
       // Hold mode is walkie-talkie (press-in/out); toggle mode taps.

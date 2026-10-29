@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, Copy } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
 import { AndroidLogo, IosBrandIcon } from './MobileBrandIcons'
-import { getChannelTagline, type InstallCopy, type IosChannel } from './mobile-platform-copy'
+import { getChannelTagline, type IosChannel } from './mobile-platform-copy'
 import type { MobilePairingConnectionMode } from '../../../../shared/mobile-pairing-connection-mode'
 import type { MobileRelayMintFailure } from '../../../../shared/mobile-relay-mint-failure'
 import { MobileHeroPairingStep } from './MobileHeroPairingStep'
@@ -20,7 +20,6 @@ type HeroFlowProps = {
   platform: Platform
   onPlatformChange: (next: Platform) => void
   installQrUrl: string | null
-  installCopy: InstallCopy
   iosChannel: IosChannel
   onIosChannelChange: (next: IosChannel) => void
   onOpenAndroidInstallGuide: () => void
@@ -60,7 +59,6 @@ export function HeroFlow({
   platform,
   onPlatformChange,
   installQrUrl,
-  installCopy,
   iosChannel,
   onIosChannelChange,
   onOpenAndroidInstallGuide,
@@ -198,7 +196,7 @@ export function HeroFlow({
               ) : null}
               <div className="mp-inline-actions">
                 <button type="button" className="mp-ghost-action" onClick={onOpenInstallUrl}>
-                  {installCopy.ctaLabel}
+                  {translate('auto.components.mobile.MobileHero.downloadApp', 'Download app')}
                 </button>
                 <button type="button" className="mp-text-link" onClick={onCopyInstallUrl}>
                   <Copy className="size-3.5" />

@@ -38,4 +38,22 @@ describe('MobileNativeChatComposerMic', () => {
     expect(findAllByHostType(mic, 'ActivityIndicator')).toHaveLength(1)
     expect(findAllByHostType(mic, 'Mic')).toHaveLength(0)
   })
+
+  it('tells screen readers it is busy starting before recording begins', () => {
+    act(() => {
+      renderer = create(
+        createElement(MobileNativeChatComposerMic, {
+          onMicPress: vi.fn(),
+          micActive: true,
+          micStarting: true,
+          disabled: false
+        })
+      )
+    })
+    const mic = renderer!.root.find(
+      (node) =>
+        String(node.type) === 'Pressable' && node.props.accessibilityLabel === 'Starting dictation'
+    )
+    expect(mic.props['aria-busy']).toBe(true)
+  })
 })

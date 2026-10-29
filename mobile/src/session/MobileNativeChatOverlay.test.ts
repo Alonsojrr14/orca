@@ -80,6 +80,7 @@ function overlayElement(tick: Tick): ReturnType<typeof createElement> {
     },
     onMicPress: vi.fn(),
     micActive: false,
+    micStarting: false,
     micProcessing: false,
     dictationMode: 'toggle',
     onMicPressIn: vi.fn(),

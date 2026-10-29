@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { colors } from '../theme/mobile-theme'
 import { useMobileColorScheme } from '../theme/use-mobile-color-scheme'
+import { useMobileTranslation } from '../i18n/use-mobile-translation'
 import { connectionRetryAction } from '../transport/connection-retry-action'
 import { useMobileSourceControlState } from './use-mobile-source-control-state'
 import { useMobileSourceControlActionSheet } from './use-mobile-source-control-action-sheet'
@@ -50,6 +51,7 @@ export function MobileSourceControlPanel({
   onOpenedFileDiff
 }: MobileSourceControlPanelProps) {
   useMobileColorScheme()
+  const t = useMobileTranslation()
   const [activeTab, setActiveTab] = useState<SourceControlHubTab>(initialTab)
   const [visitedTabs, setVisitedTabs] = useState<ReadonlySet<SourceControlHubTab>>(
     () => new Set<SourceControlHubTab>([initialTab])
@@ -205,7 +207,7 @@ export function MobileSourceControlPanel({
         ? countUnresolvedReviewThreads(prController.prSidebarState.data.details?.comments)
         : null
     return buildMobilePrChipSummary(prController.prSidebarState, commentCount)
-  }, [isHostedRepo, prBranch, prController.prSidebarState])
+  }, [isHostedRepo, prBranch, prController.prSidebarState, t])
 
   const onRefresh = useCallback(() => {
     void loadStatus({ preserveReadyOnFailure: true, rereadSettings: true })

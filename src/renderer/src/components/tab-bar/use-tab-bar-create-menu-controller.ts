@@ -89,7 +89,8 @@ export function useTabBarCreateMenuController({
   const agentMenu = useNewTabAgentMenuRows(
     worktreeId,
     newTabMenuOpen && showAgentLaunchItems,
-    agentDetectionTarget
+    agentDetectionTarget,
+    { wakeOnOpen: true }
   )
   const commandOverrides = useAppStore((state) => state.settings?.agentCmdOverrides)
   const agentLaunchOptions = buildTabAgentLaunchOptionsFromRows(

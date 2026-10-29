@@ -27,11 +27,14 @@ const NODE_RUNTIME_INCLUDE = [
   'src/main/ai-vault/session-scanner-scope-walk.test.ts',
   // Electron main bridges streams with Node's implementation.
   'src/main/host/electron-http-client.test.ts',
+  'src/main/browser/extensions/browser-extension-native-host-process-backpressure.test.ts',
   'src/main/daemon/daemon-init-provider-installation.test.ts',
   'src/main/orcad/orcad-daemon-teardown-linux.test.ts',
   'src/renderer/src/components/terminal-pane/pty-input-write-queue.test.ts',
   'src/renderer/src/lib/react-commit-cascade-observer.test.ts',
   'src/renderer/src/lib/react-commit-cascade-telemetry.test.ts',
+  // Asserts payloads are collected; Bun's GC scans the stack conservatively and may keep one alive.
+  'src/shared/ws-inbound-message-queue.test.ts',
   // These reach Node SQLite through a shared helper or a dynamic import, which the scan skips.
   'src/main/claude/claude-transcript-catch-up.test.ts',
   'src/main/claude/claude-transcript-duration.test.ts',
@@ -118,6 +121,7 @@ const NODE_RUNTIME_INCLUDE = [
   // Reconciliation loads the real native Parcel watcher; Bun can abort on Linux ARM.
   'src/main/plugins/plugin-service-reconciliation.test.ts',
   'src/main/usage/usage-scan-worker-event-loop.test.ts',
+  'src/main/ipc/command-path-directory-worker.test.ts',
   // Asserts Node's spawn-failure close signal and that a dead worker closes its children's pipes.
   'src/main/worker-thread-child-process/worker-thread-child-process.test.ts',
   'src/main/git/command-runner/worker-exec-file.test.ts',

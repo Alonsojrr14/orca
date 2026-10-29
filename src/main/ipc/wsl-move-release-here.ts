@@ -23,6 +23,10 @@ import {
   reloadWslMoveWindowWithWritesHeld
 } from '../persistence/moving-wsl-projects/wsl-move-window-write-hold'
 import type { WslMoveUndoPorts } from './wsl-move-undo-wiring'
+import {
+  wslMoveHostCopiesSlept,
+  wslMoveHostCopyOutcome
+} from '../persistence/moving-wsl-projects/wsl-move-host-copy-stop'
 import { beginWslMoveUndoRun } from '../persistence/moving-wsl-projects/wsl-move-running-moves'
 import { runWslMoveHostAutomationsExclusive } from '../persistence/moving-wsl-projects/wsl-move-undo-host-automations'
 import { listEnvironments } from '../../shared/runtime-environment-store'
@@ -84,8 +88,9 @@ async function releaseWslMovesHere(
   unsavedWorkspaceIdsAsked: readonly string[],
   createUndoPorts: () => WslMoveUndoPorts
 ): Promise<WslMoveUseLocallyResult> {
-  // An update install quits the app; it waits until this undo returns (updater-wsl-move-install-hold).
-  const endUndoRun = beginWslMoveUndoRun()
+  // Taken before any guard or host connect: that connect wakes the move orchestrator, whose run of
+  // this distro must not claim one mid-undo. An update install also waits until this returns.
+  const endUndoRun = beginWslMoveUndoRun(newestFirst[0].manifest.source.distro)
   try {
     return await releaseWslMovesHereNow(
       userDataPath,
@@ -208,8 +213,17 @@ async function releaseOneMoveHere(
         automations.outcome === 'removal-pending' ? 'host-removal-pending' : 'host-automations'
     }
   }
+  // Re-checked last before the stop: a refusal after it would leave the host's terminals stopped.
+  const late = wslMoveReleaseRefusal(userDataPath, move)
+  if (late) {
+    await automations.restore()
+    return late
+  }
   // The host's copies stop next, or an agent the move resumed there runs beside this one.
-  const stop = await ports.stopHostCopies(move).catch(() => 'unreachable' as const)
+  const stopped = await ports.stopHostCopies(move).catch(() => 'unreachable' as const)
+  const stop = wslMoveHostCopyOutcome(stopped)
+  // Any refusal from here on leaves the host's terminals in ordinary Sleep: opening resumes them.
+  const asleep = wslMoveHostCopiesSlept(stopped) ? { hostTerminalsAsleep: true as const } : {}
   if (stop !== 'stopped') {
     await automations.restore()
     if (stop === 'unreachable' && wslMoveHostKeptForPeers(userDataPath, move)) {
@@ -217,7 +231,8 @@ async function releaseOneMoveHere(
     }
     return {
       released: false,
-      reason: stop === 'unreachable' ? 'host-unreachable' : 'host-still-running'
+      reason: stop === 'unreachable' ? 'host-unreachable' : 'host-still-running',
+      ...asleep
     }
   }
   // Written here just before the release (the record keeps the choice), and undone if it refuses.
@@ -230,6 +245,7 @@ async function releaseOneMoveHere(
       // The host's copies go back on even if putting the copies here back failed.
       await automations.restore()
     }
+    return { ...release, ...asleep }
   }
   return release
 }

@@ -33,6 +33,7 @@ async function ensureColorizationLanguage(language: string): Promise<void> {
 export function useMonacoColorizedLines(lines: string[], language: string): string[] {
   const isDark = useDocumentDarkTheme()
   const code = useMemo(() => lines.join('\n'), [lines])
+  const lineCount = lines.length
   const [htmlLines, setHtmlLines] = useState<string[]>(() => lines.map(() => ''))
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export function useMonacoColorizedLines(lines: string[], language: string): stri
 
   // Why: colorize emits theme-specific token classes, so a theme switch must re-colorize.
   useEffect(() => {
-    if (lines.length === 0) {
+    if (lineCount === 0) {
       setHtmlLines([])
       return
     }
@@ -50,19 +51,22 @@ export function useMonacoColorizedLines(lines: string[], language: string): stri
     // Wait for lazy tokenizers before colorizing; colorizeModelLine would emit default tokens while contributions load.
     void ensureColorizationLanguage(language)
       .catch(() => undefined)
-      .then(() => monaco.editor.colorize(code, language, { tabSize: 2 }))
-      .then((html) => {
+      .then(async () => {
         if (cancelled) {
           return
         }
-        const nextLines = html.split('<br/>').slice(0, lines.length)
+        const html = await monaco.editor.colorize(code, language, { tabSize: 2 })
+        if (cancelled) {
+          return
+        }
+        const nextLines = html.split('<br/>').slice(0, lineCount)
         setHtmlLines(nextLines)
       })
 
     return () => {
       cancelled = true
     }
-  }, [code, language, lines, isDark])
+  }, [code, language, lineCount, isDark])
 
   return htmlLines
 }

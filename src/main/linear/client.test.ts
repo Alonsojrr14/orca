@@ -374,7 +374,8 @@ describe('Linear client workspace storage', () => {
 
     await expect(linear.testConnection('legacy')).resolves.toEqual({
       ok: false,
-      error: 'No API key stored.'
+      error: 'No API key stored.',
+      errorCode: 'linear.noApiKey'
     })
 
     expect(linearClientMock).not.toHaveBeenCalled()

@@ -1,4 +1,11 @@
-import { useCallback, useRef, type Dispatch, type SetStateAction } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type Dispatch,
+  type SetStateAction
+} from 'react'
 import type { RpcClient } from '../transport/rpc-client'
 import { isRpcDeliveryUnknown } from '../transport/rpc-delivery-ambiguity'
 import type { BrowserScreencastFrameMetadata } from '../transport/browser-screencast-protocol'
@@ -74,6 +81,19 @@ export function useMobileBrowserCommands(args: MobileBrowserCommandArgs) {
 
   const pendingWheelCommandRef = useRef<PendingWheelCommand | null>(null)
   const dialogAnswerTokenRef = useRef(0)
+  // A send claims the draft here, so a repeat tap before re-render finds it empty. The pane remounts
+  // per page, so the draft outlives a reconnect; only unmount ends a send's claim on it.
+  const keyboardDraftRef = useRef({ mounted: true, value: keyboardValue })
+  useLayoutEffect(() => {
+    keyboardDraftRef.current.value = keyboardValue
+  }, [keyboardValue])
+  useEffect(() => {
+    const draft = keyboardDraftRef.current
+    draft.mounted = true
+    return () => {
+      draft.mounted = false
+    }
+  }, [])
 
   const wheelCommandInFlightRef = useRef(false)
 
@@ -214,24 +234,40 @@ export function useMobileBrowserCommands(args: MobileBrowserCommandArgs) {
   }, [])
 
   const sendKeyboardText = useCallback(async () => {
-    const text = keyboardValue
+    const draft = keyboardDraftRef.current
+    const text = draft.value
     if (!text) {
       return
     }
+    draft.value = ''
     setKeyboardValue('')
+    let unconfirmed = false
     const result = await sendBrowserRequest(
-      async (rpc, page, options) =>
-        browserInsertText.interpret(
-          await browserInsertText.request(rpc, { ...page, text }, options)
-        ),
+      async (rpc, page, options) => {
+        try {
+          browserInsertText.interpret(
+            await browserInsertText.request(rpc, { ...page, text }, options)
+          )
+          return true
+        } catch (error) {
+          unconfirmed = isRpcDeliveryUnknown(error)
+          throw error
+        }
+      },
       { suppressError: true }
     )
+    if (!draft.mounted) {
+      return
+    }
     if (result !== null) {
       onToast('Sent')
-    } else {
-      setKeyboardValue(text)
+      return
     }
-  }, [keyboardValue, onToast, sendBrowserRequest])
+    setKeyboardValue((current) => text + current)
+    if (unconfirmed) {
+      onToast('Delivery unconfirmed — check page before retrying')
+    }
+  }, [onToast, sendBrowserRequest])
 
   const sendKeypress = useCallback(
     async (key: string) => {

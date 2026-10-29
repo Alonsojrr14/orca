@@ -123,6 +123,7 @@ import {
   MouseButton,
   MouseWheel,
   MouseXY,
+  ProfileClearGoogleCookies,
   ProfileDelete,
   ProfileImportFromBrowser,
   Screencast,
@@ -223,6 +224,7 @@ import {
   FileWriteIfUnchanged
 } from './files-mutation-params'
 import {
+  ChatImageRead,
   DocPreviewFileRead,
   FileDirRead,
   FileListAll,
@@ -867,6 +869,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'browser.openUrl': BrowserOpenUrlParams,
   'browser.pdf': BrowserTarget,
   'browser.profileClearDefaultCookies': null,
+  'browser.profileClearGoogleCookies': ProfileClearGoogleCookies,
   'browser.profileCreate': ProfileCreate,
   'browser.profileDelete': ProfileDelete,
   'browser.profileDetectBrowsers': null,
@@ -967,6 +970,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'files.openDiff': FileOpenDiff,
   'files.pathsExist': FilePathsExist,
   'files.read': FileOpen,
+  'files.readChatImage': ChatImageRead,
   'files.readChunk': FileReadChunk,
   'files.readDir': FileDirRead,
   'files.readDocPreview': DocPreviewFileRead,

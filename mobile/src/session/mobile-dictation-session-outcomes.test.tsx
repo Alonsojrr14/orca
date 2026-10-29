@@ -126,6 +126,7 @@ function mount(
       activeHandleRef: useRef('t1'),
       flushPendingLiveInputBeforeExternalSend: async () => true,
       canSend: true,
+      canCompose: true,
       liveInputEnabled: options.liveInput,
       showToast: (message: string) => {
         seen.toasts.push(message)
@@ -278,6 +279,28 @@ describe('an audio interruption while recording', () => {
     expect(seen.toasts).toEqual([
       'Voice dictation stopped because the microphone was interrupted. Try again.'
     ])
+  })
+})
+
+describe('leaving the session while recording', () => {
+  it('stops and inserts what was said instead of leaving, and lets the next leave go', async () => {
+    const rpc = createFakeRpcClient()
+    const mounted = await startRecording(rpc, { liveInput: false })
+    const held: boolean[] = []
+    act(() => {
+      held.push(mounted.current().dictationLeaveHold.hold())
+    })
+    // Back is released while transcribing, so a swipe can leave too.
+    expect(mounted.current().dictationLeaveHold.holdsLeave).toBe(false)
+    act(() => {
+      held.push(mounted.current().dictationLeaveHold.hold())
+    })
+    expect(held).toEqual([true, false])
+    const methods = await settle(rpc, 'one more thing')
+    expect(methods.filter((method) => method === 'speech.dictation.finish')).toHaveLength(1)
+    expect(methods).not.toContain('speech.dictation.cancel')
+    expect(seen.inputs).toEqual(['one more thing'])
+    expect(seen.toasts).toEqual(['Dictation inserted'])
   })
 })
 
