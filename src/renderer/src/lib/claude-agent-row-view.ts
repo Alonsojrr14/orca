@@ -9,6 +9,16 @@ import { findActiveRuntimeTerminal } from './active-agent-note-target'
 import { parsePaneKey } from '../../../shared/stable-pane-id'
 import type { ClaudeAgentViewResult } from '../../../shared/claude-agent-view'
 
+export function canViewClaudeAgentRow(
+  agent: Pick<DashboardAgentRow, 'rowSource' | 'childRow'>
+): boolean {
+  // Claude's view API resolves local agents and teammates, not the workflow runner's agents.
+  return (
+    agent.rowSource !== 'subagent' ||
+    (agent.childRow?.kind === 'agent' && agent.childRow.agentType !== 'workflow-subagent')
+  )
+}
+
 export async function viewClaudeAgentFromRow(agent: DashboardAgentRow): Promise<void> {
   const state = useAppStore.getState()
   const paneKey = agent.activationPaneKey ?? agent.paneKey
@@ -23,7 +33,7 @@ export async function viewClaudeAgentFromRow(agent: DashboardAgentRow): Promise<
   }
   const child = agent.rowSource === 'subagent'
   const agentId = child ? (agent.childRow?.providerId ?? agent.childRow?.id) : undefined
-  if (child && !agentId) {
+  if (child && (!agentId || !canViewClaudeAgentRow(agent))) {
     return
   }
   try {
@@ -72,11 +82,10 @@ export async function viewClaudeAgentFromRow(agent: DashboardAgentRow): Promise<
       )
     } else if (view.status === 'denied') {
       toast.info(
-        view.reason ??
-          translate(
-            'auto.lib.claudeAgentRowView.agentUnavailable',
-            'Claude cannot open this agent. It may no longer be available.'
-          )
+        translate(
+          'auto.lib.claudeAgentRowView.agentViewDenied',
+          'Claude could not open this agent. Open the parent conversation to follow its progress.'
+        )
       )
     } else {
       toast.info(

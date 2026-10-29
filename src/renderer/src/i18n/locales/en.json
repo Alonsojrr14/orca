@@ -1695,6 +1695,7 @@
         "subagentNavigationSetup": "Enable Claude subagent navigation in Settings → Agents, then launch Claude 2.1.300+ in Orca. Check that keybindings.json still binds Ctrl+Alt+G, H, or V to command:orca-agent-view.",
         "permissionPrompt": "Answer Claude’s permission prompt before switching agents.",
         "agentUnavailable": "Claude cannot open this agent. It may no longer be available.",
+        "agentViewDenied": "Claude could not open this agent. Open the parent conversation to follow its progress.",
         "closeDialog": "Claude did not switch views. Close any open dialog and try again.",
         "hostUnavailable": "Subagent navigation is unavailable on this host. Update Orca and restart Claude in this pane."
       },
