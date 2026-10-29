@@ -36,10 +36,11 @@ function producerFixture(agentType: 'codex' | 'pi' = 'codex') {
     receivedAt: Date.now(),
     stateStartedAt: Date.now()
   }
-  const { runtime, write } = createRuntime(db, {
+  const { runtime } = createRuntime(db, {
     launchAgent: agentType,
     getAgentStatusSnapshot: () => [hook]
   })
+  const write = vi.fn((_ptyId: string, _data: string) => true)
   runtime.setPtyController({
     write,
     writeWithSettlement: settledWriteStub(write),
