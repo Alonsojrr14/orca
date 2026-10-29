@@ -52,7 +52,9 @@ export async function viewClaudeAgentFromRow(agent: DashboardAgentRow): Promise<
     const owner = resolveOwnerOrLocal(state, { workspaceId: agent.tab.worktreeId })
     const agentId = child ? (agent.childRow?.providerId ?? agent.childRow?.id) : undefined
     if (!parsed || !sessionId || owner.kind !== 'resolved' || (!parentDestination && !agentId)) {
-      if (child) toast.info(viewFailure(parentDestination))
+      if (child) {
+        toast.info(viewFailure(parentDestination))
+      }
       return
     }
     const { target } = hostRouteForAuthority(owner.owner)
@@ -84,11 +86,15 @@ export async function viewClaudeAgentFromRow(agent: DashboardAgentRow): Promise<
       signal: intent.signal,
       expectedEnvironmentPairingRevision: revision,
       beforeSend: () => {
-        if (!current()) throw new Error('Claude view action superseded')
+        if (!current()) {
+          throw new Error('Claude view action superseded')
+        }
       }
     }
     if (!current()) {
-      if (child) toast.info(viewFailure(parentDestination))
+      if (child) {
+        toast.info(viewFailure(parentDestination))
+      }
       return
     }
     const terminal = await findActiveRuntimeTerminal(
@@ -98,9 +104,13 @@ export async function viewClaudeAgentFromRow(agent: DashboardAgentRow): Promise<
       3000,
       options
     )
-    if (!current()) return
+    if (!current()) {
+      return
+    }
     if (!terminal) {
-      if (child) toast.info(viewFailure(parentDestination))
+      if (child) {
+        toast.info(viewFailure(parentDestination))
+      }
       return
     }
     const view = () =>
@@ -116,13 +126,19 @@ export async function viewClaudeAgentFromRow(agent: DashboardAgentRow): Promise<
         { timeoutMs: 8000, ...options }
       )
     let result = (await view()).view
-    if (!current()) return
+    if (!current()) {
+      return
+    }
     if (!parentDestination && result.status === 'denied') {
       parentDestination = true
       result = (await view()).view
-      if (!current()) return
+      if (!current()) {
+        return
+      }
     }
-    if (!child || result.status === 'viewed' || result.status === 'busy') return
+    if (!child || result.status === 'viewed' || result.status === 'busy') {
+      return
+    }
     if (result.status === 'permission') {
       toast.info(
         translate(
@@ -146,9 +162,13 @@ export async function viewClaudeAgentFromRow(agent: DashboardAgentRow): Promise<
       toast.info(viewFailure(parentDestination))
     }
   } catch {
-    if (child && current()) toast.info(viewFailure(parentDestination))
+    if (child && current()) {
+      toast.info(viewFailure(parentDestination))
+    }
   } finally {
-    if (latest()) pendingViews.delete(paneKey)
+    if (latest()) {
+      pendingViews.delete(paneKey)
+    }
     intent.abort()
   }
 }

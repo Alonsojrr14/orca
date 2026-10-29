@@ -21,6 +21,8 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { CompactAgentRow } from '@/components/sidebar/worktree-card-compact-agent-row'
 import FullAgentRow from '@/components/dashboard/DashboardAgentRow'
 import { viewClaudeAgentFromRow } from './claude-agent-row-view'
+import type * as WorktreeRuntimeOwner from './worktree-runtime-owner'
+import { makeWorktree, TEST_REPO } from '@/store/slices/worktrees-slice-test-fixtures'
 
 const mocks = vi.hoisted(() => ({ info: vi.fn(), transport: vi.fn(), owner: vi.fn() }))
 vi.mock('sonner', () => ({ toast: { info: mocks.info } }))
@@ -34,7 +36,7 @@ vi.mock('@/store', async () => {
   return { useAppStore: create(() => ({})) }
 })
 vi.mock('@/lib/worktree-runtime-owner', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('./worktree-runtime-owner')>()),
+  ...(await importOriginal<typeof WorktreeRuntimeOwner>()),
   resolveOwnerOrLocal: mocks.owner
 }))
 vi.mock('@/runtime/runtime-rpc-environment-call', () => ({
@@ -138,7 +140,7 @@ function child(shape: 'modern' | 'legacy' | 'restored', agentType?: string, id =
   if (shape === 'modern') {
     entry.children = [
       {
-        id: 'host-' + id,
+        id: `host-${id}`,
         providerId: id,
         kind: 'agent',
         agentType,
@@ -156,7 +158,9 @@ function child(shape: 'modern' | 'legacy' | 'restored', agentType?: string, id =
     tab: parent.tab,
     parentIsFresh: true
   })[0]
-  if (!row) throw new Error('Expected production child projection')
+  if (!row) {
+    throw new Error('Expected production child projection')
+  }
   return row
 }
 function rows(layout: 'compact' | 'full', workflow: DashboardAgentRow) {
@@ -195,7 +199,9 @@ function rows(layout: 'compact' | 'full', workflow: DashboardAgentRow) {
 }
 function element(index: number) {
   const row = host.querySelector(`[data-test-row="${index}"] > div`)
-  if (!row) throw new Error('Missing source row')
+  if (!row) {
+    throw new Error('Missing source row')
+  }
   return row
 }
 async function click(index: number) {
@@ -204,7 +210,11 @@ async function click(index: number) {
   })
 }
 
-beforeEach(async () => {
+const actualOwner = await vi.importActual<typeof WorktreeRuntimeOwner>(
+  '@/lib/worktree-runtime-owner'
+)
+
+beforeEach(() => {
   vi.clearAllMocks()
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   forced = undefined
@@ -213,9 +223,6 @@ beforeEach(async () => {
   delayStatus = undefined
   delayedResponse = undefined
   owner = { endpoint: { kind: 'self' }, at: 'local' }
-  const actualOwner = await vi.importActual<typeof import('./worktree-runtime-owner')>(
-    '@/lib/worktree-runtime-owner'
-  )
   mocks.owner.mockImplementation(actualOwner.resolveOwnerOrLocal)
   replaceRuntimeEnvironmentRevisions([{ id: 'remote', createdAt: 1, pairingRevision: 1 }])
   bridge = new ClaudeAgentViewBridge()
@@ -232,6 +239,10 @@ beforeEach(async () => {
     agentStatusByPaneKey: { [paneKey]: parent.entry },
     terminalLayoutsByTabId: {},
     activeWorktreeId: parent.tab.worktreeId,
+    activeWorkspaceExecutionHostId: null,
+    worktreesByRepo: {},
+    detectedWorktreesByRepo: {},
+    repos: [],
     activeTabType: 'terminal',
     activeTabId: parent.tab.id,
     tabsByWorktree: { [parent.tab.worktreeId]: [parent.tab] },
@@ -241,7 +252,9 @@ beforeEach(async () => {
   })
   mocks.transport.mockImplementation(
     async (method: string, params: unknown, signal?: AbortSignal) => {
-      if (signal) signals.push(signal)
+      if (signal) {
+        signals.push(signal)
+      }
       if (method === 'status.get') {
         await delayStatus?.promise
         return {
@@ -269,17 +282,21 @@ beforeEach(async () => {
       expect(method).toBe('terminal.viewClaudeAgent')
       const request = TerminalViewClaudeAgent.parse(params)
       requests.push(request)
-      if (forced instanceof Error) throw forced
+      if (forced instanceof Error) {
+        throw forced
+      }
       let view = forced
-      if (!view)
+      if (!view) {
         view = await bridge.view({
           paneKey: request.terminal === 'T' ? paneKey : makePaneKey('second-tab', leafId),
           sessionId: request.sessionId,
           agentId: request.agentId,
           trigger: async () => true
         })
-      if (delayedResponse && delayedResponse.agentId === request.agentId)
+      }
+      if (delayedResponse && delayedResponse.agentId === request.agentId) {
         await delayedResponse.gate.promise
+      }
       return { ok: true, result: { view } }
     }
   )
@@ -314,6 +331,95 @@ afterEach(async () => {
   host.remove()
   expect(listeners).toBe(0)
 })
+
+it('settles real child and parent refusals once while observed A remains current', async () => {
+  const workflow = child('restored')
+  rows('compact', workflow)
+  expect(element(1).getAttribute('aria-current')).toBe('true')
+  const action = viewClaudeAgentFromRow(workflow)
+  await act(async () => {})
+  expect(requests.map((request) => request.agentId)).toEqual(['W'])
+  let childRequestId: string | undefined
+  await act(async () => {
+    childRequestId = takeAndSettle('no agent under that id').requestId
+  })
+  expect(requests.map((request) => request.agentId)).toEqual(['W', undefined])
+  expect(requests[1]).toEqual({ ...requests[0], agentId: undefined })
+  expect(requests[1]).not.toHaveProperty('agentId')
+  expect(mocks.info).not.toHaveBeenCalled()
+  await act(async () => {
+    const refusedParent = takeAndSettle('raw parent refusal')
+    expect(refusedParent.requestId).not.toBe(childRequestId)
+    expect(refusedParent.agentId).toBeUndefined()
+    await action
+  })
+  expect(requests).toHaveLength(2)
+  expect(mocks.info).toHaveBeenCalledExactlyOnceWith(
+    'Claude could not open the parent conversation. Try again in the Claude pane.'
+  )
+  expect(element(1).getAttribute('aria-current')).toBe('true')
+  expect(element(0).hasAttribute('aria-current')).toBe(false)
+  expect(element(2).hasAttribute('aria-current')).toBe(false)
+  expect(bridge.receive({ ...identity(), action: 'take' })).toEqual({})
+})
+
+it.each(
+  [100, 1000].flatMap((population) => [false, true].map((fallback) => ({ population, fallback })))
+)(
+  'bounds upstream active-SSH visits for $population records, fallback=$fallback',
+  async ({ population, fallback }) => {
+    const visits = { worktrees: 0, repos: 0 }
+    const worktrees = Array.from({ length: population }, (_, index) => {
+      const id = index === 0 ? parent.tab.worktreeId : `repo::/unrelated-${index}`
+      return {
+        ...makeWorktree({ id, repoId: 'repo', hostId: 'ssh:test' }),
+        get id() {
+          visits.worktrees++
+          return id
+        }
+      }
+    })
+    useAppStore.setState({
+      activeWorkspaceExecutionHostId: 'ssh:test',
+      worktreesByRepo: { repo: worktrees },
+      repos: [
+        {
+          ...TEST_REPO,
+          get id() {
+            visits.repos++
+            return 'repo'
+          },
+          connectionId: 'test'
+        }
+      ]
+    })
+    rows('compact', child('restored'))
+    await act(async () => {})
+    visits.worktrees = 0
+    visits.repos = 0
+    await click(2)
+    expect(requests.map((request) => request.agentId)).toEqual(['W'])
+    await act(async () => {
+      takeAndSettle(fallback ? 'no agent under that id' : undefined)
+    })
+    if (fallback) {
+      expect(requests.map((request) => request.agentId)).toEqual(['W', undefined])
+      expect(mocks.info).not.toHaveBeenCalled()
+      await act(async () => {
+        takeAndSettle()
+      })
+    }
+    // Count real catalog reads before observation-driven renders; R stays fixed at one.
+    const passBound = fallback ? 8 : 6
+    expect(visits.worktrees).toBeGreaterThanOrEqual(population)
+    expect(visits.worktrees).toBeLessThanOrEqual(passBound * population)
+    expect(visits.repos).toBeGreaterThan(0)
+    expect(visits.repos).toBeLessThanOrEqual(passBound)
+    expect(requests).toHaveLength(fallback ? 2 : 1)
+    expect(bridge.receive({ ...identity(), action: 'take' })).toEqual({})
+    expect(mocks.info).not.toHaveBeenCalled()
+  }
+)
 
 it.each(['compact', 'full'] as const)(
   'runs real %s clicks through child deny, parent take/ACK and observed selection',
@@ -414,8 +520,9 @@ it.each(
 )(
   'terminates a $path parent $status with no third request or intermediate toast',
   async ({ status, path }) => {
-    if (path === 'direct')
+    if (path === 'direct') {
       forced = status === 'throw' ? new Error('raw provider failure') : { status }
+    }
     const action = viewClaudeAgentFromRow(
       child('restored', path === 'direct' ? 'workflow-subagent' : undefined)
     )
@@ -431,11 +538,11 @@ it.each(
       path === 'direct' ? [undefined] : ['W', undefined]
     )
     expect(mocks.info).toHaveBeenCalledTimes(status === 'viewed' || status === 'busy' ? 0 : 1)
-    if (status === 'permission')
+    if (status === 'permission') {
       expect(mocks.info).toHaveBeenCalledWith(
         'Answer Claude’s permission prompt before switching agents.'
       )
-    else if (status !== 'viewed' && status !== 'busy') {
+    } else if (status !== 'viewed' && status !== 'busy') {
       expect(mocks.info.mock.calls[0][0]).toContain(
         'Claude could not open the parent conversation.'
       )
@@ -452,10 +559,11 @@ it.each(['permission', 'unsupported', 'unavailable', 'timeout', 'busy', 'throw']
     await viewClaudeAgentFromRow(child('legacy'))
     expect(requests.map((r) => r.agentId)).toEqual(['W'])
     expect(mocks.info).toHaveBeenCalledTimes(status === 'busy' ? 0 : 1)
-    if (status === 'timeout' || status === 'unavailable' || status === 'throw')
+    if (status === 'timeout' || status === 'unavailable' || status === 'throw') {
       expect(mocks.info).toHaveBeenCalledWith(
         'Claude could not open this agent. Try again in the Claude pane.'
       )
+    }
   }
 )
 
@@ -463,17 +571,23 @@ it.each(['terminal', 'session', 'child-id', 'owner'] as const)(
   'reports missing %s without dispatching a wrong target',
   async (missing) => {
     let row = child('restored')
-    if (missing === 'terminal') missingTerminal = true
-    if (missing === 'session')
+    if (missing === 'terminal') {
+      missingTerminal = true
+    }
+    if (missing === 'session') {
       useAppStore.setState({
         agentStatusByPaneKey: { [paneKey]: { ...parent.entry, providerSession: undefined } }
       })
-    if (missing === 'child-id')
+    }
+    if (missing === 'child-id') {
       row = {
         ...row,
         childRow: row.childRow ? { ...row.childRow, providerId: undefined, id: '' } : undefined
       }
-    if (missing === 'owner') mocks.owner.mockReturnValue({ kind: 'ambiguous' })
+    }
+    if (missing === 'owner') {
+      mocks.owner.mockReturnValue({ kind: 'ambiguous' })
+    }
     await viewClaudeAgentFromRow(row)
     expect(requests).toHaveLength(0)
     expect(mocks.info).toHaveBeenCalledExactlyOnceWith(
@@ -511,15 +625,20 @@ it.each(['owner', 'session', 'pane', 'binding', 'revision'] as const)(
     mocks.owner.mockImplementation(() => ({ kind: 'resolved', owner }))
     const action = viewClaudeAgentFromRow(child('restored'))
     await act(async () => {})
-    if (replacement === 'owner') owner = { endpoint: { kind: 'self' }, at: 'ssh:replacement' }
-    if (replacement === 'session')
+    if (replacement === 'owner') {
+      owner = { endpoint: { kind: 'self' }, at: 'ssh:replacement' }
+    }
+    if (replacement === 'session') {
       useAppStore.setState({
         agentStatusByPaneKey: {
           [paneKey]: { ...parent.entry, providerSession: { key: 'session_id', id: 'replacement' } }
         }
       })
-    if (replacement === 'pane') useAppStore.setState({ agentStatusByPaneKey: {} })
-    if (replacement === 'binding')
+    }
+    if (replacement === 'pane') {
+      useAppStore.setState({ agentStatusByPaneKey: {} })
+    }
+    if (replacement === 'binding') {
       useAppStore.setState({
         terminalLayoutsByTabId: {
           [parent.tab.id]: {
@@ -530,8 +649,10 @@ it.each(['owner', 'session', 'pane', 'binding', 'revision'] as const)(
           }
         }
       })
-    if (replacement === 'revision')
+    }
+    if (replacement === 'revision') {
       replaceRuntimeEnvironmentRevisions([{ id: 'remote', createdAt: 1, pairingRevision: 2 }])
+    }
     takeAndSettle('no agent under that id')
     await action
     expect(requests.map((r) => r.agentId)).toEqual(['W'])
@@ -545,8 +666,9 @@ it.each(['list', 'compatibility'] as const)(
   'fences delayed first %s resolution before dispatch and releases its intent',
   async (phase) => {
     const gate = deferred()
-    if (phase === 'list') delayList = gate
-    else {
+    if (phase === 'list') {
+      delayList = gate
+    } else {
       owner = { endpoint: { kind: 'environment', environmentId: 'remote' }, at: 'local' }
       mocks.owner.mockImplementation(() => ({ kind: 'resolved', owner }))
       delayStatus = gate
