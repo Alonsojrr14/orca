@@ -17,6 +17,25 @@ export function serverHostHealth(host: MobileRelayHost): ExecutionHostHealth {
   return host.relay === 'update-needed' ? 'blocked' : host.health
 }
 
+// Why: a phone never starts or connects the desktop's own WSL host, so the badge says where to.
+export function serverHostHealthLabel(host: MobileRelayHost): string | undefined {
+  if (host.stoppedOnDesktop) {
+    return 'Start on computer'
+  }
+  return host.unavailableOnDesktop ? 'Open on computer' : undefined
+}
+
+export function serverHostHealthLabels(
+  hosts: readonly MobileRelayHost[]
+): ReadonlyMap<ExecutionHostId, string> {
+  return new Map(
+    hosts.flatMap((host) => {
+      const label = serverHostHealthLabel(host)
+      return label ? [[host.hostId, label] as const] : []
+    })
+  )
+}
+
 export function withServerHosts<Value>(
   desktop: ReadonlyMap<ExecutionHostId, Value>,
   hosts: readonly MobileRelayHost[],

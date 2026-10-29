@@ -8,6 +8,7 @@ import { writeTerminalLiveInputText } from './terminal-live-input-text-write'
 import { normalizeTerminalTextInput } from './terminal-text-input-normalization'
 import { useTerminalLivePendingInputFlush } from './use-terminal-live-pending-input-flush'
 import {
+  readLiveInputSelection,
   useTerminalLiveAccessoryInputCommit,
   type TerminalLiveAccessoryInputCommitResult
 } from './use-terminal-live-accessory-input-commit'
@@ -236,10 +237,15 @@ export function useTerminalLiveInputCommit<TTabType extends string>({
       if (pendingLiveInputHandleRef.current && !ownsPendingState) {
         clearPendingLiveInputCommit()
       }
+      const fieldText = liveInputTextRef.current
+      // Key events precede the caret move, so this is where the key starts from.
+      const selection = readLiveInputSelection(liveInputRef.current, fieldText)
       const decision = getTerminalLiveSpecialKeyDecision({
         key: event.nativeEvent.key,
         heldText: ownsPendingState ? heldLiveInputTextRef.current : '',
-        sentText: ownsPendingState ? sentLiveInputTextRef.current : ''
+        sentText: ownsPendingState ? sentLiveInputTextRef.current : '',
+        caretAtFieldEnd:
+          !selection || (selection.start === fieldText.length && selection.end === fieldText.length)
       })
       switch (decision.kind) {
         case 'ignore':
@@ -260,6 +266,7 @@ export function useTerminalLiveInputCommit<TTabType extends string>({
       advanceLiveInputInteractionGeneration,
       clearPendingLiveInputCommit,
       endFieldSessionThenSend,
+      liveInputRef,
       liveInputTerminalHandles,
       queueLiveInputControl
     ]
@@ -273,6 +280,7 @@ export function useTerminalLiveInputCommit<TTabType extends string>({
     heldLiveInputTextRef,
     liveInputComposingRef,
     liveInputRef,
+    liveInputTextRef,
     liveInputTerminalHandles,
     onInteraction: advanceLiveInputInteractionGeneration,
     pendingLiveInputHandleRef,

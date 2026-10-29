@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import type { AiVaultSession } from '../../../../shared/ai-vault-types'
 import type { AiVaultSearchHit } from '../../../../shared/ai-vault-search-types'
+import type { AgentDotState } from '@/components/AgentStateDot'
 import { useAppStore } from '@/store'
 import { createEditorStore } from '@/store/slices/editor-slice-test-harness'
 import { openAiVaultSessionLogInOrca } from './ai-vault-session-log-open'
@@ -46,7 +47,8 @@ function renderSession(
   blocked = false,
   searchHit?: AiVaultSearchHit,
   searchHitHostLabels?: ReadonlyMap<string, string>,
-  logDetails?: { onOpenLog: (session: AiVaultSession) => Promise<void> }
+  logDetails?: { onOpenLog: (session: AiVaultSession) => Promise<void> },
+  liveState: AgentDotState | null = null
 ) {
   if (logDetails) {
     Object.defineProperty(window, 'api', { configurable: true, value: { aiVault: {} } })
@@ -71,7 +73,7 @@ function renderSession(
         buildResumeStartup={buildResumeStartup}
         getOriginalPaneTarget={() => null}
         isStructuredSessionOpen={() => false}
-        getSessionLiveState={() => null}
+        getSessionLiveState={() => liveState}
         getWorktreeInfo={() => null}
         getSessionResumeState={() => ({
           blocked,
@@ -174,6 +176,11 @@ describe('AiVaultVirtualRow conversation logs', () => {
       expect(screen.queryByRole('menuitem', { name: 'Open Log' })).toBeNull()
     }
   )
+})
+
+it('passes semantic status through the virtual row to the real glyph', () => {
+  renderSession(cliSession, false, undefined, undefined, undefined, 'monitoring')
+  expect(screen.getByLabelText('Monitoring background tasks')).toBeTruthy()
 })
 
 describe('AiVaultVirtualRow search hit source host', () => {

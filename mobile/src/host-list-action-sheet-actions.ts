@@ -1,6 +1,7 @@
 import { Activity, Edit3, PowerOff, RefreshCw } from 'lucide-react-native'
 import type { ActionSheetAction } from './components/ActionSheetModal'
 import type { ConnectionState, HostProfile } from './transport/types'
+import { translate } from './i18n/mobile-i18n'
 
 // Defer navigation and new drawers until this native Modal unmounts; presenting into a live one freezes iOS (#8791).
 export function getHostListActionSheetActions(args: {
@@ -26,7 +27,10 @@ export function getHostListActionSheetActions(args: {
 
   return [
     {
-      label: args.hasEverConnected && isLive ? 'Reconnect' : 'Connect',
+      label:
+        args.hasEverConnected && isLive
+          ? translate('hostScreen.hostListActionSheetActions.reconnect', 'Reconnect')
+          : translate('hostScreen.hostListActionSheetActions.connect', 'Connect'),
       icon: RefreshCw,
       onPress: () => {
         args.onDismiss()
@@ -36,7 +40,7 @@ export function getHostListActionSheetActions(args: {
     ...(isLive
       ? [
           {
-            label: 'Disconnect',
+            label: translate('hostScreen.hostListActionSheetActions.disconnect', 'Disconnect'),
             icon: PowerOff,
             onPress: () => {
               args.onDismiss()
@@ -46,7 +50,10 @@ export function getHostListActionSheetActions(args: {
         ]
       : []),
     {
-      label: 'Network diagnostics',
+      label: translate(
+        'hostScreen.hostListActionSheetActions.networkDiagnostics',
+        'Network diagnostics'
+      ),
       icon: Activity,
       closeBeforePress: true,
       onPress: () => {
@@ -54,7 +61,7 @@ export function getHostListActionSheetActions(args: {
       }
     },
     {
-      label: 'Edit host',
+      label: translate('hostScreen.hostListActionSheetActions.editHost', 'Edit host'),
       icon: Edit3,
       closeBeforePress: true,
       onPress: () => {
@@ -63,7 +70,7 @@ export function getHostListActionSheetActions(args: {
       }
     },
     {
-      label: 'Remove',
+      label: translate('common.remove', 'Remove'),
       destructive: true,
       closeBeforePress: true,
       onPress: () => {

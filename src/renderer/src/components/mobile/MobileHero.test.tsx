@@ -6,7 +6,8 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('@/i18n/i18n', () => ({
+vi.mock(import('@/i18n/i18n'), async (importOriginal) => ({
+  ...(await importOriginal()),
   translate: (_key: string, fallback: string) => fallback
 }))
 
@@ -75,7 +76,6 @@ describe('HeroFlow height', () => {
         platform="ios"
         onPlatformChange={vi.fn()}
         installQrUrl={null}
-        installCopy={{ ctaLabel: 'Open TestFlight', url: 'https://example.com' }}
         iosChannel="preview"
         onIosChannelChange={vi.fn()}
         onOpenAndroidInstallGuide={vi.fn()}
@@ -123,7 +123,6 @@ describe('HeroFlow height', () => {
         platform="ios"
         onPlatformChange={vi.fn()}
         installQrUrl={null}
-        installCopy={{ ctaLabel: 'Open TestFlight', url: 'https://example.com' }}
         iosChannel="preview"
         onIosChannelChange={vi.fn()}
         onOpenAndroidInstallGuide={vi.fn()}
@@ -166,7 +165,6 @@ describe('HeroFlow height', () => {
     const onOpenAndroidInstallGuide = vi.fn()
     renderFlow(0, {
       platform: 'android',
-      installCopy: { ctaLabel: 'Download APK', url: 'https://example.com/app-release.apk' },
       onOpenAndroidInstallGuide
     })
 
