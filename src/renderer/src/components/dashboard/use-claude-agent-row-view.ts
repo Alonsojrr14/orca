@@ -1,6 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react'
 import type { DashboardAgentRow } from './useDashboardData'
-import { canViewClaudeAgentRow } from '@/lib/claude-agent-row-view'
 import { useFocusedAgentPaneKey } from '@/components/sidebar/focused-agent-row-highlight'
 import { useAppStore } from '@/store'
 import { runtimeEnvironmentIdOrLocalUnlessTwin } from '@/lib/worktree-runtime-owner'
@@ -25,10 +24,7 @@ export function useClaudeAgentRowView(agent: DashboardAgentRow) {
     return environment?.pairingRevision ?? environment?.createdAt
   })
   const enabled =
-    parent.agentType === 'claude' &&
-    !parent.structuredHostOwned &&
-    agent.rowSource !== 'retained' &&
-    canViewClaudeAgentRow(agent)
+    parent.agentType === 'claude' && !parent.structuredHostOwned && agent.rowSource !== 'retained'
   const key = `${environmentId ?? 'local'}:${revision ?? ''}`
   const subscribe = useCallback(
     (listener: () => void) =>

@@ -1298,9 +1298,7 @@
       },
       "claudeAgentRowView": {
         "subagentNavigationSetup": "설정 → 에이전트에서 Claude 하위 에이전트 탐색을 활성화한 다음 Orca에서 Claude 2.1.300+를 실행하세요. keybindings.json에서 Ctrl+Alt+G, H 또는 V가 여전히 command:orca-agent-view에 바인딩되어 있는지 확인하세요.",
-        "permissionPrompt": "에이전트를 전환하기 전에 Claude의 권한 요청에 응답하세요.",
-        "closeDialog": "Claude가 보기를 전환하지 않았습니다. 열려 있는 대화 상자를 닫고 다시 시도하세요.",
-        "hostUnavailable": "이 호스트에서는 하위 에이전트 탐색을 사용할 수 없습니다. Orca를 업데이트하고 이 창에서 Claude를 다시 시작하세요."
+        "permissionPrompt": "에이전트를 전환하기 전에 Claude의 권한 요청에 응답하세요."
       },
       "dropFailureReason": {
         "tooLarge": "이 호스트에 업로드하기에는 너무 큽니다.",

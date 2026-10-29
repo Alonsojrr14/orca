@@ -2353,9 +2353,7 @@
       },
       "claudeAgentRowView": {
         "subagentNavigationSetup": "Ative a navegação de subagentes do Claude em Configurações → Agentes e depois inicie o Claude 2.1.300+ no Orca. Verifique se o keybindings.json ainda associa Ctrl+Alt+G, H ou V a command:orca-agent-view.",
-        "permissionPrompt": "Responda à solicitação de permissão do Claude antes de trocar de agente.",
-        "closeDialog": "O Claude não trocou de visualização. Feche qualquer diálogo aberto e tente novamente.",
-        "hostUnavailable": "A navegação de subagentes não está disponível neste host. Atualize o Orca e reinicie o Claude neste painel."
+        "permissionPrompt": "Responda à solicitação de permissão do Claude antes de trocar de agente."
       },
       "dropFailureReason": {
         "tooLarge": "Grande demais para enviar a este host.",
