@@ -1,4 +1,4 @@
-import { vi } from 'vitest'
+import { vi, type Mock, type MockInstance } from 'vitest'
 import { AgentHookServer } from '../agent-hooks/server'
 import { agentHookRuntimeDeps } from '../agent-hooks/agent-hook-runtime-deps'
 import { AgentStatusObservedPaneIdentities } from './agent-status-observed-pane-identity'
@@ -7,6 +7,7 @@ import { hostTestState } from '../native-chat/agent-session-wire/structured-agen
 import { scaleStore } from './agent-session-scale.test-fixture'
 import { makeStructuredAgentStatusSubject } from '../../shared/agent-status-subject'
 import type { AgentSessionStatusSummary } from '../../shared/agent-session-wire'
+import type { AgentStatusStore } from '../../shared/agent-status-store'
 
 class CountedServer extends AgentHookServer {
   builds = 0
@@ -73,7 +74,18 @@ export async function savedRosterRig(n: number) {
   return { ...rig, ids, server, sink, host, live }
 }
 
-export function countRosterWork(server: CountedServer) {
+type RosterWork = {
+  counts: { parentVisits: number; enumerations: number }
+  revision: MockInstance<AgentStatusStore['getRevision']>
+  mutation: MockInstance<AgentStatusStore['applyMutation']>
+  snapshots: MockInstance<AgentStatusStore['getSnapshot']>
+  listing: MockInstance<ReturnType<CountedServer['listingForContract']>['set']>
+  subjects: MockInstance<ReturnType<CountedServer['subjectsForContract']>['set']>
+  rows: Mock<Parameters<AgentHookServer['subscribeStatusRowMutations']>[0]>
+  enriched: Mock<Parameters<AgentHookServer['subscribeEnrichedStatus']>[0]>
+}
+
+export function countRosterWork(server: CountedServer): RosterWork {
   const store = server.storeForContract()
   const counts = { parentVisits: 0, enumerations: 0 }
   const parents = store.getParents
@@ -90,7 +102,7 @@ export function countRosterWork(server: CountedServer) {
     snapshots: vi.spyOn(store, 'getSnapshot'),
     listing: vi.spyOn(server.listingForContract(), 'set'),
     subjects: vi.spyOn(server.subjectsForContract(), 'set'),
-    rows: vi.fn(),
-    enriched: vi.fn()
+    rows: vi.fn<Parameters<AgentHookServer['subscribeStatusRowMutations']>[0]>(),
+    enriched: vi.fn<Parameters<AgentHookServer['subscribeEnrichedStatus']>[0]>()
   }
 }
