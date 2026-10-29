@@ -150,7 +150,7 @@ export async function prepareDirectWorkItemAgentLaunch(args: {
   const plan =
     effectiveAgent === null
       ? null
-      : args.preflightPlan
+      : args.preflightPlan?.agent === effectiveAgent
         ? adoptAgentSessionLaunchVerdict({ ...args.preflightPlan, worktreeId: args.worktreeId })
         : args.planLaunch(args.latestStore, {
             requestId: args.requestId,

@@ -14,7 +14,8 @@ import { useAppStore } from '@/store'
 import type { TuiAgent } from '../../../shared/tui-agent'
 import type { AppState } from '@/store/types'
 import { isTuiAgent } from '../../../shared/tui-agent-config'
-import { isTuiAgentEnabled, pickTuiAgent } from '../../../shared/tui-agent-selection'
+import { isTuiAgentEnabled } from '../../../shared/tui-agent-selection'
+import { resolveDefaultAgentForWorkspace } from './agent-tab-shortcuts'
 import { worktreeLaunchWorkspace } from '@/lib/agent-launch-route-input'
 import { agentChoiceMayOpenAsChat } from '@/lib/host-chat-program'
 import type { AgentSessionLaunchPlan } from '@/lib/agent-session-launch-plan'
@@ -103,12 +104,12 @@ export async function resolveDirectWorkItemAgent(args: {
     }
   }
   return {
-    agent: pickTuiAgent(
-      preferences?.defaultTuiAgent,
-      detected,
-      preferences?.disabledTuiAgents,
-      (chosen) => agentChoiceMayOpenAsChat(store, chosen, workspace, detected)
-    ),
+    agent: resolveDefaultAgentForWorkspace({
+      defaultTuiAgent: preferences?.defaultTuiAgent,
+      detectedAgentIds: detected,
+      disabledTuiAgents: preferences?.disabledTuiAgents,
+      chatIn: { store, workspace }
+    }),
     unavailable: false
   }
 }

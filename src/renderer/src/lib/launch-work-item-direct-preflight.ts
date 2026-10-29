@@ -1,6 +1,7 @@
 import { useAppStore, type AppState } from '@/store'
 import { ensureDetectedAgentsForRepo } from './agent-detection-target-inventory'
-import { isTuiAgentEnabled, pickTuiAgent } from '../../../shared/tui-agent-selection'
+import { isTuiAgentEnabled } from '../../../shared/tui-agent-selection'
+import { resolveDefaultAgentForWorkspace } from './agent-tab-shortcuts'
 import { isTuiAgent } from '../../../shared/tui-agent-config'
 import type { TuiAgent } from '../../../shared/tui-agent'
 import type { ProjectLaunchContext } from '../../../shared/rpc-contract/preflight-params'
@@ -151,11 +152,20 @@ export async function resolveDirectProspectiveAgent(
   const preferences = agentLaunchPreferences ?? store.settings
   const prospectiveAgent =
     agentOverride ??
-    pickTuiAgent(
-      preferences?.defaultTuiAgent,
-      new Set(((await detectedAgentsPromise) ?? []).filter(isTuiAgent)),
-      preferences?.disabledTuiAgents
-    )
+    resolveDefaultAgentForWorkspace({
+      defaultTuiAgent: preferences?.defaultTuiAgent,
+      detectedAgentIds: ((await detectedAgentsPromise) ?? []).filter(isTuiAgent),
+      disabledTuiAgents: preferences?.disabledTuiAgents,
+      chatIn: {
+        store,
+        workspace: {
+          kind: projectContext?.workspaceKind ?? 'git-worktree',
+          repoId: repo.id,
+          executionHostId: getRepoExecutionHostId(repo),
+          ...(projectContext ? { executionContext: projectContext.executionContext } : {})
+        }
+      }
+    })
   const unavailable = Boolean(
     agentLaunchPreferences &&
     agentOverride &&

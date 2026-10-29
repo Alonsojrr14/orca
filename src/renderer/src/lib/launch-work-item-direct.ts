@@ -216,7 +216,7 @@ export async function launchWorkItemDirect(args: LaunchWorkItemDirectArgs): Prom
       worktreeId,
       worktreePath,
       repoId,
-      agentOverride: preflightPlan?.agent ?? agentOverride,
+      agentOverride,
       agentLaunchPreferences: args.agentLaunchPreferences,
       agentArgs: args.agentArgs,
       ...(args.sessionOptions ? { sessionOptions: args.sessionOptions } : {}),

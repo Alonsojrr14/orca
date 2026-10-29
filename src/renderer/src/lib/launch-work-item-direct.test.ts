@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { resolveProjectExecutionRuntime } from '../../../shared/project-execution-runtime'
 import * as inventory from './agent-detection-target-inventory'
 import * as localCapabilities from '@/runtime/local-runtime-capabilities'
+import * as availability from '@/runtime/host-structured-agent-availability'
 import { RUNTIME_CAPABILITIES } from '../../../shared/protocol-version'
 import type { AppState } from '@/store'
 import type * as TuiAgentSelectionModule from '../../../shared/tui-agent-selection'
@@ -819,6 +820,66 @@ describe('launchWorkItemDirect', () => {
       `command test -n "$fish_pid" && set --erase -g ORCA_PI_PREFILL; command test -z "$fish_pid" && unset ORCA_PI_PREFILL; true`
     )
   })
+  it.each(['codex', 'claude'] as const)(
+    'keeps a usable preferred Codex chat over detected Claude, then honors the current default (%s)',
+    async (currentDefault) => {
+      vi.spyOn(inventory, 'loadProjectLaunchContext').mockResolvedValue({
+        agents: ['claude'],
+        workspaceKind: 'git-worktree',
+        executionContext: {
+          kind: 'host',
+          projectRuntime: resolveProjectExecutionRuntime({ appPlatform: 'darwin', projectId: 'p1' })
+        }
+      })
+      vi.spyOn(localCapabilities, 'readLocalRuntimeCapabilitiesOrUnknown').mockReturnValue(
+        RUNTIME_CAPABILITIES
+      )
+      vi.spyOn(availability, 'readHostStructuredAgentAvailability').mockReturnValue({
+        state: 'received',
+        byAgent: new Map([
+          ['codex', { agent: 'codex', state: 'available', chatProgram: 'available' }]
+        ])
+      })
+      mocks.store.settings = { defaultTuiAgent: 'codex', experimentalNativeChat: true }
+      mocks.createWorktree.mockImplementationOnce(async () => {
+        mocks.store.settings = { defaultTuiAgent: currentDefault, experimentalNativeChat: true }
+        return { worktree: { id: 'repo-1::/repo/worktree', path: '/repo/worktree' } }
+      })
+      vi.mocked(beginDirectWorkItemStructuredLaunch).mockReturnValueOnce({
+        completed: true,
+        structuredLaunch: true,
+        primaryTabId: null
+      })
+
+      const plannedAgents: string[] = []
+      await expect(
+        launchWorkItemDirect({
+          repoId: 'repo-1',
+          launchSource: 'task_page',
+          openModalFallback: vi.fn(),
+          resolveSessionOptions: (agent) => {
+            plannedAgents.push(agent)
+            return undefined
+          },
+          item: {
+            type: 'issue',
+            number: 42,
+            title: 'Use the preferred chat',
+            url: 'https://github.com/acme/repo/issues/42'
+          }
+        })
+      ).resolves.toBe(true)
+
+      expect(plannedAgents).toEqual(['codex', currentDefault])
+      expect(mocks.updateWorktreeMeta).toHaveBeenCalledWith('repo-1::/repo/worktree', {
+        createdWithAgent: currentDefault
+      })
+      expect(beginDirectWorkItemStructuredLaunch).toHaveBeenCalledWith(
+        expect.objectContaining({ plan: expect.objectContaining({ agent: currentDefault }) })
+      )
+    }
+  )
+
   it('uses prospective native facts to ignore hidden args before create', async () => {
     vi.spyOn(inventory, 'loadProjectLaunchContext').mockResolvedValue({
       agents: ['codex'],
