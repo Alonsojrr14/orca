@@ -18,6 +18,7 @@ import {
 import type { AcceptedInputOptions } from './pty-preconnect-input-buffer'
 import type { TerminalInputKind } from '../../../../shared/terminal-input-kind'
 import { isSshSignInPendingTerminalError } from './terminal-ssh-sign-in-error'
+import { terminalCreateThemeParams } from './terminal-view-attributes-publisher'
 /* eslint-disable max-lines -- Why: remote PTY transport keeps lifecycle, JSON fallback, and binary stream wiring together so reconnect/destroy ordering stays testable as one behavior surface. */
 import type { RuntimeRpcResponse } from '../../../../shared/runtime-rpc-envelope'
 import {
@@ -64,7 +65,7 @@ import {
   getRemoteRuntimeTerminalHandle,
   runtimeTerminalErrorMessage
 } from '../../runtime/runtime-terminal-stream'
-import { toRemoteRuntimePtyId } from '../../../../shared/remote-runtime-pty-id'
+import { toRemoteRuntimePtyId } from '../../../../shared/remote-runtime/remote-runtime-pty-id'
 import { getRemoteRuntimeTerminalMultiplexer } from '../../runtime/remote-runtime-terminal-multiplexer'
 import { REMOTE_TERMINAL_SNAPSHOT_TOO_LARGE } from '../../runtime/remote-runtime-terminal-snapshot-state'
 import { restoredSnapshotPaintsPrintableContent } from './restored-snapshot-coverage'
@@ -334,7 +335,15 @@ export function createRemoteRuntimePtyTransport(
     })
   }
 
-  const recoveryInputHold = createRemoteRuntimeRecoveryInputHold({ holdBeforeFirstConnect: true })
+  const recoveryInputHold = createRemoteRuntimeRecoveryInputHold({
+    holdBeforeFirstConnect: true,
+    // A closed pane has nobody left to tell.
+    onTypingDiscardedBeforeBind: () => {
+      if (!destroyed) {
+        opts.onTypingDiscardedBeforeBind?.()
+      }
+    }
+  })
   let isFirstConnect = true
   let heldInputRelease: {
     stream: RemoteRuntimeMultiplexedTerminal
@@ -3509,7 +3518,7 @@ export function createRemoteRuntimePtyTransport(
         ...(launchTokenToSend !== undefined ? { launchToken: launchTokenToSend } : {}),
         ...(launchAgentToSend !== undefined ? { launchAgent: launchAgentToSend } : {}),
         ...spawnIntentParams,
-        ...(terminalColorQueryReplies ? { terminalColorQueryReplies } : {}),
+        ...terminalCreateThemeParams(terminalColorQueryReplies),
         ...(terminalKittyKeyboardProtocol === true ? { terminalKittyKeyboardProtocol: true } : {}),
         tabId,
         leafId,
@@ -3733,7 +3742,12 @@ export function createRemoteRuntimePtyTransport(
 
     attach(options) {
       settleSignInConnectWait()
-      recoveryInputHold.expect(null)
+      // Why: like the local attach, keys typed before it reach the terminal this pane names, never another.
+      recoveryInputHold.expect(
+        opts.bufferInputUntilConnect && opts.releasePreconnectInput?.() !== false
+          ? restoredInputEndpoint(options.existingPtyId)
+          : null
+      )
       attachPane(options, false)
     },
 

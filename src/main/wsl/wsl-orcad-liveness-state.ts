@@ -15,8 +15,18 @@ export const WSL_ORCAD_HEARTBEAT_MS = 120_000
 export type WslOrcadTimer = { cancel(): void }
 
 export type WslOrcadLivenessDependencies = {
-  manager: Pick<WslOrcadConnectionManager, 'ensure' | 'get' | 'publish' | 'close'>
-  readRunning: () => Promise<WslRunningDistrosRead>
+  manager: Pick<
+    WslOrcadConnectionManager,
+    'ensure' | 'get' | 'publish' | 'close' | 'retireListener'
+  >
+  /**
+   * A settled read for `distro`: never a list probed while it may still be stopping (E9). With
+   * `exitedAt`, also only a probe started once that exit's settle window has passed.
+   */
+  readRunning: (target: {
+    distro: string
+    exitedAt?: number | null
+  }) => Promise<WslRunningDistrosRead>
   readIdentity: (distro: string, orcadPid: number | null) => Promise<WslGuestIdentity | null>
   openWatch: (connection: WslOrcadConnection) => Promise<WslOrcadWatch>
   collectCensus: (connection: WslOrcadConnection) => Promise<OrcadTerminalCensus>

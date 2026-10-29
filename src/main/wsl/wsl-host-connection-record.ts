@@ -25,6 +25,18 @@ export function persistWslHostConnection(
   }
 }
 
+/** Saves the host's live connection's pairing and ports; transports on a changed pairing retire. */
+export function saveWslHostConnection(
+  deps: { userDataPath: () => string; pairingChanged: (environmentId: string) => void },
+  record: WslHostDeploymentRecord | null,
+  connections: { get(distro: string): WslOrcadConnection | null } | null
+): void {
+  const connection = record ? connections?.get(record.distro) : null
+  if (record && connection && persistWslHostConnection(deps.userDataPath(), record, connection)) {
+    deps.pairingChanged(record.environmentId)
+  }
+}
+
 export function toWslHostStatus(
   record: WslHostDeploymentRecord,
   status: WslOrcadConnectionStatus,
@@ -34,14 +46,18 @@ export function toWslHostStatus(
     environmentId: record.environmentId,
     distro: record.distro,
     state: status.state,
-    detail: status.state === 'failed' || status.state === 'unverifiable' ? status.reason : null,
+    detail:
+      status.state === 'failed' || status.state === 'unverifiable'
+        ? status.reason
+        : (record.pendingStop?.reason ?? null),
     // Ready serves the incumbent; deferred serves nothing, so retain its Update/Force explanation.
     deferredUpdate:
       status.state === 'ready'
         ? (connection?.deferredUpdate ?? null)
         : status.state === 'failed'
           ? (status.deferredUpdate ?? null)
-          : null
+          : null,
+    ...(record.pendingStop ? { removalPending: true } : {})
   }
 }
 

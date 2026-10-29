@@ -29,7 +29,10 @@ import { translate } from '@/i18n/i18n'
 
 export function CopyButton({
   text,
-  title = 'Copy comment'
+  title = translate(
+    'auto.components.right.sidebar.checks.panel.content.copyComment',
+    'Copy comment'
+  )
 }: {
   text: string
   title?: string
@@ -193,16 +196,6 @@ export function CommentLocationLabel({
       {label}
     </button>
   )
-}
-
-export function isMutablePRConversationComment(comment: PRComment): boolean {
-  if (comment.threadId || comment.path) {
-    return false
-  }
-  if (comment.url && comment.url.includes('pullrequestreview')) {
-    return false
-  }
-  return Number.isSafeInteger(comment.id) && comment.id > 0
 }
 
 export function CommentMoreMenu({

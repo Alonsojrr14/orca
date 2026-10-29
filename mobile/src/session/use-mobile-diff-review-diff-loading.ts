@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { ConnectionState } from '../transport/types'
 import type { RpcClient } from '../transport/rpc-client'
 import { loadMobileDiffReviewDiff } from './mobile-diff-review-loaders'
+import { shouldIgnoreTrimWhitespace } from '../../../src/shared/diff-whitespace'
+import { useMobileSourceControlSettings } from '../source-control/mobile-source-control-settings'
 import type { MobileDiffReviewQueueItem } from './mobile-diff-review-queue'
 import type { ReviewDiffState, ReviewScreenState } from './mobile-diff-review-screen-model'
 
@@ -18,6 +20,7 @@ type DiffLoadingInput = {
 export function useMobileDiffReviewDiffLoading(input: DiffLoadingInput): ReviewDiffState {
   const { client, connState, worktreeId, currentItem, screenState, setActiveHunkIndex } = input
   const [diffState, setDiffState] = useState<ReviewDiffState>({ kind: 'idle' })
+  const { diffShowWhitespace } = useMobileSourceControlSettings(client, connState).settings
   const hunkResetKeyRef = useRef<string | null>(null)
   // Depend on fields read, not screen-state identity, to avoid duplicate diff requests.
   const screenReady = screenState.kind === 'ready'
@@ -41,21 +44,23 @@ export function useMobileDiffReviewDiffLoading(input: DiffLoadingInput): ReviewD
       setDiffState(keepLoadedDiff({ kind: 'error', itemKey, message: 'Waiting for desktop...' }))
       return
     }
-    let stale = false
+    const controller = new AbortController()
     setDiffState(keepLoadedDiff({ kind: 'loading', itemKey }))
     void loadMobileDiffReviewDiff({
       client,
       worktreeId,
       item: currentItem,
-      branchCompare
+      branchCompare,
+      signal: controller.signal,
+      ignoreTrimWhitespace: shouldIgnoreTrimWhitespace(diffShowWhitespace)
     })
       .then((nextState) => {
-        if (!stale) {
+        if (!controller.signal.aborted) {
           setDiffState(nextState)
         }
       })
       .catch((err: unknown) => {
-        if (!stale) {
+        if (!controller.signal.aborted) {
           // Failed reconnect reads must not erase loaded diff content.
           setDiffState(
             keepLoadedDiff({
@@ -67,9 +72,18 @@ export function useMobileDiffReviewDiffLoading(input: DiffLoadingInput): ReviewD
         }
       })
     return () => {
-      stale = true
+      controller.abort()
     }
-  }, [client, connState, currentItem, screenReady, branchCompare, setActiveHunkIndex, worktreeId])
+  }, [
+    client,
+    connState,
+    currentItem,
+    screenReady,
+    branchCompare,
+    diffShowWhitespace,
+    setActiveHunkIndex,
+    worktreeId
+  ])
 
   return diffState
 }

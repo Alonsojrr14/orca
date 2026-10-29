@@ -7,42 +7,73 @@ import i18next, {
 import { initReactI18next } from 'react-i18next'
 
 import enRuntimeRequired from './en-runtime-required.json'
+import deCatalogUrl from './locales/de.json?url'
 import esCatalogUrl from './locales/es.json?url'
 import frCatalogUrl from './locales/fr.json?url'
 import jaCatalogUrl from './locales/ja.json?url'
 import koCatalogUrl from './locales/ko.json?url'
 import ptCatalogUrl from './locales/pt.json?url'
+import ruCatalogUrl from './locales/ru.json?url'
+import trCatalogUrl from './locales/tr.json?url'
 import zhCatalogUrl from './locales/zh.json?url'
+import zhHantCatalogUrl from './locales/zh-Hant.json?url'
 import { isPseudoLocalizationLocale, pseudoLocalizeString } from './pseudo-localization'
-import { advanceTranslationResourceVersion } from './translation-resource-version'
+import {
+  advanceTranslationResourceVersion,
+  getTranslationResourceVersion
+} from './translation-resource-version'
 import { DEFAULT_LOCALE, resolveUiLocale } from './supported-languages'
 import type { SupportedUiLocale } from '../../../shared/ui-locale'
 import { isPluginUiLanguage, type UiLanguage } from '../../../shared/ui-language'
 import type { PluginLanguagePackRegistration } from '../../../shared/plugins/plugin-language-pack-artifact'
+import { replacePluginLanguagePackResources } from '../../../shared/plugins/plugin-language-pack-i18n-resources'
 import { withTimeout } from '../../../shared/promise-timeout-fallback'
+import { resolvePluralFamilyKey } from '../../../shared/i18n-plural-family'
 
 export const i18n: I18nInstance = i18next.createInstance()
 
 // Fetch catalogs as data: Chromium caches rejected module imports for the document's lifetime.
 const NON_DEFAULT_LOCALE_URLS: Record<Exclude<SupportedUiLocale, 'en'>, string> = {
+  de: deCatalogUrl,
   es: esCatalogUrl,
   fr: frCatalogUrl,
   ja: jaCatalogUrl,
   ko: koCatalogUrl,
   pt: ptCatalogUrl,
-  zh: zhCatalogUrl
+  ru: ruCatalogUrl,
+  tr: trCatalogUrl,
+  zh: zhCatalogUrl,
+  'zh-Hant': zhHantCatalogUrl
 }
 
 function localeCatalogUrl(language: string): string | undefined {
   return Object.entries(NON_DEFAULT_LOCALE_URLS).find(([name]) => name === language)?.[1]
 }
 
-async function loadLocaleCatalog(url: string): Promise<Record<string, unknown>> {
+// Built-in catalogs ship every CLDR plural form (sync:localization-catalog), so they load as-is.
+async function fetchLocaleCatalog(url: string): Promise<Record<string, unknown>> {
   const response = await fetch(url, { cache: 'no-cache' })
   if (!response.ok) {
     throw new Error(`Language catalog request failed: ${response.status}`)
   }
   return response.json()
+}
+
+// The provider, onboarding switcher and backend can ask for one locale at once; share the fetch.
+const catalogRequests = new Map<string, Promise<Record<string, unknown>>>()
+
+function loadLocaleCatalog(language: string, url: string): Promise<Record<string, unknown>> {
+  const pending = catalogRequests.get(language)
+  if (pending) {
+    return pending
+  }
+  const request = fetchLocaleCatalog(url).finally(() => {
+    if (catalogRequests.get(language) === request) {
+      catalogRequests.delete(language)
+    }
+  })
+  catalogRequests.set(language, request)
+  return request
 }
 
 const lazyLocaleBackend: BackendModule = {
@@ -55,7 +86,7 @@ const lazyLocaleBackend: BackendModule = {
       callback(null, false)
       return
     }
-    loadLocaleCatalog(url).then(
+    loadLocaleCatalog(language, url).then(
       (catalog) => callback(null, catalog),
       (error) => callback(error instanceof Error ? error : new Error(String(error)), false)
     )
@@ -68,6 +99,8 @@ void i18n
   .init({
     fallbackLng: DEFAULT_LOCALE,
     lng: DEFAULT_LOCALE,
+    // Default 'all' expands zh-Hant to [zh-Hant, zh, en], so missing keys would render Simplified.
+    load: 'currentOnly',
     // Serve eager English from resources while the backend lazily supplies other languages.
     partialBundledLanguages: true,
     resources: {
@@ -76,6 +109,8 @@ void i18n
         translation: enRuntimeRequired
       }
     },
+    // An empty catalog value falls back to English instead of rendering blank.
+    returnEmptyString: false,
     interpolation: {
       escapeValue: false
     },
@@ -87,10 +122,38 @@ void i18n
 // Plugin packs can replace translations without changing the active language.
 i18n.store.on('added', advanceTranslationResourceVersion)
 i18n.store.on('removed', advanceTranslationResourceVersion)
+i18n.on('languageChanged', advanceTranslationResourceVersion)
+
+// Re-rendered chrome resolves hundreds of option-free strings per workspace switch; they only change with language or resources.
+const PLAIN_TRANSLATION_CACHE_LIMIT = 5000
+const plainTranslationCache = new Map<string, string>()
+let plainTranslationCacheScope = ''
+
+function translateUncached(key: string, fallback: string, options?: TOptions): string {
+  const value = i18n.t(resolvePluralFamilyKey(key, options), { defaultValue: fallback, ...options })
+  return isPseudoLocalizationLocale(i18n.language) ? pseudoLocalizeString(value) : value
+}
 
 export function translate(key: string, fallback: string, options?: TOptions): string {
-  const value = i18n.t(key, { defaultValue: fallback, ...options })
-  return isPseudoLocalizationLocale(i18n.language) ? pseudoLocalizeString(value) : value
+  if (options !== undefined) {
+    return translateUncached(key, fallback, options)
+  }
+  const scope = `${i18n.isInitialized}\0${i18n.language}\0${getTranslationResourceVersion()}`
+  if (
+    scope !== plainTranslationCacheScope ||
+    plainTranslationCache.size >= PLAIN_TRANSLATION_CACHE_LIMIT
+  ) {
+    plainTranslationCache.clear()
+    plainTranslationCacheScope = scope
+  }
+  const cacheKey = `${key}\0${fallback}`
+  const cached = plainTranslationCache.get(cacheKey)
+  if (cached !== undefined) {
+    return cached
+  }
+  const value = translateUncached(key, fallback)
+  plainTranslationCache.set(cacheKey, value)
+  return value
 }
 
 export async function loadRendererUiLanguage(language: UiLanguage): Promise<string> {
@@ -102,11 +165,19 @@ export async function loadRendererUiLanguage(language: UiLanguage): Promise<stri
       : resourceLanguage
   const url = localeCatalogUrl(locale)
   if (url && !i18n.hasResourceBundle(locale, 'translation')) {
-    const catalog = await withTimeout(loadLocaleCatalog(url), 5000, null)
+    const request = loadLocaleCatalog(locale, url)
+    const catalog = await withTimeout(request, 5000, null)
     if (catalog === null) {
+      // A retry after a timeout must start a fresh request instead of joining the stalled one.
+      if (catalogRequests.get(locale) === request) {
+        catalogRequests.delete(locale)
+      }
       throw new Error('Language catalog unavailable')
     }
-    i18n.addResourceBundle(locale, 'translation', catalog, true, true)
+    if (!i18n.hasResourceBundle(locale, 'translation')) {
+      // Freshly parsed and never mutated, so skip i18next's defensive deep copy.
+      i18n.addResourceBundle(locale, 'translation', catalog, false, false, { skipCopy: true })
+    }
   }
   return locale
 }
@@ -118,17 +189,22 @@ export async function setRendererUiLanguage(language: UiLanguage): Promise<void>
   }
 }
 
-const registeredPluginLanguages = new Set<string>()
 let pluginLanguagePacks: readonly PluginLanguagePackRegistration[] = []
 
-/** Resolve an Intl-compatible BCP-47 tag: synthetic plugin<hex> resource names use the pack’s declared tag, then the default locale. */
+/** Resolve an Intl-compatible BCP-47 tag: plugin pack resources use the pack’s declared tag, then the default locale. */
 export function getIntlLocale(): string {
   const active = i18n.language
   const pack = pluginLanguagePacks.find((entry) => entry.resourceLanguage === active)
-  const candidate = pack?.locale ?? active
+  return supportedIntlLocale(pack?.locale ?? active, Intl.DateTimeFormat)
+}
+
+function supportedIntlLocale(
+  locale: string,
+  intl: { supportedLocalesOf(locale: string): string[] }
+): string {
   try {
     // An unsupported tag would silently use the runtime locale; explicitly fall back to the default.
-    return Intl.DateTimeFormat.supportedLocalesOf(candidate)[0] ?? DEFAULT_LOCALE
+    return intl.supportedLocalesOf(locale)[0] ?? DEFAULT_LOCALE
   } catch {
     return DEFAULT_LOCALE
   }
@@ -141,13 +217,6 @@ export function resolveRendererResourceLanguage(language: string): string {
 export function setRendererPluginLanguagePacks(
   packs: readonly PluginLanguagePackRegistration[]
 ): void {
-  for (const language of registeredPluginLanguages) {
-    i18n.removeResourceBundle(language, 'translation')
-  }
-  registeredPluginLanguages.clear()
+  replacePluginLanguagePackResources(i18n, pluginLanguagePacks, packs)
   pluginLanguagePacks = packs
-  for (const pack of packs) {
-    i18n.addResourceBundle(pack.resourceLanguage, 'translation', pack.catalog, true, true)
-    registeredPluginLanguages.add(pack.resourceLanguage)
-  }
 }

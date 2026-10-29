@@ -14,9 +14,10 @@ const PROTECTED_TRANSLATION_MODULE = /^plugin/i
 
 export type PluginLanguagePackRegistration = {
   id: `plugin:${string}`
-  resourceLanguage: `plugin${string}`
+  resourceLanguage: string
   pluginKey: string
   locale: string
+  displayName?: string
   catalog: Record<string, unknown>
 }
 
@@ -34,17 +35,30 @@ export function isPluginLanguagePackRegistration(
     pack.resourceLanguage === pluginLanguageResourceId(pack.id as `plugin:${string}`) &&
     typeof pack.pluginKey === 'string' &&
     typeof pack.locale === 'string' &&
+    (pack.displayName === undefined || typeof pack.displayName === 'string') &&
     checkPluginLanguagePackCatalog(pack.catalog).ok
   )
 }
 
-export function pluginLanguageResourceId(id: `plugin:${string}`): `plugin${string}` {
-  let encoded = ''
-  for (let index = 0; index < id.length; index += 1) {
-    encoded += id.charCodeAt(index).toString(16).padStart(4, '0')
+// Internal i18next ID only; settings and IPC keep the qualified `plugin:` ID.
+export function pluginLanguageResourceId(id: `plugin:${string}`): string {
+  // Fixed-width UTF-8 hex keeps IDs collision-free; private-use subtags allow at most 8 chars.
+  const encoded = Array.from(new TextEncoder().encode(id.slice('plugin:'.length)), (byte) =>
+    byte.toString(16).padStart(2, '0')
+  ).join('')
+  const subtags = encoded.match(/.{1,8}/g) ?? []
+  // The real base locale lets Intl and i18next pick the pack's plural rules natively.
+  return `${pluginPackBaseLocale(id.slice(id.lastIndexOf('/') + 1))}-x-orcapk-${subtags.join('-')}`
+}
+
+function pluginPackBaseLocale(locale: string): string {
+  try {
+    const supported = Intl.PluralRules.supportedLocalesOf(locale)[0]
+    // Unsupported tags would get the runtime's plural rules; use English like other unknown locales.
+    return supported ? new Intl.Locale(supported).baseName : 'en'
+  } catch {
+    return 'en'
   }
-  // i18next parses tag punctuation; fixed-width UTF-16 hex provides collision-free qualified-ID keys.
-  return `plugin${encoded}`
 }
 
 export type PluginLanguagePackParseResult =
@@ -66,7 +80,7 @@ type CatalogFrame = {
   depth: number
 }
 
-function isCatalogObject(value: unknown): value is Record<string, unknown> {
+export function isCatalogObject(value: unknown): value is Record<string, unknown> {
   return (
     typeof value === 'object' &&
     value !== null &&

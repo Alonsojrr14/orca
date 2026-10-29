@@ -33,7 +33,7 @@ export class DaemonServer {
 
   private readonly log: DaemonFileLog
   readonly automaticWork: DaemonAutomaticWorkGuard
-  private readonly host: TerminalHost
+  readonly host: TerminalHost
   private readonly transientFactRelay: BackgroundTransientFactRelay
   private readonly streamDataBatcher: DaemonStreamDataBatcher
   private readonly attachments: DaemonSessionAttachments

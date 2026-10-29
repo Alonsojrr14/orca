@@ -5,7 +5,8 @@ import {
   type RetainedRemoteRuntimeSubscription,
   type PendingRuntimeSubscription
 } from './runtime-environment-subscription-handlers'
-import { app, ipcMain } from 'electron'
+import { ipcMain } from 'electron'
+import { getRuntimeEnvironmentRegistryRoot } from './runtime-environment-registry-root'
 import { listEnvironments } from '../../../shared/runtime-environment-store'
 import type { Store } from '../../persistence'
 import { recordRemoteLayoutFrame } from '../../remote-layout-snapshot/remote-layout-snapshot-recorder'
@@ -49,7 +50,7 @@ import { isGatedOffWslHost } from '../../wsl/wsl-host-gate'
 import { resetDesktopBrowserBridgeEnvironment } from '../desktop-browser-bridge-reconcile'
 
 const remoteRuntimeSubscriptions = new Map<string, RetainedRemoteRuntimeSubscription>()
-const getUserDataPath = (): string => app.getPath('userData')
+const getUserDataPath = getRuntimeEnvironmentRegistryRoot
 
 function closeSubscriptionsForEnvironment(environmentId: string): void {
   for (const pending of pendingSubscriptions.values()) {
@@ -119,7 +120,11 @@ export function registerRuntimeEnvironmentHandlers(store: Store): void {
   stopPreferenceWatch?.()
   stopPreferenceWatch = watchRuntimeEnvironmentPreference(store, getUserDataPath(), () => {
     // CLI and recipe removals skip the Settings path; drop their session partitions here too.
-    reconcileOrphanedRuntimeSessions(store, getUserDataPath())
+    try {
+      reconcileOrphanedRuntimeSessions(store, getUserDataPath())
+    } catch (error) {
+      console.warn('[runtime-environments] orphaned session reconcile failed:', error)
+    }
     publishRuntimeEnvironmentCatalogChanged()
   })
   for (const pending of pendingSubscriptions.values()) {

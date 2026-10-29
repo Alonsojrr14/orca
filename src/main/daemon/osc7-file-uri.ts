@@ -18,12 +18,32 @@ export function parseFileUriPath(
   return parseFileUriPathParts(uri, options)?.path ?? null
 }
 
+const FILE_URI_AUTHORITY = /^file:\/\/[^/]*/i
+
+/**
+ * Some shells (nushell) send `#`, `?` and a lone `%` raw in the path, which a URL parser would cut
+ * at or reject. A properly encoded URI never contains them there, so encoding them first leaves its
+ * result unchanged. A raw `%41` stays ambiguous and decodes to `A`, as it always has.
+ */
+function encodeRawPathDelimiters(uri: string): string {
+  const authority = FILE_URI_AUTHORITY.exec(uri)
+  if (!authority) {
+    return uri
+  }
+  const path = uri
+    .slice(authority[0].length)
+    .replace(/%(?![0-9A-Fa-f]{2})/g, '%25')
+    .replace(/#/g, '%23')
+    .replace(/\?/g, '%3F')
+  return authority[0] + path
+}
+
 export function parseFileUriPathParts(
   uri: string,
   options: ParseFileUriPathOptions = {}
 ): ParsedFileUriPath | null {
   try {
-    const url = new URL(uri)
+    const url = new URL(encodeRawPathDelimiters(uri))
     if (url.protocol !== 'file:') {
       return null
     }

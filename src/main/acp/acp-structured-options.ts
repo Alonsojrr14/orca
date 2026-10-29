@@ -1,5 +1,3 @@
-import { abortSignalReason } from '../../shared/abort-signal-reason'
-
 import type {
   AgentSessionModelOption,
   AgentSessionOptionChoice,
@@ -53,7 +51,7 @@ export class AcpStructuredOptions {
   constructor(
     private readonly dialect: Pick<
       AcpDialect,
-      'modelEfforts' | 'clampsUnlistedEffort' | 'withheldCommands'
+      'modelEfforts' | 'clampsUnlistedEffort' | 'withheldCommands' | 'effortChangesModel'
     > = {}
   ) {}
 
@@ -63,12 +61,21 @@ export class AcpStructuredOptions {
   // Only new sessions resolve configured defaults; loaded sessions retain their saved choices.
   private resolvesConfig = false
   readonly picked = new Set<string>()
-  /** Installed Orca policy and successful writes, distinct from native agent reports. */
+  readonly appliedInput = new Map<string, string>()
   readonly applied = new Map<string, string>()
-  private initialChoice: Readonly<Record<string, string>> = {}
-  currentProof = new Set<string>()
   writeRevision = 0
 
+  invalidateInput(key: string): void {
+    this.appliedInput.delete(key)
+    if (key === 'model') {
+      this.appliedInput.delete('effort')
+    }
+    if (key === 'effort' && this.dialect.effortChangesModel) {
+      this.appliedInput.delete('model')
+    }
+  }
+
+  /** The session state a new, load or resume response reported. */
   adoptSession(
     response: {
       configOptions?: SessionConfigOption[] | null
@@ -79,13 +86,7 @@ export class AcpStructuredOptions {
     this.configOptions = response.configOptions ?? []
     this.models = response.models ?? null
     this.resolvesConfig = origin === 'new'
-    this.initialChoice = this.reported()
-    this.currentProof = new Set(Object.keys(this.initialChoice))
-  }
-
-  /** Native selection before any message changed this child. */
-  messageDefault(): Readonly<Record<string, string>> {
-    return this.initialChoice
+    this.appliedInput.clear()
   }
 
   notePick(key: string): void {
@@ -261,65 +262,4 @@ export async function readAcpLiveOptions(
     },
     acceptsImages
   }
-}
-
-/** Only the current, still-awaited write may establish reusable option proof. */
-export function writeAcpSessionOption(
-  connection: Pick<AcpStructuredConnection, 'setConfigOption' | 'setModel'>,
-  options: AcpStructuredOptions,
-  write: AcpOptionWrite,
-  bound: { agent: string; timeoutMs: number; signal?: AbortSignal; key: string; value: string }
-): Promise<void> {
-  const { agent, timeoutMs, signal } = bound
-  if (signal?.aborted) {
-    return Promise.reject(abortSignalReason(signal))
-  }
-  const revision = ++options.writeRevision
-  options.currentProof.delete(bound.key)
-  if (bound.key === 'model') {
-    options.currentProof.delete('effort')
-  }
-  const adopt = (apply: () => void): void => {
-    if (options.writeRevision !== revision) {
-      throw new Error(`${agent} option write was superseded`)
-    }
-    apply()
-    options.currentProof.add(bound.key)
-    options.applied.set(bound.key, bound.value)
-  }
-  const applied =
-    write.method === 'config'
-      ? connection
-          .setConfigOption(write.configId, write.value)
-          .then((result) => adopt(() => options.adoptConfigOptions(result.configOptions)))
-      : connection
-          .setModel(write.modelId)
-          .then(() => adopt(() => options.adoptModel(write.modelId)))
-  return new Promise<void>((resolve, reject) => {
-    const fail = (error: Error): void => {
-      if (options.writeRevision === revision) {
-        options.writeRevision += 1
-      }
-      settle()
-      reject(error)
-    }
-    const onAbort = (): void => {
-      if (signal) {
-        fail(abortSignalReason(signal))
-      }
-    }
-    const timer = setTimeout(
-      () => fail(new Error(`${agent} did not answer an option write within ${timeoutMs}ms`)),
-      timeoutMs
-    )
-    const settle = (): void => {
-      clearTimeout(timer)
-      signal?.removeEventListener('abort', onAbort)
-    }
-    signal?.addEventListener('abort', onAbort, { once: true })
-    applied.then(() => {
-      settle()
-      resolve()
-    }, fail)
-  })
 }

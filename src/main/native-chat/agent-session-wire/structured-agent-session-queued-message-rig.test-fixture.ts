@@ -26,7 +26,10 @@ import {
   hostTestOperationId,
   resetHostTestOperationIds
 } from './structured-agent-session-host-test-data'
-import { openTestJournalHostDatabase } from '../agent-session-journal/journal-host-database-test-support'
+import {
+  closeTestJournalHostDatabase,
+  openTestJournalHostDatabase
+} from '../agent-session-journal/journal-host-database-test-support'
 import { createStructuredAgentSessionLogger } from './structured-agent-session-logger'
 import {
   createQueuedRigProvider,
@@ -78,10 +81,17 @@ export async function createQueuedMessageTestRig(
       ...(options.recoveryCapsule ? { recoveryCapsule: new AgentSessionRecoveryCapsule(root) } : {})
     })
   let host = makeHost()
-  const firstAttach = hostTestAttachParams(
-    null,
-    options.location ? { location: options.location } : {}
-  )
+  const firstAttach = hostTestAttachParams(null, {
+    ...(options.location ? { location: options.location } : {}),
+    ...(options.agent === 'claude'
+      ? ({
+          provider: 'claude',
+          agent: 'claude',
+          providerHandle: { kind: 'claude', sessionId: THREAD, leafUuid: null },
+          accountHome: { variable: 'CLAUDE_CONFIG_DIR', path: '/private-fixture/claude' }
+        } as const)
+      : {})
+  })
   expect(await host.attach(QUEUED_RIG_CALLER, firstAttach)).toMatchObject({ ok: true })
 
   function envelope(
@@ -266,6 +276,7 @@ export async function createQueuedMessageTestRig(
 
   async function dispose(): Promise<void> {
     await host.flushAllStreamedEvents()
+    closeTestJournalHostDatabase(root)
     await rm(root, { recursive: true, force: true })
   }
 

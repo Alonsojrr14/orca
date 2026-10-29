@@ -23,6 +23,9 @@ import type { useMarkdownDocuments } from './useMarkdownDocuments'
 import { EditorMarkdownFileSurface } from './EditorMarkdownFileSurface'
 import type { MarkdownRenderState } from './markdown-render-mode'
 
+// Retry is a user act: it may start a stopped WSL distro.
+const USER_RETRY = { wakeWslDistro: true }
+
 const noopEditorContentChange = (_content: string): void => {}
 const noopEditorSave = async (_content: string): Promise<boolean> => false
 
@@ -86,12 +89,16 @@ export function EditorEditFileSurface({
   markdownAnnotationsEnabled: boolean
   pendingEditorReveal: PendingEditorReveal | null
   markdownDocuments: MarkdownDocumentsController
-  getConflictNavigation: (file: OpenFile, content: string) => EditorConflictNavigation | undefined
+  getConflictNavigation: (
+    file: OpenFile,
+    content: string,
+    viewStateId: string
+  ) => EditorConflictNavigation | undefined
   getMarkdownSourceLineOffset: (frontMatterRaw: string) => number
   handleContentChange: (content: string) => void
   handleDirtyStateHint: (dirty: boolean) => void
   handleSave: (content: string) => Promise<boolean>
-  reloadContent: (file: OpenFile) => void
+  reloadContent: (file: OpenFile, options?: { wakeWslDistro?: boolean }) => void
 }): React.JSX.Element {
   if (activeFile.conflict?.kind === 'conflict-placeholder') {
     return <ConflictPlaceholderView file={activeFile} />
@@ -119,12 +126,12 @@ export function EditorEditFileSurface({
       <EditorFileLoadErrorView
         message={fileContent.loadError}
         code={fileContent.loadErrorCode}
-        onRetry={() => reloadContent(activeFile)}
+        onRetry={() => reloadContent(activeFile, USER_RETRY)}
       />
     )
   }
   if (fileContent.isBinary) {
-    if (fileContent.mediaUrl) {
+    if (fileContent.mediaUrl && !fileContent.isImage) {
       return (
         <MediaViewer
           key={fileContent.mediaUrl}
@@ -144,6 +151,8 @@ export function EditorEditFileSurface({
       return (
         <ImageViewer
           content={fileContent.content}
+          src={fileContent.mediaUrl}
+          byteSize={fileContent.size}
           filePath={activeFile.filePath}
           mimeType={fileContent.mimeType}
           preferenceKey={pdfPreferenceKey}
@@ -269,7 +278,11 @@ export function EditorEditFileSurface({
       monacoEditor={monacoEditor}
     />
   ) : isMermaid && mdViewMode === 'rich' ? (
-    <MermaidViewer key={activeFile.id} content={currentContent} filePath={activeFile.filePath} />
+    <MermaidViewer
+      key={activeFile.id}
+      content={currentContent}
+      scrollCacheKey={`${editorViewStateKey}:mermaid-diagram`}
+    />
   ) : isCsv && mdViewMode === 'rich' ? (
     <CsvViewer
       key={activeFile.id}
@@ -307,7 +320,7 @@ export function EditorEditFileSurface({
         <ConflictBanner
           file={activeFile}
           entry={activeConflictEntry}
-          conflictNavigation={getConflictNavigation(activeFile, currentContent)}
+          conflictNavigation={getConflictNavigation(activeFile, currentContent, viewStateScopeId)}
         />
       )}
       <div className="min-h-0 flex-1 relative">{editorSurface}</div>
