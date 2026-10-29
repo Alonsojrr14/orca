@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Alert, Pressable, Text, View } from 'react-native'
 import { SafeAreaView, useSafeAreaFrame } from 'react-native-safe-area-context'
 import { ChevronLeft, Save } from 'lucide-react-native'
+import { useWorkspaceExecutionHost } from '../navigation/workspace-execution-host'
 import { useWorkspaceRouteHandoff } from '../navigation/workspace-route-handoff'
 import { getWorktreeLabel } from '../session/worktree-label'
 import { colors, spacing } from '../theme/mobile-theme'
+import { useMobileColorScheme } from '../theme/use-mobile-color-scheme'
 import { useForceReconnect } from '../transport/host-client-hooks'
 import { useWorkspaceClient } from '../transport/use-workspace-client'
 import { connectionRetryAction } from '../transport/connection-retry-action'
@@ -29,6 +31,7 @@ import {
   shouldKeepDirtyDraftOnPreviewLoadResult
 } from './mobile-file-preview-editability'
 import { filePreviewStyles as styles } from './mobile-file-preview-styles'
+import { mobileMarkdownFileLink } from './mobile-markdown-file-link'
 import { useMobileFilePreviewBack } from './use-mobile-file-preview-back'
 
 type Props = {
@@ -36,7 +39,20 @@ type Props = {
 }
 
 export function MobileFilePreviewScreen({ route }: Props) {
-  // Why: every workspace screen uses the handoff so it shares the route chunk; else the bundle overruns its asset budget.
+  const executionHost = useWorkspaceExecutionHost()
+  const documentKey = route.ok
+    ? [
+        route.params.hostId,
+        executionHost,
+        sourceKeyForPreview(previewSourceFromRoute(route.params))
+      ]
+    : ['invalid', route.message]
+  return <MobileFilePreviewDocument key={JSON.stringify(documentKey)} route={route} />
+}
+
+function MobileFilePreviewDocument({ route }: Props) {
+  useMobileColorScheme()
+  // Use the shared route handoff to keep this screen within the bundle asset budget.
   const router = useWorkspaceRouteHandoff()
   const previewParams = route.ok ? route.params : null
   const { client, state: connState } = useWorkspaceClient(previewParams?.hostId)
@@ -48,6 +64,7 @@ export function MobileFilePreviewScreen({ route }: Props) {
   const [savedContent, setSavedContent] = useState('')
   const [saveError, setSaveError] = useState('')
   const [saving, setSaving] = useState(false)
+  const savingRef = useRef(false)
   const draftContentRef = useRef(draftContent)
   const savedContentRef = useRef(savedContent)
   const draftSourceKeyRef = useRef<string | null>(null)
@@ -65,6 +82,7 @@ export function MobileFilePreviewScreen({ route }: Props) {
     [routePreviewSource]
   )
   const previewSourceKeyRef = useRef(previewSourceKey)
+  const previewLoadRevisionRef = useRef(0)
   const lineColumn = useMemo(
     () =>
       previewParams
@@ -75,7 +93,6 @@ export function MobileFilePreviewScreen({ route }: Props) {
 
   useEffect(() => {
     setPreviewSource(routePreviewSource)
-    draftSourceKeyRef.current = null
   }, [routePreviewSource])
 
   useEffect(() => {
@@ -91,7 +108,11 @@ export function MobileFilePreviewScreen({ route }: Props) {
   }, [savedContent])
 
   const loadPreview = useCallback(async () => {
+    const loadRevision = ++previewLoadRevisionRef.current
     const loadSourceKey = previewSourceKey
+    const isCurrentLoad = () =>
+      previewLoadRevisionRef.current === loadRevision &&
+      previewSourceKeyRef.current === loadSourceKey
     if (!previewParams || !previewSource || loadSourceKey !== routePreviewSourceKey) {
       setPreview(previewError(route.ok ? 'Unable to load preview' : route.message))
       return
@@ -113,14 +134,22 @@ export function MobileFilePreviewScreen({ route }: Props) {
     setSaveError('')
     try {
       const result = await loadMobileFilePreview(client, previewSource, undefined, {
-        onTerminalArtifactSourceRefreshed: setPreviewSource,
+        onTerminalArtifactSourceRefreshed: (source) => {
+          if (isCurrentLoad()) {
+            setPreviewSource(source)
+          }
+        },
         refreshGrant: true
       })
-      if (previewSourceKeyRef.current !== loadSourceKey) {
+      if (!isCurrentLoad()) {
         return
       }
       if (shouldKeepDirtyDraftOnPreviewLoadResult(preserveDirtyDraft, result)) {
         setSaveError(result.message)
+        return
+      }
+      // A refreshed preview can become truncated or binary while this editor owns a dirty draft.
+      if (preserveDirtyDraft) {
         return
       }
       const loadedContent =
@@ -130,14 +159,15 @@ export function MobileFilePreviewScreen({ route }: Props) {
             ? ''
             : null
       if (loadedContent !== null) {
-        if (!preserveDirtyDraft) {
-          setDraftContent(loadedContent)
-          setSavedContent(loadedContent)
-        }
+        setDraftContent(loadedContent)
+        setSavedContent(loadedContent)
         draftSourceKeyRef.current = previewSourceKey
       }
       setPreview(result)
     } catch (err) {
+      if (!isCurrentLoad()) {
+        return
+      }
       const message = err instanceof Error ? err.message : 'Unable to load preview'
       if (preserveDirtyDraft) {
         setSaveError(message)
@@ -157,6 +187,9 @@ export function MobileFilePreviewScreen({ route }: Props) {
 
   useEffect(() => {
     void loadPreview()
+    return () => {
+      previewLoadRevisionRef.current += 1
+    }
   }, [loadPreview])
 
   const retry = useMemo(
@@ -199,9 +232,15 @@ export function MobileFilePreviewScreen({ route }: Props) {
   })
 
   const saveArtifact = useCallback(async () => {
-    if (!client || previewSource?.source !== 'terminalArtifact' || !canSaveArtifact || saving) {
+    if (
+      !client ||
+      previewSource?.source !== 'terminalArtifact' ||
+      !canSaveArtifact ||
+      savingRef.current
+    ) {
       return
     }
+    savingRef.current = true
     setSaving(true)
     setSaveError('')
     try {
@@ -218,9 +257,10 @@ export function MobileFilePreviewScreen({ route }: Props) {
       const message = err instanceof Error ? err.message : 'Unable to save file'
       setSaveError(message)
     } finally {
+      savingRef.current = false
       setSaving(false)
     }
-  }, [canSaveArtifact, client, draftContent, previewSource, savedContent, saving])
+  }, [canSaveArtifact, client, draftContent, previewSource, savedContent])
 
   const leave = useCallback(() => router.back(), [router])
   const { confirmingDiscard, requestBack, stay, discard } = useMobileFilePreviewBack({
@@ -264,6 +304,7 @@ export function MobileFilePreviewScreen({ route }: Props) {
       <MobileFilePreviewBody
         preview={preview}
         client={client}
+        worktreeId={previewSource?.source === 'worktree' ? previewSource.worktreeId : undefined}
         relativePath={displayPath}
         title={title || 'File'}
         editable={isEditableTerminalArtifact}
@@ -277,6 +318,14 @@ export function MobileFilePreviewScreen({ route }: Props) {
           setPreview({ status: 'error', message: 'Unable to load preview', reconnect: false })
         }
         onRetry={retry}
+        onOpenFile={(pathText) => {
+          const href = previewParams && mobileMarkdownFileLink(previewParams, pathText)
+          if (href) {
+            router.push(href)
+          } else {
+            Alert.alert('Unable to open file', 'Choose a file inside this workspace.')
+          }
+        }}
       />
       <ConfirmModal
         visible={confirmingDiscard}

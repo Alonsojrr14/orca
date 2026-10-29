@@ -5,10 +5,12 @@ import { afterEach, expect, it, vi } from 'vitest'
 
 const rpc = vi.hoisted(() => ({ call: vi.fn() }))
 vi.mock('@/runtime/structured-agent-session-client', () => ({
-  callStructuredAgentSession: rpc.call
+  callStructuredAgentSession: rpc.call,
+  subscribeStructuredAgentSessionStatus: async () => ({ unsubscribe: () => {} })
 }))
 vi.mock('@/runtime/structured-agent-session-host-capability', () => ({
   useStructuredAgentSessionHostCapability: () => true,
+  useStructuredAgentSessionOwnPermissionState: () => 'supported',
   structuredAgentSessionHostKey: () => 'local'
 }))
 vi.mock('./native-chat-session-option-settings-write', () => ({

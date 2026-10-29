@@ -1,6 +1,8 @@
 import type { StructuredAgentSessionSendControl } from '../../../../shared/structured-agent-session-send-mutation'
+import { useStructuredAgentSessionHostCapabilityState } from '@/runtime/structured-agent-session-host-capability'
+import { AGENT_SESSION_SEND_SKILLS_RUNTIME_CAPABILITY } from '../../../../shared/agent-session-create-capabilities'
 import type { StructuredAgentSessionSendRequest } from './structured-agent-session-send-slot'
-import { useCallback, useEffect, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useEffectEvent, useSyncExternalStore } from 'react'
 import type {
   AgentJournalCursor,
   AgentJournalSubmission
@@ -24,7 +26,7 @@ import {
 } from './structured-agent-session-pending-sends'
 import { noteStructuredAgentSessionFence } from './structured-agent-session-send-attempt'
 import { recoverLegacyStructuredAgentSessionOutbox } from './structured-agent-session-legacy-outbox'
-import { pendingSendsOutsideQueuedCards } from './structured-agent-session-queued-cards'
+import { pendingSendsOutsideQueuedCards } from './structured-agent-session-sending-queued-cards'
 
 /** The open chat's view of its sends: they live in the sender, which works without this view. */
 export function useStructuredAgentSessionSends(args: {
@@ -59,6 +61,12 @@ export function useStructuredAgentSessionSends(args: {
     submissions,
     target
   } = args
+  // An older host refuses a send body carrying `skills`; there the `$name` text stands alone.
+  const takesSkills =
+    useStructuredAgentSessionHostCapabilityState(
+      target,
+      AGENT_SESSION_SEND_SKILLS_RUNTIME_CAPABILITY
+    ) === 'supported'
   const subscribe = useCallback(
     (listener: () => void) => subscribeToStructuredAgentSessionPendingSends(sessionId, listener),
     [sessionId]
@@ -80,17 +88,19 @@ export function useStructuredAgentSessionSends(args: {
   }, [cursor, pending, queuedMessageIds, sessionId, submissions])
 
   const recoverLegacy = historyLoaded && fence !== null
+  // Why an event: once per open, from the first loaded history; later batches add nothing it needs.
+  const recoverLegacyOutbox = useEffectEvent(() => {
+    void recoverLegacyStructuredAgentSessionOutbox({
+      sessionId,
+      target,
+      submissions,
+      queuedMessageIds
+    })
+  })
   useEffect(() => {
     if (recoverLegacy) {
-      void recoverLegacyStructuredAgentSessionOutbox({
-        sessionId,
-        target,
-        submissions,
-        queuedMessageIds
-      })
+      recoverLegacyOutbox()
     }
-    // Why: once per open, from the first loaded history; later batches add nothing it needs.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recoverLegacy, sessionId, target])
 
   /** Whether the message was taken; 'queued' when it waits as a queued card, not a bubble. */
@@ -116,9 +126,9 @@ export function useStructuredAgentSessionSends(args: {
           : {}),
         ...(delivery ? { delivery } : {}),
         ...captured,
+        ...(takesSkills && request?.skills?.length ? { skills: request.skills } : {}),
         ...(stopping ? { sentWhileStopping: true as const } : {})
       })
-      // Refused while the chat's send is out: the text stays in the box.
       if (!sent) {
         return false
       }
@@ -134,7 +144,17 @@ export function useStructuredAgentSessionSends(args: {
         ? 'queued'
         : true
     },
-    [isWorking, queue, queuedMessageIds, sendSelection, sendOptions, sessionId, stopping, target]
+    [
+      isWorking,
+      queue,
+      queuedMessageIds,
+      sendSelection,
+      sendOptions,
+      sessionId,
+      stopping,
+      takesSkills,
+      target
+    ]
   )
 
   return {

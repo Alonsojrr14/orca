@@ -1,16 +1,16 @@
 import {
   STRUCTURED_LAUNCH_OPTION_IDS,
   STRUCTURED_LAUNCH_SEED_OPTION_IDS
-} from './native-chat-session-option-defaults'
+} from './native-chat/input/native-chat-session-option-defaults'
 import { decodeStructuredAgentSessionOptionValue } from './structured-agent-session-option-codec'
-import type { NativeChatSessionOptionSettingsMutation } from './native-chat-session-options'
+import type { NativeChatSessionOptionSettingsMutation } from './native-chat/input/native-chat-session-options'
 import type { AgentSessionWriteFailure } from './agent-session-write-failure'
 
 export type SelectionOutcome =
   | { kind: 'accepted'; options: Readonly<Record<string, string>> }
   | { kind: 'refused'; failure?: AgentSessionWriteFailure }
   | { kind: 'superseded' }
-  | { kind: 'unknown' }
+  | { kind: 'unknown'; failure?: AgentSessionWriteFailure }
 
 const OPTION_ORDER: readonly string[] = STRUCTURED_LAUNCH_OPTION_IDS
 
@@ -27,6 +27,8 @@ export type SelectionOperation = {
   outcome?: SelectionOutcome
   result: Promise<SelectionOutcome>
   resolve: (outcome: SelectionOutcome) => void
+  previousPending?: SelectionOperation
+  nextPending?: SelectionOperation
 }
 
 /** Finite operation precedence above a queried host answer; no mutation reply installs a base. */
@@ -36,10 +38,15 @@ export function createStructuredSessionSelectionController(
   let sequence = 0
   let revision = 0
   let adopted = 0
-  const inFlight = new Set<Promise<void>>()
+  const inFlight = new Set<Promise<SelectionOutcome>>()
   const operations = new Map<number, SelectionOperation>()
   const latest = new Map<string, number>()
   const remembered = new Map<string, number>()
+  const terminal = new Set<number>()
+  let terminalRevision = 0
+  const pendingCounts = new Map<string, number>()
+  let pendingTail: SelectionOperation | undefined
+  const currentOperations = () => [...latest.values()].flatMap((id) => operations.get(id) ?? [])
   const listeners = new Set<() => void>()
   const notify = () => {
     revision += 1
@@ -52,7 +59,22 @@ export function createStructuredSessionSelectionController(
       return
     }
     operation.outcome = outcome
+    pendingCounts.set(operation.key, (pendingCounts.get(operation.key) ?? 1) - 1)
+    if (operation.previousPending) {
+      operation.previousPending.nextPending = operation.nextPending
+    }
+    if (operation.nextPending) {
+      operation.nextPending.previousPending = operation.previousPending
+    } else {
+      pendingTail = operation.previousPending
+    }
+    operation.previousPending = undefined
+    operation.nextPending = undefined
     operation.resolve(outcome)
+    if (outcome.kind === 'accepted' || outcome.kind === 'unknown') {
+      terminal.add(operation.identity)
+      terminalRevision = revision + 1
+    }
     if (outcome.kind === 'accepted') {
       const model =
         operation.key === 'model' ? (outcome.options.model ?? operation.model) : operation.model
@@ -102,7 +124,7 @@ export function createStructuredSessionSelectionController(
       model: string | null,
       offers?: (key: string, value: string) => boolean
     ): SelectionOperation {
-      for (const previous of operations.values()) {
+      for (const previous of currentOperations()) {
         if (
           !previous.transmitted &&
           !previous.outcome &&
@@ -113,7 +135,7 @@ export function createStructuredSessionSelectionController(
         }
       }
       const reply = Promise.withResolvers<SelectionOutcome>()
-      const operation = {
+      const operation: SelectionOperation = {
         identity: ++sequence,
         key,
         value,
@@ -122,6 +144,12 @@ export function createStructuredSessionSelectionController(
         result: reply.promise,
         resolve: reply.resolve
       }
+      operation.previousPending = pendingTail
+      if (pendingTail) {
+        pendingTail.nextPending = operation
+      }
+      pendingTail = operation
+      pendingCounts.set(key, (pendingCounts.get(key) ?? 0) + 1)
       operations.set(operation.identity, operation)
       latest.set(key, operation.identity)
       notify()
@@ -129,17 +157,17 @@ export function createStructuredSessionSelectionController(
     },
     overlay(): Record<string, string> {
       return Object.fromEntries(
-        [...operations.values()]
-          .filter((op) => latest.get(op.key) === op.identity)
-          .map((op) => [
-            op.key,
-            op.outcome?.kind === 'accepted' ? (op.outcome.options[op.key] ?? op.value) : op.value
-          ])
+        currentOperations().map((op) => [
+          op.key,
+          op.outcome?.kind === 'accepted' ? (op.outcome.options[op.key] ?? op.value) : op.value
+        ])
       )
     },
     pending(): SelectionOperation[] {
       return [...operations.values()].filter((op) => !op.outcome)
     },
+    isPending: (key: string) => (pendingCounts.get(key) ?? 0) > 0,
+    pendingId: () => pendingTail?.key ?? null,
     freeze(replaced: readonly SelectionOperation[] = []): SelectionOperation[] {
       // A definitive create refusal permits a new capture; an ambiguous retry never calls freeze.
       for (const op of replaced) {
@@ -151,45 +179,47 @@ export function createStructuredSessionSelectionController(
           }
         }
       }
-      const frozen = [...operations.values()].filter((op) => !op.transmitted && !op.outcome)
+      const frozen = currentOperations().filter((op) => !op.transmitted && !op.outcome)
       for (const op of frozen) {
         op.transmitted = true
       }
       return frozen
     },
     settle,
+    terminalSnapshot: () => (terminal.size ? terminalRevision : 0),
     captureRead(): number[] {
-      return [...operations.values()].filter((op) => op.outcome).map((op) => op.identity)
+      return [...terminal]
     },
     retire(identities: readonly number[]): void {
       for (const identity of identities) {
         operations.delete(identity)
+        terminal.delete(identity)
       }
       if (identities.length) {
+        terminalRevision = revision + 1
         notify()
       }
     },
-    flush(send: (operation: SelectionOperation) => Promise<SelectionOutcome>): Promise<void> {
-      const unsent = [...operations.values()].filter((op) => !op.transmitted && !op.outcome)
+    flush(send: (operation: SelectionOperation) => Promise<SelectionOutcome>): void {
+      const unsent = currentOperations().filter((op) => !op.transmitted && !op.outcome)
       unsent.sort((a, b) => OPTION_ORDER.indexOf(a.key) - OPTION_ORDER.indexOf(b.key))
       for (const operation of unsent) {
         if (operation.outcome || operation.transmitted) {
           continue
         }
         operation.transmitted = true
-        const completion = (async () => {
+        inFlight.add(operation.result)
+        void operation.result.then(() => inFlight.delete(operation.result))
+        void (async () => {
           settle(operation, await send(operation))
-        })()
-          .catch(() => settle(operation, { kind: 'unknown' }))
-          .finally(() => inFlight.delete(completion))
-        inFlight.add(completion)
+        })().catch(() => settle(operation, { kind: 'unknown' }))
         notify()
       }
-      return (async () => {
-        while (inFlight.size) {
-          await Promise.all(inFlight)
-        }
-      })()
+    },
+    async drain(): Promise<void> {
+      while (inFlight.size) {
+        await Promise.all(inFlight)
+      }
     },
     abandon(): void {
       for (const operation of operations.values()) {
@@ -198,6 +228,8 @@ export function createStructuredSessionSelectionController(
       operations.clear()
       latest.clear()
       remembered.clear()
+      terminal.clear()
+      pendingCounts.clear()
       notify()
     }
   }

@@ -19,7 +19,8 @@ describe('chat selection operation handoff', () => {
       }
       return { kind: 'accepted' as const, options: { [op.key]: op.value } }
     })
-    const sending = controller.flush(send)
+    controller.flush(send)
+    const sending = controller.drain()
     await Promise.resolve()
     const newerEffort = controller.issue('effort', 'low', 'sonnet')
     const newerModel = controller.issue('model', 'opus', null)
@@ -79,4 +80,24 @@ describe('chat selection operation handoff', () => {
       { modelId: 'sonnet', optionId: 'effort', value: 'high' }
     ])
   })
+})
+
+it('drains abandoned writes without cancelling host acceptance or remembering late replies', async () => {
+  const remember = vi.fn()
+  const controller = createStructuredSessionSelectionController(remember)
+  const reply = Promise.withResolvers<{ kind: 'accepted'; options: Record<string, string> }>()
+  const operation = controller.issue('model', 'sonnet', null)
+  controller.flush(() => reply.promise)
+  const drained = controller.drain()
+  controller.abandon()
+  await drained
+  await expect(operation.result).resolves.toEqual({ kind: 'superseded' })
+  reply.resolve({ kind: 'accepted', options: { model: 'sonnet' } })
+  await reply.promise
+  await Promise.resolve()
+  expect(remember).not.toHaveBeenCalled()
+  expect(controller.overlay()).toEqual({})
+  expect(controller.captureRead()).toEqual([])
+  expect(controller.isPending('model')).toBe(false)
+  expect(controller.pendingId()).toBeNull()
 })

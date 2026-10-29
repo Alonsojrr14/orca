@@ -7,9 +7,7 @@ vi.mock('@/store', () => ({
     getState: vi.fn()
   }
 }))
-// Why: editor-autosave calls window.dispatchEvent at module scope paths; the
-// vitest 'node' environment has no window. Stub the two exports we use so the
-// handler can run headlessly.
+// Stub autosave’s window-event exports so the handler runs in headless Node.
 vi.mock('@/components/editor/editor-autosave', async (importOriginal) => {
   const actual = await importOriginal<typeof EditorAutosaveModule>()
   return {
@@ -25,6 +23,7 @@ import {
 } from './editor-external-watch-event-reconciliation'
 import { getEditorExternalWatchTargetKey as getWatchedTargetKey } from './editor-external-watch-targets'
 import { useAppStore } from '@/store'
+import { createTestStore } from '@/store/slices/store-test-helpers'
 import {
   getOpenFilesForExternalFileChange,
   notifyEditorExternalFileChange
@@ -101,6 +100,7 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
     worktreePath: '/repo',
     filePath: '/repo/notes.md',
     relativePath: 'notes.md',
+    language: 'markdown',
     mode: 'edit' as const,
     isDirty: false
   }
@@ -109,9 +109,10 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
     vi.clearAllMocks()
     vi.useFakeTimers()
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [fileNotes],
       setExternalMutation
-    } as never)
+    })
   })
 
   afterEach(() => {
@@ -126,18 +127,14 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
   }
 
   it('does not flash deleted when a create at the same path arrives in the next payload', () => {
-    // Simulates macOS atomic write: two back-to-back payloads, delete then create.
     const { handleFsChanged, dispose } = createExternalWatchEventHandler(findTarget)
     handleFsChanged(payload([{ kind: 'delete', absolutePath: '/repo/notes.md' }]))
 
-    // Advance less than the debounce window; the deleted tombstone must not
-    // have fired yet.
     vi.advanceTimersByTime(10)
     expect(setExternalMutation).not.toHaveBeenCalledWith('file-notes', 'deleted')
 
     handleFsChanged(payload([{ kind: 'create', absolutePath: '/repo/notes.md' }]))
 
-    // Flush anything remaining; the pending tombstone should have been cancelled.
     vi.advanceTimersByTime(500)
     expect(setExternalMutation).not.toHaveBeenCalledWith('file-notes', 'deleted')
 
@@ -164,8 +161,7 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       ])
     )
 
-    // The single-payload rename-correlated path must not defer — the decision
-    // is already correct because both events are visible at once.
+    // Same-payload delete/create already proves recreation; reconcile without deferral.
     expect(setExternalMutation).toHaveBeenCalledWith('file-notes', 'renamed')
 
     dispose()
@@ -178,14 +174,16 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       worktreePath: 'C:\\Repo',
       filePath: 'C:\\Repo\\notes.md',
       relativePath: 'notes.md',
+      language: 'markdown',
       mode: 'edit' as const,
       isDirty: false,
       runtimeEnvironmentId: 'env-1'
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [file],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([file] as never)
     const { handleFsChanged, dispose } = createExternalWatchEventHandler(() => ({
       worktreeId: 'wt-win',
@@ -216,14 +214,16 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       worktreePath: '//Server/Share/Repo',
       filePath: '//Server/Share/Repo/notes.md',
       relativePath: 'notes.md',
+      language: 'markdown',
       mode: 'edit' as const,
       isDirty: false,
       runtimeEnvironmentId: 'env-1'
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [file],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([file] as never)
     const { handleFsChanged, dispose } = createExternalWatchEventHandler(() => ({
       worktreeId: 'wt-unc',
@@ -249,9 +249,10 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
 
   it('does not drop external edits that arrive inside the self-write TTL', async () => {
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [fileNotes],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([fileNotes] as never)
     const readFile = vi.fn().mockResolvedValue({ content: 'agent edit', isBinary: false })
     vi.stubGlobal('window', { api: { fs: { readFile } } })
@@ -272,9 +273,10 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
 
   it('still suppresses the watcher echo from Orca self-writes', async () => {
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [fileNotes],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([fileNotes] as never)
     const readFile = vi.fn().mockResolvedValue({ content: 'orca save', isBinary: false })
     vi.stubGlobal('window', { api: { fs: { readFile } } })
@@ -294,9 +296,10 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       runtimeEnvironmentId: 'env-1'
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [runtimeFile],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([runtimeFile] as never)
     const readFile = vi.fn().mockResolvedValue({ content: 'local save', isBinary: false })
     vi.stubGlobal('window', { api: { fs: { readFile } } })
@@ -323,9 +326,10 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       runtimeEnvironmentId: 'env-1'
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [localFile, runtimeFile],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockImplementation((_files, notification) =>
       notification.runtimeEnvironmentId === 'env-1'
         ? ([runtimeFile] as never)
@@ -359,14 +363,16 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       worktreePath: '/repo',
       filePath: '/repo',
       relativePath: 'Changes',
+      language: 'markdown',
       mode: 'diff' as const,
       diffSource: 'combined-uncommitted' as const,
       isDirty: false
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [combinedDiffTab],
       setExternalMutation
-    } as never)
+    })
     // Why: combined tabs match no single path, so the per-path lookup stays empty.
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([])
     const { handleFsChanged, dispose } = createExternalWatchEventHandler(findTarget)
@@ -394,14 +400,16 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       worktreePath: '/repo',
       filePath: '/repo',
       relativePath: 'Changes',
+      language: 'markdown',
       mode: 'diff' as const,
       diffSource: 'combined-uncommitted' as const,
       isDirty: false
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [dirtyFile, combinedDiffTab],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([dirtyFile] as never)
     const { handleFsChanged, dispose } = createExternalWatchEventHandler(findTarget)
 
@@ -423,9 +431,10 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       isDirty: true
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [dirtyFile],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([dirtyFile] as never)
     const { handleFsChanged, dispose } = createExternalWatchEventHandler(findTarget)
 
@@ -448,14 +457,16 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       worktreePath: '/repo',
       filePath: '/repo/notes.md',
       relativePath: 'notes.md',
+      language: 'markdown',
       mode: 'diff' as const,
       diffSource: 'unstaged' as const,
       isDirty: false
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [dirtyFile, cleanDiffTab],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([dirtyFile, cleanDiffTab] as never)
     const { handleFsChanged, dispose } = createExternalWatchEventHandler(findTarget)
 
@@ -478,9 +489,10 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       isDirty: true
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [dirtyFile],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([dirtyFile] as never)
     const readFile = vi.fn().mockResolvedValue({ content: 'orca save', isBinary: false })
     vi.stubGlobal('window', { api: { fs: { readFile } } })
@@ -500,9 +512,10 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       isDirty: true
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [dirtyFile],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([dirtyFile] as never)
     const readFile = vi.fn().mockResolvedValue({ content: 'agent content', isBinary: false })
     vi.stubGlobal('window', { api: { fs: { readFile } } })
@@ -522,18 +535,17 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       isDirty: true
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [dirtyFile],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([dirtyFile] as never)
     const readFile = vi.fn().mockResolvedValue({ content: 'agent content', isBinary: false })
     vi.stubGlobal('window', { api: { fs: { readFile } } })
     const { handleFsChanged, dispose } = createExternalWatchEventHandler(findTarget)
 
     recordSelfWrite('/repo/notes.md', 'orca save')
-    // Why: SSH poll + event streams can deliver several payloads for one
-    // write; each verification is a full-file read, so a burst must share
-    // the in-flight read instead of stacking network round-trips.
+    // Burst SSH echo payloads must share full-file reads instead of stacking network round trips.
     handleFsChanged(payload([{ kind: 'update', absolutePath: '/repo/notes.md' }]))
     handleFsChanged(payload([{ kind: 'update', absolutePath: '/repo/notes.md' }]))
     handleFsChanged(payload([{ kind: 'update', absolutePath: '/repo/notes.md' }]))
@@ -550,9 +562,10 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       isDirty: true
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [dirtyFile],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([dirtyFile] as never)
     let resolveEchoRead: (value: { content: string; isBinary: boolean }) => void = () => {}
     const readFile = vi
@@ -569,7 +582,6 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
     recordSelfWrite('/repo/notes.md', 'orca save')
     handleFsChanged(payload([{ kind: 'update', absolutePath: '/repo/notes.md' }]))
     await vi.advanceTimersByTimeAsync(50)
-    // An agent writes while the slow echo read is still in flight.
     handleFsChanged(payload([{ kind: 'update', absolutePath: '/repo/notes.md' }]))
     await vi.advanceTimersByTimeAsync(50)
     resolveEchoRead({ content: 'orca save', isBinary: false })
@@ -587,14 +599,16 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       worktreePath: '/repo',
       filePath: '/repo/notes.md',
       relativePath: 'notes.md',
+      language: 'markdown',
       mode: 'diff' as const,
       diffSource: 'unstaged' as const,
       isDirty: true
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [dirtyDiffTab],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([dirtyDiffTab] as never)
     const { handleFsChanged, dispose } = createExternalWatchEventHandler(findTarget)
 
@@ -613,9 +627,10 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       externalMutation: 'changed' as const
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [dirtyChangedFile],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([dirtyChangedFile] as never)
     const { handleFsChanged, dispose } = createExternalWatchEventHandler(findTarget)
 
@@ -633,14 +648,16 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       worktreePath: '/repo',
       filePath: '/repo',
       relativePath: 'Branch Changes',
+      language: 'markdown',
       mode: 'diff' as const,
       diffSource: 'combined-branch' as const,
       isDirty: false
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [branchDiffTab],
       setExternalMutation
-    } as never)
+    })
     vi.mocked(getOpenFilesForExternalFileChange).mockReturnValue([])
     const { handleFsChanged, dispose } = createExternalWatchEventHandler(findTarget)
 
@@ -659,9 +676,10 @@ describe('createExternalWatchEventHandler tombstone coalescing', () => {
       runtimeEnvironmentId: 'env-1'
     }
     vi.mocked(useAppStore.getState).mockReturnValue({
+      ...createTestStore().getState(),
       openFiles: [localFile, runtimeFile],
       setExternalMutation
-    } as never)
+    })
     const { handleFsChanged, dispose } = createExternalWatchEventHandler(findTarget)
 
     handleFsChanged(payload([{ kind: 'delete', absolutePath: '/repo/notes.md' }]), 'env-1')

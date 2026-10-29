@@ -1,3 +1,4 @@
+import { agentSessionConversationView } from '../../../shared/agent-session-conversation-view'
 import { isFloatingWorkspaceId } from '../../../shared/floating-workspace-worktree'
 import { isAgentSessionCreateAdmissionRefusal } from '../../../shared/agent-session-definitive-refusal'
 import type { StructuredAgentSessionFirstMessage } from '../../../shared/structured-agent-session-create'
@@ -36,13 +37,11 @@ import { openingMessageOptions } from './structured-agent-session-execution-opti
 export type StructuredAgentSessionCreateOptions = {
   firstMessage?: StructuredAgentSessionFirstMessage
   hostLaunchDirectory?: string
-  /** The saved list the chat's options are admitted against, for the folder its picker read. */
   catalogModels?: Parameters<typeof reserveRequestFor>[0]['models']
-  /** Called after the durable create, before delivery can start the agent. */
+  /** Publish after durable creation, before agent delivery starts. */
   publishTab?: () => Promise<void>
 }
 
-/** Founds a chat and its opening message; only the delivery loop acquires the agent. */
 export function createStructuredAgentSession(
   context: StructuredAgentSessionAttachContext,
   callerKey: string,
@@ -171,16 +170,17 @@ async function foundConversation(
   const existing = context.sessions.get(sessionId)
   const opened = existing
     ? { session: existing }
-    : await openStructuredAgentSessionConversationJournal(deps, candidate.record).catch(
-        (error: unknown) => {
-          deps.logger.warn('opening the journal of a new chat failed', {
-            scope: 'create-journal-open',
-            sessionId,
-            error
-          })
-          throw journalOpenRefusalError(error)
-        }
-      )
+    : await openStructuredAgentSessionConversationJournal(
+        deps,
+        agentSessionConversationView(candidate.record)
+      ).catch((error: unknown) => {
+        deps.logger.warn('opening the journal of a new chat failed', {
+          scope: 'create-journal-open',
+          sessionId,
+          error
+        })
+        throw journalOpenRefusalError(error)
+      })
   const { session } = opened
   const fence = candidate.record.lease.runtimeFence
   let committed = replayed
@@ -284,7 +284,6 @@ async function foundConversation(
   }
 }
 
-/** Host entry points that open a chat: attach an existing one or create a new one. */
 export function structuredAgentSessionEntryDelegates(
   context: () => StructuredAgentSessionAttachContext
 ) {

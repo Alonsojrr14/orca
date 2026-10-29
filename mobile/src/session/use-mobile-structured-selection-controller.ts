@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import { createStructuredSessionSelectionController } from '../../../src/shared/structured-agent-session-selection-operations'
-import { persistMobileStructuredOptionPicks } from './mobile-native-chat-session-option-persistence'
+import { persistMobileStructuredOptionPicks } from './native-chat/input/mobile-native-chat-session-option-persistence'
 import type { RpcClient } from '../transport/rpc-client'
 
 /** Temporary operations belong to one phone authority, above its queried host answer. */
@@ -23,7 +23,7 @@ export function useMobileStructuredSelectionController(args: {
   )
   useEffect(() => () => controller.abandon(), [controller])
   const selectionRevision = useSyncExternalStore(controller.subscribe, controller.snapshot)
-  const terminal = controller.captureRead().join(',')
+  const terminal = controller.terminalSnapshot()
   useEffect(() => {
     if (terminal) {
       onRevalidate()

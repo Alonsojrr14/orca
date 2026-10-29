@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import type { AiVaultSession } from '../../../../shared/ai-vault-types'
 import type { AiVaultSearchHit } from '../../../../shared/ai-vault-search-types'
+import type { AgentDotState } from '@/components/AgentStateDot'
 import { AiVaultVirtualRow } from './AiVaultVirtualRow'
 
 const cliSession: AiVaultSession = {
@@ -35,7 +36,13 @@ afterEach(() => {
   cleanup()
 })
 
-function renderSession(session: AiVaultSession, blocked = false, searchHit?: AiVaultSearchHit) {
+function renderSession(
+  session: AiVaultSession,
+  blocked = false,
+  searchHit?: AiVaultSearchHit,
+  searchHitHostLabels?: ReadonlyMap<string, string>,
+  liveState: AgentDotState | null = null
+) {
   const buildResumeStartup = vi.fn(() => ({ command: session.resumeCommand }))
   const onCopyResume = vi.fn()
   const onResume = vi.fn()
@@ -52,10 +59,11 @@ function renderSession(session: AiVaultSession, blocked = false, searchHit?: AiV
         expandedSessionIds={new Set()}
         vaultScope="all"
         searchHits={searchHit ? new Map([[session.id, searchHit]]) : undefined}
+        searchHitHostLabels={searchHitHostLabels}
         buildResumeStartup={buildResumeStartup}
         getOriginalPaneTarget={() => null}
         isStructuredSessionOpen={() => false}
-        getSessionLiveState={() => null}
+        getSessionLiveState={() => liveState}
         getWorktreeInfo={() => null}
         getSessionResumeState={() => ({
           blocked,
@@ -87,6 +95,25 @@ function renderSession(session: AiVaultSession, blocked = false, searchHit?: AiV
   )
   return { buildResumeStartup, onCopyResume, onResume, onResumeInNewCli }
 }
+
+it('passes semantic status through the virtual row to the real glyph', () => {
+  renderSession(cliSession, false, undefined, undefined, 'monitoring')
+  expect(screen.getByLabelText('Monitoring background tasks')).toBeTruthy()
+})
+
+describe('AiVaultVirtualRow search hit source host', () => {
+  it('names the host a hit came from when hits span several hosts', () => {
+    renderSession(cliSession, false, undefined, new Map([['local', 'Local Mac']]))
+
+    expect(screen.getByTitle('Found on Local Mac').textContent).toBe('Local Mac')
+  })
+
+  it('shows no host badge when every hit came from one host', () => {
+    renderSession(cliSession)
+
+    expect(screen.queryByTitle(/^Found on /)).toBeNull()
+  })
+})
 
 describe('AiVaultVirtualRow resume command actions', () => {
   it('renders blocked IDE references without preparing an unsafe startup command', () => {

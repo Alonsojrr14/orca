@@ -1,238 +1,40 @@
 // @vitest-environment happy-dom
+import {
+  mocks,
+  LOCAL_TARGET,
+  PAIRED_TARGET,
+  FakeRpcCallError,
+  answer,
+  mutateWith,
+  PROVISIONAL,
+  PUBLISHED_UNATTACHED,
+  ATTACHED,
+  REOPENED,
+  renderOptions,
+  descriptor,
+  currentValue,
+  modelChoiceCount,
+  setOptionCalls,
+  HOST_CATALOG,
+  LIVE_OPTIONS,
+  SAVED_LIST,
+  SEED,
+  tick
+} from './use-structured-agent-session-options.test-fixture'
+import { act, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it } from 'vitest'
 
-import { act, renderHook, waitFor } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { RuntimeClientTarget } from '../../../../shared/runtime-client-target'
 import type { SelectionOutcome } from '../../../../shared/structured-agent-session-selection-operations'
 
-const mocks = vi.hoisted(() => {
-  const selection: { target: RuntimeClientTarget; agent: 'codex' | 'claude' } = {
-    target: { kind: 'local' },
-    agent: 'codex'
-  }
-  return {
-    call: vi.fn(),
-    enqueue: vi.fn(),
-    pick: vi.fn(),
-    ...selection,
-    hold: vi.fn<
-      (
-        sessionId: string,
-        id: string,
-        encoded: string,
-        picker?: unknown
-      ) => Promise<SelectionOutcome> | null
-    >(),
-    toastError: vi.fn<(message: string) => void>()
-  }
-})
-
-vi.mock('sonner', () => ({ toast: { error: mocks.toastError } }))
-
-vi.mock('@/runtime/structured-agent-session-client', () => ({
-  callStructuredAgentSession: mocks.call
-}))
-
-vi.mock('./native-chat-session-option-settings-write', () => ({
-  enqueueSessionOptionSettingsWrite: mocks.enqueue
-}))
-
-vi.mock('@/lib/structured-agent-session-launch-options', async () => {
-  const { structuredSessionSelectionController } =
-    await import('@/lib/structured-agent-session-selection-controller')
-  return {
-    holdStructuredAgentSessionLaunchOption: (...args: Parameters<typeof mocks.hold>) => {
-      const reply = mocks.hold(...args)
-      if (!reply) {
-        return null
-      }
-      const controller = structuredSessionSelectionController(mocks.target, args[0], mocks.agent)
-      const operation = controller.issue(
-        args[1],
-        args[2],
-        args[1] === 'model' ? args[2] : 'gpt-5.5'
-      )
-      void reply.then((outcome) => controller.settle(operation, outcome))
-      return operation.result
-    },
-    setStructuredSessionSelectionOption: async (
-      _target: unknown,
-      _session: string,
-      _fence: number,
-      key: string,
-      value: string
-    ) => {
-      const result = await mocks.pick('agentSession.setOption', 'agentSession.setOption', {
-        key,
-        value
-      })
-      return result
-        ? { kind: 'accepted', options: result.options ?? { [key]: value } }
-        : { kind: 'unknown' }
-    },
-    getStructuredAgentSessionLaunchSelection: () => null
-  }
-})
-
-import type { SessionOptionDescriptor } from '../../../../shared/native-chat-session-options'
-import type { StructuredAgentSessionMutate } from './use-structured-agent-session-mutate'
-import { useStructuredAgentSessionOptions } from './use-structured-agent-session-options'
-import { structuredAgentSessionSendSelection } from '../../../../shared/structured-agent-session-option-view'
-import { forgetStructuredSessionSelection } from '@/lib/structured-agent-session-selection-controller'
+import {
+  structuredAgentSessionSendSelection,
+  structuredAgentSessionMessageSelection
+} from '../../../../shared/structured-agent-session-option-view'
+import {
+  forgetStructuredSessionSelection,
+  structuredSessionSelectionController
+} from '@/lib/structured-agent-session-selection-controller'
 import { resetHostModelCatalogSnapshotsForTests } from '@/runtime/host-model-catalog-snapshots'
-
-const LOCAL_TARGET = { kind: 'local' } as const
-const PAIRED_TARGET = { kind: 'environment', environmentId: 'server-1' } as const
-
-class FakeRpcCallError extends Error {
-  constructor(readonly code: string) {
-    super(code)
-  }
-}
-
-type Answers = {
-  options?: () => Promise<unknown>
-  modelCatalog?: () => Promise<unknown>
-}
-
-function answer(answers: Answers): void {
-  mocks.call.mockImplementation((_target: unknown, method: string) => {
-    if (method === 'agentSession.options' && answers.options) {
-      return answers.options()
-    }
-    if (method === 'agentSession.modelCatalog' && answers.modelCatalog) {
-      return answers.modelCatalog()
-    }
-    return new Promise(() => {})
-  })
-}
-
-type MutateCall = (...args: unknown[]) => Promise<unknown>
-
-function mutateWith(reply: MutateCall): {
-  mutate: StructuredAgentSessionMutate
-  calls: ReturnType<typeof vi.fn<MutateCall>>
-} {
-  const calls = vi.fn<MutateCall>(reply)
-  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: each reply is null or the AgentSessionOptionResult shape the hook reads.
-  return { mutate: calls as unknown as StructuredAgentSessionMutate, calls }
-}
-
-type RenderProps = {
-  transportEnabled: boolean
-  fence: number | null
-  turnId?: string | null
-  launch?: 'new' | 'resume'
-  hidden?: boolean
-  launchSeedOptions?: Record<string, string>
-  worktree?: string
-  agent?: 'claude' | 'codex'
-  providerStarting?: boolean
-  paired?: boolean
-}
-
-// A new chat: create has not published, so there is no fence and no live read.
-const PROVISIONAL: RenderProps = { transportEnabled: false, fence: null, launch: 'new' }
-// The receipt lands first; attach delivers the fence on a later render.
-const PUBLISHED_UNATTACHED: RenderProps = { transportEnabled: true, fence: null, launch: 'new' }
-const ATTACHED: RenderProps = { transportEnabled: true, fence: 1, launch: 'new' }
-// A chat this view did not launch (reopened), attached before its first live read.
-const REOPENED: RenderProps = { transportEnabled: true, fence: 1 }
-
-function renderOptions(initial: RenderProps, mutate: StructuredAgentSessionMutate) {
-  mocks.pick.mockImplementation(mutate)
-  mocks.target = initial.paired ? PAIRED_TARGET : LOCAL_TARGET
-  mocks.agent = initial.agent ?? 'codex'
-  return renderHook(
-    (props: RenderProps) =>
-      useStructuredAgentSessionOptions({
-        agent: props.agent ?? 'codex',
-        sessionId: 'session-1',
-        target: props.paired ? PAIRED_TARGET : LOCAL_TARGET,
-        transportEnabled: props.transportEnabled,
-        isVisible: !props.hidden,
-        providerVisible: props.transportEnabled && !props.hidden,
-        ...(props.providerStarting ? { providerStarting: true } : {}),
-        fence: props.fence,
-        turnId: props.turnId ?? null,
-        unloadedTurnRevisions: undefined,
-        mutate,
-        ...(props.launch
-          ? {
-              launch: {
-                kind: props.launch,
-                ...(props.launchSeedOptions ? { seedOptions: props.launchSeedOptions } : {}),
-                ...(props.worktree ? { worktree: props.worktree } : {})
-              }
-            }
-          : {})
-      }),
-    { initialProps: initial }
-  )
-}
-
-function descriptor(snapshot: readonly SessionOptionDescriptor[], id: string) {
-  return snapshot.find((entry) => entry.id === id)
-}
-
-function currentValue(snapshot: readonly SessionOptionDescriptor[], id: string) {
-  const entry = descriptor(snapshot, id)
-  return entry?.kind.type === 'select' ? (entry.kind.currentValue ?? null) : null
-}
-
-function modelChoiceCount(snapshot: readonly SessionOptionDescriptor[]): number {
-  const model = descriptor(snapshot, 'model')
-  return model?.kind.type === 'select' ? model.kind.choices.length : 0
-}
-
-function setOptionCalls(calls: ReturnType<typeof vi.fn<MutateCall>>): unknown[] {
-  return calls.mock.calls
-    .filter(([method]) => method === 'agentSession.setOption')
-    .map(([, , fields]) => fields)
-}
-
-const HOST_CATALOG = {
-  origin: 'live-session',
-  models: [
-    {
-      id: 'gpt-hosted',
-      label: 'GPT Hosted',
-      isDefault: true,
-      efforts: [{ value: 'high', label: 'High' }]
-    }
-  ],
-  fetchedAt: 1_000
-}
-
-const LIVE_OPTIONS = {
-  models: [
-    { id: 'gpt-5.5', label: 'GPT-5.5', isDefault: true, efforts: [] },
-    { id: 'gpt-5.6-luna', label: 'GPT-5.6 Luna', efforts: [] }
-  ],
-  current: { model: 'gpt-5.5', confirmed: ['model'] }
-}
-
-// The account's saved list, naming the launch seed's model.
-const SAVED_LIST = {
-  origin: 'probe',
-  models: [
-    {
-      id: 'gpt-5.5',
-      label: 'GPT-5.5',
-      isDefault: true,
-      efforts: [
-        { value: 'medium', label: 'Medium' },
-        { value: 'high', label: 'High' }
-      ]
-    },
-    { id: 'gpt-5.6-luna', label: 'GPT-5.6 Luna', efforts: [] }
-  ],
-  fetchedAt: 1_000
-}
-
-const SEED = { model: 'gpt-5.5' }
-const tick = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0))
-
 describe('useStructuredAgentSessionOptions', () => {
   beforeEach(() => {
     forgetStructuredSessionSelection('session-1')
@@ -240,7 +42,59 @@ describe('useStructuredAgentSessionOptions', () => {
     mocks.enqueue.mockReset()
     mocks.hold.mockReset()
     mocks.toastError.mockReset()
+    mocks.coherentCatalog = false
     resetHostModelCatalogSnapshotsForTests()
+  })
+
+  it('retains a queried seed-catalog base through same-session attach and later metadata', async () => {
+    mocks.coherentCatalog = true
+    let landCatalog = (_value: unknown): void => {}
+    const catalog = new Promise((resolve) => (landCatalog = resolve))
+    let reads = 0
+    answer({
+      modelCatalog: () => catalog,
+      options: () =>
+        ++reads === 1
+          ? Promise.resolve({
+              ...LIVE_OPTIONS,
+              current: { model: 'gpt-5.5', defaulted: ['model'], acceptedInputSources: {} }
+            })
+          : new Promise(() => {})
+    })
+    const stale = { model: 'old-unlisted', effort: 'high' }
+    const props = { ...ATTACHED, launchSeedOptions: stale }
+    const { result, rerender, unmount } = renderOptions(props, mutateWith(async () => null).mutate)
+    const capture = () => {
+      const { optionStateRef, optionView } = result.current.sendSource
+      return structuredAgentSessionMessageSelection(
+        optionView(optionStateRef.current, stale, stale)
+      )
+    }
+    await waitFor(() =>
+      expect(result.current.sendSource.optionStateRef.current.optionsAnswerPresent).toBe(true)
+    )
+    expect(result.current.sendSource.optionStateRef.current.catalogSource).toBe('seed')
+    expect(capture()).toEqual({})
+    rerender({ ...props, fence: 2 })
+    expect(capture()).toEqual({})
+    expect(result.current.sendSource.optionStateRef.current.optionsAnswerPresent).toBe(true)
+    await act(async () => {
+      landCatalog({ ...SAVED_LIST, listingNamesConfiguredModel: true })
+      await tick()
+    })
+    expect(capture()).toEqual({})
+    await act(async () => {
+      structuredSessionSelectionController(LOCAL_TARGET, 'session-1', 'codex').issue(
+        'effort',
+        'low',
+        'gpt-5.5'
+      )
+    })
+    expect(capture()).toEqual({ effort: 'low' })
+    rerender({ ...props, fence: 3 })
+    expect(capture()).toEqual({ effort: 'low' })
+    unmount()
+    forgetStructuredSessionSelection('session-1')
   })
 
   it('upgrades the seed with the host catalog while the live read is still pending', async () => {
@@ -260,7 +114,7 @@ describe('useStructuredAgentSessionOptions', () => {
       mutateWith(async () => null).mutate
     )
     await tick()
-    // A read can start a background listing process; restored hidden tabs must not at startup.
+    // Hidden restored tabs must not start background listing processes on startup.
     expect(mocks.call).not.toHaveBeenCalled()
     rerender(REOPENED)
     await waitFor(() =>
@@ -293,7 +147,7 @@ describe('useStructuredAgentSessionOptions', () => {
       mutateWith(async () => null).mutate
     )
     await waitFor(() => expect(modelChoiceCount(result.current.optionSnapshot)).toBeGreaterThan(0))
-    // Nothing would carry the pick: no launch holds it and there is no fence to send it under.
+    // Without a holding launch or runtime fence, no path can apply the pick.
     expect(descriptor(result.current.optionSnapshot, 'model')).toMatchObject({
       settable: false,
       disabledReason: 'available-after-session-start'
@@ -314,30 +168,40 @@ describe('useStructuredAgentSessionOptions', () => {
         expect(descriptor(result.current.optionSnapshot, 'model')?.settable).toBe(true)
       )
       expect(modelChoiceCount(result.current.optionSnapshot)).toBeGreaterThan(0)
-      // The built-in label could differ from the host's, so the saved pick is not painted from it.
+      // Wait for host labels instead of flashing built-in labels for saved picks.
       expect(currentValue(result.current.optionSnapshot, 'model')).toBeNull()
       unmount()
     }
   })
 
-  it('lets the live options result win over a later host catalog answer', async () => {
-    let settleCatalog!: (value: unknown) => void
+  it('refreshes inventory after a live answer while keeping the chat choice', async () => {
+    let settleCatalog: ((value: unknown) => void) | undefined
     answer({
-      options: () => Promise.resolve(LIVE_OPTIONS),
+      options: () =>
+        Promise.resolve(
+          settleCatalog
+            ? { ...LIVE_OPTIONS, models: [...HOST_CATALOG.models, ...LIVE_OPTIONS.models] }
+            : LIVE_OPTIONS
+        ),
       modelCatalog: () => new Promise((resolve) => (settleCatalog = resolve))
     })
     const { result, unmount } = renderOptions(ATTACHED, mutateWith(async () => null).mutate)
     await waitFor(() =>
       expect(currentValue(result.current.optionSnapshot, 'model')).toBe('gpt-5.5')
     )
-    settleCatalog(HOST_CATALOG)
-    await tick()
+    await act(async () => {
+      if (!settleCatalog) {
+        throw new Error('Host catalog request has not started')
+      }
+      settleCatalog(HOST_CATALOG)
+      await tick()
+    })
     const model = descriptor(result.current.optionSnapshot, 'model')
     expect(model?.kind.type === 'select' ? model.kind.currentValue : null).toBe('gpt-5.5')
     expect(
       model?.kind.type === 'select' &&
         model.kind.choices.some((choice) => choice.value === 'gpt-hosted')
-    ).toBe(false)
+    ).toBe(true)
     unmount()
   })
 
@@ -393,7 +257,6 @@ describe('useStructuredAgentSessionOptions', () => {
       )
       unmount()
       mocks.call.mockClear()
-      // A resumed chat names no listed default, so its read asks nothing of the workspace.
       renderOptions(
         { ...PROVISIONAL, launch: 'resume', worktree: 'id:wt-1' },
         mutateWith(async () => null).mutate
@@ -427,7 +290,7 @@ describe('useStructuredAgentSessionOptions', () => {
         ).toBe(true)
       })
       expect(currentValue(result.current.optionSnapshot, 'model')).toBeNull()
-      // Every new chat names its workspace: the host decides whether its listed default runs there.
+      // New-chat reads include workspace identity so the host can resolve project overrides.
       expect(mocks.call).toHaveBeenCalledWith(LOCAL_TARGET, 'agentSession.modelCatalog', {
         agent: 'claude',
         sessionId: 'session-1',
@@ -536,7 +399,9 @@ describe('useStructuredAgentSessionOptions', () => {
       expect(currentValue(result.current.optionSnapshot, 'effort')).toBe('low')
       const { optionStateRef, optionView } = result.current.sendSource
       expect(
-        structuredAgentSessionSendSelection(optionView(optionStateRef.current, undefined))
+        structuredAgentSessionSendSelection(
+          optionView(optionStateRef.current, claude.launchSeedOptions)
+        )
       ).toEqual({ model: 'opus', effort: 'low' })
       await waitFor(() => expect(reads).toHaveLength(3))
       // Another client's newer answer retires the accepted operation without value equality.
@@ -585,7 +450,7 @@ describe('useStructuredAgentSessionOptions', () => {
       await act(async () => {
         accepted = await result.current.setStructuredOption('model', 'gpt-5.6-luna')
       })
-      // Published, not yet attached: nothing holds it and there is no fence to send it on.
+      // After publication but before attach, neither launch holding nor fenced writes can accept picks.
       expect(accepted).toBe(false)
       expect(calls).not.toHaveBeenCalled()
 
@@ -594,7 +459,7 @@ describe('useStructuredAgentSessionOptions', () => {
         await result.current.setStructuredOption('model', 'gpt-5.6-luna')
       })
       expect(setOptionCalls(calls)).toEqual([{ key: 'model', value: 'gpt-5.6-luna' }])
-      expect(mocks.hold).toHaveBeenCalledTimes(1)
+      expect(mocks.hold).not.toHaveBeenCalled()
       unmount()
     })
   })
@@ -602,6 +467,7 @@ describe('useStructuredAgentSessionOptions', () => {
   describe('before the provider starts', () => {
     it('keeps a picked effort visible after a model pick during startup', async () => {
       answer({
+        modelCatalog: async () => ({ origin: 'unknown' }),
         options: async () => ({
           models: ['opus', 'sonnet'].map((id) => ({
             id,
@@ -628,7 +494,7 @@ describe('useStructuredAgentSessionOptions', () => {
       unmount()
     })
 
-    // What a started Claude host reports: the model its settings or env make Claude run.
+    // A started host knows the model selected by Claude settings/environment.
     const CLAUDE_STARTED = {
       models: [
         { id: 'opus[1m]', label: 'Opus (1M context)', isDefault: true, efforts: [] },
@@ -647,7 +513,6 @@ describe('useStructuredAgentSessionOptions', () => {
         mutateWith(async () => null).mutate
       )
       await tick()
-      // The host has not read what Claude will run yet, so its answer would be a guess.
       expect(optionReads()).toBe(0)
       expect(currentValue(result.current.optionSnapshot, 'model')).toBeNull()
 
@@ -655,7 +520,6 @@ describe('useStructuredAgentSessionOptions', () => {
       await waitFor(() =>
         expect(currentValue(result.current.optionSnapshot, 'model')).toBe('haiku')
       )
-      // Unconfirmed until a turn reports it.
       expect(descriptor(result.current.optionSnapshot, 'model')?.valueSource).toBe('dispatched')
       expect(optionReads()).toBe(1)
       unmount()
@@ -673,13 +537,11 @@ describe('useStructuredAgentSessionOptions', () => {
       )
 
       rerender({ ...starting, providerStarting: false })
-      // Re-read once started: only then has the host read what the provider will run.
       await waitFor(() => expect(optionReads()).toBe(2))
       unmount()
     })
   })
 
-  // A paired server names the saved selection its create seeds when it admits the chat.
   describe("a paired server's new chat", () => {
     it("shows the server's seed once its list answers and remembers a pick on the server under its model", async () => {
       answer({ modelCatalog: () => Promise.resolve(SAVED_LIST) })
@@ -706,7 +568,6 @@ describe('useStructuredAgentSessionOptions', () => {
       unmount()
     })
 
-    // A server whose user never saved a model starts the CLI default, as a local chat does.
     it('shows the CLI default and takes picks when the server saved no model', async () => {
       answer({ modelCatalog: () => Promise.resolve(HOST_CATALOG) })
       mocks.hold.mockResolvedValue({ kind: 'accepted', options: { model: 'gpt-hosted' } })
@@ -755,7 +616,6 @@ describe('useStructuredAgentSessionOptions', () => {
         { id: 'sonnet', label: 'Sonnet', isDefault: false, efforts }
       ]
     }
-    // The at-rest answer for a chat with nothing saved (readStructuredAgentSessionOptionsAtRest).
     const AT_REST = {
       models: FRESH_LIST.models,
       listedModelIds: ['opus', 'sonnet'],
@@ -793,7 +653,7 @@ describe('useStructuredAgentSessionOptions', () => {
   })
 
   it.each([
-    // Claude replies with the values Orca set, so an effort it keeps is not in the reply.
+    // Claude replies only with values Orca set; retained effort is omitted.
     {
       agent: 'claude' as const,
       tiers: [[], []],
@@ -801,7 +661,7 @@ describe('useStructuredAgentSessionOptions', () => {
       reply: {},
       shown: ['effort', 'high']
     },
-    // Codex writes Standard when the new model lacks the tier, which shows with no later read.
+    // Codex immediately reports Standard when the new model lacks the selected tier.
     {
       agent: 'codex' as const,
       tiers: [[{ value: 'priority', label: 'Fast' }], [{ value: 'flex', label: 'Flex' }]],
@@ -809,7 +669,7 @@ describe('useStructuredAgentSessionOptions', () => {
       reply: { serviceTier: 'default' },
       shown: ['serviceTier', 'default']
     },
-    // A configured tier no model lists (Flex) still runs, so it shows as held.
+    // Unlisted configured Flex remains effective and must stay shown as held.
     {
       agent: 'codex' as const,
       tiers: [[{ value: 'priority', label: 'Fast' }], [{ value: 'priority', label: 'Fast' }]],

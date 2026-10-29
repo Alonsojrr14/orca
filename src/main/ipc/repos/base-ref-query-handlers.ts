@@ -7,8 +7,13 @@ import {
   isRepoSearchRefsRequestLimit
 } from '../../../shared/repo-search-limits'
 import { isFolderRepo } from '../../../shared/repo-kind'
-import { getRepoExecutionHostId, type ExecutionHostId } from '../../../shared/execution-host'
+import {
+  getRepoExecutionHostId,
+  getRepoRoutingConnectionId,
+  type ExecutionHostId
+} from '../../../shared/execution-host'
 import { getBaseRefDefault, getRemoteCount, searchBaseRefDetails } from '../../git/repo'
+import { getProjectRuntimeReadGitOptions } from '../../project-runtime-git-options'
 
 export function registerBaseRefQueryHandlers(store: Store): void {
   ipcMain.handle(
@@ -19,17 +24,18 @@ export function registerBaseRefQueryHandlers(store: Store): void {
     ): Promise<BaseRefDefaultResult> => {
       const repo = getRepoForExecutionHost(store, args.repoId, args.hostId)
       if (!repo || isFolderRepo(repo)) {
-        // Why: folder repos have no git state for a base ref; return null + 0 so the renderer skips a fabricated default.
+        // Folder projects have no Git base ref; null prevents a fabricated renderer default.
         return { defaultBaseRef: null, remoteCount: 0 }
       }
-      // Why: an SSH repo's git data lives on a host this process does not serve.
-      if (repo.connectionId) {
+      // SSH Git state is unavailable to this local handler.
+      if (getRepoRoutingConnectionId(repo)) {
         return { defaultBaseRef: null, remoteCount: 0 }
       }
-      // Why: run in parallel; a remote-count failure must not break default detection.
+      // Where the project's runtime runs Git; a runtime needing repair reads with host Git.
+      const git = getProjectRuntimeReadGitOptions(store, repo)
       const [defaultBaseRef, remoteCount] = await Promise.all([
-        getBaseRefDefault(repo.path),
-        getRemoteCount(repo.path)
+        getBaseRefDefault(repo.path, git),
+        getRemoteCount(repo.path, git)
       ])
       return { defaultBaseRef, remoteCount }
     }
@@ -68,13 +74,18 @@ async function searchBaseRefDetailsForRepo(
   if (!isRepoSearchRefsRequestLimit(requestedLimit)) {
     return []
   }
-  // Keep the public IPC shape forgiving while bounding Git and retained results
-  // for callers that request an unusually large page.
+  // Bound Git work and retained results while accepting oversized IPC page requests.
   const limit = clampRepoSearchRefsLimit(requestedLimit)
-  if (repo.connectionId) {
+  if (getRepoRoutingConnectionId(repo)) {
     return []
   }
-  return searchBaseRefDetails(repo.path, args.query, limit)
+  return searchBaseRefDetails(
+    repo.path,
+    args.query,
+    limit,
+    true,
+    getProjectRuntimeReadGitOptions(store, repo)
+  )
 }
 
 function getRepoForExecutionHost(
@@ -85,7 +96,7 @@ function getRepoForExecutionHost(
   if (!hostId) {
     return store.getRepo(repoId) ?? null
   }
-  // Why: repo ids can collide across local and SSH hosts; read must use the same host the Settings pane selected for the write.
+  // Repo IDs can collide across hosts; read the host selected for the corresponding write.
   return (
     store
       .getRepos()

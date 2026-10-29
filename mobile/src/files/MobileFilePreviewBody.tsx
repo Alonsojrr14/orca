@@ -2,6 +2,7 @@ import { MobileFileMediaPreview } from './MobileFileMediaPreview'
 import type { MobileFilePreviewRpcSender } from './mobile-file-preview-operations'
 import { ActivityIndicator, Image, ScrollView, Text, View } from 'react-native'
 import { colors } from '../theme/mobile-theme'
+import { useMobileColorScheme } from '../theme/use-mobile-color-scheme'
 import type { MobileFilePreviewResult } from './mobile-file-preview-request'
 import { MobileFileMarkdownPreview } from './MobileFileMarkdownPreview'
 import { MobileFilePreviewEditableSource } from './MobileFilePreviewEditableSource'
@@ -13,6 +14,7 @@ import { MobileLoadErrorState } from '../components/MobileLoadErrorState'
 type Props = {
   preview: MobileFilePreviewResult
   client?: MobileFilePreviewRpcSender | null
+  worktreeId?: string
   relativePath: string
   title: string
   editable: boolean
@@ -23,11 +25,13 @@ type Props = {
   imageHeight: number
   onDraftChange: (content: string) => void
   onImageError: () => void
+  onOpenFile?: (pathText: string) => void
   /** Null where the only retry is a re-dial this document cannot make. */
   onRetry: (() => void) | null
 }
 
 export function MobileFilePreviewBody({ preview, ...options }: Props) {
+  useMobileColorScheme()
   if (preview.status === 'loading') {
     return (
       <View style={styles.state}>
@@ -84,10 +88,13 @@ export function MobileFilePreviewBody({ preview, ...options }: Props) {
     ) : (
       <MobileFileMarkdownPreview
         relativePath={options.relativePath}
+        client={options.client}
+        worktreeId={options.worktreeId}
         content={preview.content}
         truncated={preview.truncated}
         byteLength={preview.byteLength}
         initialLine={options.lineColumn?.line}
+        onOpenFile={options.onOpenFile}
       />
     )
   }

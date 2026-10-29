@@ -14,12 +14,12 @@ import { countTerminalGestureInputSequences } from '../terminal/terminal-gesture
 import {
   isGestureMouseTrackingMode,
   TERMINAL_GESTURE_INPUT_BUCKET_CAPACITY,
-  TERMINAL_GESTURE_INPUT_FLUSH_DELAY_MS,
   TERMINAL_GESTURE_INPUT_MAX_PENDING_SEQUENCES,
   TERMINAL_GESTURE_INPUT_MAX_QUEUE_AGE_MS,
   TERMINAL_GESTURE_INPUT_REFILL_PER_SECOND
 } from './mobile-session-route-helpers'
 import type { Terminal, TerminalGestureInputQueue } from './mobile-session-route-types'
+import type { TerminalPointerInput } from '../terminal/terminal-webview-contract'
 import type { MobileSessionFileActionsModel } from './use-mobile-session-file-actions'
 
 export function useMobileSessionTerminalInput(scope: MobileSessionFileActionsModel) {
@@ -41,9 +41,14 @@ export function useMobileSessionTerminalInput(scope: MobileSessionFileActionsMod
     activeHandleRef,
     activeSessionTabTypeRef,
     clearPendingLiveInputCommit,
+    liveInputTerminalHandlesRef,
+    sendLiveInputClick,
+    sendLiveTerminalInputRef,
     showToast,
-    getTerminalRef,
-    hostQueryReplyInputSupportedRef
+    hostQueryReplyInputSupportedRef,
+    hostProgramStatusSupportedRef,
+    unsubscribeTerminal,
+    subscribeToTerminal
   } = scope
   const toggleLiveInput = useCallback(() => {
     if (!activeHandle) {
@@ -72,7 +77,7 @@ export function useMobileSessionTerminalInput(scope: MobileSessionFileActionsMod
         current.tokens + elapsedSeconds * TERMINAL_GESTURE_INPUT_REFILL_PER_SECOND
       )
 
-      // Why: tokens count terminal control sequences, not WebView messages; one gesture may batch up to 32 wheel/key reports.
+      // Rate-limit control sequences, not WebView messages; one gesture can batch many reports.
       if (tokens < sequenceCount) {
         terminalGestureInputBucketsRef.current.set(handle, { tokens, lastRefillMs: now })
         return false
@@ -111,7 +116,7 @@ export function useMobileSessionTerminalInput(scope: MobileSessionFileActionsMod
 
     terminalGestureInputInFlightRef.current.add(handle)
     try {
-      // Why: gesture arrows parked across a reconnect would move a TUI long after the swipe.
+      // Drop queued gesture arrows on disconnect so reconnect cannot move the TUI long after the swipe.
       const response = await terminalInputSend.request(
         rpc,
         buildTerminalSendParams({
@@ -154,6 +159,9 @@ export function useMobileSessionTerminalInput(scope: MobileSessionFileActionsMod
         current.bytes += bytes
         current.sequenceCount += sequenceCount
         current.lastUpdatedMs = now
+        if (!terminalGestureInputInFlightRef.current.has(handle)) {
+          void flushTerminalGestureInput(handle)
+        }
         return
       }
 
@@ -164,14 +172,10 @@ export function useMobileSessionTerminalInput(scope: MobileSessionFileActionsMod
         if (!terminalGestureInputInFlightRef.current.has(handle)) {
           void flushTerminalGestureInput(handle)
         } else {
-          // Why: cap is a soft guideline — append instead of dropping queued bytes; the in-flight flush picks up the merged queue.
+          // Merge beyond the soft cap rather than losing bytes; the in-flight flush drains the appended queue.
           current.bytes += bytes
           current.sequenceCount += sequenceCount
           current.lastUpdatedMs = now
-          current.timer = setTimeout(() => {
-            current.timer = null
-            void flushTerminalGestureInput(handle)
-          }, TERMINAL_GESTURE_INPUT_FLUSH_DELAY_MS)
           return
         }
       }
@@ -182,17 +186,16 @@ export function useMobileSessionTerminalInput(scope: MobileSessionFileActionsMod
         timer: null,
         lastUpdatedMs: now
       }
-      queued.timer = setTimeout(() => {
-        queued.timer = null
-        void flushTerminalGestureInput(handle)
-      }, TERMINAL_GESTURE_INPUT_FLUSH_DELAY_MS)
       terminalGestureInputQueuesRef.current.set(handle, queued)
+      if (!terminalGestureInputInFlightRef.current.has(handle)) {
+        void flushTerminalGestureInput(handle)
+      }
     },
     [flushTerminalGestureInput]
   )
 
   const handleTerminalInput = useCallback(
-    async (handle: string, bytes: string) => {
+    async (handle: string, bytes: string, input?: TerminalPointerInput) => {
       if (!client || connState !== 'connected' || bytes.length === 0) {
         return
       }
@@ -200,7 +203,7 @@ export function useMobileSessionTerminalInput(scope: MobileSessionFileActionsMod
         return
       }
       const modes = ptyModesRef.current.get(handle)
-      // Why: WebView gesture bytes can become PTY input, so gate mouse reports behind validation and SSH-safe rate limiting.
+      // Validate and rate-limit mouse reports because WebView gestures can become remote PTY input.
       if (!modes?.altScreen && !isGestureMouseTrackingMode(modes?.mouseTrackingMode)) {
         return
       }
@@ -208,12 +211,19 @@ export function useMobileSessionTerminalInput(scope: MobileSessionFileActionsMod
       if (sequenceCount == null) {
         return
       }
+      if (input?.click) {
+        // A deliberate click must survive wheel limits and follow text queued for the old cursor.
+        void (liveInputTerminalHandlesRef.current.has(handle)
+          ? sendLiveInputClick(handle, bytes)
+          : sendLiveTerminalInputRef.current(handle, bytes))
+        return
+      }
       if (!allowTerminalGestureInput(handle, sequenceCount)) {
         return
       }
       enqueueTerminalGestureInput(handle, bytes, sequenceCount)
     },
-    [allowTerminalGestureInput, client, connState, enqueueTerminalGestureInput]
+    [allowTerminalGestureInput, client, connState, enqueueTerminalGestureInput, sendLiveInputClick]
   )
 
   const handleTerminalQueryReply = useCallback((handle: string, bytes: string) => {
@@ -224,6 +234,7 @@ export function useMobileSessionTerminalInput(scope: MobileSessionFileActionsMod
       connected: connStateRef.current === 'connected',
       handle,
       hostSupportsQueryReplyInput: hostQueryReplyInputSupportedRef.current,
+      hostSupportsProgramStatus: hostProgramStatusSupportedRef.current,
       subscribedTerminals: terminalUnsubsRef.current
     })
   }, [])
@@ -232,13 +243,31 @@ export function useMobileSessionTerminalInput(scope: MobileSessionFileActionsMod
     if (!client) {
       return
     }
-    getTerminalRef(target.handle)?.clear()
+    // Why: only a different client is stale; the WebView handle is rebuilt on re-render and a path cutover keeps the same host.
+    const isCurrent = () => clientRef.current === client
     try {
-      // The reply is unread: main toasted success on any fulfilled envelope, refusal included.
-      await terminalBufferClear.request(client, { terminal: target.handle })
+      const response = await terminalBufferClear.request(
+        client,
+        { terminal: target.handle },
+        { failWhenDisconnected: true }
+      )
+      if (!isCurrent()) {
+        return
+      }
+      if (terminalBufferClear.interpret(response) !== true) {
+        showToast("Couldn't clear terminal", 1500)
+        return
+      }
+      // Why: an unsubscribed tab draws a fresh snapshot when it next subscribes; subscribing it here would leak a background stream.
+      if (terminalUnsubsRef.current.has(target.handle)) {
+        unsubscribeTerminal(target.handle)
+        subscribeToTerminal(target.handle)
+      }
       showToast('Terminal cleared')
     } catch {
-      showToast("Couldn't clear terminal", 1500)
+      if (isCurrent()) {
+        showToast("Couldn't clear terminal", 1500)
+      }
     }
   }
   return {

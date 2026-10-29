@@ -72,7 +72,8 @@ it.each(['local', 'environment'] as const)(
         return { kind: 'accepted' as const, options: { [operation.key]: operation.value } }
       })
     controller.issue('model', 'sonnet', null)
-    const draining = dispatch()
+    dispatch()
+    const draining = controller.drain()
     await vi.waitFor(() => expect(enqueued).toEqual(['model']))
     controller.issue('permissionMode', 'plan', null)
     controller.issue('serviceTier', 'priority', 'sonnet')

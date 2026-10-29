@@ -72,7 +72,6 @@ describe('what each composer send carries', () => {
     expect(sendOptionsFor(true, { model: 'opus[1m]', effort: 'low' })()).toMatchObject({
       options: { model: 'opus[1m]', effort: 'low' }
     })
-    // A model the list lacks runs as picked.
     expect(sendOptionsFor(true, { model: 'claude-retired' })()).toMatchObject({
       options: { model: 'claude-retired' }
     })
@@ -127,7 +126,7 @@ it('desktop capture freezes only accepted echoed inputs; empty origin differs fr
     { ...answer, current: { ...answer.current, acceptedInputSources: undefined } }
   )
   expect(result.current()).toEqual({
-    selection: { model: 'opus[1m]', fastMode: 'false' }
+    selection: { model: 'opus[1m]', effort: 'high', fastMode: 'false' }
   })
   expect(captured).toEqual({ selection: { model: 'opus[1m]', fastMode: 'false' } })
 })

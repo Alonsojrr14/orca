@@ -29,7 +29,7 @@ const harness = vi.hoisted(() => {
 
 vi.mock('@/store', () => ({
   useAppStore: Object.assign((selector: (state: unknown) => unknown) => selector({}), {
-    getState: () => ({ openFiles: [], setPendingDiskBaselineVerification: vi.fn() })
+    getState: () => ({ openFiles: [] })
   })
 }))
 vi.mock('./editor-external-watch-targets', () => ({
@@ -70,6 +70,7 @@ function resyncOf(target: TestWatchTarget): [unknown, string | null, TestWatchTa
     {
       worktreePath: target.worktreePath,
       events: [{ kind: 'overflow', absolutePath: target.worktreePath }],
+      resync: true,
       connectionId: target.connectionId
     },
     target.runtimeEnvironmentId,

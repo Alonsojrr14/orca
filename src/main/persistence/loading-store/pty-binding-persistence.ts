@@ -1,6 +1,5 @@
-import { isDeepStrictEqual } from 'node:util'
 import { LOCAL_EXECUTION_HOST_ID, parseExecutionHostId } from '../../../shared/execution-host'
-import { isTerminalLeafId } from '../../../shared/stable-pane-id'
+import { makePaneKey } from '../../../shared/stable-pane-id'
 import type { WorkspaceSessionState } from '../../../shared/workspace-session-state-types'
 import { rollbackFailedPtyBinding } from './pty-binding-write-rollback'
 import { cloneWorkspaceSessionState } from '../restoring-sessions/session-owner-fields'
@@ -16,6 +15,7 @@ import {
   type UnstartedPaneKept
 } from '../terminal-topology/unstarted-pane-withdraw'
 import { evaluatePtyBindingFastLane } from './pty-binding-fast-lane'
+import { durabilityOnlyBindingResult, isDurabilityOnlyMatch } from './pty-binding-durability-only'
 import { ptyBindingIsRefused } from './pty-binding-refusals'
 import { applyPtyBinding } from './pty-binding-session-update'
 import {
@@ -60,6 +60,15 @@ type PtyBindingPersistenceOperationsRuntime = Pick<
   | 'ptyBindingGenerations'
 >
 
+function markPtyBindingSessionDirty(
+  runtime: Pick<StoreRuntimeState, 'dirtyProfileStateDomains'>,
+  hostId: ReturnType<typeof resolveHostId>
+): void {
+  runtime.dirtyProfileStateDomains?.add(
+    hostId === LOCAL_EXECUTION_HOST_ID ? 'workspaceSession' : 'workspaceSessionsByHostId'
+  )
+}
+
 export type PersistPtyBindingArgs = {
   worktreeId: string
   tabId: string
@@ -67,22 +76,17 @@ export type PersistPtyBindingArgs = {
   ptyId: string
   incarnationId?: string
   startupCwd?: string
+  correctStartupCwd?: string
   expectedBinding?: { ptyId: string; incarnationId?: string }
   expectedSourceBinding?: PtyBindingSourceExpectation
-  /**
-   * Defaults true, which is what `pty:spawn` needs — it can beat the debounced layout writer
-   * and must be able to mint the surface it is binding. A reattach is the opposite: the pane
-   * either still exists or the user closed it, so creating one grafts back a tab they closed.
-   * Callers pass false only once absence is meaningful; see the relay's reattach bind.
-   */
+  /** Spawns may precede layout saves; reattach must disable creation once absence proves a user close. */
   mayCreate?: boolean
-  /** Reattach must not revive a surface a prior build durably recorded as retired. */
   mayReviveRetiredSurface?: boolean
-  /** Span metadata only; see `PtyBindingOrigin`. The write path never reads it. */
+  /** Tracing metadata only; persistence must not branch on origin. */
   origin?: PtyBindingOrigin
-  /** Where a new leaf goes. Report-only for now: the span records whether it names today's tab. */
+  /** Report-only until main owns layout; then determines split placement. */
   placement?: TerminalPanePlacement
-  /** Replaces a gone process: with no `incarnationId`, the pane's recorded one is cleared. */
+  /** Replacement without incarnationId clears the saved incarnation. */
   dropsIncarnation?: true
 }
 
@@ -102,10 +106,11 @@ export class PtyBindingPersistenceOperations {
     this[ptyBindingPersistenceOperationsContext] = { runtime, sessions }
   }
 
-  /** Clears a stopped process's binding, keeping the pane; fenced on the id, which is dead in any incarnation. */
+  /** Preserve the pane while clearing its dead binding; an incarnation fence narrows absence evidence. */
   async retirePtyBinding(
     binding: Pick<PersistPtyBindingArgs, 'worktreeId' | 'tabId' | 'leafId' | 'ptyId'>,
-    hostId?: string | null
+    hostId?: string | null,
+    fence?: { incarnationId: string | undefined }
   ): Promise<boolean> {
     const { runtime, sessions } = this[ptyBindingPersistenceOperationsContext]
     const resolved = resolveHostId(hostId)
@@ -118,9 +123,7 @@ export class PtyBindingPersistenceOperations {
           [resolved]: session
         }
       }
-      runtime.dirtyProfileStateDomains?.add(
-        resolved === LOCAL_EXECUTION_HOST_ID ? 'workspaceSession' : 'workspaceSessionsByHostId'
-      )
+      markPtyBindingSessionDirty(runtime, resolved)
     }
     return runtime.runDurableMutation(() => {
       const session = sessions.getWorkspaceSession(resolved)
@@ -132,12 +135,19 @@ export class PtyBindingPersistenceOperations {
       if (currentId !== binding.ptyId) {
         return { value: false, persist: false }
       }
+      if (
+        fence &&
+        session.terminalPtyIncarnationsByPaneKey?.[makePaneKey(binding.tabId, binding.leafId)] !==
+          fence.incarnationId
+      ) {
+        return { value: false, persist: false }
+      }
       if (!session.tabsByWorktree[binding.worktreeId]?.some((tab) => tab.id === binding.tabId)) {
         return { value: false, persist: false }
       }
       const before = cloneWorkspaceSessionState(session)
       const retired = clearReplacedPaneBinding(session, { ...binding, parentTabId: binding.tabId })
-      // Host retirement must not run renderer snapshot repair, which would put the old binding back.
+      // Publish directly: renderer snapshot repair would revive the retired binding.
       publish(retired)
       bumpPtyBindingGeneration(runtime, resolved, binding.leafId)
       const staged = cloneWorkspaceSessionState(retired)
@@ -173,7 +183,7 @@ export class PtyBindingPersistenceOperations {
         if (!args) {
           return { value: false, persist: false }
         }
-        // Measure the admitted binding operation; queue time precedes its current-state checks.
+        // Measure admitted execution after queue wait, before current-state checks.
         span = startPtyBindingSpan({
           hostKind: parseExecutionHostId(resolvedHostId)?.kind ?? 'local',
           origin: args.origin ?? 'unknown',
@@ -200,9 +210,15 @@ export class PtyBindingPersistenceOperations {
         span.setEligibility(verdict)
         if (verdict.eligible) {
           outcome = 'fast_lane'
+          span.setPath('durable_match')
           return { value: true, persist: false }
         }
-        // After the fast lane, so a no-op rebind skips the scan.
+        if (isDurabilityOnlyMatch(verdict)) {
+          span.setPath('durability_only')
+          markPtyBindingSessionDirty(runtime, resolvedHostId)
+          return durabilityOnlyBindingResult(resolvedHostId)
+        }
+        span.setPath('mutation')
         reportPtyBindingOwnerConflict(span, args, resolvedHostId, partitions)
         return {
           value: true,
@@ -218,17 +234,13 @@ export class PtyBindingPersistenceOperations {
     }
   }
 
-  /**
-   * Detach-to-new-tab, committed before the renderer mounts the target tab (STA-9259). It lives on
-   * the binding domain only for its runtime and partition access; the commit module owns the write.
-   */
+  /** Commit detached-tab moves before the renderer mounts the destination. */
   moveTerminalLeafToNewTab(request: TerminalLeafMoveRequest): Promise<TerminalLeafMoveResult> {
     return this[ptyBindingPersistenceOperationsContext].runtime.runDurableMutation(
       moveLeaf(request, this.topology())
     )
   }
 
-  /** Writes a runtime-started pane before its terminal starts; the commit module owns the write. */
   admitTerminalPane(
     admission: TerminalPaneAdmission,
     hostId?: string | null
@@ -238,7 +250,7 @@ export class PtyBindingPersistenceOperations {
     )
   }
 
-  /** With `stillStarting`, a pane whose terminal bound or is starting stays (UnstartedPaneKept). */
+  /** stillStarting preserves panes that bound or began starting while withdrawal waited. */
   withdrawTerminalPane(
     pane: CommandOf<'closePane'>,
     hostId?: string | null,
@@ -286,28 +298,10 @@ function writePtyBinding(
     }
     applyPtyBinding(args, session, bindingWorktreeId, paneKey)
     bumpPtyBindingGeneration(runtime, resolvedHostId, args.leafId)
-    runtime.dirtyProfileStateDomains?.add(
-      resolvedHostId === LOCAL_EXECUTION_HOST_ID ? 'workspaceSession' : 'workspaceSessionsByHostId'
-    )
+    markPtyBindingSessionDirty(runtime, resolvedHostId)
     const boundSession = cloneWorkspaceSessionState(session)
     return () => {
       const current = sessions.getWorkspaceSession(resolvedHostId)
-      const ownerState = (value: WorkspaceSessionState) => {
-        const tab = value.tabsByWorktree[bindingWorktreeId]?.find((tab) => tab.id === args.tabId)
-        return {
-          createdAt: tab?.createdAt,
-          generation: tab?.generation,
-          worktreeId: tab?.worktreeId,
-          ptyId: isTerminalLeafId(args.leafId)
-            ? value.terminalLayoutsByTabId[args.tabId]?.ptyIdsByLeafId?.[args.leafId]
-            : tab?.ptyId,
-          incarnation: value.terminalPtyIncarnationsByPaneKey?.[paneKey]
-        }
-      }
-      // Presentation edits do not replace the binding that must be rolled back.
-      if (!isDeepStrictEqual(ownerState(current), ownerState(boundSession))) {
-        return
-      }
       const rolledBack = rollbackFailedPtyBinding(
         sessionBeforeBinding,
         boundSession,
