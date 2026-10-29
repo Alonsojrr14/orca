@@ -7,7 +7,11 @@ import { releaseDeferredCwdFence } from './fresh-spawn-start'
 import { findTerminalTabForPane } from './terminal-tab-id'
 import { isHostMirroredSleepingRecord } from '@/lib/host-mirrored-pane-liveness'
 import { parsePaneKey } from '../../../../../shared/stable-pane-id'
-import { isWorkspaceSleepRecord } from '../../../../../shared/workspace-sleep'
+import {
+  isWorkspaceSleepRecord,
+  WORKTREE_TERMINALS_SLEEPING_ERROR
+} from '../../../../../shared/workspace-sleep'
+import { readIpcErrorDetail } from '@/lib/ipc-error'
 import type { ColdRestoreAgentResumeStartup, FreshSpawnOptions } from './fresh-spawn-types'
 import type { ConnectPanePtySession } from './connect-pane-pty-session'
 
@@ -31,6 +35,28 @@ export function mainResumedSleepPane(
   return { worktreeId: session.deps.worktreeId, tabId: pane.tabId, leafId: pane.leafId }
 }
 
+export function isMainResumedSleepPaneCurrent(
+  session: ConnectPanePtySession,
+  startup: ColdRestoreAgentResumeStartup,
+  generation?: number
+): boolean {
+  const tab = findTerminalTabForPane(
+    useAppStore.getState(),
+    session.deps.worktreeId,
+    session.deps.tabId
+  )
+  return (
+    !session.disposed &&
+    !hasWorktreeTeardownStarted(
+      useAppStore.getState().deleteStateByWorktreeId?.[session.deps.worktreeId]
+    ) &&
+    !startup.resumeSource?.cancelled &&
+    (startup.isCurrent?.() ?? true) &&
+    (tab?.generation ?? 0) === session.tabGeneration &&
+    (generation === undefined || generation === session.transportStreamGeneration)
+  )
+}
+
 /** Asks main to resume the pane, then spawns it plainly so the spawn attaches to main's terminal. */
 export async function attachToMainResumedSleepPane(
   session: ConnectPanePtySession,
@@ -40,15 +66,7 @@ export async function attachToMainResumedSleepPane(
   automatic?: boolean
 ): Promise<string | null> {
   const generation = session.transportStreamGeneration
-  const isCurrent = (): boolean =>
-    !session.disposed &&
-    !hasWorktreeTeardownStarted(
-      useAppStore.getState().deleteStateByWorktreeId?.[pane.worktreeId]
-    ) &&
-    !startup.resumeSource?.cancelled &&
-    (startup.isCurrent?.() ?? true) &&
-    (findTerminalTabForPane(useAppStore.getState(), pane.worktreeId, pane.tabId)?.generation ??
-      0) === session.tabGeneration
+  const isCurrent = (): boolean => isMainResumedSleepPaneCurrent(session, startup)
   if (!isCurrent()) {
     return null
   }
@@ -64,6 +82,9 @@ export async function attachToMainResumedSleepPane(
     if (deferral) {
       session.enterSpawnDeferredSleep(deferral, startup, options, visibleAtSpawn)
       return null
+    }
+    if (automatic && readIpcErrorDetail(error) !== WORKTREE_TERMINALS_SLEEPING_ERROR) {
+      throw error
     }
   }
   if (!isCurrent() || generation !== session.transportStreamGeneration) {

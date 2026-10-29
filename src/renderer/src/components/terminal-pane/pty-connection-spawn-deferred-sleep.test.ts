@@ -1,3 +1,5 @@
+import type * as DeferralDrain from '@/lib/pane-spawn-deferral-drain'
+import { registerMainOwnedResumeDrainTests } from './pty-connection-main-owned-resume-drain.spec'
 import type { ConnectPanePtySession } from './pty-connection/connect-pane-pty-session'
 import type * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -98,17 +100,26 @@ vi.mock('@/runtime/resume-host-automatic-restores', () => ({
 }))
 
 const drain = vi.hoisted(() => ({
+  real: false,
   queued: new Map<string, () => Promise<boolean>>()
 }))
 
-vi.mock('@/lib/pane-spawn-deferral-drain', () => ({
-  queueDeferredRestoreRetry: (
-    paneKey: string,
-    _env: string | null,
-    retry: () => Promise<boolean>
-  ) => drain.queued.set(paneKey, retry),
-  cancelDeferredRestoreRetry: (paneKey: string) => drain.queued.delete(paneKey)
-}))
+vi.mock('@/lib/pane-spawn-deferral-drain', async (importOriginal) => {
+  const actual = await importOriginal<typeof DeferralDrain>()
+  return {
+    ...actual,
+    queueDeferredRestoreRetry: (
+      paneKey: string,
+      env: string | null,
+      retry: () => Promise<boolean>
+    ) =>
+      drain.real
+        ? actual.queueDeferredRestoreRetry(paneKey, env, retry)
+        : drain.queued.set(paneKey, retry),
+    cancelDeferredRestoreRetry: (paneKey: string) =>
+      drain.real ? actual.cancelDeferredRestoreRetry(paneKey) : drain.queued.delete(paneKey)
+  }
+})
 
 vi.mock('./terminal-pane-recovery', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
@@ -211,6 +222,7 @@ describe('connectPanePty: a restore the host kept asleep', () => {
     vi.resetModules()
     vi.clearAllMocks()
     transportFactoryQueue = []
+    drain.real = false
     drain.queued.clear()
     createdTransportOptions = []
     storeSubscribers = []
@@ -225,12 +237,15 @@ describe('connectPanePty: a restore the host kept asleep', () => {
   })
 
   afterEach(async () => {
+    const { resetDeferredRestoreDrainForTests } = await import('@/lib/pane-spawn-deferral-drain')
+    resetDeferredRestoreDrainForTests()
+    vi.useRealTimers()
+    vi.restoreAllMocks()
     await restoreTerminalTestGlobals()
   })
 
-  it('retains the main owner through wrapped refusal, hidden retries and explicit attachment', async () => {
+  async function mainOwnedResumeFixture() {
     const { connectPanePty } = await import('./pty-connection')
-    const { getPaneSpawnDeferral } = await import('@/lib/pane-spawn-deferral-registry')
     const pane = createPane(1)
     const paneKey = makePaneKey('tab-1', pane.leafId)
     const record = {
@@ -262,41 +277,37 @@ describe('connectPanePty: a restore the host kept asleep', () => {
     })
     window.api.worktrees = { ...window.api.worktrees, resumeSleptPane: mainResume }
     const transport = createMockTransport()
-    transport.connect.mockResolvedValue('main-pty')
+    transport.connect.mockImplementation(async () => {
+      transport.attach({ existingPtyId: 'main-pty' })
+      return 'main-pty'
+    })
     transportFactoryQueue.push(transport)
     const onDeferredCwdSpawnFailed = vi.fn()
     const deps = createDeps({ onDeferredCwdSpawnFailed })
     const binding = connectPanePty(...mockPanePtyArgs(pane, createManager(1), deps))
+    if (vi.isFakeTimers()) {
+      await vi.advanceTimersByTimeAsync(0)
+    }
     await flushAsyncTicks(30)
-    const owner = { worktreeId: 'wt-1', tabId: 'tab-1', leafId: pane.leafId }
-    expect(mainResume).toHaveBeenLastCalledWith(owner, undefined)
-    expect(transport.connect).not.toHaveBeenCalled()
-    expect(getPaneSpawnDeferral(paneKey)?.reason).toBe('live_cap')
-    expect(onDeferredCwdSpawnFailed).toHaveBeenCalledOnce()
-    expect(deps.onShowSessionRestoredBanner).not.toHaveBeenCalled()
+    return {
+      mainResume,
+      transport,
+      deps,
+      binding,
+      paneKey,
+      record,
+      onDeferredCwdSpawnFailed,
+      owner: { worktreeId: 'wt-1', tabId: 'tab-1', leafId: pane.leafId }
+    }
+  }
 
-    deps.isVisibleRef.current = false
-    await expect(drain.queued.get(paneKey)?.()).resolves.toBe(false)
-    expect(mainResume).toHaveBeenLastCalledWith(owner, true)
-    expect(getPaneSpawnDeferral(paneKey)?.reason).toBe('live_cap')
-    expect(mockStoreState.sleepingAgentSessionsByPaneKey[paneKey]).toBe(record)
-    expect(transport.connect).not.toHaveBeenCalled()
-
-    mainResume.mockResolvedValue(true)
-    deps.isVisibleRef.current = true
-    getPaneSpawnDeferral(paneKey)?.resume()
-    await flushAsyncTicks(30)
-    expect(mainResume).toHaveBeenLastCalledWith(owner, false)
-    expect(transport.connect).toHaveBeenCalledOnce()
-    expect(transport.connect).toHaveBeenCalledWith(
-      expect.not.objectContaining({ command: expect.anything() })
-    )
-    expect(deps.onShowSessionRestoredBanner).toHaveBeenCalledOnce()
-    expect(mockStoreState.clearSleepingAgentSession).toHaveBeenCalledWith(paneKey)
-    expect(getPaneSpawnDeferral(paneKey)).toBeUndefined()
-    expect(drain.queued.has(paneKey)).toBe(false)
-    binding.dispose()
-  })
+  registerMainOwnedResumeDrainTests(
+    mainOwnedResumeFixture,
+    () => mockStoreState,
+    () => {
+      drain.real = true
+    }
+  )
 
   it('fences late main outcomes and preserves only explicit legacy fallback', async () => {
     const { attachToMainResumedSleepPane } =

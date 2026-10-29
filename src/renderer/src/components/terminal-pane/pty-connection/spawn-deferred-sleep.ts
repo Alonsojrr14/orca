@@ -1,5 +1,5 @@
 import { releaseDeferredCwdFence } from './fresh-spawn-start'
-import { mainResumedSleepPane } from './main-resumed-sleep-pane'
+import { isMainResumedSleepPaneCurrent, mainResumedSleepPane } from './main-resumed-sleep-pane'
 import { useAppStore } from '@/store'
 import { writeTerminalOutput } from '@/lib/pane-manager/pane-terminal-output-scheduler'
 import type { SpawnDeferralReason } from '../../../../../shared/host-spawn-admission'
@@ -227,24 +227,40 @@ export function installSpawnDeferredSleep(session: ConnectPanePtySession): void 
       }
     }
     const startup = deferred.startupOverride
-    const spawned: Promise<string | null> =
-      isColdRestoreStartup(startup) && mainResumedSleepPane(session, startup)
-        ? session.spawnColdRestoreAgentResume(
-            startup,
-            deferred.options,
-            session.deps.isVisibleRef.current !== true
-          )
-        : startPaneThroughMainThenAttach(session, () =>
-            session.startFreshSpawn(startup, deferred.options)
-          )
+    const mainStartup =
+      isColdRestoreStartup(startup) && mainResumedSleepPane(session, startup) ? startup : null
+    const generation = session.transportStreamGeneration
+    const visibleAtDispatch = session.deps.isVisibleRef.current === true
+    const spawned: Promise<string | null> = mainStartup
+      ? session.spawnColdRestoreAgentResume(mainStartup, deferred.options, !visibleAtDispatch)
+      : startPaneThroughMainThenAttach(session, () =>
+          session.startFreshSpawn(startup, deferred.options)
+        )
     return spawned.then(
       (ptyId: string | null) => {
         settle()
         return ptyId
       },
       (error: unknown) => {
+        if (!mainStartup) {
+          settle()
+          throw error
+        }
+        if (
+          getPaneSpawnDeferral(session.cacheKey) === resuming &&
+          session.deferredSpawn === null &&
+          !session.transport.getPtyId() &&
+          isMainResumedSleepPaneCurrent(session, mainStartup, generation)
+        ) {
+          session.enterSpawnDeferredSleep(
+            deferred.reason,
+            mainStartup,
+            deferred.options,
+            visibleAtDispatch
+          )
+        }
         settle()
-        throw error
+        return null
       }
     )
   }
