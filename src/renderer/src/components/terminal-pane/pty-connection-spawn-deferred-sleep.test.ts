@@ -277,8 +277,8 @@ describe('connectPanePty: a restore the host kept asleep', () => {
     })
     window.api.worktrees = { ...window.api.worktrees, resumeSleptPane: mainResume }
     const transport = createMockTransport()
-    transport.connect.mockImplementation(async () => {
-      transport.attach({ existingPtyId: 'main-pty' })
+    transport.connect.mockImplementation(async ({ callbacks }) => {
+      transport.attach({ existingPtyId: 'main-pty', callbacks: callbacks ?? {} })
       return 'main-pty'
     })
     transportFactoryQueue.push(transport)

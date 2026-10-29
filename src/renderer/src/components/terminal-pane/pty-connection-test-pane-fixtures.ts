@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import type { Mock } from 'vitest'
-import type { PtyReplayDataMeta } from './pty-transport-types'
+import type { PtyReplayDataMeta, PtyTransport } from './pty-transport-types'
 
 export const LEAF_1 = '11111111-1111-4111-8111-111111111111' as const
 export const LEAF_2 = '22222222-2222-4222-8222-222222222222' as const
@@ -27,7 +27,7 @@ export type ConnectCallbacks = {
 
 export type MockTransport = {
   retryRecovery?: () => boolean
-  attach: Mock<(options: { existingPtyId: string }) => void>
+  attach: Mock<PtyTransport['attach']>
   connect: ReturnType<typeof vi.fn> & {
     mockImplementation: (
       impl: (opts: { callbacks?: ConnectCallbacks } & Record<string, unknown>) => Promise<unknown>
