@@ -40,6 +40,7 @@ export function countStatusWriteWork() {
         }
         yield entry
       }
+      return undefined
     })
   }
   function watchRetired(state: AgentSessionStoreState) {
@@ -53,6 +54,7 @@ export function countStatusWriteWork() {
         counts.retiredCopies++
         yield entry
       }
+      return undefined
     })
     const some = state.retiredClaimKeys.some.bind(state.retiredClaimKeys)
     vi.spyOn(state.retiredClaimKeys, 'some').mockImplementation((predicate, thisArg) =>

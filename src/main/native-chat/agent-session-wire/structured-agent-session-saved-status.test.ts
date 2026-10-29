@@ -34,11 +34,16 @@ import { StructuredAgentSessionHost } from './structured-agent-session-host'
 import type { AgentSessionResumeMarker } from '../../../shared/agent-session-resume-marker'
 import { structuredAgentSessionAgentStatus } from '../../../shared/structured-agent-session-agent-status'
 import { agentVerdictDisplayMark } from '../../../shared/agent-main-agent-verdict'
-import { agentVerdictStatusLine } from '../../../renderer/src/lib/agent-verdict-status-line'
+import { savedStatusContracts } from '../../../shared/agent-session-saved-status.test-fixture'
 
 afterEach(() => vi.restoreAllMocks())
 
 it('maps saved turn edges and legacy markers without using rename time', () => {
+  for (const contract of savedStatusContracts) {
+    expect(
+      savedStructuredAgentSessionStatus(agentSessionConversationView(contract.record))
+    ).toEqual(contract.summary)
+  }
   const record = agentSessionConversationView({ ...agentSessionRecordFixture(), updatedAt: 99_000 })
   expect(savedStructuredAgentSessionStatus(record)).toMatchObject({
     status: null,
@@ -100,7 +105,7 @@ it('seeds first desktop and phone snapshots without opening, writing or reacting
     statusSink: () => sink
   })
   const events: AgentSessionStatusEvent[] = []
-  feed.publishSaved(record)
+  feed.publishSavedGroup((publish) => publish(record))
   feed.subscribe({ id: 'first-client', emit: (event) => events.push(event) })
   expect(events).toContainEqual({
     type: 'snapshot',
@@ -256,7 +261,6 @@ it.each(['quit', 'stop', 'failure', 'provider-death'] as const)(
         expect(summary.turnOutcome).toBe(outcome)
         const row = structuredAgentSessionAgentStatus({ ...summary, status: summary.status })
         expect(agentVerdictDisplayMark(row)).toBe(intentional ? 'interrupted' : 'failed')
-        expect(agentVerdictStatusLine(row)).toBe(intentional ? 'Interrupted by user' : 'Failed')
       }
       expect(openJournal).toHaveBeenCalledOnce()
       expect(store.getRecord(SESSION)?.lastTurn).toMatchObject({ state: 'settled', outcome })

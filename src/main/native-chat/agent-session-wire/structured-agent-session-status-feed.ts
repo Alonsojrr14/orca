@@ -4,7 +4,7 @@ import type {
   AgentSessionStatusEvent,
   AgentSessionStatusSummary
 } from '../../../shared/agent-session-wire'
-import { createSavedStructuredStatusPublisher } from './structured-agent-session-saved-status'
+import { createSavedStructuredStatusGroup } from './structured-agent-session-saved-status'
 import type { AgentChildWorkEvidence } from '../../../shared/agent-status-child-work-evidence'
 import type { AgentChildWorkRecord } from '../../../shared/agent-status-child-work'
 import type { AgentChildWorkView } from '../../../shared/agent-status-child-work-view'
@@ -36,6 +36,7 @@ import {
 import type { StructuredAgentSessionChildWorkProducer } from './structured-agent-session-subagent-rows'
 import {
   StructuredAgentSessionStatusOwnership,
+  type StructuredAgentSessionStatusPublisher,
   type CapturedChildWorkStops
 } from './structured-agent-session-status-ownership'
 
@@ -161,11 +162,12 @@ export class StructuredAgentSessionStatusFeed {
     this.published.get(sessionId)?.summary
 
   /** Seed unopened lists and the phone sink without reactions or saved-status writes. */
-  publishSaved = createSavedStructuredStatusPublisher(
+  publishSavedGroup = createSavedStructuredStatusGroup(
     (id) => this.deps.sessions.has(id),
     this.published,
     this.sink.bind(this),
-    this.broadcast.bind(this)
+    this.broadcast.bind(this),
+    () => this.deps.statusSink?.()
   )
 
   /** Share per-commit projection with completion and steer-hold readers to avoid repeated snapshots. */
@@ -317,10 +319,11 @@ export class StructuredAgentSessionStatusFeed {
 
   private sink(
     summary: AgentSessionStatusSummary,
-    location?: StatusFeedSession['params']['location']
+    location?: StatusFeedSession['params']['location'],
+    publisher?: StructuredAgentSessionStatusPublisher
   ): void {
     try {
-      this.ownership.publish(summary, location)
+      this.ownership.publish(summary, location, publisher)
     } catch (error) {
       this.logFailure('status-sink-publish', 'status sink publish failed', summary.sessionId, error)
     }

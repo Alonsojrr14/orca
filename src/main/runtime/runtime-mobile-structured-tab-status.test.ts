@@ -3,6 +3,8 @@ import { makeStructuredAgentStatusSubject } from '../../shared/agent-status-subj
 import type { AgentSessionStatusSummary } from '../../shared/agent-session-wire'
 import type { RuntimeMobileSessionTabsSnapshot } from '../../shared/runtime-types'
 import { AgentHookServer } from '../agent-hooks/server'
+import { agentHookRuntimeDeps } from '../agent-hooks/agent-hook-runtime-deps'
+import { AgentStatusObservedPaneIdentities } from './agent-status-observed-pane-identity'
 import { projectRuntimeMobileSessionTabs } from './runtime-mobile-session-projection'
 import type { RuntimeMobileSessionProjectionHost } from './runtime-mobile-session-projection-contract'
 import { agentSessionRecordFixture } from '../../shared/agent-session-record.test-fixture'
@@ -73,12 +75,11 @@ describe('a chat tab on the phone', () => {
         getConversation: () => record,
         now: () => 99_000,
         logger: createStructuredAgentSessionLogger(),
-        statusSink: () => ({
-          publish: (summary, subject) => store.ingestStructuredStatus(summary, subject),
-          forget: () => {}
-        })
+        statusSink: () =>
+          agentHookRuntimeDeps(store, new AgentStatusObservedPaneIdentities(), () => ({}))
+            .structuredAgentStatusSink
       })
-      feed.publishSaved(record)
+      feed.publishSavedGroup((publish) => publish(record))
       expect(projectChatTab(store, WORKTREE_ID)).toMatchObject({
         type: 'agent-session',
         chatStatus: { state: 'done', mainAgent: { state: 'done', outcome, stateStartedAt: 22_000 } }

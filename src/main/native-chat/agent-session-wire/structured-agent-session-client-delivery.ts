@@ -1,5 +1,4 @@
 import { StructuredAgentSessionSavedStatus } from './structured-agent-session-saved-status'
-import type { AgentSessionConversationView } from '../../../shared/agent-session-conversation-view'
 import { StructuredAgentSessionRequestFailures } from './structured-agent-session-request-failures'
 import { structuredAgentSessionFailureWordsContext } from './structured-agent-session-send-preparation'
 import { AT_REST_COMMANDS_READ_BUDGET_MS } from './at-rest-command-catalog'
@@ -132,8 +131,9 @@ export class StructuredAgentSessionClientDelivery {
 
   drainStatusWrites = (): Promise<void> => this.savedStatus.drain()
 
-  publishSavedStatus = (record: AgentSessionConversationView, markerAt?: number): void =>
-    this.statusFeed.publishSaved(record, markerAt)
+  publishSavedStatusGroup = (
+    visit: Parameters<StructuredAgentSessionStatusFeed['publishSavedGroup']>[0]
+  ): void => this.statusFeed.publishSavedGroup(visit)
 
   publishStatus = (sessionId: string): void => this.statusFeed.publish(sessionId)
 

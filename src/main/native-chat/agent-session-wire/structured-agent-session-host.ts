@@ -222,7 +222,7 @@ export class StructuredAgentSessionHost {
     this,
     this.sessions,
     this.clientDelivery.forgetStatus,
-    this.clientDelivery.publishSavedStatus,
+    this.clientDelivery.publishSavedStatusGroup,
     (ids) => this.startup.recover(ids)
   )
   listSessionTabs = this.tabs.listSessionTabs

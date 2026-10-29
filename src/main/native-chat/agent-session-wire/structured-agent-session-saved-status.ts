@@ -1,3 +1,7 @@
+import type {
+  StructuredAgentSessionStatusPublisher,
+  StructuredAgentSessionStatusSink
+} from './structured-agent-session-status-ownership'
 import type { AgentSessionConversationView } from '../../../shared/agent-session-conversation-view'
 import {
   AGENT_SESSION_TURN_PREVIEW_CHARS,
@@ -112,20 +116,47 @@ export class StructuredAgentSessionSavedStatus {
   }
 }
 
-export function createSavedStructuredStatusPublisher(
+export type SavedStructuredStatusPublisher = (
+  record: AgentSessionConversationView,
+  markerAt?: number
+) => void
+export type SavedStructuredStatusGroup = (
+  visit: (publish: SavedStructuredStatusPublisher) => void
+) => void
+
+export function createSavedStructuredStatusGroup(
   isOpen: (id: string) => boolean,
   published: Map<string, StatusPublication>,
-  sink: (summary: AgentSessionStatusSummary, location: AgentSessionExecutionLocation) => void,
-  broadcast: (event: AgentSessionStatusEvent) => void
-): (record: AgentSessionConversationView, markerAt?: number) => void {
-  return (record, markerAt) => {
+  sink: (
+    summary: AgentSessionStatusSummary,
+    location: AgentSessionExecutionLocation,
+    publisher?: StructuredAgentSessionStatusPublisher
+  ) => void,
+  broadcast: (event: AgentSessionStatusEvent) => void,
+  readSink: () => StructuredAgentSessionStatusSink | undefined
+): SavedStructuredStatusGroup {
+  const publish = (
+    record: AgentSessionConversationView,
+    markerAt?: number,
+    publisher?: StructuredAgentSessionStatusPublisher
+  ): void => {
     if (isOpen(record.sessionId) || published.has(record.sessionId)) {
       return
     }
     const summary = savedStructuredAgentSessionStatus(record, markerAt)
     published.set(record.sessionId, { summary, firstInputSubmissionKey: null })
-    sink(summary, record.location)
+    sink(summary, record.location, publisher)
     broadcast({ type: 'status', session: summary })
+  }
+  return (visit) => {
+    const sink = readSink()
+    const run = (publisher?: StructuredAgentSessionStatusPublisher): void =>
+      visit((record, markerAt) => publish(record, markerAt, publisher))
+    if (sink?.withSavedStatusGroup) {
+      sink.withSavedStatusGroup(run)
+    } else {
+      run(sink)
+    }
   }
 }
 
@@ -137,7 +168,7 @@ export async function seedSavedStructuredSessionTabs(
     >
   },
   ids: readonly string[] | undefined,
-  visit: (record: AgentSessionConversationView, markerAt?: number) => void,
+  publishGroup: SavedStructuredStatusGroup,
   recover: (ids: readonly string[]) => Promise<void>
 ): Promise<void> {
   const index = deps.store.getVisibleSessionTabIndex()
@@ -158,10 +189,12 @@ export async function seedSavedStructuredSessionTabs(
   } catch (error) {
     deps.logger.warn('reading saved chat recovery status failed', { scope: 'saved-status', error })
   }
-  for (const id of targets) {
-    const record = deps.store.getConversation(id)
-    if (record) {
-      visit(record, markers.get(id))
+  publishGroup((publish) => {
+    for (const id of targets) {
+      const record = deps.store.getConversation(id)
+      if (record) {
+        publish(record, markers.get(id))
+      }
     }
-  }
+  })
 }
