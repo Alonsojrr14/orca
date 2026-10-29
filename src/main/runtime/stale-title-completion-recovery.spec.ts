@@ -148,7 +148,7 @@ describe('hook title evidence and completion recovery', () => {
       const { main }: { main(argv: string[], cwd: string): Promise<void> } = await import(cliPath)
       const wait = async () => {
         output.mockClear()
-        process.exitCode = undefined
+        process.exitCode = 0
         await main(
           [
             'terminal',
@@ -191,7 +191,7 @@ describe('hook title evidence and completion recovery', () => {
 
       status('done')
       expect(await wait()).toMatchObject({ ok: true, result: { wait: { satisfied: true } } })
-      expect(process.exitCode).toBeUndefined()
+      expect(process.exitCode).toBe(0)
       await expect
         .poll(() => write.mock.calls.map(([, data]) => data))
         .toEqual([expect.stringContaining('You have 1 orchestration message'), '\r'])
@@ -199,7 +199,7 @@ describe('hook title evidence and completion recovery', () => {
       await new Promise((resolve) => setTimeout(resolve, 500))
       expect(write).toHaveBeenCalledTimes(2)
     } finally {
-      process.exitCode = exitCode
+      process.exitCode = exitCode ?? 0
       try {
         await server.stop()
       } finally {
