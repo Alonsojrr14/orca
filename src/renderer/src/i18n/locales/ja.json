@@ -19970,7 +19970,10 @@
       "listening": "リスニング…",
       "unassignedInstruction": "フォーカスされたペインで音声ディクテーションを開始する前に、ディクテーションショートカットを割り当てます。",
       "shortcutInstruction": "ターミナル、エディター、または Agent のプロンプトにフォーカスし、<shortcut/> を押すと音声入力を開始します。もう一度 <shortcut/> を押すと停止します。",
-      "changeInSettings": "モデル、ディクテーションモード、ショートカットは、<link>設定 → 音声</link>でいつでも変更できます。"
+      "changeInSettings": "モデル、ディクテーションモード、ショートカットは、<link>設定 → 音声</link>でいつでも変更できます。",
+      "title": "どのペインでも音声入力",
+      "description": "フォーカス中のペインで音声ディクテーションを開始し、停止するには同じショートカットをもう一度押します。",
+      "cta": "音声ディクテーションを設定"
     },
     "sessionSearch": {
       "ageHours": "2時間前",
@@ -20015,8 +20018,23 @@
       "recent3Text": "メモの初版です。分野別にまとめています。",
       "recent3Title": "リリースノートの下書き",
       "startSearching": "検索を開始",
-      "changeInSettings": "<link>設定 → Agent セッションの検索</link>でいつでも変更または無効化できます。"
-    }
+      "changeInSettings": "<link>設定 → Agent セッションの検索</link>でいつでも変更または無効化できます。",
+      "title": "すべての Agent セッションを検索",
+      "description": "過去の会話を内容から見つけて、Agent が中断したところから再開できます。",
+      "cta": "セッション検索を有効にする"
+    },
+    "eyebrowNew": "新機能",
+    "eyebrowTip": "ヒント",
+    "orcaCli": {
+      "title": "Orca CLI で Agent に Orca を操作させる",
+      "description": "Agent が子ワークツリーを連携させ、ワークツリー間で通信できるようにします。",
+      "cta": "CLI とスキルをインストール"
+    },
+    "cmdJPalette": {
+      "title": "<shortcut> でワークツリーに移動",
+      "description": "ワークツリーの検索、タブの切り替え、設定の調整、新しいワークツリーの作成を、すべてキーボードだけで行えます。"
+    },
+    "gotIt": "了解"
   },
   "quickOpen": {
     "moreMatchesAvailable": "さらに多くの一致が利用可能になる可能性があります。検索を絞り込んで結果を絞り込みます。",
@@ -21887,6 +21905,109 @@
         "mrNotFound": "MR !{{number}} が見つかりません。",
         "mrSourceBranchMissing": "MR !{{number}} にソースブランチがありません。",
         "forkHeadUnresolved": "フェッチ後にフォークの MR !{{number}} のヘッドを解決できませんでした。"
+      }
+    }
+  },
+  "featureWall": {
+    "workflows": {
+      "workspaces": {
+        "title": "ワークスペース",
+        "lede": "Orca はタスクごとに独立したワークスペースを用意し、Agent が並行して作業できるようにします。"
+      },
+      "tasks": {
+        "title": "タスク",
+        "lede": "GitHub や Linear から直接作業を開始できます。"
+      },
+      "agents": {
+        "title": "Agent",
+        "lede": "複数の Agent を同時に実行し、進捗を追跡。必要に応じて自動化で Orca を操作できます。"
+      },
+      "workbench": {
+        "title": "ワークベンチ",
+        "lede": "使い慣れたターミナル環境を Orca に取り込み、ペインを分割してサーバー、テスト、ログ、Agent を並べて実行できます。"
+      },
+      "review": {
+        "title": "コードレビュー",
+        "lede": "変更内容を確認し、的確なフィードバックを Agent に返せます。"
+      }
+    },
+    "steps": {
+      "statuses": {
+        "name": "可視性",
+        "subtitle": "Agent の可視性",
+        "description": "どの Agent が作業中、待機中、稼働中、ブロック中かを把握できます。"
+      },
+      "orchestration": {
+        "name": "オーケストレーション",
+        "description": "Agent が Orca のワークスペースを管理・連携させ、より大きなタスクを実行できるようにします。"
+      },
+      "usage": {
+        "name": "使用量",
+        "description": "接続済みの全アカウントの使用量とレート制限を確認し、切り替え時を把握できます。"
+      },
+      "terminal": {
+        "name": "ターミナル",
+        "description": "Agent、テスト、開発ログを同時に確認できます。"
+      },
+      "editor": {
+        "name": "エディター",
+        "description": "Notion スタイルの Markdown エディターで、Orca を離れずにノートを書けます。"
+      },
+      "browser": {
+        "name": "ブラウザ",
+        "description": "Orca のブラウザでアプリを実行し、選択した UI 要素を Agent に送信。Agent にウェブページを操作させることもできます。"
+      },
+      "notes": {
+        "name": "ノート",
+        "subtitle": "ノートと差分",
+        "description": "要点を絞ったレビューコメントを Agent に送信できます。"
+      },
+      "prView": {
+        "name": "PR チェック",
+        "subtitle": "PR チェックとコメント",
+        "description": "「チェック」タブで PR のステータスを確認できます。"
+      },
+      "ship": {
+        "name": "AI でリリース",
+        "description": "AI にコミットと PR の下書きを作成させることができます。"
+      }
+    },
+    "tiles": {
+      "tile01": {
+        "title": "ワークスペースの並列オーケストレーション"
+      },
+      "tile02": {
+        "title": "Ghostty クラスのターミナル"
+      },
+      "tile03": {
+        "title": "GitHub・Linear とネイティブ連携"
+      },
+      "tile04": {
+        "title": "対応する CLI Agent"
+      },
+      "tile05": {
+        "title": "内蔵ブラウザ + デザインモード"
+      },
+      "tile06": {
+        "title": "リモートワークスペース"
+      },
+      "tile07": {
+        "title": "Monaco エディターから Agent へドラッグ"
+      },
+      "tile08": {
+        "title": "インラインレビューを Agent にフィードバック"
+      },
+      "tile09": {
+        "title": "Orca CLI"
+      },
+      "tile10": {
+        "title": "キーボード中心の操作"
+      },
+      "tile11": {
+        "title": "使用量とレート制限を把握"
+      },
+      "tile12": {
+        "title": "PDF、画像、CSV、Markdown"
       }
     }
   }

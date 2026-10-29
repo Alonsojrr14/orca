@@ -374,7 +374,10 @@
       "listening": "Ouvindo...",
       "unassignedInstruction": "Atribua um atalho de ditado antes de iniciar o ditado por voz em um painel em foco.",
       "shortcutInstruction": "Coloque o foco em um terminal, editor ou prompt de agente e pressione <shortcut/> para iniciar o ditado por voz. Pressione <shortcut/> novamente para parar.",
-      "changeInSettings": "Altere o modelo, o modo de ditado ou o atalho a qualquer momento em <link>Configurações → Voz</link>."
+      "changeInSettings": "Altere o modelo, o modo de ditado ou o atalho a qualquer momento em <link>Configurações → Voz</link>.",
+      "title": "Dite em qualquer painel",
+      "description": "Inicie o ditado por voz em qualquer painel em foco e use o atalho novamente para parar.",
+      "cta": "Configurar ditado por voz"
     },
     "nativeChatUpgrade": {
       "eyebrow": "Novo",
@@ -431,8 +434,23 @@
       "demoHit6Age": "1mês",
       "readyToast": "A busca de sessões está pronta",
       "readyToastOpen": "Abrir",
-      "changeInSettings": "Altere ou desative a qualquer momento em <link>Configurações → Busca de Sessões de Agente</link>."
-    }
+      "changeInSettings": "Altere ou desative a qualquer momento em <link>Configurações → Busca de Sessões de Agente</link>.",
+      "title": "Busque em todas as sessões de agentes",
+      "description": "Encontre qualquer conversa anterior pelo que foi dito nela e continue de onde o agente parou.",
+      "cta": "Ativar busca de sessões"
+    },
+    "eyebrowNew": "Novo",
+    "eyebrowTip": "Dica",
+    "orcaCli": {
+      "title": "Deixe os agentes controlarem o Orca com o Orca CLI",
+      "description": "Permita que os agentes coordenem worktrees filhos e se comuniquem entre worktrees.",
+      "cta": "Instalar CLI e Skills"
+    },
+    "cmdJPalette": {
+      "title": "Vá para um worktree com <shortcut>",
+      "description": "Busque worktrees, troque de aba, ajuste configurações ou crie um worktree, tudo sem sair do teclado."
+    },
+    "gotIt": "Entendi"
   },
   "rendererRecovery": {
     "reload": "Recarregar",
@@ -22316,6 +22334,109 @@
         "mrNotFound": "MR !{{number}} não encontrado.",
         "mrSourceBranchMissing": "O MR !{{number}} não tem uma branch de origem.",
         "forkHeadUnresolved": "Não foi possível resolver o head do MR !{{number}} de um fork após o fetch."
+      }
+    }
+  },
+  "featureWall": {
+    "workflows": {
+      "workspaces": {
+        "title": "Espaços de Trabalho",
+        "lede": "O Orca coloca cada tarefa em um espaço de trabalho isolado para que os agentes possam trabalhar em paralelo."
+      },
+      "tasks": {
+        "title": "Tarefas",
+        "lede": "Comece a trabalhar diretamente pelo GitHub ou Linear."
+      },
+      "agents": {
+        "title": "Agentes",
+        "lede": "Execute vários agentes ao mesmo tempo, acompanhe o progresso e deixe a automação controlar o Orca quando for útil."
+      },
+      "workbench": {
+        "title": "Painel principal",
+        "lede": "Traga sua configuração de terminal para o Orca e divida os painéis para manter servidores, testes, logs e agentes rodando lado a lado."
+      },
+      "review": {
+        "title": "Revisão de código",
+        "lede": "Revise as alterações, deixe comentários específicos e envie-os de volta ao agente."
+      }
+    },
+    "steps": {
+      "statuses": {
+        "name": "Visibilidade",
+        "subtitle": "Visibilidade dos agentes",
+        "description": "Saiba quais agentes estão trabalhando, em espera, ativos ou bloqueados."
+      },
+      "orchestration": {
+        "name": "Orquestração",
+        "description": "Permita que os agentes gerenciem e coordenem espaços de trabalho do Orca para executar tarefas maiores."
+      },
+      "usage": {
+        "name": "Uso",
+        "description": "Acompanhe o uso e os limites de taxa de todas as contas conectadas para saber quando trocar de conta."
+      },
+      "terminal": {
+        "name": "Terminal",
+        "description": "Mantenha seus agentes, testes e logs de desenvolvimento visíveis ao mesmo tempo."
+      },
+      "editor": {
+        "name": "Editor",
+        "description": "Use nosso editor de Markdown no estilo do Notion para escrever notas sem sair do Orca."
+      },
+      "browser": {
+        "name": "Navegador",
+        "description": "Execute seu app no navegador do Orca, envie elementos selecionados da interface aos agentes e deixe que eles interajam com sua página."
+      },
+      "notes": {
+        "name": "Notas",
+        "subtitle": "Notas e diffs",
+        "description": "Envie notas de revisão específicas a um agente."
+      },
+      "prView": {
+        "name": "Verificações de PR",
+        "subtitle": "Verificações e comentários de PR",
+        "description": "Veja o status do PR na aba Verificações."
+      },
+      "ship": {
+        "name": "Entregue com IA",
+        "description": "Deixe a IA preparar rascunhos de commits e PRs para você."
+      }
+    },
+    "tiles": {
+      "tile01": {
+        "title": "Orquestração de espaços de trabalho em paralelo"
+      },
+      "tile02": {
+        "title": "Terminal do nível do Ghostty"
+      },
+      "tile03": {
+        "title": "GitHub e Linear, integração nativa"
+      },
+      "tile04": {
+        "title": "Agentes de CLI compatíveis"
+      },
+      "tile05": {
+        "title": "Navegador integrado + Modo de design"
+      },
+      "tile06": {
+        "title": "Espaços de trabalho remotos"
+      },
+      "tile07": {
+        "title": "Editor Monaco, arraste para o agente"
+      },
+      "tile08": {
+        "title": "Revisão em linha, de volta ao agente"
+      },
+      "tile09": {
+        "title": "Orca CLI"
+      },
+      "tile10": {
+        "title": "Feito para o teclado"
+      },
+      "tile11": {
+        "title": "Monitoramento de uso e limites de taxa"
+      },
+      "tile12": {
+        "title": "PDFs, imagens, CSV, Markdown"
       }
     }
   }

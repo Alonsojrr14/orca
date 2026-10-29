@@ -19690,7 +19690,10 @@
       "listening": "正在聆聽…",
       "unassignedInstruction": "在聚焦的窗格中使用語音聽寫前，請先設定聽寫快速鍵。",
       "shortcutInstruction": "將焦點移至終端機、編輯器或代理程式提示詞輸入框，然後按 <shortcut/> 開始語音聽寫。再按一次 <shortcut/> 即可停止。",
-      "changeInSettings": "隨時在<link>設定 → 語音</link>中變更模型、聽寫模式或快速鍵。"
+      "changeInSettings": "隨時在<link>設定 → 語音</link>中變更模型、聽寫模式或快速鍵。",
+      "title": "在任何窗格中聽寫",
+      "description": "在任何已聚焦的窗格中開始語音聽寫，再次使用快速鍵即可停止。",
+      "cta": "設定語音聽寫"
     },
     "sessionSearch": {
       "enableFailed": "無法開啟工作階段搜尋。請重試。",
@@ -19735,8 +19738,23 @@
       "demoHit6Age": "1 個月",
       "readyToast": "工作階段搜尋已就緒",
       "readyToastOpen": "開啟",
-      "changeInSettings": "隨時在<link>設定 → 代理程式工作階段搜尋</link>中變更或關閉。"
-    }
+      "changeInSettings": "隨時在<link>設定 → 代理程式工作階段搜尋</link>中變更或關閉。",
+      "title": "搜尋所有代理程式工作階段",
+      "description": "根據對話內容找出任何過往對話，再從代理程式上次停下的地方繼續。",
+      "cta": "開啟工作階段搜尋"
+    },
+    "eyebrowNew": "新功能",
+    "eyebrowTip": "提示",
+    "orcaCli": {
+      "title": "讓代理程式透過 Orca CLI 操控 Orca",
+      "description": "讓代理程式協調子工作樹，並在工作樹之間通訊。",
+      "cta": "安裝 CLI 與技能"
+    },
+    "cmdJPalette": {
+      "title": "使用 <shortcut> 跳至工作樹",
+      "description": "搜尋工作樹、切換分頁、調整設定或建立工作樹，全程不必離開鍵盤。"
+    },
+    "gotIt": "知道了"
   },
   "quickOpen": {
     "moreMatchesAvailable": "可能還有更多符合項目。請縮小搜尋範圍。",
@@ -21587,6 +21605,109 @@
         "mrNotFound": "找不到 MR !{{number}}。",
         "mrSourceBranchMissing": "MR !{{number}} 沒有來源分支。",
         "forkHeadUnresolved": "擷取後，無法解析來自 Fork 的 MR !{{number}} 的頂端參照。"
+      }
+    }
+  },
+  "featureWall": {
+    "workflows": {
+      "workspaces": {
+        "title": "工作區",
+        "lede": "Orca 為每項任務分配獨立的工作區，讓代理程式能夠平行執行。"
+      },
+      "tasks": {
+        "title": "任務",
+        "lede": "直接從 GitHub 或 Linear 開始工作。"
+      },
+      "agents": {
+        "title": "代理程式",
+        "lede": "同時執行多個代理程式、追蹤進度，並在需要時透過自動化操控 Orca。"
+      },
+      "workbench": {
+        "title": "工作台",
+        "lede": "將慣用的終端機設定帶入 Orca，再分割窗格，讓伺服器、測試、記錄與代理程式並排執行。"
+      },
+      "review": {
+        "title": "程式碼審查",
+        "lede": "審查變更、留下具體的意見回饋，再傳回給代理程式。"
+      }
+    },
+    "steps": {
+      "statuses": {
+        "name": "可見性",
+        "subtitle": "代理程式可見性",
+        "description": "掌握哪些代理程式正在執行、等待中、作用中或受到阻擋。"
+      },
+      "orchestration": {
+        "name": "編排",
+        "description": "讓代理程式管理及協調 Orca 工作區，以執行更大規模的任務。"
+      },
+      "usage": {
+        "name": "用量",
+        "description": "查看所有已連線帳戶的用量與速率限制，掌握切換帳戶的時機。"
+      },
+      "terminal": {
+        "name": "終端機",
+        "description": "同時查看代理程式、測試與開發記錄。"
+      },
+      "editor": {
+        "name": "編輯器",
+        "description": "使用 Notion 風格的 Markdown 編輯器，不必離開 Orca 就能撰寫筆記。"
+      },
+      "browser": {
+        "name": "瀏覽器",
+        "description": "在 Orca 瀏覽器中執行應用程式、將選取的 UI 元素傳送給代理程式，並讓代理程式與您的網頁互動。"
+      },
+      "notes": {
+        "name": "筆記",
+        "subtitle": "筆記與差異",
+        "description": "將具體的審查筆記傳送給代理程式。"
+      },
+      "prView": {
+        "name": "PR 檢查項",
+        "subtitle": "PR 檢查項與留言",
+        "description": "在「檢查項」分頁中查看 PR 狀態。"
+      },
+      "ship": {
+        "name": "透過 AI 交付",
+        "description": "讓 AI 為您準備提交與 PR 草稿。"
+      }
+    },
+    "tiles": {
+      "tile01": {
+        "title": "平行工作區編排"
+      },
+      "tile02": {
+        "title": "Ghostty 等級的終端機"
+      },
+      "tile03": {
+        "title": "原生整合 GitHub 與 Linear"
+      },
+      "tile04": {
+        "title": "支援的 CLI 代理程式"
+      },
+      "tile05": {
+        "title": "內嵌瀏覽器 + 設計模式"
+      },
+      "tile06": {
+        "title": "遠端工作區"
+      },
+      "tile07": {
+        "title": "Monaco 編輯器，拖曳給代理程式"
+      },
+      "tile08": {
+        "title": "行內審查，回傳給代理程式"
+      },
+      "tile09": {
+        "title": "Orca CLI"
+      },
+      "tile10": {
+        "title": "以鍵盤操作為核心"
+      },
+      "tile11": {
+        "title": "掌握用量與速率限制"
+      },
+      "tile12": {
+        "title": "PDF、圖片、CSV、Markdown"
       }
     }
   }

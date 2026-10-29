@@ -19970,7 +19970,10 @@
       "listening": "听...",
       "unassignedInstruction": "在焦点窗格中开始语音听写之前指定听写快捷方式。",
       "shortcutInstruction": "将焦点移至终端、编辑器或智能体提示词输入框，然后按 <shortcut/> 开始语音听写。再次按 <shortcut/> 即可停止。",
-      "changeInSettings": "随时在<link>设置 → 语音</link>中更改模型、听写模式或快捷键。"
+      "changeInSettings": "随时在<link>设置 → 语音</link>中更改模型、听写模式或快捷键。",
+      "title": "在任意窗格中听写",
+      "description": "在任意已聚焦的窗格中开始语音听写，再次使用快捷键即可停止。",
+      "cta": "设置语音听写"
     },
     "sessionSearch": {
       "ageHours": "2小时",
@@ -20015,8 +20018,23 @@
       "recent3Text": "这是按领域分组的记录初稿。",
       "recent3Title": "发布说明草稿",
       "startSearching": "开始搜索",
-      "changeInSettings": "随时在<link>设置 → 智能体会话搜索</link>中更改或关闭。"
-    }
+      "changeInSettings": "随时在<link>设置 → 智能体会话搜索</link>中更改或关闭。",
+      "title": "搜索所有智能体会话",
+      "description": "根据对话内容找到任何历史会话，再从智能体上次停下的地方继续。",
+      "cta": "开启会话搜索"
+    },
+    "eyebrowNew": "新功能",
+    "eyebrowTip": "提示",
+    "orcaCli": {
+      "title": "让智能体通过 Orca CLI 操控 Orca",
+      "description": "让智能体协调子工作树，并在工作树之间通信。",
+      "cta": "安装 CLI 与技能"
+    },
+    "cmdJPalette": {
+      "title": "使用 <shortcut> 跳转到工作树",
+      "description": "搜索工作树、切换标签页、调整设置或创建工作树，全程无需离开键盘。"
+    },
+    "gotIt": "知道了"
   },
   "quickOpen": {
     "moreMatchesAvailable": "可能还有更多匹配结果。请细化搜索以缩小范围。",
@@ -21887,6 +21905,109 @@
         "mrNotFound": "未找到 MR !{{number}}。",
         "mrSourceBranchMissing": "MR !{{number}} 没有源分支。",
         "forkHeadUnresolved": "获取后，无法解析来自 fork 的 MR !{{number}} 的头部引用。"
+      }
+    }
+  },
+  "featureWall": {
+    "workflows": {
+      "workspaces": {
+        "title": "工作区",
+        "lede": "Orca 为每项任务分配独立的工作区，让智能体能够并行工作。"
+      },
+      "tasks": {
+        "title": "任务",
+        "lede": "直接从 GitHub 或 Linear 开始工作。"
+      },
+      "agents": {
+        "title": "智能体",
+        "lede": "同时运行多个智能体，跟踪进度，并在需要时通过自动化操控 Orca。"
+      },
+      "workbench": {
+        "title": "工作台",
+        "lede": "将常用的终端配置带入 Orca，再拆分窗格，让服务器、测试、日志和智能体并排运行。"
+      },
+      "review": {
+        "title": "代码评审",
+        "lede": "审阅更改，留下有针对性的反馈，再发送给智能体。"
+      }
+    },
+    "steps": {
+      "statuses": {
+        "name": "可见性",
+        "subtitle": "智能体可见性",
+        "description": "了解哪些智能体正在工作、等待、处于活跃状态或已被阻塞。"
+      },
+      "orchestration": {
+        "name": "编排",
+        "description": "让智能体管理和协调 Orca 工作区，以执行更大规模的任务。"
+      },
+      "usage": {
+        "name": "用量",
+        "description": "查看所有已连接账户的用量和速率限制，掌握切换账户的时机。"
+      },
+      "terminal": {
+        "name": "终端",
+        "description": "同时查看智能体、测试和开发日志。"
+      },
+      "editor": {
+        "name": "编辑器",
+        "description": "使用 Notion 风格的 Markdown 编辑器，无需离开 Orca 即可记笔记。"
+      },
+      "browser": {
+        "name": "浏览器",
+        "description": "在 Orca 浏览器中运行应用，将选中的 UI 元素发送给智能体，并让智能体与你的网页交互。"
+      },
+      "notes": {
+        "name": "笔记",
+        "subtitle": "笔记与差异",
+        "description": "向智能体发送有针对性的评审笔记。"
+      },
+      "prView": {
+        "name": "PR 检查项",
+        "subtitle": "PR 检查项与评论",
+        "description": "在“检查项”标签页中查看 PR 状态。"
+      },
+      "ship": {
+        "name": "借助 AI 交付",
+        "description": "让 AI 为你准备提交和 PR 草稿。"
+      }
+    },
+    "tiles": {
+      "tile01": {
+        "title": "并行工作区编排"
+      },
+      "tile02": {
+        "title": "Ghostty 级终端"
+      },
+      "tile03": {
+        "title": "原生集成 GitHub 与 Linear"
+      },
+      "tile04": {
+        "title": "支持的 CLI 智能体"
+      },
+      "tile05": {
+        "title": "内嵌浏览器 + 设计模式"
+      },
+      "tile06": {
+        "title": "远程工作区"
+      },
+      "tile07": {
+        "title": "Monaco 编辑器，拖给智能体"
+      },
+      "tile08": {
+        "title": "行内评审，反馈给智能体"
+      },
+      "tile09": {
+        "title": "Orca CLI"
+      },
+      "tile10": {
+        "title": "键盘优先"
+      },
+      "tile11": {
+        "title": "掌握用量与速率限制"
+      },
+      "tile12": {
+        "title": "PDF、图片、CSV、Markdown"
       }
     }
   }

@@ -167,6 +167,19 @@ describe('createWslDistroHolder', () => {
     expect(host.spawned).toEqual(['Alpine'])
   })
 
+  it('a holder exiting with code 1 notes its distro may have stopped (E9)', async () => {
+    const noteMayHaveStopped = vi.fn()
+    const holder = makeHolder({ noteMayHaveStopped })
+    await holder.ensureHeld('Alpine')
+    host.children[0]?.emit('exit', 0, null)
+    expect(noteMayHaveStopped).not.toHaveBeenCalled()
+
+    await holder.release('Alpine')
+    await holder.ensureHeld('Alpine')
+    host.children[1]?.emit('exit', 1, null)
+    expect(noteMayHaveStopped).toHaveBeenCalledWith('Alpine')
+  })
+
   it('single-flights concurrent ensures for one distro', async () => {
     const holder = makeHolder()
     const [a, b] = await Promise.all([holder.ensureHeld('Alpine'), holder.ensureHeld('alpine')])

@@ -20404,7 +20404,10 @@
       "listening": "Écoute...",
       "unassignedInstruction": "Assignez un raccourci de dictée avant de lancer la dictée vocale dans un volet actif.",
       "shortcutInstruction": "Placez le focus sur un terminal, un éditeur ou un champ de saisie d'agent, puis appuyez sur <shortcut/> pour démarrer la dictée vocale. Appuyez à nouveau sur <shortcut/> pour l'arrêter.",
-      "changeInSettings": "Modifiez le modèle, le mode de dictée ou le raccourci à tout moment dans <link>Paramètres → Voix</link>."
+      "changeInSettings": "Modifiez le modèle, le mode de dictée ou le raccourci à tout moment dans <link>Paramètres → Voix</link>.",
+      "title": "Dictez dans n’importe quel volet",
+      "description": "Démarrez la dictée vocale dans un volet actif, puis utilisez à nouveau le raccourci pour l’arrêter.",
+      "cta": "Configurer la dictée vocale"
     },
     "sessionSearch": {
       "ageHours": "2 h",
@@ -20449,8 +20452,23 @@
       "recent3Text": "Voici une première version des notes, regroupées par domaine.",
       "recent3Title": "Brouillon des notes de version",
       "startSearching": "Commencer la recherche",
-      "changeInSettings": "Modifiez ou désactivez cette fonction à tout moment dans <link>Paramètres → Recherche de session d'agent</link>."
-    }
+      "changeInSettings": "Modifiez ou désactivez cette fonction à tout moment dans <link>Paramètres → Recherche de session d'agent</link>.",
+      "title": "Recherchez dans toutes les sessions d’agent",
+      "description": "Retrouvez n’importe quelle conversation passée par son contenu, puis reprenez là où l’agent s’est arrêté.",
+      "cta": "Activer la recherche de sessions"
+    },
+    "eyebrowNew": "Nouveau",
+    "eyebrowTip": "Conseil",
+    "orcaCli": {
+      "title": "Laissez les agents piloter Orca avec Orca CLI",
+      "description": "Permettez aux agents de coordonner les worktrees enfants et de communiquer entre worktrees.",
+      "cta": "Installer la CLI et les Skills"
+    },
+    "cmdJPalette": {
+      "title": "Accédez à un worktree avec <shortcut>",
+      "description": "Recherchez des worktrees, changez d’onglet, ajustez les paramètres ou créez un worktree, sans quitter le clavier."
+    },
+    "gotIt": "Compris"
   },
   "quickOpen": {
     "moreMatchesAvailable": "D'autres correspondances sont peut-être disponibles. Affinez votre recherche pour réduire les résultats.",
@@ -22501,6 +22519,109 @@
         "mrNotFound": "MR !{{number}} introuvable.",
         "mrSourceBranchMissing": "La MR !{{number}} n'a pas de branche source.",
         "forkHeadUnresolved": "Impossible de résoudre la tête de la MR !{{number}} issue d'un fork après récupération."
+      }
+    }
+  },
+  "featureWall": {
+    "workflows": {
+      "workspaces": {
+        "title": "Espaces de travail",
+        "lede": "Orca attribue à chaque tâche un espace de travail isolé pour que les agents puissent travailler en parallèle."
+      },
+      "tasks": {
+        "title": "Tâches",
+        "lede": "Commencez à travailler directement depuis GitHub ou Linear."
+      },
+      "agents": {
+        "title": "Agents",
+        "lede": "Exécutez plusieurs agents à la fois, suivez leur progression et laissez l’automatisation piloter Orca quand cela vous aide."
+      },
+      "workbench": {
+        "title": "Atelier",
+        "lede": "Retrouvez votre configuration de terminal dans Orca, puis divisez les volets pour faire tourner serveurs, tests, journaux et agents côte à côte."
+      },
+      "review": {
+        "title": "Revue de code",
+        "lede": "Examinez les modifications, laissez des commentaires ciblés et renvoyez-les à l’agent."
+      }
+    },
+    "steps": {
+      "statuses": {
+        "name": "Visibilité",
+        "subtitle": "Visibilité des agents",
+        "description": "Sachez quels agents travaillent, sont en attente, actifs ou bloqués."
+      },
+      "orchestration": {
+        "name": "Orchestration",
+        "description": "Permettez aux agents de gérer et de coordonner les espaces de travail Orca pour accomplir des tâches plus importantes."
+      },
+      "usage": {
+        "name": "Utilisation",
+        "description": "Surveillez l’utilisation et les limites de débit de tous vos comptes connectés pour savoir quand changer de compte."
+      },
+      "terminal": {
+        "name": "Terminal",
+        "description": "Gardez vos agents, tests et journaux de développement visibles en même temps."
+      },
+      "editor": {
+        "name": "Éditeur",
+        "description": "Utilisez notre éditeur Markdown de style Notion pour prendre des notes sans quitter Orca."
+      },
+      "browser": {
+        "name": "Navigateur",
+        "description": "Exécutez votre application dans le navigateur d’Orca, envoyez des éléments d’interface sélectionnés aux agents et laissez-les interagir avec votre page web."
+      },
+      "notes": {
+        "name": "Notes",
+        "subtitle": "Notes et diffs",
+        "description": "Envoyez des notes de revue ciblées à un agent."
+      },
+      "prView": {
+        "name": "Vérifications de PR",
+        "subtitle": "Vérifications et commentaires de PR",
+        "description": "Consultez le statut de la PR dans l’onglet Vérifications."
+      },
+      "ship": {
+        "name": "Livrer avec l’IA",
+        "description": "Laissez l’IA préparer vos brouillons de commits et de PR."
+      }
+    },
+    "tiles": {
+      "tile01": {
+        "title": "Orchestration d’espaces de travail en parallèle"
+      },
+      "tile02": {
+        "title": "Terminal de niveau Ghostty"
+      },
+      "tile03": {
+        "title": "GitHub et Linear, en natif"
+      },
+      "tile04": {
+        "title": "Agents CLI pris en charge"
+      },
+      "tile05": {
+        "title": "Navigateur intégré + Mode conception"
+      },
+      "tile06": {
+        "title": "Espaces de travail distants"
+      },
+      "tile07": {
+        "title": "Éditeur Monaco, glisser vers l’agent"
+      },
+      "tile08": {
+        "title": "Revue dans le code, retour à l’agent"
+      },
+      "tile09": {
+        "title": "Orca CLI"
+      },
+      "tile10": {
+        "title": "Pensé pour le clavier"
+      },
+      "tile11": {
+        "title": "Suivi de l’utilisation et des limites de débit"
+      },
+      "tile12": {
+        "title": "PDF, images, CSV, Markdown"
       }
     }
   }

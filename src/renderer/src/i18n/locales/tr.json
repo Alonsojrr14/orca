@@ -19954,7 +19954,10 @@
       "listening": "Dinleniyor...",
       "unassignedInstruction": "Odaklanmış bir bölmede sesli yazmayı başlatmadan önce bir sesli yazma kısayolu atayın.",
       "shortcutInstruction": "Bir terminale, düzenleyiciye veya ajan istemine odaklanın, ardından sesli dikteyi başlatmak için <shortcut/> tuşuna basın. Durdurmak için tekrar <shortcut/> tuşuna basın.",
-      "changeInSettings": "Modeli, dikte modunu veya kısayolu istediğiniz zaman <link>Ayarlar → Ses</link> bölümünde değiştirin."
+      "changeInSettings": "Modeli, dikte modunu veya kısayolu istediğiniz zaman <link>Ayarlar → Ses</link> bölümünde değiştirin.",
+      "title": "Herhangi bir bölmede sesli yazın",
+      "description": "Odaklanmış bir bölmede sesli yazmayı başlatın, ardından durdurmak için aynı kısayolu tekrar kullanın.",
+      "cta": "Sesli yazmayı ayarla"
     },
     "sessionSearch": {
       "enableFailed": "Oturum araması açılmadı. Tekrar deneyin.",
@@ -19999,8 +20002,23 @@
       "demoHit6Age": "1 ay",
       "readyToast": "Oturum araması hazır",
       "readyToastOpen": "Aç",
-      "changeInSettings": "İstediğiniz zaman <link>Ayarlar → Ajan Oturumu Arama</link> bölümünde değiştirin veya kapatın."
-    }
+      "changeInSettings": "İstediğiniz zaman <link>Ayarlar → Ajan Oturumu Arama</link> bölümünde değiştirin veya kapatın.",
+      "title": "Tüm ajan oturumlarında arayın",
+      "description": "Geçmiş konuşmaları içlerinde söylenenlere göre bulun ve ajanın kaldığı yerden devam edin.",
+      "cta": "Oturum aramasını aç"
+    },
+    "eyebrowNew": "Yeni",
+    "eyebrowTip": "İpucu",
+    "orcaCli": {
+      "title": "Ajanların Orca CLI ile Orca'yı yönetmesini sağlayın",
+      "description": "Ajanların alt worktree'leri koordine etmesini ve worktree'ler arasında iletişim kurmasını sağlayın.",
+      "cta": "CLI ve Becerileri Yükle"
+    },
+    "cmdJPalette": {
+      "title": "<shortcut> ile bir worktree'ye geçin",
+      "description": "Klavyeden ayrılmadan worktree arayın, sekme değiştirin, ayarları düzenleyin veya yeni bir worktree oluşturun."
+    },
+    "gotIt": "Anladım"
   },
   "quickOpen": {
     "moreMatchesAvailable": "Daha fazla eşleşme olabilir. Sonuçları daraltmak için aramanızı detaylandırın.",
@@ -21865,6 +21883,109 @@
         "mrNotFound": "MR !{{number}} bulunamadı.",
         "mrSourceBranchMissing": "MR !{{number}} için kaynak branch yok.",
         "forkHeadUnresolved": "Getirme işleminden sonra fork MR !{{number}} için head çözümlenemedi."
+      }
+    }
+  },
+  "featureWall": {
+    "workflows": {
+      "workspaces": {
+        "title": "Çalışma Alanları",
+        "lede": "Orca, ajanların paralel çalışabilmesi için her görevi yalıtılmış bir çalışma alanına yerleştirir."
+      },
+      "tasks": {
+        "title": "Görevler",
+        "lede": "Doğrudan GitHub veya Linear üzerinden çalışmaya başlayın."
+      },
+      "agents": {
+        "title": "Ajanlar",
+        "lede": "Birden fazla ajanı aynı anda çalıştırın, ilerlemelerini izleyin ve yararlı olduğunda otomasyonun Orca'yı yönetmesini sağlayın."
+      },
+      "workbench": {
+        "title": "İş Tezgâhı",
+        "lede": "Terminal düzeninizi Orca'ya taşıyın, ardından bölmeleri ayırarak sunucuları, testleri, günlükleri ve ajanları yan yana çalıştırın."
+      },
+      "review": {
+        "title": "Kod İncelemesi",
+        "lede": "Değişiklikleri inceleyin, belirli noktalara yönelik geri bildirim bırakın ve ajana geri gönderin."
+      }
+    },
+    "steps": {
+      "statuses": {
+        "name": "Görünürlük",
+        "subtitle": "Ajan Görünürlüğü",
+        "description": "Hangi ajanların çalıştığını, beklediğini, etkin veya engellenmiş olduğunu görün."
+      },
+      "orchestration": {
+        "name": "Orkestrasyon",
+        "description": "Ajanların daha büyük görevleri yürütmek için Orca çalışma alanlarını yönetmesini ve koordine etmesini sağlayın."
+      },
+      "usage": {
+        "name": "Kullanım",
+        "description": "Ne zaman hesap değiştireceğinizi bilmek için bağlı tüm hesapların kullanımını ve hız sınırlarını izleyin."
+      },
+      "terminal": {
+        "name": "Terminal",
+        "description": "Ajanlarınızı, testlerinizi ve geliştirme günlüklerinizi aynı anda görünür tutun."
+      },
+      "editor": {
+        "name": "Düzenleyici",
+        "description": "Orca'dan ayrılmadan not yazmak için Notion tarzı Markdown düzenleyicimizi kullanın."
+      },
+      "browser": {
+        "name": "Tarayıcı",
+        "description": "Uygulamanızı Orca'nın tarayıcısında çalıştırın, seçili arayüz öğelerini ajanlara gönderin ve ajanların web sayfanızla etkileşime girmesini sağlayın."
+      },
+      "notes": {
+        "name": "Notlar",
+        "subtitle": "Notlar ve diff'ler",
+        "description": "Bir ajana belirli noktalara yönelik inceleme notları gönderin."
+      },
+      "prView": {
+        "name": "PR kontrolleri",
+        "subtitle": "PR kontrolleri ve yorumları",
+        "description": "PR durumunu Kontroller sekmesinde görün."
+      },
+      "ship": {
+        "name": "Yapay zekâyla yayınla",
+        "description": "Yapay zekânın sizin için commit ve PR taslakları hazırlamasını sağlayın."
+      }
+    },
+    "tiles": {
+      "tile01": {
+        "title": "Paralel çalışma alanı orkestrasyonu"
+      },
+      "tile02": {
+        "title": "Ghostty düzeyinde terminal"
+      },
+      "tile03": {
+        "title": "GitHub ve Linear, yerleşik entegrasyon"
+      },
+      "tile04": {
+        "title": "Desteklenen CLI ajanları"
+      },
+      "tile05": {
+        "title": "Yerleşik tarayıcı + Tasarım Modu"
+      },
+      "tile06": {
+        "title": "Uzak çalışma alanları"
+      },
+      "tile07": {
+        "title": "Monaco düzenleyici, ajana sürükle"
+      },
+      "tile08": {
+        "title": "Satır içi inceleme, ajana geri iletim"
+      },
+      "tile09": {
+        "title": "Orca CLI"
+      },
+      "tile10": {
+        "title": "Klavye odaklı"
+      },
+      "tile11": {
+        "title": "Kullanım ve hız sınırı takibi"
+      },
+      "tile12": {
+        "title": "PDF'ler, görseller, CSV, Markdown"
       }
     }
   }

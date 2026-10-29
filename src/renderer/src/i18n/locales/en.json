@@ -20387,7 +20387,10 @@
       "listening": "Listening...",
       "unassignedInstruction": "Assign a dictation shortcut before starting voice dictation in a focused pane.",
       "shortcutInstruction": "Focus a terminal, editor, or agent prompt, then press <shortcut/> to start voice dictation. Press <shortcut/> again to stop.",
-      "changeInSettings": "Change the model, dictation mode, or shortcut anytime in <link>Settings → Voice</link>."
+      "changeInSettings": "Change the model, dictation mode, or shortcut anytime in <link>Settings → Voice</link>.",
+      "title": "Dictate into any pane",
+      "description": "Start voice dictation in any focused pane, then use the shortcut again to stop.",
+      "cta": "Set up voice dictation"
     },
     "sessionSearch": {
       "enableFailed": "Could not turn on session search. Try again.",
@@ -20432,8 +20435,23 @@
       "demoHit6Age": "1mo",
       "readyToast": "Session search is ready",
       "readyToastOpen": "Open",
-      "changeInSettings": "Change or turn it off anytime in <link>Settings → Agent Session Search</link>."
-    }
+      "changeInSettings": "Change or turn it off anytime in <link>Settings → Agent Session Search</link>.",
+      "title": "Search every agent session",
+      "description": "Find any past conversation by what was said in it, then pick up where the agent left off.",
+      "cta": "Turn on session search"
+    },
+    "eyebrowNew": "New",
+    "eyebrowTip": "Tip",
+    "orcaCli": {
+      "title": "Let agents drive Orca with the Orca CLI",
+      "description": "Enable agents to coordinate child worktrees and communicate between worktrees.",
+      "cta": "Install CLI & Skills"
+    },
+    "cmdJPalette": {
+      "title": "Jump to a worktree with <shortcut>",
+      "description": "Search worktrees, switch tabs, tweak settings, or spin up a new worktree, all without leaving the keyboard."
+    },
+    "gotIt": "Got it"
   },
   "quickOpen": {
     "moreMatchesAvailable": "More matches may be available. Refine your search to narrow the results.",
@@ -22318,6 +22336,109 @@
         "mrNotFound": "MR !{{number}} not found.",
         "mrSourceBranchMissing": "MR !{{number}} has no source branch.",
         "forkHeadUnresolved": "Could not resolve fork MR !{{number}} head after fetch."
+      }
+    }
+  },
+  "featureWall": {
+    "workflows": {
+      "workspaces": {
+        "title": "Workspaces",
+        "lede": "Orca splits each task into an isolated workspace so agents can run in parallel."
+      },
+      "tasks": {
+        "title": "Tasks",
+        "lede": "Start work directly from GitHub or Linear."
+      },
+      "agents": {
+        "title": "Agents",
+        "lede": "Run several agents at once, track their progress, and let automation drive Orca when it helps."
+      },
+      "workbench": {
+        "title": "Workbench",
+        "lede": "Bring your terminal setup into Orca, then split panes to keep servers, tests, logs, and agents running side by side."
+      },
+      "review": {
+        "title": "Code Review",
+        "lede": "Review what changed, leave focused feedback, and send it back to the agent."
+      }
+    },
+    "steps": {
+      "statuses": {
+        "name": "Visibility",
+        "subtitle": "Agent Visibility",
+        "description": "Know which agents are working, waiting, live, or blocked."
+      },
+      "orchestration": {
+        "name": "Orchestration",
+        "description": "Enable agents to manage and coordinate Orca workspaces to execute larger tasks."
+      },
+      "usage": {
+        "name": "Usage",
+        "description": "Watch your usage and rate limits across every connected account, so you know when to switch."
+      },
+      "terminal": {
+        "name": "Terminal",
+        "description": "Keep your agents, tests, and dev logs visible at once."
+      },
+      "editor": {
+        "name": "Editor",
+        "description": "Use our Notion-style markdown editor to write notes without leaving Orca."
+      },
+      "browser": {
+        "name": "Browser",
+        "description": "Run your app in Orca's browser, send selected UI elements to agents, and let your agents interact with your webpage."
+      },
+      "notes": {
+        "name": "Notes",
+        "subtitle": "Notes & diffs",
+        "description": "Send focused review notes to an agent."
+      },
+      "prView": {
+        "name": "PR checks",
+        "subtitle": "PR checks & comments",
+        "description": "See PR status in the Checks tab."
+      },
+      "ship": {
+        "name": "Ship with AI",
+        "description": "Let AI prepare commit and PR drafts for you."
+      }
+    },
+    "tiles": {
+      "tile01": {
+        "title": "Parallel workspace orchestration"
+      },
+      "tile02": {
+        "title": "Ghostty-class terminal"
+      },
+      "tile03": {
+        "title": "GitHub & Linear, native"
+      },
+      "tile04": {
+        "title": "Supported CLI agents"
+      },
+      "tile05": {
+        "title": "Embedded browser + Design Mode"
+      },
+      "tile06": {
+        "title": "Remote workspaces"
+      },
+      "tile07": {
+        "title": "Monaco editor, drag-to-agent"
+      },
+      "tile08": {
+        "title": "Inline review, back to the agent"
+      },
+      "tile09": {
+        "title": "Orca CLI"
+      },
+      "tile10": {
+        "title": "Keyboard-native"
+      },
+      "tile11": {
+        "title": "Usage & rate-limit aware"
+      },
+      "tile12": {
+        "title": "PDFs, images, CSV, Markdown"
       }
     }
   }

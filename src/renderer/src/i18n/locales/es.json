@@ -20481,7 +20481,10 @@
       "recent3Text": "Esta es una primera versión de las notas, agrupadas por área.",
       "recent3Title": "Borrador de notas de la versión",
       "startSearching": "Empezar a buscar",
-      "changeInSettings": "Cámbialo o desactívalo cuando quieras en <link>Ajustes → Búsqueda de sesiones de agente</link>."
+      "changeInSettings": "Cámbialo o desactívalo cuando quieras en <link>Ajustes → Búsqueda de sesiones de agente</link>.",
+      "title": "Busca en todas las sesiones de agentes",
+      "description": "Encuentra cualquier conversación anterior por lo que se dijo en ella y continúa donde lo dejó el agente.",
+      "cta": "Activar la búsqueda de sesiones"
     },
     "voice": {
       "demoPrompt": "Revisa este diff en busca de casos límite y agrega pruebas para lo que encuentres.",
@@ -20490,8 +20493,23 @@
       "listening": "Escuchando...",
       "unassignedInstruction": "Asigna un atajo de dictado antes de iniciar el dictado por voz en un panel enfocado.",
       "shortcutInstruction": "Enfoca un terminal, un editor o un campo de entrada del agente y pulsa <shortcut/> para iniciar el dictado por voz. Pulsa <shortcut/> de nuevo para detenerlo.",
-      "changeInSettings": "Cambia el modelo, el modo de dictado o el atajo cuando quieras en <link>Ajustes → Voz</link>."
-    }
+      "changeInSettings": "Cambia el modelo, el modo de dictado o el atajo cuando quieras en <link>Ajustes → Voz</link>.",
+      "title": "Dicta en cualquier panel",
+      "description": "Inicia el dictado de voz en cualquier panel con el foco y vuelve a usar el atajo para detenerlo.",
+      "cta": "Configurar el dictado de voz"
+    },
+    "eyebrowNew": "Nuevo",
+    "eyebrowTip": "Consejo",
+    "orcaCli": {
+      "title": "Deja que los agentes controlen Orca con Orca CLI",
+      "description": "Permite que los agentes coordinen worktrees secundarios y se comuniquen entre worktrees.",
+      "cta": "Instalar CLI y habilidades"
+    },
+    "cmdJPalette": {
+      "title": "Ve a un worktree con <shortcut>",
+      "description": "Busca worktrees, cambia de pestaña, ajusta la configuración o crea un worktree, todo sin dejar el teclado."
+    },
+    "gotIt": "Entendido"
   },
   "fileExplorer": {
     "root": {
@@ -22501,6 +22519,109 @@
         "mrNotFound": "No se encontró la MR !{{number}}.",
         "mrSourceBranchMissing": "La MR !{{number}} no tiene rama de origen.",
         "forkHeadUnresolved": "No se pudo resolver el head de la MR !{{number}} de un fork tras el fetch."
+      }
+    }
+  },
+  "featureWall": {
+    "workflows": {
+      "workspaces": {
+        "title": "Espacios de trabajo",
+        "lede": "Orca asigna a cada tarea un espacio de trabajo aislado para que los agentes puedan trabajar en paralelo."
+      },
+      "tasks": {
+        "title": "Tareas",
+        "lede": "Empieza a trabajar directamente desde GitHub o Linear."
+      },
+      "agents": {
+        "title": "Agentes",
+        "lede": "Ejecuta varios agentes a la vez, sigue su progreso y deja que la automatización controle Orca cuando sea útil."
+      },
+      "workbench": {
+        "title": "Panel principal",
+        "lede": "Trae tu configuración de terminal a Orca y divide los paneles para ejecutar servidores, pruebas, registros y agentes en paralelo."
+      },
+      "review": {
+        "title": "Revisión de código",
+        "lede": "Revisa los cambios, deja comentarios concretos y envíaselos al agente."
+      }
+    },
+    "steps": {
+      "statuses": {
+        "name": "Visibilidad",
+        "subtitle": "Visibilidad de los agentes",
+        "description": "Consulta qué agentes están trabajando, en espera, activos o bloqueados."
+      },
+      "orchestration": {
+        "name": "Orquestación",
+        "description": "Permite que los agentes gestionen y coordinen espacios de trabajo de Orca para realizar tareas más grandes."
+      },
+      "usage": {
+        "name": "Uso",
+        "description": "Supervisa el uso y los límites de tasa de todas las cuentas conectadas para saber cuándo cambiar de cuenta."
+      },
+      "terminal": {
+        "name": "Terminal",
+        "description": "Mantén tus agentes, pruebas y registros de desarrollo a la vista a la vez."
+      },
+      "editor": {
+        "name": "Editor",
+        "description": "Usa nuestro editor de Markdown al estilo de Notion para escribir notas sin salir de Orca."
+      },
+      "browser": {
+        "name": "Navegador",
+        "description": "Ejecuta tu aplicación en el navegador de Orca, envía elementos seleccionados de la interfaz a los agentes y deja que interactúen con tu página web."
+      },
+      "notes": {
+        "name": "Notas",
+        "subtitle": "Notas y diferencias",
+        "description": "Envía notas de revisión concretas a un agente."
+      },
+      "prView": {
+        "name": "Checks de PR",
+        "subtitle": "Checks y comentarios de PR",
+        "description": "Consulta el estado del PR en la pestaña Checks."
+      },
+      "ship": {
+        "name": "Publica con IA",
+        "description": "Deja que la IA prepare borradores de commits y PR por ti."
+      }
+    },
+    "tiles": {
+      "tile01": {
+        "title": "Orquestación de espacios de trabajo en paralelo"
+      },
+      "tile02": {
+        "title": "Terminal a la altura de Ghostty"
+      },
+      "tile03": {
+        "title": "Integración nativa con GitHub y Linear"
+      },
+      "tile04": {
+        "title": "Agentes de CLI compatibles"
+      },
+      "tile05": {
+        "title": "Navegador integrado + Modo de diseño"
+      },
+      "tile06": {
+        "title": "Espacios de trabajo remotos"
+      },
+      "tile07": {
+        "title": "Editor Monaco, arrastra al agente"
+      },
+      "tile08": {
+        "title": "Revisión en el código, de vuelta al agente"
+      },
+      "tile09": {
+        "title": "Orca CLI"
+      },
+      "tile10": {
+        "title": "Diseñado para el teclado"
+      },
+      "tile11": {
+        "title": "Uso y límites de tasa bajo control"
+      },
+      "tile12": {
+        "title": "PDF, imágenes, CSV, Markdown"
       }
     }
   }
