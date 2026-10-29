@@ -24,7 +24,7 @@ export function savedStructuredAgentSessionStatus(
   const turn = record.lastTurn
   const at = turn?.at ?? markerAt
   const outcome =
-    turn?.state === 'open' || (!turn && markerAt !== undefined) ? 'interruption' : turn?.outcome
+    turn?.state === 'open' || (!turn && markerAt !== undefined) ? 'cancellation' : turn?.outcome
   const model = normalizeOptionalField(record.options?.model, AGENT_MODEL_MAX_LENGTH)
   const launchDirectory = agentSessionPinnedLaunchDirectory(record)
   return {

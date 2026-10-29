@@ -154,6 +154,7 @@ describe('the row a quit writes for the reply it cut', () => {
     expect(row?.turnScope).toEqual({ kind: 'turn', turnItemId })
     expect(readerErrors).toEqual([LEGACY_TEXT])
     expect(latestNativeChatOrcaStopCut(items, [])).toEqual({ turnItemId, cause: trigger })
+    expect(host.readStatusSummary(SESSION)?.turnOutcome).toBe('cancellation')
   })
 
   it('writes nothing for a turn the provider finished during the stop', async () => {
@@ -203,6 +204,7 @@ describe('the row a restart writes for a reply its Orca died in', () => {
     })
     expect(readerErrors).toEqual([LEGACY_TEXT])
     expect(latestNativeChatOrcaStopCut(items, [])).toEqual({ turnItemId, cause: 'crash' })
+    expect(host.readStatusSummary(SESSION)?.turnOutcome).toBe('interruption')
   })
 
   it('names the update an unfinished quit began, never a crash', async () => {
@@ -259,5 +261,6 @@ describe('an agent this Orca runs', () => {
     )
     const { stopRows } = await reread()
     expect(stopRows).toEqual([])
+    expect(host.readStatusSummary(SESSION)?.turnOutcome).toBe('interruption')
   })
 })

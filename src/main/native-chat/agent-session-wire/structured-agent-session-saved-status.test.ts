@@ -32,6 +32,9 @@ import {
 } from './structured-agent-session-restart-interruption-test-harness'
 import { StructuredAgentSessionHost } from './structured-agent-session-host'
 import type { AgentSessionResumeMarker } from '../../../shared/agent-session-resume-marker'
+import { structuredAgentSessionAgentStatus } from '../../../shared/structured-agent-session-agent-status'
+import { agentVerdictDisplayMark } from '../../../shared/agent-main-agent-verdict'
+import { agentVerdictStatusLine } from '../../../renderer/src/lib/agent-verdict-status-line'
 
 afterEach(() => vi.restoreAllMocks())
 
@@ -43,7 +46,7 @@ it('maps saved turn edges and legacy markers without using rename time', () => {
   })
   expect(savedStructuredAgentSessionStatus(record, 35)).toMatchObject({
     status: 'idle',
-    turnOutcome: 'interruption',
+    turnOutcome: 'cancellation',
     statusStartedAt: 35
   })
   expect(
@@ -53,7 +56,7 @@ it('maps saved turn edges and legacy markers without using rename time', () => {
     })
   ).toMatchObject({
     status: 'idle',
-    turnOutcome: 'interruption',
+    turnOutcome: 'cancellation',
     statusStartedAt: 40,
     updatedAt: 40,
     latestPrompt: 'hello'
@@ -102,11 +105,11 @@ it('seeds first desktop and phone snapshots without opening, writing or reacting
   expect(events).toContainEqual({
     type: 'snapshot',
     sessions: [
-      expect.objectContaining({ sessionId: record.sessionId, turnOutcome: 'interruption' })
+      expect.objectContaining({ sessionId: record.sessionId, turnOutcome: 'cancellation' })
     ]
   })
   expect(sink.publish).toHaveBeenCalledWith(
-    expect.objectContaining({ turnOutcome: 'interruption' }),
+    expect.objectContaining({ turnOutcome: 'cancellation' }),
     { ...record.location, kind: 'structured-session', sessionId: record.sessionId }
   )
   expect(reaction).not.toHaveBeenCalled()
@@ -169,47 +172,99 @@ it('writes turn and attention edges, ignores streamed previews, and clears an em
   expect(store.getRecord(SESSION)?.lastTurn).toBeUndefined()
 })
 
-it('saves real send, attention and Stop publications through the record transaction queue', async () => {
-  await attach()
-  const { host, store } = hostTestState()
-  const body = hostTestMessage('saved prompt')
-  await host.send(CALLER, { envelope: envelope('agentSession.send', { body }), body })
-  const sink = hostTestState().acquire.mock.calls.at(-1)?.[0].events
-  sink?.appendItem({ provider: 'codex', threadId: THREAD, turnId: 'turn-1', ordinal: 1 }, body, {
-    turnScope: AGENT_JOURNAL_THREAD_SCOPE
-  })
-  sink?.appendItem(
-    { provider: 'codex', threadId: THREAD, turnId: 'turn-1', ordinal: 2 },
-    { kind: 'turn', turnId: 'turn-1', state: 'running' },
-    { turnScope: AGENT_JOURNAL_THREAD_SCOPE }
-  )
-  await host.flushStreamedEvents(SESSION)
-  await seedApproval()
-  await host.drainStatusWrites()
-  expect(store.getRecord(SESSION)?.lastTurn).toMatchObject({
-    state: 'open',
-    prompt: 'saved prompt'
-  })
-  await host.cancel(CALLER, {
-    envelope: envelope('agentSession.cancel', { turnId: 'turn-1' }),
-    turnId: 'turn-1'
-  })
-  sink?.appendItem(
-    { provider: 'codex', threadId: THREAD, turnId: 'turn-1', ordinal: 2 },
-    { kind: 'turn', turnId: 'turn-1', state: 'completed', outcome: 'cancellation' },
-    { turnScope: AGENT_JOURNAL_THREAD_SCOPE }
-  )
-  await host.flushStreamedEvents(SESSION)
-  await host.drainStatusWrites()
-  expect(host.readStatusSummary(SESSION)).toMatchObject({
-    status: 'idle',
-    turnOutcome: 'cancellation'
-  })
-  expect(store.getRecord(SESSION)?.lastTurn).toMatchObject({
-    state: 'settled',
-    outcome: 'cancellation'
-  })
-})
+it.each(['quit', 'stop', 'failure', 'provider-death'] as const)(
+  'keeps the displayed %s verdict through graceful drain, saved first paint and demand open',
+  async (ending) => {
+    await attach()
+    const { host: original, store, acquire } = hostTestState()
+    const body = hostTestMessage('finish this after restart')
+    await original.send(CALLER, { envelope: envelope('agentSession.send', { body }), body })
+    const events = acquire.mock.calls.at(-1)?.[0].events
+    if (!events) {
+      throw new Error('provider event sink missing')
+    }
+    events.appendItem({ provider: 'codex', threadId: THREAD, turnId: 'turn-1', ordinal: 1 }, body, {
+      turnScope: AGENT_JOURNAL_THREAD_SCOPE
+    })
+    events.appendItem(
+      { provider: 'codex', threadId: THREAD, turnId: 'turn-1', ordinal: 2 },
+      { kind: 'turn', turnId: 'turn-1', state: 'running' },
+      { turnScope: AGENT_JOURNAL_THREAD_SCOPE }
+    )
+    await original.flushStreamedEvents(SESSION)
+    await original.drainStatusWrites()
+    expect(store.getRecord(SESSION)?.lastTurn?.state).toBe('open')
+    if (ending === 'stop') {
+      await seedApproval()
+      await original.drainStatusWrites()
+      expect(store.getRecord(SESSION)?.lastTurn).toMatchObject({
+        state: 'open',
+        prompt: 'finish this after restart'
+      })
+      await original.cancel(CALLER, {
+        envelope: envelope('agentSession.cancel', { turnId: 'turn-1' }),
+        turnId: 'turn-1'
+      })
+    }
+    if (ending === 'provider-death') {
+      const generation = (await acquire.mock.results.at(-1)?.value)?.acquisitionGeneration
+      const fence = store.getRecord(SESSION)?.lease.runtimeFence
+      if (!generation || fence === undefined) {
+        throw new Error('provider identity missing')
+      }
+      await original.handleAdapterEvent({
+        type: 'ended',
+        sessionId: SESSION,
+        reason: 'provider crashed',
+        cause: 'unexpected-exit',
+        fence,
+        acquisitionGeneration: generation
+      })
+    } else if (ending === 'failure' || ending === 'stop') {
+      events.appendItem(
+        { provider: 'codex', threadId: THREAD, turnId: 'turn-1', ordinal: 2 },
+        {
+          kind: 'turn',
+          turnId: 'turn-1',
+          state: 'completed',
+          outcome: ending === 'stop' ? 'cancellation' : 'failure'
+        },
+        { turnScope: AGENT_JOURNAL_THREAD_SCOPE }
+      )
+      await original.flushStreamedEvents(SESSION)
+    }
+    await original.flushAllStreamedEvents()
+    await original.drainStatusWrites()
+    const intentional = ending === 'quit' || ending === 'stop'
+    const outcome = intentional ? 'cancellation' : ending === 'failure' ? 'failure' : 'interruption'
+    expect(store.getRecord(SESSION)?.lastTurn).toMatchObject({ state: 'settled', outcome })
+    const restarted = new StructuredAgentSessionHost({ ...original.deps, adapter: adapter() })
+    try {
+      const openJournal = vi.spyOn(journalFactory, 'openAgentSessionJournal')
+      await restarted.reconcileRestartLeases()
+      await restarted.seedSessionTabs([SESSION])
+      expect(openJournal).not.toHaveBeenCalled()
+      for (const open of [false, true]) {
+        if (open) {
+          await restarted.revealSession(SESSION)
+          await restarted.drainStatusWrites()
+        }
+        const summary = restarted.readStatusSummary(SESSION)
+        if (!summary?.status) {
+          throw new Error('restarted status missing')
+        }
+        expect(summary.turnOutcome).toBe(outcome)
+        const row = structuredAgentSessionAgentStatus({ ...summary, status: summary.status })
+        expect(agentVerdictDisplayMark(row)).toBe(intentional ? 'interrupted' : 'failed')
+        expect(agentVerdictStatusLine(row)).toBe(intentional ? 'Interrupted by user' : 'Failed')
+      }
+      expect(openJournal).toHaveBeenCalledOnce()
+      expect(store.getRecord(SESSION)?.lastTurn).toMatchObject({ state: 'settled', outcome })
+    } finally {
+      await restarted.flushAllStreamedEvents()
+    }
+  }
+)
 
 it('lists only indexed unopened chats, keeps legacy targets, and opens history on demand', async () => {
   await attach()
@@ -291,7 +346,7 @@ it('keeps queued leftovers closed at startup and shows their paused cards on dem
   expect(host.hasSession(SESSION)).toBe(false)
   expect(host.readStatusSummary(SESSION)).toMatchObject({
     status: 'idle',
-    turnOutcome: 'interruption'
+    turnOutcome: 'cancellation'
   })
   await host.restartResume.list()
   await host.restartResume.listFailures()

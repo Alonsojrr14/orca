@@ -1,5 +1,5 @@
 import { openTestChats } from './structured-agent-session-open-test-chats.test-support'
-// Only user-close supplies personal cancellation; host eviction/quit leaves interrupted work reportable.
+// Personal close and intentional shutdown are cancellation; unrelated eviction remains failure news.
 // Provider and fallback turn-end writers both derive verdict from the journal Stop event.
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -243,13 +243,13 @@ describe('a turn cut short by closing its provider', () => {
     expect(turn).toMatchObject({ state: 'interrupted', outcome: 'failure' })
   })
 
-  it('leaves a quit as news', async () => {
+  it('projects an intentional quit as cancellation while retaining its cut notice', async () => {
     const statuses = await runningTurn()
 
     await host.flushAllStreamedEvents({ trigger: 'quit' })
 
     expect(statuses.findLast((event) => event.type === 'status')).toMatchObject({
-      session: { status: 'idle', turnOutcome: 'interruption' }
+      session: { status: 'idle', turnOutcome: 'cancellation' }
     })
     const { label, notices } = await settledTurn()
     expect(label).toBe('workedFor')
@@ -302,7 +302,7 @@ describe('a turn cut short by closing its provider', () => {
     }
   )
 
-  it("leaves a quit's cut on a turn no adapter settled as news", async () => {
+  it("retains a quit's raw cut when no adapter settled the turn", async () => {
     providerEnd = null
     await runningTurn()
 

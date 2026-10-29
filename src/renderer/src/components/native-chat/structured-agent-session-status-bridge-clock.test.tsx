@@ -13,6 +13,12 @@ import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
 import type { Tab } from '../../../../shared/tab-types'
 import type { AppState } from '@/store/types'
 import { countActivityUnread } from '../activity/useActivityUnreadCount'
+import { agentSessionRecordFixture } from '../../../../shared/agent-session-record.test-fixture'
+import { agentSessionConversationView } from '../../../../shared/agent-session-conversation-view'
+import { savedStructuredAgentSessionStatus } from '../../../../main/native-chat/agent-session-wire/structured-agent-session-saved-status'
+import { resolveAttention } from '../../../../shared/sidebar-list/smart-attention'
+import type { AgentSessionLastTurn } from '../../../../shared/agent-session-last-turn'
+import { agentVerdictStatusLine } from '@/lib/agent-verdict-status-line'
 
 type TestStore = {
   getState: () => AppState
@@ -124,6 +130,48 @@ describe("the structured row's state clock", () => {
     cleanup()
     resetStructuredAgentSessionStatusFeedsForTests()
   })
+
+  it.each([
+    [{ state: 'settled', outcome: 'success', at: SETTLED }, 'success', 2, null],
+    [{ state: 'open', at: SETTLED }, 'cancellation', 5, 'Interrupted by user'],
+    [
+      { state: 'settled', outcome: 'cancellation', at: SETTLED },
+      'cancellation',
+      5,
+      'Interrupted by user'
+    ],
+    [{ state: 'settled', outcome: 'failure', at: SETTLED }, 'failure', 2, 'Failed'],
+    [{ state: 'settled', outcome: 'interruption', at: SETTLED }, 'interruption', 2, 'Failed']
+  ] satisfies [AgentSessionLastTurn, string, number, string | null][])(
+    'projects saved %j through desktop status and Smart Sort on the original turn clock',
+    async (lastTurn, outcome, cls, text) => {
+      const emit = await connect()
+      const record = agentSessionConversationView({
+        ...agentSessionRecordFixture(),
+        sessionId: structuredTab.entityId,
+        location: {
+          ...agentSessionRecordFixture().location,
+          workspaceId: structuredTab.worktreeId
+        },
+        updatedAt: SETTLED + 60_000,
+        lastTurn
+      })
+      emit({ type: 'snapshot', sessions: [savedStructuredAgentSessionStatus(record)] })
+      expect(row()).toMatchObject({
+        state: 'done',
+        stateStartedAt: SETTLED,
+        interrupted: outcome === 'cancellation',
+        mainAgent: { state: 'done', outcome, stateStartedAt: SETTLED }
+      })
+      expect(agentVerdictStatusLine(row())).toBe(text)
+      expect(
+        resolveAttention([{ kind: 'hook', entry: row(), hasLivePty: false }], SETTLED + 1)
+      ).toEqual({
+        cls,
+        attentionTimestamp: cls === 2 ? SETTLED : 0
+      })
+    }
+  )
 
   it('keeps a settled parent read while its subagent writes, until its own next turn ends', async () => {
     const emit = await connect()
