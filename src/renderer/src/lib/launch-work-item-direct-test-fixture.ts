@@ -1,10 +1,39 @@
 import { afterEach, beforeEach, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import type * as TuiAgentSelectionModule from '../../../shared/tui-agent-selection'
 import type * as TuiAgentStartupModule from '@/lib/tui-agent-startup'
 import type * as DirectAgentRoutingModule from '@/lib/launch-work-item-direct-agent-routing'
 import type * as RuntimeRpcSubscribeModule from '@/runtime/runtime-rpc-subscribe'
 
-const mocks = vi.hoisted(() => ({
+type DirectLaunchStoreActions = {
+  ensureDetectedAgents: Mock
+  ensureRemoteDetectedAgents: Mock
+  createWorktree: Mock
+  updateWorktreeMeta: Mock
+  setSidebarOpen: Mock
+  seedNativeChatLaunchPrompt: Mock
+  seedNativeChatLaunchDraft: Mock
+  markNativeChatLaunchPromptFailed: Mock
+}
+
+type DirectLaunchMocks = DirectLaunchStoreActions & {
+  toastError: Mock
+  activateAndRevealWorktree: Mock
+  pasteDraftWhenAgentReady: Mock
+  openModalFallback: Mock
+  resolvePrBase: Mock
+  getConnectionId: Mock
+  store: Record<string, unknown> & DirectLaunchStoreActions
+}
+
+type HostMocks = {
+  checkRuntimeHooks: Mock
+  callRuntimeRpc: Mock
+  supports: Mock
+  subscribe: Mock<typeof RuntimeRpcSubscribeModule.subscribeRuntimeRpc>
+}
+
+const mocks: DirectLaunchMocks = vi.hoisted(() => ({
   toastError: vi.fn(),
   createWorktree: vi.fn(),
   ensureDetectedAgents: vi.fn(),
@@ -20,16 +49,7 @@ const mocks = vi.hoisted(() => ({
   resolvePrBase: vi.fn(),
   getConnectionId: vi.fn(),
   // SAFETY: each test supplies the store slices its production launch reads.
-  store: {} as Record<string, unknown> & {
-    ensureDetectedAgents: ReturnType<typeof vi.fn>
-    ensureRemoteDetectedAgents: ReturnType<typeof vi.fn>
-    createWorktree: ReturnType<typeof vi.fn>
-    updateWorktreeMeta: ReturnType<typeof vi.fn>
-    setSidebarOpen: ReturnType<typeof vi.fn>
-    seedNativeChatLaunchPrompt: ReturnType<typeof vi.fn>
-    seedNativeChatLaunchDraft: ReturnType<typeof vi.fn>
-    markNativeChatLaunchPromptFailed: ReturnType<typeof vi.fn>
-  }
+  store: {} as Record<string, unknown> & DirectLaunchStoreActions
 }))
 
 vi.mock('@/store', async () => {
@@ -62,7 +82,7 @@ vi.mock('@/lib/connection-context', () => ({
   getConnectionId: mocks.getConnectionId
 }))
 
-const hostMocks = vi.hoisted(() => ({
+const hostMocks: HostMocks = vi.hoisted(() => ({
   checkRuntimeHooks: vi.fn(),
   callRuntimeRpc: vi.fn(),
   supports: vi.fn(),
