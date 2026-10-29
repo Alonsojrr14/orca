@@ -129,7 +129,7 @@ export class HostTerminalPolicy {
         systemPtyLimit === null
           ? DEFAULT_MAX_HOST_TERMINALS
           : Math.min(Math.ceil(systemPtyLimit / 2), MAX_CONFIGURED_TERMINALS)
-      await this.refresh()
+      await awaitDaemonValueWithinCallerDeadline(this.refresh(), Date.now() + 250)
       if (!this.disposed && this.path && this.environment === null) {
         this.timer = setInterval(() => void this.refresh(), 3_000)
         this.timer.unref?.()
@@ -150,28 +150,24 @@ export class HostTerminalPolicy {
     const path = this.path
     const revision = this.revision
     this.reading = true
-    const raw = Promise.resolve().then(() => this.readSaved(path))
-    void raw
-      .finally(() => {
-        this.reading = false
-        if (revision !== this.revision) {
-          void this.refresh()
-        }
-      })
-      .catch(() => undefined)
     try {
-      const read = await awaitDaemonValueWithinCallerDeadline(raw, Date.now() + 250)
+      const maximum = await this.readSaved(path)
       if (this.disposed || revision !== this.revision) {
         return
       }
-      if (!read.completed || (read.value === null && this.savedMaximum !== null)) {
+      if (maximum === null && this.savedMaximum !== null) {
         throw new Error('Saved terminal limit unavailable')
       }
-      this.savedMaximum = read.value
+      this.savedMaximum = maximum
       this.setReadHealth(false)
     } catch {
       if (!this.disposed && revision === this.revision) {
         this.setReadHealth(true)
+      }
+    } finally {
+      this.reading = false
+      if (!this.disposed && revision !== this.revision) {
+        void this.refresh()
       }
     }
   }

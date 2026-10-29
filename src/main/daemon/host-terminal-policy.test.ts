@@ -8,6 +8,7 @@ import { SystemPtyLimit, parseLinuxPtyLimit } from './system-pty-limit'
 import * as deadlines from './daemon-request-deadline'
 import { HostTerminalLedger } from './host-terminal-ledger'
 import { TerminalSpawnGate } from './terminal-spawn-gate'
+import { isConfiguredTerminalLimit } from '../../shared/terminal-limit-policy'
 import {
   DEFAULT_SPAWN_ADMISSION_LIMITS,
   type SpawnRequestFacts
@@ -22,10 +23,12 @@ const fs = await vi.importActual<typeof FileSystem>('node:fs/promises')
 
 function deferred<T>() {
   let resolve!: (value: T) => void
-  const promise = new Promise<T>((done) => {
+  let reject!: (error: Error) => void
+  const promise = new Promise<T>((done, fail) => {
     resolve = done
+    reject = fail
   })
-  return { promise, resolve }
+  return { promise, resolve, reject }
 }
 
 const facts: SpawnRequestFacts = {
@@ -167,7 +170,51 @@ describe('host terminal policy', () => {
     }
   })
 
-  it('bounds shared startup and retains one raw read/observer across ticks, admissions and saves', async () => {
+  it('publishes slow startup, raises and decreases on settlement without background observers or transient health', async () => {
+    vi.useFakeTimers()
+    let saved = 384
+    let latency = 300
+    const read = vi.fn(() => {
+      const maximum = saved
+      return new Promise<number>((resolve) => setTimeout(() => resolve(maximum), latency))
+    })
+    const value = createPolicy(join(await home(), 'policy.json'), {}, system(), read)
+    const log = vi.fn()
+    const observed = vi.spyOn(deadlines, 'awaitDaemonValueWithinCallerDeadline')
+    const startup = value.start(log)
+    expect(value.start()).toBe(startup)
+    await vi.advanceTimersByTimeAsync(251)
+    await startup
+    expect(await value.status('nonce')).toMatchObject({ maxTerminals: 256, source: 'default' })
+    expect((await value.status('nonce')).savedUnreadable).toBeUndefined()
+    const observers = observed.mock.calls.length
+    await vi.advanceTimersByTimeAsync(49)
+    expect(value.admissionMaximum()).toBe(384)
+    for (const maximum of [400, 300]) {
+      saved = maximum
+      await vi.advanceTimersToNextTimerAsync()
+      await vi.advanceTimersByTimeAsync(300)
+      expect(value.admissionMaximum()).toBe(maximum)
+    }
+    latency = 3_100
+    saved = 350
+    await vi.advanceTimersToNextTimerAsync()
+    await vi.advanceTimersByTimeAsync(3_000)
+    expect(read).toHaveBeenCalledTimes(4)
+    expect(value.admissionMaximum()).toBe(300)
+    await vi.advanceTimersByTimeAsync(100)
+    expect(value.admissionMaximum()).toBe(350)
+    expect(observed).toHaveBeenCalledTimes(observers)
+    saved = 2
+    await vi.advanceTimersToNextTimerAsync()
+    value.dispose()
+    await vi.advanceTimersByTimeAsync(30_000)
+    expect(read).toHaveBeenCalledTimes(5)
+    expect(value.admissionMaximum()).toBe(350)
+    expect(log).not.toHaveBeenCalled()
+  })
+
+  it('bounds shared startup and retains one raw read/observer across ticks, admissions and independent saves', async () => {
     const path = join(await home(), 'policy.json')
     vi.useFakeTimers()
     const old = deferred<number | null>()
@@ -177,11 +224,15 @@ describe('host terminal policy', () => {
       .mockResolvedValue(384)
     const value = createPolicy(path, {}, system(), read)
     const observed = vi.spyOn(deadlines, 'awaitDaemonValueWithinCallerDeadline')
-    const startup = value.start()
+    const log = vi.fn()
+    const startup = value.start(log)
     expect(value.start()).toBe(startup)
     await vi.advanceTimersByTimeAsync(251)
     await startup
-    expect(await value.status('nonce')).toMatchObject({ maxTerminals: 256, savedUnreadable: true })
+    expect(await value.status('nonce')).toMatchObject({ maxTerminals: 256 })
+    expect((await value.status('nonce')).savedUnreadable).toBeUndefined()
+    expect(await value.save(384, () => true)).toMatchObject({ maxTerminals: 384 })
+    expect(await value.save(400, () => true)).toMatchObject({ maxTerminals: 400 })
     expect(await value.save(384, () => true)).toMatchObject({ maxTerminals: 384 })
     const observers = observed.mock.calls.length
     const maximum = vi.fn(() => value.admissionMaximum())
@@ -227,6 +278,8 @@ describe('host terminal policy', () => {
     await vi.advanceTimersByTimeAsync(0)
     expect(value.admissionMaximum()).toBe(384)
     expect(read).toHaveBeenCalledTimes(2)
+    expect(observed).toHaveBeenCalledTimes(observers)
+    expect(log).not.toHaveBeenCalled()
     value.dispose()
     await vi.advanceTimersByTimeAsync(30_000)
     expect(read).toHaveBeenCalledTimes(2)
@@ -266,9 +319,12 @@ describe('host terminal policy', () => {
       editable: true
     })
     expect(log).toHaveBeenCalledTimes(1)
-    held.resolve(2)
+    setTimeout(() => held.resolve(400), 300)
     read.mockResolvedValue(400)
-    await vi.advanceTimersByTimeAsync(3_000)
+    await vi.advanceTimersByTimeAsync(299)
+    expect(value.admissionMaximum()).toBe(384)
+    expect(log).toHaveBeenCalledTimes(1)
+    await vi.advanceTimersByTimeAsync(1)
     const recovered = await value.status('nonce')
     expect(recovered.maxTerminals).toBe(400)
     expect(recovered.savedUnreadable).toBeUndefined()
@@ -276,22 +332,58 @@ describe('host terminal policy', () => {
       'terminal-policy-read-failed',
       'terminal-policy-read-recovered'
     ])
-    const stale = deferred<number | null>()
-    read.mockReturnValueOnce(stale.promise).mockResolvedValue(384)
+    const rejected = deferred<number | null>()
+    read.mockReturnValueOnce(rejected.promise)
     await vi.advanceTimersToNextTimerAsync()
-    expect(await value.save(384, () => true)).toMatchObject({ maxTerminals: 384 })
+    await expect(value.save(512, () => true)).rejects.toThrow('capacity')
+    rejected.reject(new Error('obsolete denied read'))
+    await vi.advanceTimersByTimeAsync(0)
+    expect(value.admissionMaximum()).toBe(400)
+    expect((await value.status('nonce')).savedUnreadable).toBeUndefined()
+    expect(log).toHaveBeenCalledTimes(2)
+    read.mockImplementationOnce(() => {
+      throw new Error('actual synchronous loader failure')
+    })
+    await vi.advanceTimersToNextTimerAsync()
+    expect((await value.status('nonce')).savedUnreadable).toBe(true)
+    expect(log).toHaveBeenCalledTimes(3)
+    const stale = deferred<number | null>()
+    const between = deferred<number | null>()
+    read
+      .mockReturnValueOnce(stale.promise)
+      .mockReturnValueOnce(between.promise)
+      .mockResolvedValue(384)
+    await vi.advanceTimersToNextTimerAsync()
+    const committing = deferred<void>()
+    const release = deferred<void>()
+    vi.mocked(rename).mockImplementationOnce(async (...args) => {
+      committing.resolve()
+      await release.promise
+      await fs.rename(...args)
+    })
+    const save = value.save(384, () => true)
+    await committing.promise
     stale.resolve(2)
     await vi.advanceTimersByTimeAsync(0)
+    expect(await value.status('nonce')).toMatchObject({ maxTerminals: 400, savedUnreadable: true })
+    expect(log).toHaveBeenCalledTimes(3)
+    release.resolve()
+    expect(await save).toMatchObject({ maxTerminals: 384 })
+    between.reject(new Error('obsolete pre-commit denial'))
+    await vi.advanceTimersByTimeAsync(0)
     expect(value.admissionMaximum()).toBe(384)
+    expect((await value.status('nonce')).savedUnreadable).toBeUndefined()
+    expect(log).toHaveBeenCalledTimes(4)
     const late = deferred<number | null>()
     read.mockReturnValue(late.promise)
     await vi.advanceTimersToNextTimerAsync()
     value.dispose()
     const count = read.mock.calls.length
-    late.resolve(2)
+    late.reject(new Error('disposed read failure'))
     await vi.advanceTimersByTimeAsync(30_000)
     expect(read).toHaveBeenCalledTimes(count)
     expect(value.admissionMaximum()).toBe(384)
+    expect(log).toHaveBeenCalledTimes(4)
   })
 
   it('expires staging without a late rename or orphan, and permits retry while cleanup stalls', async () => {
@@ -362,7 +454,22 @@ describe('host terminal policy', () => {
           cleaned.resolve()
         }
       })
-      const policy = createPolicy(path, {}, system())
+      const reconciling = deferred<void>()
+      const read = vi.fn(async (file: string) => {
+        const saved: unknown = JSON.parse(await fs.readFile(file, 'utf8'))
+        if (
+          !saved ||
+          typeof saved !== 'object' ||
+          !('maxTerminals' in saved) ||
+          !isConfiguredTerminalLimit(saved.maxTerminals)
+        ) {
+          throw new Error('Invalid fixture')
+        }
+        reconciling.resolve()
+        await new Promise((resolve) => setTimeout(resolve, 300))
+        return saved.maxTerminals
+      })
+      const policy = createPolicy(path, {}, system(), read)
       vi.useFakeTimers()
       const save = policy.save(10, () => true)
       const failed = expect(save).rejects.toThrow('confirm')
@@ -374,14 +481,22 @@ describe('host terminal policy', () => {
       try {
         Object.defineProperty(process, 'platform', { configurable: true, value: 'win32' })
         release.resolve()
-        await vi.advanceTimersByTimeAsync(100)
+        await vi.advanceTimersByTimeAsync(0)
         await cleaned.promise
       } finally {
         Object.defineProperty(process, 'platform', { configurable: true, value: platform })
       }
-      await vi.waitFor(() =>
-        expect(policy.admissionMaximum()).toBe(outcome === 'completed' ? 10 : 20)
-      )
+      expect(policy.admissionMaximum()).toBe(20)
+      if (outcome === 'completed') {
+        await reconciling.promise
+        await vi.advanceTimersByTimeAsync(299)
+        expect(policy.admissionMaximum()).toBe(20)
+        await vi.advanceTimersByTimeAsync(1)
+        expect(policy.admissionMaximum()).toBe(10)
+        expect(read).toHaveBeenCalledOnce()
+      } else {
+        expect(read).not.toHaveBeenCalled()
+      }
       expect(rename).toHaveBeenCalledTimes(2)
     }
   )
