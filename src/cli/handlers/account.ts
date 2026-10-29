@@ -149,8 +149,8 @@ function readAgentLoginHelp(command: string, args: string[]): string | null {
       addAgentNodePaths(stripElectronRunAsNode(process.env))
     )
     const probe = spawnSync(spawnCmd, spawnArgs, { encoding: 'utf8', env, timeout: 15_000 })
-    // A probe that cannot run proves nothing; the login then reports the real launch error.
-    return probe.error ? null : `${probe.stdout}${probe.stderr}`
+    // A probe that fails proves nothing; the login then reports the real launch error.
+    return probe.error || probe.status !== 0 ? null : `${probe.stdout}${probe.stderr}`
   } catch {
     return null
   }
