@@ -236,11 +236,11 @@ describe('direct workspace defaults', () => {
       hostMocks.callRuntimeRpc.mockClear()
       const agent = supplied ? 'claude' : 'codex'
       await expect(
-        launch({
-          ...(supplied
+        launch(
+          supplied
             ? { agentLaunchPreferences: { defaultTuiAgent: 'claude', disabledTuiAgents: [] } }
-            : {})
-        })
+            : {}
+        )
       ).resolves.toBe(true)
       expect(mocks.updateWorktreeMeta).toHaveBeenCalledWith('repo-1::/repo/worktree', {
         createdWithAgent: agent
@@ -388,7 +388,9 @@ describe('direct workspace defaults', () => {
       const find = rows.find
       vi.spyOn(rows, 'find').mockImplementation((predicate, thisArg) =>
         find.call(rows, (row, index, array) => {
-          if (inRootLookup) visits++
+          if (inRootLookup) {
+            visits++
+          }
           return predicate.call(thisArg, row, index, array)
         })
       )

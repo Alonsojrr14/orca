@@ -2,6 +2,7 @@ import { afterEach, beforeEach, vi } from 'vitest'
 import type * as TuiAgentSelectionModule from '../../../shared/tui-agent-selection'
 import type * as TuiAgentStartupModule from '@/lib/tui-agent-startup'
 import type * as DirectAgentRoutingModule from '@/lib/launch-work-item-direct-agent-routing'
+import type * as RuntimeRpcSubscribeModule from '@/runtime/runtime-rpc-subscribe'
 
 const mocks = vi.hoisted(() => ({
   toastError: vi.fn(),
@@ -65,7 +66,7 @@ const hostMocks = vi.hoisted(() => ({
   checkRuntimeHooks: vi.fn(),
   callRuntimeRpc: vi.fn(),
   supports: vi.fn(),
-  subscribe: vi.fn<typeof import('@/runtime/runtime-rpc-subscribe').subscribeRuntimeRpc>()
+  subscribe: vi.fn<typeof RuntimeRpcSubscribeModule.subscribeRuntimeRpc>()
 }))
 
 vi.mock('@/runtime/runtime-hooks-client', () => ({
