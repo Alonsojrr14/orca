@@ -233,18 +233,33 @@ it('disables on contact loss and reads again on a real same-runtime recovery pub
   expect(readTerminalLimit).toHaveBeenCalledTimes(2)
 })
 
-it('finds localized capacity in both the catalog and the rendered row filter', async () => {
+it('finds and formats capacity in the UI language in the catalog and rendered row', async () => {
   await i18n.changeLanguage('fr')
   search.query = 'capacité'
   expect(
     getTerminalAdvancedSearchEntries().some((entry) => matchesSettingsSearch(search.query, entry))
   ).toBe(true)
-  await render()
-  expect(input().value).toBe('256')
-  search.query = 'aucun-résultat'
-  await render()
-  expect(container.querySelector('input')).toBeNull()
-  expect(ptCatalog.settings.terminal.limit.savedUnreadable).toContain('Não foi possível ler')
+  vi.mocked(readTerminalLimit).mockResolvedValue({
+    ...base,
+    maxTerminals: 2048,
+    systemPtyLimit: 4096,
+    savedUnreadable: true
+  })
+  const format = vi.spyOn(Number.prototype, 'toLocaleString')
+  try {
+    await render()
+    expect(input().value).toBe('2048')
+    expect(container.textContent).toContain('4\u202f096')
+    expect(container.querySelector('[role="status"]')?.textContent).toContain('2\u202f048')
+    expect(format).toHaveBeenCalledWith('fr')
+    expect(format).not.toHaveBeenCalledWith()
+    search.query = 'aucun-résultat'
+    await render()
+    expect(container.querySelector('input')).toBeNull()
+    expect(ptCatalog.settings.terminal.limit.savedUnreadable).toContain('Não foi possível ler')
+  } finally {
+    format.mockRestore()
+  }
 })
 
 it.each([

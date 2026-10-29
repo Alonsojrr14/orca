@@ -17,7 +17,7 @@ import {
   type HostIdentityFence
 } from '@/store/host-catalog-fencing'
 import type { HostRoute } from '@/runtime/runtime-client-target'
-import { translate } from '@/i18n/i18n'
+import { getIntlLocale, translate } from '@/i18n/i18n'
 import { runtimeHostContactForEntry } from '../../../../shared/runtime-host-contact'
 import { getTerminalLimitSearchKeywords } from './terminal-advanced-platform-search'
 
@@ -187,7 +187,7 @@ function TerminalLimitField({ scope }: { scope: SettingsHostScope }): React.JSX.
                 value:
                   status === undefined && scope.available && !failed
                     ? '…'
-                    : (status?.systemPtyLimit?.toLocaleString() ??
+                    : (status?.systemPtyLimit?.toLocaleString(getIntlLocale()) ??
                       translate('settings.terminal.limit.unknown', 'Unavailable'))
               })}
             </span>
@@ -203,7 +203,7 @@ function TerminalLimitField({ scope }: { scope: SettingsHostScope }): React.JSX.
                 {translate(
                   'settings.terminal.limit.savedUnreadable',
                   'Couldn’t read this host’s saved terminal limit. Using {{value}}. Enter a value and press Enter to replace it.',
-                  { value: status.maxTerminals.toLocaleString() }
+                  { value: status.maxTerminals.toLocaleString(getIntlLocale()) }
                 )}
               </span>
             ) : null}
