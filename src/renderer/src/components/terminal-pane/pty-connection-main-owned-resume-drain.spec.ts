@@ -39,8 +39,10 @@ export function registerMainOwnedResumeDrainTests(
     async (ending) => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
       enableRealDrain()
-      window.api.runtime.call = vi.fn(async () => ({
+      window.api.runtime.call = vi.fn<typeof window.api.runtime.call>(async () => ({
+        id: 'automatic-work-status',
         ok: true,
+        _meta: { runtimeId: 'local-runtime' },
         result: { automaticWork: { mode: { kind: 'normal' } } }
       }))
       const helper = await import('./pty-connection/main-resumed-sleep-pane')
@@ -208,8 +210,10 @@ export function registerMainOwnedResumeDrainTests(
     async ({ shape, population, ending }) => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
       enableRealDrain()
-      window.api.runtime.call = vi.fn(async () => ({
+      window.api.runtime.call = vi.fn<typeof window.api.runtime.call>(async () => ({
+        id: 'automatic-work-status',
         ok: true,
+        _meta: { runtimeId: 'local-runtime' },
         result: { automaticWork: { mode: { kind: 'normal' } } }
       }))
       const helper = await import('./pty-connection/main-resumed-sleep-pane')
