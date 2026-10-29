@@ -236,9 +236,14 @@ describe('useStructuredAgentSession provisional launch gate', () => {
     rerender({ transportEnabled: true })
 
     await waitFor(() =>
-      expect(mocks.call).toHaveBeenCalledWith(LOCAL_TARGET, 'agentSession.options', {
-        sessionId: 'session-1'
-      })
+      expect(mocks.call).toHaveBeenCalledWith(
+        LOCAL_TARGET,
+        'agentSession.options',
+        {
+          sessionId: 'session-1'
+        },
+        {}
+      )
     )
     expect(methodsCalled().filter((method) => method === 'agentSession.options')).toHaveLength(1)
     expect(mocks.hold).toHaveBeenLastCalledWith(expect.objectContaining({ enabled: true }))

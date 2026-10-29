@@ -1,3 +1,4 @@
+import type { StructuredSessionConversationSupport } from './structured-agent-session-options-contract'
 import {
   structuredSessionSelectionAuthority,
   structuredSessionSelectionController
@@ -6,12 +7,10 @@ import { useStructuredSessionSelectionReads } from './use-structured-session-sel
 import { projectRuntimePermission } from '../../../../shared/structured-agent-session-permission-option'
 import { useStructuredAgentSessionStatusSummary } from './StructuredAgentSessionStatusBridge'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { AgentSessionConversationCommand } from '../../../../shared/agent-session/agent-session-conversation-command'
 import type {
   AgentSessionOptionsResult,
   AgentSessionModelCatalogResult
 } from '../../../../shared/agent-session-wire'
-import type { AgentSessionRewindSupport } from '../../../../shared/agent-session-rewind'
 import type { AgentType } from '../../../../shared/agent-status-types'
 import type { AgentSessionOptionCatalog } from '../../../../shared/agent-session-option-catalog'
 import { usesInstalledAgentModelCatalog } from '../../../../shared/agent-model-catalog-ownership'
@@ -78,17 +77,8 @@ export function useStructuredAgentSessionOptionState(args: {
     worktree
   } = args
   const { summary, observation } = useStructuredAgentSessionStatusSummary(sessionId, target)
-  const [conversationSupport, setConversationSupport] = useState<{
-    sessionId: string
-    commands: readonly AgentSessionConversationCommand[]
-    threadGoal: AgentSessionOptionsResult['threadGoal']
-    reportedThreadGoal: AgentSessionOptionsResult['reportedThreadGoal']
-    contextUsage: AgentSessionOptionsResult['contextUsage']
-    acceptsImages: boolean | undefined
-    rewind: AgentSessionRewindSupport
-    /** The fence the read answered for; rewind support is only that runtime's. */
-    fence: number | null
-  } | null>(null)
+  const [conversationSupport, setConversationSupport] =
+    useState<StructuredSessionConversationSupport | null>(null)
   // A revision the loaded window dropped can move the host's whole-journal context facts.
   const contextRefresh = conversationSupport?.contextUsage ? (args.unloadedTurnRevisions ?? 0) : 0
   // Paint cached host evidence immediately; without it keep the placeholder until the host names the model.
@@ -188,10 +178,13 @@ export function useStructuredAgentSessionOptionState(args: {
       const epoch = readEpoch.current
       const record = activeOptionRecordRef.current
       const completed = controller.captureRead()
-      const result = await callStructuredAgentSession<AgentSessionOptionsResult>(
-        target,
-        'agentSession.options',
-        { sessionId }
+      const result = await controller.request((options) =>
+        callStructuredAgentSession<AgentSessionOptionsResult>(
+          target,
+          'agentSession.options',
+          { sessionId },
+          options
+        )
       )
       if (
         !stale &&

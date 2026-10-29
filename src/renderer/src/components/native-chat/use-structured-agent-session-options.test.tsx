@@ -34,6 +34,7 @@ import {
   forgetStructuredSessionSelection,
   structuredSessionSelectionController
 } from '@/lib/structured-agent-session-selection-controller'
+import { replaceRuntimeEnvironmentRevisions } from '@/runtime/runtime-environment-revision'
 import { resetHostModelCatalogSnapshotsForTests } from '@/runtime/host-model-catalog-snapshots'
 describe('useStructuredAgentSessionOptions', () => {
   beforeEach(() => {
@@ -543,6 +544,7 @@ describe('useStructuredAgentSessionOptions', () => {
   })
 
   describe("a paired server's new chat", () => {
+    beforeEach(() => replaceRuntimeEnvironmentRevisions([{ id: 'server-1', createdAt: 1 }]))
     it("shows the server's seed once its list answers and remembers a pick on the server under its model", async () => {
       answer({ modelCatalog: () => Promise.resolve(SAVED_LIST) })
       mocks.hold.mockResolvedValue({ kind: 'accepted', options: { effort: 'high' } })
@@ -559,11 +561,15 @@ describe('useStructuredAgentSessionOptions', () => {
         await result.current.setStructuredOption('effort', 'high')
       })
       await waitFor(() =>
-        expect(mocks.enqueue).toHaveBeenCalledWith(PAIRED_TARGET, {
-          type: 'apply-picks',
-          agent: 'codex',
-          picks: [{ modelId: 'gpt-5.5', optionId: 'effort', value: 'high' }]
-        })
+        expect(mocks.enqueue).toHaveBeenCalledWith(
+          PAIRED_TARGET,
+          {
+            type: 'apply-picks',
+            agent: 'codex',
+            picks: [{ modelId: 'gpt-5.5', optionId: 'effort', value: 'high' }]
+          },
+          { expectedEnvironmentPairingRevision: 1 }
+        )
       )
       unmount()
     })

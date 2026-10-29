@@ -166,7 +166,11 @@ export async function callStructuredAgentSession<TResult>(
   method: string,
   params?: unknown,
   /** For a caller that checked the remote host's compatibility itself, just before. */
-  options: { skipCompatibilityCheck?: true; beforeSend?: () => void } = {}
+  options: {
+    skipCompatibilityCheck?: true
+    beforeSend?: () => void
+    expectedEnvironmentPairingRevision?: number
+  } = {}
 ): Promise<TResult> {
   if (
     method === 'agentSession.rewind' &&
@@ -179,7 +183,7 @@ export async function callStructuredAgentSession<TResult>(
     throw new Error('Rewinding requires a newer Orca server. Update the server and try again.')
   }
   const timeoutMs = STRUCTURED_AGENT_SESSION_METHOD_TIMEOUT_MS.get(method)
-  return timeoutMs === undefined && !options.skipCompatibilityCheck && !options.beforeSend
+  return timeoutMs === undefined && Object.keys(options).length === 0
     ? callRuntimeRpc<TResult>(target, method, params)
     : callRuntimeRpc<TResult>(target, method, params, {
         ...(timeoutMs === undefined ? {} : { timeoutMs }),

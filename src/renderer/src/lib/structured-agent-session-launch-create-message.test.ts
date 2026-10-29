@@ -27,6 +27,8 @@ import {
   getStructuredAgentSessionLaunchLifecycle
 } from './structured-agent-session-launch'
 import { structuredSessionSelectionController } from './structured-agent-session-selection-controller'
+import { setRuntimeEnvironmentConnectionGenerationForTests } from '@/store/slices/runtime-status-connection-generation'
+import { replaceRuntimeEnvironmentRevisions } from '@/runtime/runtime-environment-revision'
 import {
   applyStructuredAgentSessionOptions,
   createStructuredAgentSessionOptionState
@@ -335,6 +337,7 @@ describe('the first message owned by create', () => {
     const create = deferred<unknown>()
     mocks.call.mockReturnValue(create.promise)
     const launch = start()
+    const held = holdStructuredAgentSessionLaunchOption(launch.sessionId, 'model', 'gpt-5.4')!
     const state = getStructuredLaunchStateBySessionId(launch.sessionId)
     if (state) {
       state.intent.surfaceAddress = { worktreeId: 'workspace-1', precedingTabIds: [] }
@@ -356,6 +359,7 @@ describe('the first message owned by create', () => {
     expect(mocks.call.mock.calls.map(([, method]) => method)).toEqual(['agentSession.create'])
     expect(getStructuredAgentSessionPendingSends(launch.sessionId)).toEqual([])
     expect(findStructuredAgentSessionReadOwner(launch.sessionId, target)).toBeUndefined()
+    await expect(held).resolves.toEqual({ kind: 'superseded' })
   })
 
   it('returns text at 30 seconds and a late create reply cannot send it again', async () => {
@@ -667,13 +671,35 @@ describe('the first message owned by create', () => {
   it('allows Retry after the deadline while the original create never answers', async () => {
     const create = deferred<unknown>()
     mocks.call.mockReturnValue(create.promise)
-    const launch = start()
+    const paired = { kind: 'environment', environmentId: 'frozen-generation' } as const
+    replaceRuntimeEnvironmentRevisions([{ id: paired.environmentId, createdAt: 1 }])
+    const launch = startStructuredAgentLaunch('workspace-1', 'codex', {
+      requestId: newAgentLaunchRequestId(),
+      executionHostId: 'runtime:frozen-generation',
+      hostSeedOptions: { model: 'gpt-5.5' },
+      prompt: 'opening text'
+    })
+    const first = holdStructuredAgentSessionLaunchOption(launch.sessionId, 'model', 'gpt-5.4')!
     await vi.waitFor(() => expect(mocks.call).toHaveBeenCalledOnce())
     const original = createParams()
+    const owner = structuredSessionSelectionController(paired, launch.sessionId, 'codex')
+    const carried = owner.pending()[0]!
     await vi.advanceTimersByTimeAsync(30_000)
     await launch.promptDeliveryResult
+    setRuntimeEnvironmentConnectionGenerationForTests(paired.environmentId, 2)
+    expect(structuredSessionSelectionController(paired, launch.sessionId, 'codex')).toBe(owner)
+    const middle = holdStructuredAgentSessionLaunchOption(
+      launch.sessionId,
+      'model',
+      'gpt-5.3-codex'
+    )!
+    const newest = holdStructuredAgentSessionLaunchOption(launch.sessionId, 'model', 'gpt-5.4')!
+    await expect(middle).resolves.toEqual({ kind: 'superseded' })
+    const applied = deferred<unknown>()
     mocks.inventory.mockResolvedValue([])
-    mocks.call.mockImplementation(async () => created())
+    mocks.call.mockImplementation((_target, method) =>
+      method === 'agentSession.setOption' ? applied.promise : Promise.resolve(created())
+    )
     expect(retryStructuredAgentSessionLaunch('workspace-1', launch.sessionId)).toBe(true)
     await vi.waitFor(() =>
       expect(readStructuredAgentLaunchRecord(launch.sessionId)).toBeUndefined()
@@ -681,8 +707,16 @@ describe('the first message owned by create', () => {
     const creates = mocks.call.mock.calls.filter(([, method]) => method === 'agentSession.create')
     expect(creates).toHaveLength(2)
     expect(creates[1]?.[2]).toEqual(original)
+    await expect(first).resolves.toMatchObject({ kind: 'accepted' })
+    expect(carried.outcome?.kind).toBe('accepted')
+    expect(owner.pending()).toHaveLength(1)
+    expect(owner.pending()[0]).not.toBe(carried)
+    applied.resolve({ ok: true, value: { options: { model: 'gpt-5.4' } } })
+    await expect(newest).resolves.toMatchObject({ kind: 'accepted' })
+    expect(owner.captureRead()).toHaveLength(2)
     expect(mocks.call.mock.calls.filter(([, method]) => method === 'agentSession.send')).toEqual([])
     expect(draft(launch.sessionId)).toBe('opening text')
+    replaceRuntimeEnvironmentRevisions([])
   })
 
   it.each([

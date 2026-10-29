@@ -66,7 +66,7 @@ const launchControllers = new WeakMap<
   StructuredLaunchState,
   ReturnType<typeof structuredSessionSelectionController>
 >()
-const selectionController = (state: StructuredLaunchState) => {
+export const structuredLaunchSelectionController = (state: StructuredLaunchState) => {
   let controller = launchControllers.get(state)
   if (!controller) {
     controller = structuredSessionSelectionController(
@@ -78,6 +78,7 @@ const selectionController = (state: StructuredLaunchState) => {
   }
   return controller
 }
+const selectionController = structuredLaunchSelectionController
 const receipts = new WeakMap<StructuredLaunchState, StructuredAgentLaunchReceipt>()
 /** Create and the attached view read the same finite operation overlay. */
 export function structuredLaunchOptionOverlay(
@@ -117,25 +118,31 @@ export async function setStructuredSessionSelectionOption(
   sessionId: string,
   fence: number,
   key: string,
-  value: string
+  value: string,
+  options: { expectedEnvironmentPairingRevision?: number } = {}
 ): Promise<StructuredLaunchOptionOutcome> {
   const fields = { key, value }
   try {
     const result = await callStructuredAgentSession<
       AgentSessionMutationResult<AgentSessionOptionResult>
-    >(target, 'agentSession.setOption', {
-      envelope: {
-        sessionId,
-        clientOperationId: createStructuredAgentSessionOperationId(createBrowserUuid),
-        expectedRuntimeFence: fence,
-        payloadFingerprint: structuredAgentSessionPayloadFingerprint({
-          method: 'agentSession.setOption',
+    >(
+      target,
+      'agentSession.setOption',
+      {
+        envelope: {
           sessionId,
-          fields
-        })
+          clientOperationId: createStructuredAgentSessionOperationId(createBrowserUuid),
+          expectedRuntimeFence: fence,
+          payloadFingerprint: structuredAgentSessionPayloadFingerprint({
+            method: 'agentSession.setOption',
+            sessionId,
+            fields
+          })
+        },
+        ...fields
       },
-      ...fields
-    })
+      options
+    )
     return result.ok
       ? { kind: 'accepted', options: result.value.options ?? { [key]: value } }
       : { kind: 'refused', failure: agentSessionRefusalFailure(result.refusal) }
@@ -168,12 +175,15 @@ export async function applyStructuredLaunchExplicitOptions(
       if (state.cancelled) {
         throw new StructuredAgentSessionLaunchCancelledError()
       }
-      const outcome = await setStructuredSessionSelectionOption(
-        state.intent.target,
-        receipt.sessionId,
-        receipt.fence,
-        id,
-        value
+      const outcome = await controller.request((options) =>
+        setStructuredSessionSelectionOption(
+          state.intent.target,
+          receipt.sessionId,
+          receipt.fence,
+          id,
+          value,
+          options
+        )
       )
       if (
         (outcome.kind === 'refused' || outcome.kind === 'unknown') &&
@@ -219,12 +229,15 @@ export async function applyStructuredLaunchHeldOptions(
     if (state.cancelled) {
       throw new StructuredAgentSessionLaunchCancelledError()
     }
-    return setStructuredSessionSelectionOption(
-      state.intent.target,
-      state.intent.sessionId,
-      receipt.fence,
-      operation.key,
-      operation.value
+    return controller.request((options) =>
+      setStructuredSessionSelectionOption(
+        state.intent.target,
+        state.intent.sessionId,
+        receipt.fence,
+        operation.key,
+        operation.value,
+        options
+      )
     )
   })
   if (waitForDrain) {

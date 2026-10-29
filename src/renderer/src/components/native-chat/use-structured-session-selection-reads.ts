@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { subscribeRuntimeHostContactRegained } from '@/runtime/runtime-host-contact-regained'
-import {
-  structuredSessionSelectionAuthority,
-  type structuredSessionSelectionController
-} from '@/lib/structured-agent-session-selection-controller'
+import type { structuredSessionSelectionAuthority } from '@/lib/structured-agent-session-selection-controller'
+import type { StructuredSessionSelectionController } from '../../../../shared/structured-agent-session-selection-operations'
 import type { RuntimeClientTarget } from '../../../../shared/runtime-client-target'
 
 /** Revalidate the queried base when local operations finish or host authority moves. */
 export function useStructuredSessionSelectionReads(args: {
-  controller: ReturnType<typeof structuredSessionSelectionController>
+  controller: StructuredSessionSelectionController
   target: RuntimeClientTarget
   authority: ReturnType<typeof structuredSessionSelectionAuthority>
   hostOptionStamp: string
@@ -36,9 +34,6 @@ export function useStructuredSessionSelectionReads(args: {
     () =>
       target.kind === 'environment'
         ? subscribeRuntimeHostContactRegained(target.environmentId, () => {
-            if (structuredSessionSelectionAuthority(target) !== authority) {
-              controller.abandon()
-            }
             setContact((value) => value + 1)
             rereadOptions()
           })

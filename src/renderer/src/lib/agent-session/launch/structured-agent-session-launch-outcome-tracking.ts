@@ -22,6 +22,7 @@ import {
   type StructuredLaunchState
 } from './structured-agent-session-launch-registry'
 import { recordUnlistedCreatedChat } from '../../structured-agent-session-unlisted-created-chats'
+import { forgetStructuredSessionSelection } from '../../structured-agent-session-selection-controller'
 
 function cleanupLaunchState(state: StructuredLaunchState): void {
   if (deleteStructuredLaunchStateIfCurrent(state)) {
@@ -43,7 +44,10 @@ function cleanupUnmaterializedLaunch(state: StructuredLaunchState): boolean {
       state.intent.worktreeId,
       state.intent.sessionId
     )
-    return deleteStructuredLaunchStateIfCurrent(state)
+    if (deleteStructuredLaunchStateIfCurrent(state)) {
+      forgetStructuredSessionSelection(state.intent.sessionId, state.intent.target)
+      return true
+    }
   }
   return false
 }

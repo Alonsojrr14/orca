@@ -11,17 +11,35 @@ export function useMobileStructuredSelectionController(args: {
   onRevalidate: () => void
 }) {
   const { agent, client, sessionId, onRevalidate } = args
-  const clientGeneration = client?.getGeneration?.()
-  const controller = useMemo(
-    () =>
-      createStructuredSessionSelectionController((picks) => {
+  const clientGeneration = useSyncExternalStore(client?.onStateChange ?? (() => () => {}), () =>
+    client?.getGeneration?.()
+  )
+  const scope = useMemo(() => {
+    let attached = true
+    const controller = createStructuredSessionSelectionController(
+      (picks) => {
         if (agent) {
           void persistMobileStructuredOptionPicks({ client, agent, picks })
         }
-      }),
-    [agent, client, clientGeneration, sessionId]
-  )
-  useEffect(() => () => controller.abandon(), [controller])
+      },
+      () => attached
+    )
+    return {
+      controller,
+      attach: () => {
+        attached = true
+      },
+      detach: () => {
+        attached = false
+        controller.abandon()
+      }
+    }
+  }, [agent, client, sessionId])
+  const { controller } = scope
+  useEffect(() => {
+    scope.attach()
+    return scope.detach
+  }, [scope])
   const selectionRevision = useSyncExternalStore(controller.subscribe, controller.snapshot)
   const terminal = controller.terminalSnapshot()
   useEffect(() => {
@@ -30,12 +48,7 @@ export function useMobileStructuredSelectionController(args: {
     }
   }, [terminal, onRevalidate])
   useEffect(() => {
-    let generation = client?.getGeneration?.()
     return client?.onStateChange((state) => {
-      if (generation !== client.getGeneration?.()) {
-        generation = client.getGeneration?.()
-        controller.abandon()
-      }
       if (state === 'connected') {
         onRevalidate()
       }

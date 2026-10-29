@@ -397,10 +397,15 @@ it('refuses typed literals while the current fence awaits options, then accepts 
   await act(async () =>
     expect(await view.result.current.setStructuredOption('model', 'literal')).toBe(true)
   )
-  expect(mocks.call).toHaveBeenCalledWith(LOCAL_TARGET, 'agentSession.setOption', {
-    envelope: expect.objectContaining({ sessionId: 'locked-chat', expectedRuntimeFence: 2 }),
-    key: 'model',
-    value: 'literal'
-  })
+  expect(mocks.call).toHaveBeenCalledWith(
+    LOCAL_TARGET,
+    'agentSession.setOption',
+    {
+      envelope: expect.objectContaining({ sessionId: 'locked-chat', expectedRuntimeFence: 2 }),
+      key: 'model',
+      value: 'literal'
+    },
+    {}
+  )
   view.unmount()
 })

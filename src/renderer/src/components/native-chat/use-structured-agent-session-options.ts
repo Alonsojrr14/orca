@@ -142,7 +142,16 @@ export function useStructuredAgentSessionOptions(args: StructuredAgentSessionOpt
         pendingId: providerStarting || id === AGENT_CHAT_PERMISSION_MODE_OPTION_ID ? null : id
       }))
       void controller.flush((pick) =>
-        setStructuredSessionSelectionOption(target, sessionId, fence, pick.key, pick.value)
+        controller.request((options) =>
+          setStructuredSessionSelectionOption(
+            target,
+            sessionId,
+            fence,
+            pick.key,
+            pick.value,
+            options
+          )
+        )
       )
       const outcome = await operation.result
       updateOptionState((current) => ({

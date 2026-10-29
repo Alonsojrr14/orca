@@ -82,7 +82,6 @@ import {
   structuredSessionSelectionController,
   forgetStructuredSessionSelection
 } from '@/lib/structured-agent-session-selection-controller'
-import { setRuntimeEnvironmentConnectionGenerationForTests } from '@/store/slices/runtime-status-connection-generation'
 import { retirePurgedTabLaunches } from '@/store/slices/worktrees/teardown/purged-structured-launch-retirement'
 import { useAppStore } from '@/store'
 import { agentSessionTabFixture } from '@/components/native-chat/native-chat-workspace-test-fixtures'
@@ -390,7 +389,7 @@ describe('structured agent session tab retirement', () => {
   })
 })
 
-it('replaces generations of one logical owner and retires ordinary close/purge only on the target host', async () => {
+it('retains one logical owner across generations and retires ordinary close/purge only on the target host', async () => {
   const remote = { kind: 'environment', environmentId: 'selection-generations' } as const
   const local = { kind: 'local' } as const
   const sessionId = 'selection-lifetime'
@@ -415,33 +414,36 @@ it('replaces generations of one logical owner and retires ordinary close/purge o
     return del.call(this, key)
   })
   try {
-    let previous: ReturnType<typeof structuredSessionSelectionController> | undefined
-    for (let generation = 1; generation <= 10; generation++) {
-      setRuntimeEnvironmentConnectionGenerationForTests(remote.environmentId, generation)
-      const controller = structuredSessionSelectionController(remote, sessionId, 'codex')
-      expect(controller).not.toBe(previous)
-      expect(previous?.overlay() ?? {}).toEqual({})
-      expect(retained.size).toBe(1)
-      controller.issue('model', `model-${generation}`, null)
-      previous = controller
-    }
+    const previous = structuredSessionSelectionController(remote, sessionId, 'codex')
+    previous.issue('model', 'model-1', null)
+    expect(retained.size).toBe(1)
     const survivor = structuredSessionSelectionController(local, sessionId, 'codex')
     survivor.issue('model', 'surviving-model', null)
     expect(retained.size).toBe(2)
     const reply = Promise.withResolvers<{ kind: 'accepted'; options: Record<string, string> }>()
-    previous!.flush(() => reply.promise)
+    previous!.flush(() => previous!.request(() => reply.promise))
     const drain = previous!.drain()
     await retireStructuredAgentSessionTab({ target: remote, worktreeId: 'wt-1', sessionId })
     await drain
     expect(retained.size).toBe(1)
     expect(survivor.overlay()).toEqual({ model: 'surviving-model' })
     // The host can still finish the accepted write; no obsolete client owner remembers it.
-    reply.resolve({ kind: 'accepted', options: { model: 'model-10' } })
+    reply.resolve({ kind: 'accepted', options: { model: 'model-1' } })
     await reply.promise
     await Promise.resolve()
     expect(mocks.remember).not.toHaveBeenCalled()
     expect(previous!.overlay()).toEqual({})
+    const noSend = vi.fn()
+    await expect(previous!.issue('model', 'dead', null).result).resolves.toEqual({
+      kind: 'superseded'
+    })
+    previous!.flush(noSend)
+    expect(previous!.freeze()).toEqual([])
+    await expect(previous!.request(noSend)).rejects.toThrow('retired')
+    expect(noSend).not.toHaveBeenCalled()
     const purged = structuredSessionSelectionController(remote, sessionId, 'codex')
+    expect(purged).not.toBe(previous)
+    expect(purged.captureRead()).toEqual([])
     purged.issue('effort', 'high', 'sonnet')
     retirePurgedTabLaunches(
       useAppStore.getState(),

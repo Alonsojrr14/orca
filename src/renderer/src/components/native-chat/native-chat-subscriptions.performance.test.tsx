@@ -6,6 +6,7 @@ import { createStructuredSessionSelectionController } from '../../../../shared/s
 import { useStructuredSessionSelectionReads } from './use-structured-session-selection-reads'
 import { useStructuredAgentSessionOptionStamp } from './structured-agent-session-status-hooks'
 import { useAppStore } from '@/store'
+import { replaceRuntimeEnvironmentRevisions } from '@/runtime/runtime-environment-revision'
 import type { AppState } from '@/store/types'
 import type { NativeChatSkillDiscovery } from './use-native-chat-skills'
 import {
@@ -726,4 +727,66 @@ it('keeps unrelated store, same-host status and other-host consumers quiet at N 
     snapshot.mockRestore()
     resetStructuredAgentSessionStatusFeedsForTests()
   }
+})
+
+it('bounds selected continuity wakes and keeps other-host consumers quiet at N and 10N', () => {
+  for (const count of [10, 100]) {
+    const targets = Array.from({ length: count }, (_, index) => ({
+      kind: 'environment' as const,
+      environmentId: index % 2 ? 'continuity-other' : 'continuity-selected'
+    }))
+    const controllers = targets.map(() => createStructuredSessionSelectionController(vi.fn()))
+    const reads = targets.map(() => vi.fn())
+    const renders = targets.map(() => 0)
+    function Probe({ index }: { index: number }) {
+      useStructuredSessionSelectionReads({
+        controller: controllers[index],
+        target: targets[index],
+        authority: '',
+        hostOptionStamp: '',
+        turnId: null,
+        rereadOptions: reads[index]
+      })
+      renders[index]++
+      return null
+    }
+    const environments = targets
+      .slice(0, 2)
+      .map((target) => ({ id: target.environmentId, createdAt: 1, pairingRevision: 2 }))
+    replaceRuntimeEnvironmentRevisions(environments, {
+      retired: [],
+      sameHost: [],
+      pending: [{ id: 'continuity-selected', fromRevision: 1 }]
+    })
+    const view = render(targets.map((_, index) => <Probe key={index} index={index} />))
+    const baseline = [...renders]
+    const projectionReads = vi.spyOn(useAppStore.getState().runtimeStatusByEnvironmentId, 'get')
+    act(() => useAppStore.setState({ lastTerminalInputAtByPaneKey: { other: count } }))
+    expect(projectionReads).not.toHaveBeenCalled()
+    const publishCatalog = () =>
+      useAppStore.setState({ runtimeEnvironments: [...useAppStore.getState().runtimeEnvironments] })
+    act(publishCatalog)
+    expect(renders).toEqual(baseline)
+    expect(projectionReads.mock.calls.length).toBeLessThanOrEqual(2 * count)
+    replaceRuntimeEnvironmentRevisions(environments, {
+      retired: [],
+      sameHost: [{ id: 'continuity-selected', fromRevision: 1, toRevision: 2 }]
+    })
+    act(publishCatalog)
+    expect(renders).toEqual(baseline.map((value, index) => value + (index % 2 ? 0 : 1)))
+    expect(reads.map((read) => read.mock.calls.length)).toEqual(
+      targets.map((_, index) => (index % 2 ? 0 : 1))
+    )
+    console.info(
+      'selection-continuity-work',
+      JSON.stringify({
+        count,
+        projectionReads: projectionReads.mock.calls.length,
+        otherHostRenders: 0
+      })
+    )
+    view.unmount()
+    projectionReads.mockRestore()
+  }
+  replaceRuntimeEnvironmentRevisions([])
 })

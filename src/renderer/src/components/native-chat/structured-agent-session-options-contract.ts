@@ -19,3 +19,19 @@ export type StructuredAgentSessionOptionsArgs = {
   mutate: StructuredAgentSessionMutate
   launch?: StructuredAgentSessionLaunchView
 }
+
+import type { AgentSessionConversationCommand } from '../../../../shared/agent-session/agent-session-conversation-command'
+import type { AgentSessionRewindSupport } from '../../../../shared/agent-session-rewind'
+import type { AgentSessionOptionsResult } from '../../../../shared/agent-session-wire'
+
+export type StructuredSessionConversationSupport = {
+  sessionId: string
+  commands: readonly AgentSessionConversationCommand[]
+  threadGoal: AgentSessionOptionsResult['threadGoal']
+  reportedThreadGoal: AgentSessionOptionsResult['reportedThreadGoal']
+  contextUsage: AgentSessionOptionsResult['contextUsage']
+  acceptsImages: boolean | undefined
+  rewind: AgentSessionRewindSupport
+  /** The fence the read answered for; rewind support is only that runtime's. */
+  fence: number | null
+}

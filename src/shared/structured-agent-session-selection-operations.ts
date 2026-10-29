@@ -33,7 +33,8 @@ export type SelectionOperation = {
 
 /** Finite operation precedence above a queried host answer; no mutation reply installs a base. */
 export function createStructuredSessionSelectionController(
-  remember: (picks: RememberedPicks) => void
+  remember: (picks: RememberedPicks) => void,
+  isCurrent: () => boolean = () => true
 ) {
   let sequence = 0
   let revision = 0
@@ -57,6 +58,9 @@ export function createStructuredSessionSelectionController(
   const settle = (operation: SelectionOperation, outcome: SelectionOutcome): void => {
     if (operation.outcome) {
       return
+    }
+    if (!isCurrent()) {
+      outcome = { kind: 'superseded' }
     }
     operation.outcome = outcome
     pendingCounts.set(operation.key, (pendingCounts.get(operation.key) ?? 1) - 1)
@@ -124,6 +128,19 @@ export function createStructuredSessionSelectionController(
       model: string | null,
       offers?: (key: string, value: string) => boolean
     ): SelectionOperation {
+      if (!isCurrent()) {
+        const outcome = { kind: 'superseded' } as const
+        return {
+          identity: 0,
+          key,
+          value,
+          model,
+          transmitted: false,
+          outcome,
+          result: Promise.resolve(outcome),
+          resolve: () => {}
+        }
+      }
       for (const previous of currentOperations()) {
         if (
           !previous.transmitted &&
@@ -169,6 +186,9 @@ export function createStructuredSessionSelectionController(
     isPending: (key: string) => (pendingCounts.get(key) ?? 0) > 0,
     pendingId: () => pendingTail?.key ?? null,
     freeze(replaced: readonly SelectionOperation[] = []): SelectionOperation[] {
+      if (!isCurrent()) {
+        return []
+      }
       // A definitive create refusal permits a new capture; an ambiguous retry never calls freeze.
       for (const op of replaced) {
         if (!op.outcome && operations.get(op.identity) === op) {
@@ -201,6 +221,9 @@ export function createStructuredSessionSelectionController(
       }
     },
     flush(send: (operation: SelectionOperation) => Promise<SelectionOutcome>): void {
+      if (!isCurrent()) {
+        return
+      }
       const unsent = currentOperations().filter((op) => !op.transmitted && !op.outcome)
       unsent.sort((a, b) => OPTION_ORDER.indexOf(a.key) - OPTION_ORDER.indexOf(b.key))
       for (const operation of unsent) {

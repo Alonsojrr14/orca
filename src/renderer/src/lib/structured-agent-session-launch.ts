@@ -49,7 +49,10 @@ import {
   trackStructuredLaunchConfirmationDeadline
 } from './agent-session/launch/structured-agent-session-launch-prompt-outcome'
 import { repeatedStructuredLaunchAttempt } from './structured-agent-session-launch-request'
-import { initialStructuredLaunchSelection } from './structured-agent-session-launch-options'
+import {
+  initialStructuredLaunchSelection,
+  structuredLaunchSelectionController
+} from './structured-agent-session-launch-options'
 import { releaseStructuredLaunchSource } from './structured-agent-session-launch-source-handoff'
 
 export type { StructuredAgentLaunchOptions, StructuredAgentLaunchReceipt }
@@ -242,6 +245,7 @@ function structuredAgentLaunchState(
   }
   state.onHostSeed = (seedOptions) => adoptPairedHostSeed(state, seedOptions)
   callers.onSettled = () => maybeCleanupLaunchState(state)
+  structuredLaunchSelectionController(state)
   setStructuredLaunchState(state)
   reserveStructuredLaunchSlot(state.intent)
   state.promise = publishWithHeldOptions(state, launchAndReconcile(state))
@@ -256,11 +260,7 @@ function structuredAgentLaunchState(
   setStructuredLaunchState(state)
   notifyStructuredLaunchListeners()
   trackLaunchSettlement(state, state.promise)
-  return {
-    state,
-    caller,
-    joined: false
-  }
+  return { state, caller, joined: false }
 }
 
 export function cancelStructuredAgentLaunch(worktreeId: string, sessionId: string): boolean {
