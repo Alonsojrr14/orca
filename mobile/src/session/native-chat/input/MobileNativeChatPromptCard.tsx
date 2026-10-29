@@ -15,6 +15,7 @@ import { MobileNativeChatPromptStrip } from './MobileNativeChatPromptStrip'
 // Keep dismissal in the controller across chat/terminal toggles; the shared resolver already chose the terminal card.
 export function MobileNativeChatPromptCard({
   ask,
+  answering = false,
   askKey,
   onDismissAsk,
   onAnswerAsk,
@@ -31,6 +32,8 @@ export function MobileNativeChatPromptCard({
   onAnswerQuestion
 }: {
   ask?: AskPrompt | null
+  // The keyboard is up for this card's reply, so it may take the whole conversation area.
+  answering?: boolean
   askKey?: string | null
   onDismissAsk?: () => void
   onAnswerAsk?: (prompt: AskPrompt, selections: AskAnswerSelection[]) => Promise<boolean>
@@ -109,7 +112,11 @@ export function MobileNativeChatPromptCard({
   // Hide without remounting so a collapsed prompt keeps partial selections.
   return (
     <>
-      <View style={collapsedPrompt ? styles.collapsed : undefined}>{card}</View>
+      <View
+        style={collapsedPrompt ? styles.collapsed : [styles.shown, answering && styles.answering]}
+      >
+        {card}
+      </View>
       {collapsedPrompt ? (
         <MobileNativeChatPromptStrip
           title={collapsedPrompt.title}
@@ -122,6 +129,9 @@ export function MobileNativeChatPromptCard({
 
 const styles = themedStyleSheet(() => ({
   collapsed: { display: 'none' },
+  // Leave the conversation visible above the question, as desktop caps its card.
+  shown: { flexShrink: 1, minHeight: 0, maxHeight: '60%' },
+  answering: { maxHeight: '100%' },
   terminalCard: {
     backgroundColor: colors.bgPanel,
     borderTopWidth: StyleSheet.hairlineWidth,

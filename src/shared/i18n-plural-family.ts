@@ -8,7 +8,7 @@ export function resolvePluralFamilyKey(key: string, options?: TOptions): string 
   return typeof options?.count === 'number' ? key.replace(PLURAL_SUFFIX_RE, '') : key
 }
 
-// Catalogs translated from English often ship only _one/_other; reuse _other so few/many stay in-language.
+// Plugin packs often ship only _one/_other; reuse _other so few/many stay in-language (built-ins commit these forms).
 export function withPluralCategoriesFromOther(
   catalog: Record<string, unknown>,
   categories: readonly string[]

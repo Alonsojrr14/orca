@@ -6,21 +6,17 @@ import i18next, {
   type TOptions
 } from 'i18next'
 
-import {
-  resolvePluralFamilyKey,
-  withPluralCategoriesFromOther
-} from '../../shared/i18n-plural-family'
+import { resolvePluralFamilyKey } from '../../shared/i18n-plural-family'
 import { isPseudoLocalizationLocale, pseudoLocalizeString } from '../../shared/pseudo-localization'
 import { DEFAULT_UI_LOCALE, resolveUiLocale, type SupportedUiLocale } from '../../shared/ui-locale'
 import { UI_LANGUAGE_SYSTEM, type UiLanguage } from '../../shared/ui-language'
 import type { PluginLanguagePackRegistration } from '../../shared/plugins/plugin-language-pack-artifact'
+import { replacePluginLanguagePackResources } from '../../shared/plugins/plugin-language-pack-i18n-resources'
 
 export const mainI18n: I18nInstance = i18next.createInstance()
 
-let initialized = false
 let languageGeneration = 0
 let pluginLanguagePacks: readonly PluginLanguagePackRegistration[] = []
-const registeredPluginLanguages = new Set<string>()
 
 // English uses caller fallbacks; load only the selected non-English catalog after startup.
 const LAZY_LOCALE_LOADERS: Record<
@@ -50,14 +46,7 @@ const lazyLocaleBackend: BackendModule = {
       return
     }
     loader().then(
-      (mod) =>
-        callback(
-          null,
-          withPluralCategoriesFromOther(
-            mod.default,
-            new Intl.PluralRules(language).resolvedOptions().pluralCategories
-          )
-        ),
+      (mod) => callback(null, mod.default),
       (error) => callback(error instanceof Error ? error : new Error(String(error)), false)
     )
   }
@@ -67,33 +56,28 @@ export function getMainSystemLocale(): string {
   return getSystemLanguageDetection()?.locale ?? DEFAULT_UI_LOCALE
 }
 
-export async function ensureMainI18n(): Promise<I18nInstance> {
-  if (!initialized) {
-    await mainI18n.use(lazyLocaleBackend).init({
-      fallbackLng: DEFAULT_UI_LOCALE,
-      lng: DEFAULT_UI_LOCALE,
-      // Keep zh-Hant from falling back to Simplified zh before English.
-      load: 'currentOnly',
-      // Seed English as loaded; partialBundledLanguages allows lazy non-English catalogs.
-      partialBundledLanguages: true,
-      resources: {
-        en: {
-          translation: {}
-        }
-      },
-      interpolation: {
-        escapeValue: false
-      }
-    })
-    initialized = true
-    applyMainPluginLanguagePacks()
+// In-memory resources make init synchronous, so startup dialogs can translate before settings load.
+void mainI18n.use(lazyLocaleBackend).init({
+  fallbackLng: DEFAULT_UI_LOCALE,
+  lng: DEFAULT_UI_LOCALE,
+  // Keep zh-Hant from falling back to Simplified zh before English.
+  load: 'currentOnly',
+  // Seed English as loaded; partialBundledLanguages allows lazy non-English catalogs.
+  partialBundledLanguages: true,
+  resources: {
+    en: {
+      translation: {}
+    }
+  },
+  // An empty catalog value falls back to English instead of rendering blank.
+  returnEmptyString: false,
+  interpolation: {
+    escapeValue: false
   }
-  return mainI18n
-}
+})
 
 export async function setMainUiLanguage(language: UiLanguage): Promise<string> {
   const request = ++languageGeneration
-  await ensureMainI18n()
   const selectedLocale = resolveUiLocale(
     language,
     language === UI_LANGUAGE_SYSTEM ? getMainSystemLocale() : DEFAULT_UI_LOCALE
@@ -123,46 +107,21 @@ export async function prepareEarlyMainUiLanguage(): Promise<void> {
   }
 }
 
-function applyMainPluginLanguagePacks(): void {
-  for (const language of registeredPluginLanguages) {
-    mainI18n.removeResourceBundle(language, 'translation')
-  }
-  registeredPluginLanguages.clear()
-  for (const pack of pluginLanguagePacks) {
-    mainI18n.addResourceBundle(pack.resourceLanguage, 'translation', pack.catalog, true, true)
-    registeredPluginLanguages.add(pack.resourceLanguage)
-  }
-}
-
 export function setMainPluginLanguagePacks(
   packs: readonly PluginLanguagePackRegistration[]
 ): boolean {
   if (pluginLanguagePacks === packs) {
     return false
   }
+  const changed = replacePluginLanguagePackResources(mainI18n, pluginLanguagePacks, packs)
   pluginLanguagePacks = packs
-  if (initialized) {
-    applyMainPluginLanguagePacks()
-  }
-  return true
+  return changed.size > 0
 }
 
 export function translateMain(key: string, fallback: string, options?: TOptions): string {
-  // Menu registration can precede async initialization; use the English fallback then.
-  const raw = initialized
-    ? mainI18n.t(resolvePluralFamilyKey(key, options), { defaultValue: fallback, ...options })
-    : interpolateFallback(fallback, options)
-  const value = typeof raw === 'string' && raw.length > 0 ? raw : fallback
-  return isPseudoLocalizationLocale(mainI18n.language) ? pseudoLocalizeString(value) : value
-}
-
-// Why: startup dialogs can run before init, and their fallbacks still carry {{placeholders}}.
-function interpolateFallback(fallback: string, options: TOptions | undefined): string {
-  if (!options) {
-    return fallback
-  }
-  return fallback.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (placeholder, name: string) => {
-    const value: unknown = options[name]
-    return value === undefined || value === null ? placeholder : String(value)
+  const value = mainI18n.t(resolvePluralFamilyKey(key, options), {
+    defaultValue: fallback,
+    ...options
   })
+  return isPseudoLocalizationLocale(mainI18n.language) ? pseudoLocalizeString(value) : value
 }

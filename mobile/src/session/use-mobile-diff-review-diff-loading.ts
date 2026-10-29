@@ -44,22 +44,23 @@ export function useMobileDiffReviewDiffLoading(input: DiffLoadingInput): ReviewD
       setDiffState(keepLoadedDiff({ kind: 'error', itemKey, message: 'Waiting for desktop...' }))
       return
     }
-    let stale = false
+    const controller = new AbortController()
     setDiffState(keepLoadedDiff({ kind: 'loading', itemKey }))
     void loadMobileDiffReviewDiff({
       client,
       worktreeId,
       item: currentItem,
       branchCompare,
+      signal: controller.signal,
       ignoreTrimWhitespace: shouldIgnoreTrimWhitespace(diffShowWhitespace)
     })
       .then((nextState) => {
-        if (!stale) {
+        if (!controller.signal.aborted) {
           setDiffState(nextState)
         }
       })
       .catch((err: unknown) => {
-        if (!stale) {
+        if (!controller.signal.aborted) {
           // Failed reconnect reads must not erase loaded diff content.
           setDiffState(
             keepLoadedDiff({
@@ -71,7 +72,7 @@ export function useMobileDiffReviewDiffLoading(input: DiffLoadingInput): ReviewD
         }
       })
     return () => {
-      stale = true
+      controller.abort()
     }
   }, [
     client,

@@ -12,13 +12,12 @@ import {
   isAgentSessionHostStatusPresentation
 } from '../../../../../src/shared/agent-session-host-status-rows'
 import { withoutPendingNativeChatVisualDirectiveTail } from '../../../../../src/shared/native-chat/native-chat-visual-directive'
-import { isAgentSessionAttachmentStorePath } from '../../../../../src/shared/agent-session-attachments'
 import { MobileNativeChatRowOverlaysContext } from './mobile-native-chat-row-overlays'
 import {
   isRenderableImageUri,
-  readStoredChatImage
+  readHostChatImage,
+  type MobileNativeChatImageSource
 } from '../visual/mobile-native-chat-image-preview'
-import type { RpcClient } from '../../../transport/rpc-client'
 import {
   CHAT_PROSE_SCALE,
   scaledType,
@@ -98,7 +97,7 @@ export function Prose({
   return null
 }
 
-// Host paths cannot load on the phone; the chat's host reads its attachment store, anything else stays a placeholder.
+// Host paths cannot load on the phone; the chat's host reads them, and a refused read stays a placeholder.
 function ImageAttachment({
   block,
   fontScale,
@@ -109,35 +108,32 @@ function ImageAttachment({
   onLongPress?: () => void
 }): React.JSX.Element {
   useMobileColorScheme()
-  const { openImage, imageClient } = useContext(MobileNativeChatRowOverlaysContext)
+  const { openImage, imageSource } = useContext(MobileNativeChatRowOverlaysContext)
   const direct = block.url ?? block.path
   const renderable = isRenderableImageUri(direct) ? direct : null
-  const storedPath =
-    !renderable && imageClient && block.path && isAgentSessionAttachmentStorePath(block.path)
-      ? block.path
-      : null
-  const [stored, setStored] = useState<{
-    client: RpcClient
+  const hostPath = !renderable && imageSource && block.path ? block.path : null
+  const [hostRead, setHostRead] = useState<{
+    source: MobileNativeChatImageSource
     path: string
     uri: string | null
   } | null>(null)
   useEffect(() => {
-    if (!imageClient || !storedPath) {
+    if (!imageSource || !hostPath) {
       return
     }
     const unmounted = new AbortController()
-    void readStoredChatImage(imageClient, storedPath, unmounted.signal).then((uri) => {
+    void readHostChatImage(imageSource, hostPath, unmounted.signal).then((uri) => {
       if (!unmounted.signal.aborted) {
-        setStored({ client: imageClient, path: storedPath, uri })
+        setHostRead({ source: imageSource, path: hostPath, uri })
       }
     })
     return () => unmounted.abort()
-  }, [imageClient, storedPath])
+  }, [imageSource, hostPath])
   const read =
-    storedPath && stored?.path === storedPath && stored.client === imageClient ? stored : null
+    hostPath && hostRead?.path === hostPath && hostRead.source === imageSource ? hostRead : null
   const uri = renderable ?? read?.uri
   const label = block.alt ?? 'Attached image'
-  if (storedPath && !read) {
+  if (hostPath && !read) {
     return <View style={styles.imageThumb} accessibilityLabel={label} />
   }
   if (!uri) {

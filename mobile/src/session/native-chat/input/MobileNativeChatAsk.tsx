@@ -18,6 +18,7 @@ import { TEXT_INPUT_FONT_SIZE } from '../../../platform/text-input-font-size'
 import { MobileNativeChatCardHeaderAction } from '../../MobileNativeChatCardHeaderAction'
 import { useMobileNativeChatAskAutoAdvance } from './use-mobile-native-chat-ask-auto-advance'
 import { MobileNativeChatAskOptionRow } from './MobileNativeChatAskOptionRow'
+import { useMobileNativeChatReplyScroll } from './use-mobile-native-chat-reply-scroll'
 
 type Props = {
   prompt: AskPrompt
@@ -45,6 +46,7 @@ export function MobileNativeChatAsk({
   freeTextInputs
 }: Props): React.JSX.Element {
   useMobileColorScheme()
+  const { scrollRef, inputRef, revealReply, onViewportLayout } = useMobileNativeChatReplyScroll()
   const [index, setIndex] = useState(0)
   const [selections, setSelections] = useState<number[][]>(() => prompt.questions.map(() => []))
   const [otherText, setOtherText] = useState<string[]>(() =>
@@ -53,6 +55,12 @@ export function MobileNativeChatAsk({
   const [submitting, setSubmitting] = useState(false)
   const submittingRef = useRef(false)
   const autoAdvance = useMobileNativeChatAskAutoAdvance()
+  // Open each step at its question and end the last step's edit, so no typing lands out of view.
+  const showStep = (next: (current: number) => number): void => {
+    inputRef.current?.blur()
+    scrollRef.current?.scrollTo({ y: 0, animated: false })
+    setIndex(next)
+  }
 
   // A question with no options is answered by typing alone.
   const typesOnly = (qi: number): boolean =>
@@ -121,7 +129,7 @@ export function MobileNativeChatAsk({
     if (isLast) {
       await submit(sel)
     } else {
-      setIndex((i) => Math.min(i + 1, total - 1))
+      showStep((i) => Math.min(i + 1, total - 1))
     }
   }
 
@@ -172,7 +180,7 @@ export function MobileNativeChatAsk({
               disabled={submitting}
               onPress={() => {
                 autoAdvance.cancel()
-                setIndex(i)
+                showStep(() => i)
               }}
             >
               <Text style={[styles.tabText, i === index && styles.tabTextActive]} numberOfLines={1}>
@@ -186,7 +194,12 @@ export function MobileNativeChatAsk({
         </ScrollView>
       ) : null}
 
-      <ScrollView style={styles.scroll} keyboardShouldPersistTaps="always">
+      <ScrollView
+        ref={scrollRef}
+        onLayout={onViewportLayout}
+        style={styles.scroll}
+        keyboardShouldPersistTaps="always"
+      >
         <View style={styles.questionRow}>
           <Text style={styles.questionText}>{q.question}</Text>
           <MobileNativeChatCardHeaderAction
@@ -222,6 +235,8 @@ export function MobileNativeChatAsk({
         ) : null}
         {otherSelected || typesOnly(index) ? (
           <TextInput
+            ref={inputRef}
+            onFocus={revealReply}
             style={styles.input}
             value={otherText[index]}
             onChangeText={(v) => setOther(index, v)}
@@ -264,7 +279,8 @@ export function MobileNativeChatAsk({
 
 const styles = themedStyleSheet(() => ({
   card: {
-    maxHeight: 380,
+    flexShrink: 1,
+    minHeight: 0,
     backgroundColor: colors.bgPanel,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.borderSubtle

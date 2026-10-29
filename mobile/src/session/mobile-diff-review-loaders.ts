@@ -42,6 +42,7 @@ type DiffLoadInput = {
   item: MobileDiffReviewQueueItem
   branchCompare: MobileGitBranchCompareResult | null
   ignoreTrimWhitespace?: boolean
+  signal?: AbortSignal
 }
 
 type PendingFileDiff = {
@@ -157,6 +158,9 @@ export async function loadMobileDiffReviewDiff(input: DiffLoadInput): Promise<Re
     item.scope === 'branch'
       ? await requestBranchFileDiff(client, worktreeId, item, branchCompare)
       : await requestWorktreeFileDiff(client, worktreeId, item)
+  if (input.signal?.aborted) {
+    return { kind: 'idle' }
+  }
   if (!pending.reply.ok) {
     // Read the raw code because diff_too_large selects a render mode rather than a failure.
     if (pending.reply.error?.code === 'diff_too_large') {

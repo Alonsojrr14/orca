@@ -115,6 +115,10 @@ export function useMobileSessionTerminalRuntime(scope: MobileSessionScreenStateM
   // Fit the unrounded measured frame; window height can exceed visible area.
   const terminalFrameRef = useRef<TerminalFrame | null>(null)
   const activeSessionTab = sessionTabs.find((tab) => tab.id === activeSessionTabId) ?? null
+  const framesLivePaste = useCallback(
+    (handle: string): boolean => ptyModesRef.current.get(handle)?.bracketedPasteMode === true,
+    []
+  )
   const {
     clearPendingLiveInputCommit,
     flushPendingLiveInputBeforeExternalSend,
@@ -129,6 +133,7 @@ export function useMobileSessionTerminalRuntime(scope: MobileSessionScreenStateM
     activeHandleRef,
     activeSessionTabType: activeSessionTab?.type,
     activeSessionTabTypeRef,
+    framesLivePaste,
     connected: connState === 'connected',
     liveInputRef,
     liveInputTerminalHandles,
@@ -144,7 +149,7 @@ export function useMobileSessionTerminalRuntime(scope: MobileSessionScreenStateM
   const canCompose = inputGate.canCompose
   const canSend = inputGate.canSend && clientId !== null
   const liveInputEnabled = activeHandle ? liveInputTerminalHandles.has(activeHandle) : false
-  const { focusLiveInput, handleTerminalTap, resetLiveInputFocus } = useTerminalLiveInputFocus({
+  const { handleTerminalTap, resetLiveInputFocus } = useTerminalLiveInputFocus({
     activeHandleRef,
     canSend,
     inputRef: liveInputRef,
@@ -216,7 +221,6 @@ export function useMobileSessionTerminalRuntime(scope: MobileSessionScreenStateM
     canCompose,
     canSend,
     liveInputEnabled,
-    focusLiveInput,
     handleTerminalTap,
     resetLiveInputFocus,
     terminalInventoryRecoveryScope,
