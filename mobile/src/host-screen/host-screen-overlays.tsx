@@ -117,6 +117,7 @@ export function HostScreenOverlays({ controller }: { controller: HostScreenContr
                       ? []
                       : [
                           {
+                            id: 'sleep',
                             label: t('hostScreen.hostScreenOverlays.sleep', 'Sleep'),
                             icon: Moon,
                             onPress: () => {
@@ -126,6 +127,7 @@ export function HostScreenOverlays({ controller }: { controller: HostScreenContr
                           }
                         ]),
                     {
+                      id: 'togglePin',
                       label: isWorktreePinned(actionTarget, state.pinnedIds)
                         ? t('hostScreen.hostScreenOverlays.unpin', 'Unpin')
                         : t('hostScreen.hostScreenOverlays.pin', 'Pin'),
@@ -136,6 +138,7 @@ export function HostScreenOverlays({ controller }: { controller: HostScreenContr
                       }
                     },
                     {
+                      id: 'delete',
                       label: t('common.delete', 'Delete'),
                       destructive: true,
                       onPress: () => state.setConfirmDelete(actionTarget),

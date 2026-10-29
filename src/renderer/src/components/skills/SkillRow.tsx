@@ -20,6 +20,7 @@ import {
   SkillRowDropdownActions,
   type SkillRowAction
 } from './SkillRowActions'
+import { uiDateTimeFormat } from '@/i18n/ui-intl-formatters'
 
 const providerLabels: Record<SkillProvider, string> = {
   codex: 'Codex',
@@ -27,14 +28,14 @@ const providerLabels: Record<SkillProvider, string> = {
   'agent-skills': 'Agent Skills'
 }
 
-const dateFormatter = new Intl.DateTimeFormat(undefined, {
+const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
   month: 'short',
   day: 'numeric'
-})
+}
 
 function formatUpdatedAt(value: number | null): string {
   return value
-    ? dateFormatter.format(new Date(value))
+    ? uiDateTimeFormat(DATE_OPTIONS).format(new Date(value))
     : translate('auto.components.skills.SkillRow.updatedUnknown', 'No date')
 }
 

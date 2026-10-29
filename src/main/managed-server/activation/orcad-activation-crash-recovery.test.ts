@@ -269,6 +269,21 @@ describe('recovery refusals keep the fence', () => {
     expect(host.record).toContain(`"previous": "${OLD}"`)
   })
 
+  it('skips its reads only when a connect just saw no journal and an open fence', async () => {
+    await interruptedAfterCandidateLaunch()
+    const before = host.commands.length
+    expect(
+      await recoverInterruptedOrcadActivation(slot, { transactionAbsent: true, fenceOpen: true })
+    ).toEqual({ outcome: 'none' })
+    expect(host.commands).toHaveLength(before)
+    // Any other answer reads the host as before, and so finds the interrupted run.
+    const result = await recoverInterruptedOrcadActivation(slot, {
+      transactionAbsent: false,
+      fenceOpen: true
+    })
+    expect(result).toMatchObject({ outcome: 'recovered', resolution: 'committed' })
+  })
+
   it('relaunches and commits that candidate after a host reboot left nothing running', async () => {
     await interruptedAfterCandidateLaunch()
     host.alive.clear()

@@ -11,10 +11,10 @@ import { useMobileTranslation } from '../i18n/use-mobile-translation'
 import { styles } from './mobile-accounts-screen-styles'
 import { useNow } from '../hooks/use-now'
 import { ClaudeIcon, OpenAIIcon } from '../components/AgentIcons'
+import { AccountsSnapshotError, decodeAccountsSnapshot } from '../components/accounts-snapshot'
 import {
   type AccountsSnapshot,
   type ProviderKey,
-  decodeAccountsSnapshot,
   getActiveProviderRateLimits,
   getInactiveProviderUsage,
   getUsageBarState,
@@ -142,7 +142,7 @@ export function MobileAccountsScreen() {
         setError(res.error.message)
       }
     } catch (e) {
-      if (e instanceof Error && e.message === 'Invalid accounts snapshot from host') {
+      if (e instanceof AccountsSnapshotError) {
         rejectInvalidSnapshot()
       } else {
         setError(e instanceof Error ? e.message : String(e))

@@ -15,12 +15,13 @@ import { translate } from '@/i18n/i18n'
 import type { DiscoveredSkill } from '../../../../shared/skills'
 import { sourceKindLabel } from './skill-display-labels'
 import { skillAgentLabel } from './skill-agent-filter'
+import { uiDateTimeFormat } from '@/i18n/ui-intl-formatters'
 
-const updatedFormatter = new Intl.DateTimeFormat(undefined, {
+const UPDATED_OPTIONS: Intl.DateTimeFormatOptions = {
   year: 'numeric',
   month: 'short',
   day: 'numeric'
-})
+}
 
 function DetailRow({
   label,
@@ -120,7 +121,7 @@ export function SkillDetailDialog({
               label={translate('auto.components.skills.SkillDetailDialog.updated', 'Updated')}
             >
               {skill.updatedAt
-                ? updatedFormatter.format(new Date(skill.updatedAt))
+                ? uiDateTimeFormat(UPDATED_OPTIONS).format(new Date(skill.updatedAt))
                 : translate('auto.components.skills.SkillRow.updatedUnknown', 'No date')}
             </DetailRow>
             <DetailRow label={translate('auto.components.skills.SkillRow.detailPath', 'Path')}>

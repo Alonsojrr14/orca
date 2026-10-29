@@ -121,6 +121,7 @@ export function assertLinkedWorkItemSourceContextMatch(
 export const WorktreeSet = WorktreeSelector.extend({
   // Empty clears to branch/folder fallback; OptionalString would drop remote clears and restore the old name.
   displayName: OptionalPlainString,
+  firstAgentMessageRenameError: z.null().optional(),
   // Preserve empty comment updates instead of coercing them to absent.
   comment: OptionalPlainString,
   linkedIssue: TriStateLinkedIssue,

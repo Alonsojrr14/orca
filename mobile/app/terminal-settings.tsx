@@ -26,11 +26,10 @@ import {
 } from '../src/terminal/terminal-auto-restore-fit-state'
 import { terminalSettingsScreenStyles as styles } from '../src/terminal/terminal-settings-screen-styles'
 import { setTerminalSettingsScrollEnabled } from '../src/terminal/terminal-settings-scroll-lock'
+import { useTerminalTextScaleSetting } from '../src/terminal/use-terminal-text-scale-setting'
 import {
   loadTerminalAutocompleteEnabled,
-  loadTerminalTextScale,
-  saveTerminalAutocompleteEnabled,
-  saveTerminalTextScale
+  saveTerminalAutocompleteEnabled
 } from '../src/storage/preferences'
 
 type RestoreValue = 'indefinite' | '60s' | '5m' | '30m'
@@ -178,21 +177,16 @@ export default function TerminalSettingsScreen() {
   const [hostMs, setHostMs] = useState<Record<string, number | null | undefined>>({})
   const [pickerHostId, setPickerHostId] = useState<string | null>(null)
 
-  const [textScale, setTextScale] = useState(1)
+  const [textScale, selectTextScale] = useTerminalTextScaleSetting()
   const [textSizePickerOpen, setTextSizePickerOpen] = useState(false)
-  useEffect(() => {
-    void loadTerminalTextScale().then(setTextScale)
-  }, [])
   const selectTextSize = useCallback(
     (value: TextSizeValue) => {
       const opt = textSizeOptions(t).find((o) => o.value === value)
-      if (!opt) {
-        return
+      if (opt) {
+        selectTextScale(opt.scale)
       }
-      setTextScale(opt.scale)
-      void saveTerminalTextScale(opt.scale)
     },
-    [t]
+    [selectTextScale, t]
   )
 
   const [autocompleteEnabled, setAutocompleteEnabled] = useState(false)

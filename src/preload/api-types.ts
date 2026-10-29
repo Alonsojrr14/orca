@@ -192,6 +192,9 @@ export type {
   NativeChatSubscriptionFrame
 } from './api/native-chat-api'
 export type {
+  PluginAutoUpdateEvent,
+  PluginHostCustomEditor,
+  PluginHostNewFile,
   PluginHostInstallResult,
   PluginHostInstallSource,
   PluginHostListEntry,

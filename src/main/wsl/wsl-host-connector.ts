@@ -30,6 +30,7 @@ import { createWslOrcadLivenessSupervisor } from './wsl-orcad-liveness-wiring'
 import type { WslOrcadLivenessSupervisor } from './wsl-orcad-liveness-supervisor'
 import { confirmsRunning } from './wsl-orcad-liveness-evidence'
 import { wslDistroHolderKey } from './wsl-distro-holder-record'
+import { wslHostServerStopReason } from '../../shared/wsl-host-failure-copy'
 
 function targetFor(distro: string): WslOrcadHostTarget {
   return { kind: 'wsl', id: defaultWslOrcadEnvironmentId(distro), distro, label: distro }
@@ -206,7 +207,7 @@ export function createWslHostConnector(options: {
       if (reachability === 'unavailable') {
         return {
           stopped: false,
-          reason: 'The WSL service did not confirm whether the distro runs.',
+          ...wslHostServerStopReason('serviceUnconfirmed'),
           verdict: 'unverifiable'
         }
       }

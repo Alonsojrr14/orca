@@ -9,7 +9,7 @@ import { localAgentInventoryContextKey } from '@/lib/local-preflight-context-key
 import * as contextEviction from './local-agent-context-eviction'
 import { getLegacyLoadingPatch, getSupersededDetectPatch } from './local-agent-legacy-loading'
 import type { LocalAgentRefreshOptions } from './local-detected-agent-store-state'
-import { isWslDistroRefusalError } from '../../../../shared/wsl-distro-refusal'
+import { isWslDistroNotRunningRefusal } from '../../../../shared/wsl-distro-not-running-refusal'
 
 export type LocalAgentInventoryLifecycle = {
   detectPromises: Map<string, Promise<TuiAgent[]>>
@@ -212,7 +212,7 @@ export function markLocalAgentRefusal(
   contextKey: string,
   error: unknown
 ): void {
-  if (isWslDistroRefusalError(error)) {
+  if (isWslDistroNotRunningRefusal(error)) {
     lifecycle.refusedContextKeys.add(contextKey)
   } else {
     lifecycle.refusedContextKeys.delete(contextKey)
