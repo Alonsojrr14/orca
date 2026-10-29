@@ -115,7 +115,7 @@ describe('host terminal policy', () => {
     server.stopHostTerminals()
   })
 
-  it('validates the host ceiling, preserves environment priority and never shares a missing machine identity', async () => {
+  it('caches the capped startup default, validates host capacity and preserves saved/environment priority', async () => {
     const root = await home()
     const path = hostTerminalPolicyPath(root, 'machine-a')
     expect(path).not.toBe(hostTerminalPolicyPath(root, 'machine-b'))
@@ -139,13 +139,32 @@ describe('host terminal policy', () => {
     })
     await expect(override.save(20, () => true)).rejects.toThrow('unavailable')
     const unidentified = createPolicy(null, {}, system())
+    await unidentified.start()
     expect(await unidentified.status('nonce')).toMatchObject({ maxTerminals: 256, editable: false })
     await expect(unidentified.save(10, () => true)).rejects.toThrow()
     const reduced = createPolicy(path, {}, new SystemPtyLimit(async () => 128))
     await reduced.start()
     expect(await reduced.status('nonce')).toMatchObject({ maxTerminals: 384, systemPtyLimit: 128 })
-    const defaults = createPolicy(null, {}, new SystemPtyLimit(async () => 128))
-    expect(await defaults.status('nonce')).toMatchObject({ maxTerminals: 256, systemPtyLimit: 128 })
+    for (const [capacity, expected] of [
+      [null, 256],
+      [511, 256],
+      [4096, 2048],
+      [16384, 4096]
+    ] as const) {
+      const probe = vi.fn<() => Promise<number | null>>().mockResolvedValue(capacity)
+      const defaults = createPolicy(null, {}, new SystemPtyLimit(probe))
+      await defaults.start()
+      expect(defaults.admissionMaximum()).toBe(expected)
+      expect(defaults.admissionMaximum()).toBe(expected)
+      expect(probe).toHaveBeenCalledOnce()
+      probe.mockResolvedValue(128)
+      expect(await defaults.status('nonce')).toMatchObject({
+        maxTerminals: expected,
+        source: 'default',
+        systemPtyLimit: 128
+      })
+      expect(defaults.admissionMaximum()).toBe(expected)
+    }
   })
 
   it('bounds shared startup and retains one raw read/observer across ticks, admissions and saves', async () => {
@@ -211,6 +230,16 @@ describe('host terminal policy', () => {
     value.dispose()
     await vi.advanceTimersByTimeAsync(30_000)
     expect(read).toHaveBeenCalledTimes(2)
+    const systemProbe = deferred<number | null>()
+    const cold = createPolicy(null, {}, new SystemPtyLimit(() => systemProbe.promise))
+    const initializing = cold.start()
+    expect(cold.start()).toBe(initializing)
+    await vi.advanceTimersByTimeAsync(1_101)
+    await initializing
+    expect(cold.admissionMaximum()).toBe(256)
+    systemProbe.resolve(16384)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(cold.admissionMaximum()).toBe(256)
   })
 
   it('retains last good through failures, fences stale reads against save and disposal, and recovers', async () => {

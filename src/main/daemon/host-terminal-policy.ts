@@ -6,6 +6,7 @@ import { readNodeFileWithinLimit } from '../../shared/node-bounded-file-reader'
 import { renameFileWithWindowsRetryAsync } from '../../shared/windows-retry-file-operations'
 import {
   isConfiguredTerminalLimit,
+  MAX_CONFIGURED_TERMINALS,
   terminalLimitInputMaximum,
   type TerminalLimitStatus
 } from '../../shared/terminal-limit-policy'
@@ -91,6 +92,7 @@ async function withPolicyOperation<T>(
 }
 
 export class HostTerminalPolicy {
+  private defaultMaximum = DEFAULT_MAX_HOST_TERMINALS
   private savedMaximum: number | null = null
   private savedUnreadable = false
   private revision = 0
@@ -119,7 +121,15 @@ export class HostTerminalPolicy {
 
   start(log = this.log): Promise<void> {
     this.log = log
-    return (this.initialization ??= this.refresh().then(() => {
+    return (this.initialization ??= this.system.read().then(async (systemPtyLimit) => {
+      if (this.disposed) {
+        return
+      }
+      this.defaultMaximum =
+        systemPtyLimit === null
+          ? DEFAULT_MAX_HOST_TERMINALS
+          : Math.min(Math.ceil(systemPtyLimit / 2), MAX_CONFIGURED_TERMINALS)
+      await this.refresh()
       if (!this.disposed && this.path && this.environment === null) {
         this.timer = setInterval(() => void this.refresh(), 3_000)
         this.timer.unref?.()
@@ -181,7 +191,7 @@ export class HostTerminalPolicy {
   }
 
   admissionMaximum(): number {
-    return this.environment ?? this.savedMaximum ?? DEFAULT_MAX_HOST_TERMINALS
+    return this.environment ?? this.savedMaximum ?? this.defaultMaximum
   }
 
   private observedStatus(systemPtyLimit: number | null, daemonNonce: string): TerminalLimitStatus {
