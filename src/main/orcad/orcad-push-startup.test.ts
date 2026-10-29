@@ -346,6 +346,20 @@ it('disconnects a daemon still spawning only after it settles, when the hook ser
   acquireProfileStateMaintenance(state.root).release()
 })
 
+it('disconnects the daemon when startup throws between its spawn and the stores', async () => {
+  state.root = mkdtempSync(join(tmpdir(), 'orca-headless-early-throw-'))
+  const observability = await import('./orcad-observability')
+  vi.spyOn(observability, 'installOrcadObservability').mockImplementationOnce(() => {
+    throw new Error('observability init failed')
+  })
+  const { startOrcad } = await import('./orcad-entry')
+
+  await expect(startOrcad()).rejects.toThrow('observability init failed')
+
+  expect(state.startDaemon).toHaveBeenCalledOnce()
+  expect(state.stopDaemon).toHaveBeenCalledOnce()
+})
+
 it('installs agent status hooks on the host when it starts', async () => {
   state.root = mkdtempSync(join(tmpdir(), 'orca-headless-hooks-'))
   const { startOrcad } = await import('./orcad-entry')

@@ -16,6 +16,7 @@ import { getDiffSectionLoadErrorMessage } from './combined-diff-section-load-tim
 import { getInitialCombinedDiffSectionLoadIndices } from './combined-diff-initial-section-load'
 import { isUnchangedDiffSectionReload } from './combined-diff-section-load-state'
 import type { CombinedDiffSectionLoadRegistry } from './combined-diff-section-load-registry'
+import type { CombinedDiffLoadRequest } from './combined-diff-load-scheduler'
 
 export function useCombinedDiffSectionLoader({
   entrySet,
@@ -201,11 +202,11 @@ export function useCombinedDiffSectionLoader({
   loadSectionRef.current = loadSectionNow
 
   const loadSection = useCallback(
-    (index: number) => {
+    (index: number, options: CombinedDiffLoadRequest = { viewportOnly: true }) => {
       if (sectionsRef.current[index]?.collapsed || sectionsRef.current[index]?.loadOnDemand) {
         return
       }
-      loadSchedulerRef.current.request(index)
+      loadSchedulerRef.current.request(index, options)
     },
     [loadSchedulerRef, sectionsRef]
   )
@@ -243,7 +244,7 @@ export function useCombinedDiffSectionLoader({
 
     for (const index of initialIndices) {
       if (!currentSections[index]?.collapsed) {
-        loadSection(index)
+        loadSection(index, { viewportOnly: false })
       }
     }
   }, [entrySignature, loadSection, loadedIndicesRef, sectionCount, sectionsRef])

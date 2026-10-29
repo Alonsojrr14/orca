@@ -23,6 +23,7 @@ import { getAutomationHostDetailDisplay } from './automation-host-detail-display
 import { getAutomationSourceDisplay } from './automation-source-display'
 import { translate } from '@/i18n/i18n'
 import { AutomationPromptDisclosure } from './AutomationPromptDisclosure'
+import { automationRunErrorText } from './automation-run-error-copy'
 
 type AutomationDetailProps = {
   automation: Automation | null
@@ -179,7 +180,8 @@ export function AutomationDetail({
   })
   const runNowDisabled = runNowAvailability?.canRunNow === false
   const latestRun = indexLatestAutomationRuns(runs).get(automation.id)
-  const latestRunError = latestRun?.status === 'dispatch_failed' ? latestRun.error : null
+  const latestRunError =
+    latestRun?.status === 'dispatch_failed' ? automationRunErrorText(latestRun) : null
 
   return (
     <div className="flex w-full flex-col gap-4">

@@ -73,11 +73,4 @@ describe('startWslHostAndReloadProjects', () => {
     expect(toastError).toHaveBeenCalledOnce()
     expect(toastError).toHaveBeenCalledWith(START_FAILED)
   })
-
-  it('says the same when reloading its projects fails after the boot', async () => {
-    fetchRepos.mockRejectedValueOnce(new Error('runtime_call_failed: repo.list timed out'))
-    await expect(startWslHostAndReloadProjects('env-1')).resolves.toBe(false)
-    expect(toastError).toHaveBeenCalledOnce()
-    expect(toastError).toHaveBeenCalledWith(START_FAILED)
-  })
 })

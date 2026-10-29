@@ -493,6 +493,7 @@ describe('combined diff live result compatibility', () => {
       hook.result.current.setSectionHeights({ 0: 640, 1: 80 })
     })
     const heights = hook.result.current.sectionHeights
+    hook.result.current.registry.renderedIndicesRef.current.add(0)
     hook.result.current.registry.loadedIndicesRef.current.delete(0)
     hook.result.current.loader.loadSection(0)
     await flushLoads()

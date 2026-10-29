@@ -36,6 +36,8 @@ export type CommitMessagePlan = {
   args: string[]
   /** Non-null when the prompt should be piped via stdin. */
   stdinPayload: string | null
+  /** Execution-host-owned prompt attachment, materialized only when starting the process. */
+  promptFile?: { content: string; argIndex: number }
   /** Human-readable label used in error prefixes (e.g. "Claude failed: ..."). */
   label: string
   /** Leading command assignments, applied on the execution host. */
@@ -137,7 +139,7 @@ function applySingletonOptionOverrides(args: {
 function insertAdditionalAgentArgs(args: {
   baseArgs: string[]
   agentArgs: string[]
-  promptDelivery: 'argv' | 'stdin'
+  promptDelivery: 'argv' | 'stdin' | 'file'
   prompt: string
 }): string[] {
   if (!args.agentArgs.length) {
@@ -221,7 +223,8 @@ export function planCommitMessageGeneration(
     }
   }
 
-  const argvPrompt = spec.promptDelivery === 'argv' ? prompt : ''
+  const argvPrompt =
+    spec.promptDelivery === 'file' ? '@{prompt-file}' : spec.promptDelivery === 'argv' ? prompt : ''
   const agentArgs = planAdditionalAgentArgs(input.agentArgs, input.backslash)
   if (!agentArgs.ok) {
     return agentArgs
@@ -287,6 +290,14 @@ export function planCommitMessageGeneration(
           : spec.promptDelivery === 'stdin'
             ? prompt
             : null,
+      ...(spec.promptDelivery === 'file'
+        ? {
+            promptFile: {
+              content: prompt,
+              argIndex: merged.prefixArgs.length + merged.generatedArgs.length - 1
+            }
+          }
+        : {}),
       label: spec.label,
       ...(formatOption?.value === 'json' ? { outputFormat: 'opencode-json' as const } : {}),
       ...(kimiFormatOption?.value === 'stream-json'

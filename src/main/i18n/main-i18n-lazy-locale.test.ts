@@ -12,6 +12,7 @@ import {
   UI_LANGUAGE_CHINESE,
   UI_LANGUAGE_CHINESE_TRADITIONAL,
   UI_LANGUAGE_ENGLISH,
+  UI_LANGUAGE_GERMAN,
   UI_LANGUAGE_JAPANESE,
   UI_LANGUAGE_KOREAN,
   UI_LANGUAGE_PORTUGUESE,
@@ -19,7 +20,7 @@ import {
   UI_LANGUAGE_SPANISH
 } from '../../shared/ui-language'
 import { mainI18n, setMainPluginLanguagePacks, setMainUiLanguage, translateMain } from './main-i18n'
-import { pluginLanguageResourceId } from '../../shared/plugins/plugin-language-pack-artifact'
+import { pluginLanguageResourceId } from '../../shared/plugins/artifacts/plugin-language-pack-artifact'
 
 describe('main-i18n lazy locale loading', () => {
   afterEach(() => vi.restoreAllMocks())
@@ -111,14 +112,15 @@ describe('main-i18n lazy locale loading', () => {
   })
 
   it('loads a contributed catalog for native menus and dialogs', async () => {
-    const id = 'plugin:orca-samples.portuguese/pt-BR' as const
+    const id = 'plugin:samples.portuguese/pt-BR' as const
     setMainPluginLanguagePacks([
       {
         id,
         resourceLanguage: pluginLanguageResourceId(id),
-        pluginKey: 'orca-samples.portuguese',
+        pluginKey: 'samples.portuguese',
         locale: 'pt-BR',
-        catalog: { menu: { file: 'Arquivo Orca' } }
+        catalog: { menu: { file: 'Arquivo Orca' } },
+        coverage: 100
       }
     ])
 
@@ -130,6 +132,29 @@ describe('main-i18n lazy locale loading', () => {
     expect(translateMain('menu.file', 'File')).toBe('File')
   })
 
+  it('still lazy-loads built-in catalogs after a pack is removed', async () => {
+    const packs = ['orca-samples.first', 'orca-samples.second'].map((pluginKey) => {
+      const id = `plugin:${pluginKey}/pt-BR` as const
+      return {
+        id,
+        resourceLanguage: pluginLanguageResourceId(id),
+        pluginKey,
+        coverage: 100,
+        locale: 'pt-BR',
+        catalog: { menu: { file: pluginKey } }
+      }
+    })
+    setMainPluginLanguagePacks(packs)
+    expect(setMainPluginLanguagePacks(packs.slice(1).map((pack) => structuredClone(pack)))).toBe(
+      true
+    )
+    expect(setMainPluginLanguagePacks([structuredClone(packs[1])])).toBe(false)
+
+    // German is not loaded by earlier tests, so this needs a backend load.
+    await setMainUiLanguage(UI_LANGUAGE_GERMAN)
+    expect(translateMain('menu.file', 'File')).toBe('Datei')
+  })
+
   it("uses a contributed pack's plural rules and English for its empty values", async () => {
     const id = 'plugin:orca-samples.russian/ru-RU' as const
     setMainPluginLanguagePacks([
@@ -137,6 +162,7 @@ describe('main-i18n lazy locale loading', () => {
         id,
         resourceLanguage: pluginLanguageResourceId(id),
         pluginKey: 'orca-samples.russian',
+        coverage: 100,
         locale: 'ru-RU',
         catalog: {
           terminals_one: '{{count}} one',

@@ -12,6 +12,7 @@ import {
 import type { ResolvedSourceControlAiGenerationParams } from '../../shared/source-control-ai'
 import { openCodeVariantRetryPlan } from '../../shared/opencode-generation-command'
 import { runLocalPlanForAgent } from './source-control-local-generation'
+import { emptyResultFailure } from './source-control-agent-failure'
 import { runRemoteSourceControlPlan } from './source-control-remote-generation'
 import type {
   CommitMessageGenerationTarget,
@@ -33,12 +34,14 @@ export async function runGenerationRequest(input: {
   params: GenerateParams
   prompt: string
   target: CommitMessageGenerationTarget
-  emptyResultName: string
   operation: TextGenerationOperation
   spawnAgent: SpawnSourceControlAgent
   shouldExecute?: () => boolean
 }): Promise<InternalTextGenerationResult> {
-  const params = { ...input.params, backslash: commandBackslashMode(input.target) }
+  const params = {
+    ...input.params,
+    backslash: commandBackslashMode(input.target)
+  }
   const planned = planCommitMessageGeneration(params, input.prompt)
   if (!planned.ok) {
     return { success: false, error: planned.error }
@@ -49,14 +52,12 @@ export async function runGenerationRequest(input: {
       ? runRemoteSourceControlPlan({
           plan,
           target: input.target,
-          emptyResultName: input.emptyResultName,
           operation: input.operation
         })
       : runLocalPlanForAgent({
           agentId: input.params.agentId,
           plan,
           target: input.target,
-          emptyResultName: input.emptyResultName,
           operation: input.operation,
           spawnAgent: input.spawnAgent,
           shouldExecute: input.shouldExecute
@@ -67,7 +68,9 @@ export async function runGenerationRequest(input: {
       if (strictMcp) {
         return execute(plan)
       }
-      const retry = planCommitMessageGeneration(params, input.prompt, { strictMcp })
+      const retry = planCommitMessageGeneration(params, input.prompt, {
+        strictMcp
+      })
       return retry.ok
         ? execute(retry.plan)
         : Promise.resolve({ success: false, error: retry.error })
@@ -100,5 +103,5 @@ export async function runGenerationRequest(input: {
   const rawOutput = cleanGeneratedCommitMessage(answer)
   return rawOutput
     ? { ...result, rawOutput }
-    : { success: false, error: `${plan.label} returned an empty ${input.emptyResultName}.` }
+    : { success: false, ...emptyResultFailure(input.operation, plan.label) }
 }

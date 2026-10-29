@@ -1,3 +1,4 @@
+import { textGenerationFailure } from '../../../shared/text-generation-failure-copy'
 import { ipcMain } from 'electron'
 import type { GlobalSettings } from '../../../shared/global-settings-types'
 import type { ResolvedSourceControlAiGenerationParams } from '../../../shared/source-control-ai'
@@ -122,7 +123,7 @@ export function registerFilesystemGitPullRequestGenerationHandlers(
         }
       }
       if (!context) {
-        return { success: false, error: 'No branch changes to summarize.' }
+        return { success: false, ...textGenerationFailure('noBranchChanges') }
       }
       const linkedIssueDetails = await linkedIssueDetailsPromise
       context = {
