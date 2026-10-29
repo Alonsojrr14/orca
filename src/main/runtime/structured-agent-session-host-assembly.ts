@@ -10,6 +10,7 @@ import type { InstalledRuntime } from './agent-session/structured-agent-session-
 import { AgentSessionRecoveryCapsule } from './agent-session-recovery-capsule'
 import type { OpenedAgentSessionRecordStore } from './agent-session-record-store-slot'
 import { installAgentSessionAttachments } from './structured-agent-session-attachment-wiring'
+import { installJournalMaintenance } from './structured-agent-session-journal-maintenance-wiring'
 import {
   createStructuredAgentSessionOwnerProbe,
   createStructuredAgentSessionOwnerProbes
@@ -110,6 +111,7 @@ export async function installOnJournal(
     journalDatabase,
     logger: deps.logger
   })
+  installJournalMaintenance({ journalDatabase, logger: deps.logger })
   const stopVisualsSweep = deps.nativeChatVisuals
     ? scheduleNativeChatVisualsSweep({
         stateDirectory: deps.stateDirectory,

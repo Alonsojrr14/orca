@@ -9,6 +9,7 @@ import {
 import type { StructuredAgentSessionHost } from '../native-chat/agent-session-wire/structured-agent-session-host'
 import { setStructuredAgentSessionHost } from '../native-chat/agent-session-wire/structured-agent-session-registry'
 import { stopAgentSessionAttachments } from './structured-agent-session-attachment-wiring'
+import { stopJournalMaintenance } from './structured-agent-session-journal-maintenance-wiring'
 import {
   openAgentSessionRecordStoreOnce,
   releaseAgentSessionRecordStore
@@ -65,6 +66,7 @@ export async function stopStructuredAgentSessionRuntime(options?: {
   installing = null
   setStructuredAgentSessionHost(null)
   stopAgentSessionAttachments()
+  stopJournalMaintenance()
   const outstanding = [...pendingTeardown]
   pendingTeardown.clear()
   const installed = pending ? await pending.catch(() => null) : null
