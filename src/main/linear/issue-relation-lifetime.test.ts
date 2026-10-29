@@ -10,11 +10,7 @@ vi.mock('./client', () => ({
   isAuthError: () => false
 }))
 vi.mock('./linear-sdk', () => ({
-  loadLinearSdk: () => ({
-    LinearClient: class {
-      client = { rawRequest: mocks.rawRequest }
-    }
-  })
+  createLinearClient: () => ({ client: { rawRequest: mocks.rawRequest } })
 }))
 
 const issue = { id: 'issue-1', identifier: 'ENG-1', title: 'Title', url: 'https://example.com/1' }
