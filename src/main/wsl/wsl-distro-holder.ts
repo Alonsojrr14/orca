@@ -1,11 +1,13 @@
 import { runKeyedSerializedOperation } from '../cli/keyed-promise-queue'
-import { spawnProcess } from '@orca/process-host'
+import { spawnDetachedWithoutInheritance } from '@orca/process-host/isolated-detached-spawn'
 import { queryWindowsProcess } from '../daemon/daemon-process-inspection'
-import type { WindowsProcessEvidence } from '../daemon/daemon-incarnation-evidence-types'
-import { listConfirmedRunningWslDistros } from '../wsl-background-distro-gate'
+import {
+  listConfirmedRunningWslDistros,
+  noteWslDistroMayHaveStopped
+} from '../wsl-background-distro-gate'
 import { WslDistroNotRunningError } from './wsl-orcad-connection-errors'
 import { resolveWslInteropSpawnCwd } from '../wsl-interop-spawn-directory'
-import { buildWslDistroHolderArgs, isWslDistroHolderCommandLine } from './wsl-distro-holder-command'
+import { buildWslDistroHolderArgs } from './wsl-distro-holder-command'
 import {
   listWslDistroHolderRecordDistros,
   readWslDistroHolderRecord,
@@ -40,41 +42,18 @@ export const WSL_HOLDER_UNVERIFIABLE_REPLACE_AFTER_MS = 5 * 60_000
 
 function spawnDetachedHolder(distro: string): WslDistroHolderChild {
   // Detached holders outlive Orca's libuv kill-on-close job; explicit taskkill /T still reaches descendants.
-  return spawnProcess({
+  // Inheriting none of Orca's handles keeps a launcher's pipe or a DevTools socket from outliving Orca.
+  return spawnDetachedWithoutInheritance({
     program: resolveWslExecutablePath(),
     args: buildWslDistroHolderArgs(distro),
     // A host-wide holder must never pin a worktree as its Windows cwd.
     cwd: resolveWslInteropSpawnCwd(),
-    env: { ...process.env, WSL_UTF8: '1' },
-    detached: true,
-    stdio: 'ignore'
+    env: { ...process.env, WSL_UTF8: '1' }
   })
 }
 
-/** Pid + creation time + command line must all agree; any one contradicting means pid reuse. */
-export function classifyWslDistroHolderProcess(
-  record: WslDistroHolderRecord,
-  evidence: WindowsProcessEvidence
-): WslDistroHolderState {
-  if (evidence.status === 'unavailable') {
-    return 'unverifiable'
-  }
-  if (evidence.status === 'missing') {
-    return 'exited'
-  }
-  const timeKnown = record.creationTimeMs !== null && evidence.startedAtMs !== null
-  if (timeKnown && record.creationTimeMs !== evidence.startedAtMs) {
-    return 'exited'
-  }
-  if (!evidence.commandLine) {
-    return 'unverifiable'
-  }
-  if (!isWslDistroHolderCommandLine(evidence.commandLine, record.distro)) {
-    return 'exited'
-  }
-  // A record written without a creation time never had one to compare; the command line decides.
-  return timeKnown || record.creationTimeMs === null ? 'live' : 'unverifiable'
-}
+export { classifyWslDistroHolderProcess } from './wsl-distro-holder-process-classification'
+import { classifyWslDistroHolderProcess } from './wsl-distro-holder-process-classification'
 
 export function createWslDistroHolder(dependencies: WslDistroHolderDependencies): WslDistroHolder {
   const { userDataPath } = dependencies
@@ -82,6 +61,7 @@ export function createWslDistroHolder(dependencies: WslDistroHolderDependencies)
   const queryProcess = dependencies.queryProcess ?? ((pid: number) => queryWindowsProcess(pid))
   const killProcess = dependencies.killProcess ?? ((pid: number) => process.kill(pid))
   const listRunningDistros = dependencies.listRunningDistros ?? listConfirmedRunningWslDistros
+  const noteMayHaveStopped = dependencies.noteMayHaveStopped ?? noteWslDistroMayHaveStopped
   const now = dependencies.now ?? Date.now
   const monotonicNow = dependencies.monotonicNow ?? (() => performance.now())
   const unverifiableSince = new Map<string, number>()
@@ -192,9 +172,13 @@ export function createWslDistroHolder(dependencies: WslDistroHolderDependencies)
         throw error
       }
       const { onHolderExit } = dependencies
-      if (onHolderExit) {
-        child.once('exit', (code, signal) => onHolderExit(distro, { code, signal }))
-      }
+      child.once('exit', (code, signal) => {
+        // Unfiltered and bridge-independent: no cooldown or open socket can hide this stop.
+        if (code === 1) {
+          noteMayHaveStopped(distro)
+        }
+        onHolderExit?.(distro, { code, signal })
+      })
       return record
     } finally {
       child.off('exit', onExit)

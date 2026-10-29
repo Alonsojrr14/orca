@@ -33,6 +33,8 @@ export type WslDistroHolderDependencies = {
     distro: string,
     exit: { code: number | null; signal: NodeJS.Signals | null }
   ) => void
+  /** A holder's code 1 means its distro stopped: later background reads must re-read (E9). */
+  noteMayHaveStopped?: (distro: string) => void
   sleep?: (ms: number) => Promise<void>
   /** How long a spawned holder has to bring its distro up (a cold boot can take ~15 s). */
   bootTimeoutMs?: number
