@@ -138,7 +138,7 @@ describe('AndroidEmulatorBackend', () => {
       'shell',
       'input',
       'text',
-      'hi%sthere'
+      "'hi%sthere'"
     ])
     expect(runner).toHaveBeenCalledWith(SDK.adb, [
       '-s',
