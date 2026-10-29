@@ -5,7 +5,10 @@ import { join } from 'node:path'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
+type PortStub = EventEmitter & { close: ReturnType<typeof vi.fn>; start: ReturnType<typeof vi.fn> }
+
 const mocks = vi.hoisted(() => ({
+  channels: new Array<{ port1: PortStub; port2: PortStub }>(),
   userData: '',
   prompt: vi.fn<() => Promise<boolean>>(),
   handlers: new Map<
@@ -18,22 +21,37 @@ const mocks = vi.hoisted(() => ({
   >()
 }))
 
-vi.mock('electron', () => ({
-  app: { on: vi.fn(), getPath: () => mocks.userData },
-  BrowserWindow: vi.fn(),
-  session: { fromPartition: vi.fn() },
-  webContents: { fromId: vi.fn() },
-  ipcMain: {
-    removeHandler: (channel: string) => mocks.handlers.delete(channel),
-    handle: (
-      channel: string,
-      handler: (event: unknown, request: unknown, userGesture?: boolean) => Promise<unknown>
-    ) => mocks.handlers.set(channel, handler)
-  },
-  webFrameMain: {
-    fromId: (processId: number, routingId: number) => mocks.frames.get(`${processId}:${routingId}`)
+vi.mock('electron', async () => {
+  const { EventEmitter } = await import('node:events')
+  class Port extends EventEmitter {
+    close = vi.fn(() => this.emit('close'))
+    start = vi.fn()
   }
-}))
+  return {
+    MessageChannelMain: class {
+      port1 = new Port()
+      port2 = new Port()
+      constructor() {
+        mocks.channels.push(this)
+      }
+    },
+    app: { on: vi.fn(), getPath: () => mocks.userData },
+    BrowserWindow: vi.fn(),
+    session: { fromPartition: vi.fn() },
+    webContents: { fromId: vi.fn() },
+    ipcMain: {
+      removeHandler: (channel: string) => mocks.handlers.delete(channel),
+      handle: (
+        channel: string,
+        handler: (event: unknown, request: unknown, userGesture?: boolean) => Promise<unknown>
+      ) => mocks.handlers.set(channel, handler)
+    },
+    webFrameMain: {
+      fromId: (processId: number, routingId: number) =>
+        mocks.frames.get(`${processId}:${routingId}`)
+    }
+  }
+})
 vi.mock('../browser-manager', () => ({ browserManager: {} }))
 vi.mock('../../ipc/browser-tab-registration-wait', () => ({ waitForTabRegistration: vi.fn() }))
 vi.mock('../../runtime/browser/browser-tab-renderer-create', () => ({
@@ -48,8 +66,11 @@ vi.mock('./browser-extension-permission-prompt', () => ({
 }))
 mocks.userData = mkdtempSync(join(tmpdir(), 'orca-extension-api-host-'))
 
-const { BROWSER_EXTENSION_EVENT_CHANNEL, BROWSER_EXTENSION_INVOKE_CHANNEL } =
-  await import('../../../shared/browser-extension-channels')
+const {
+  BROWSER_EXTENSION_EVENT_CHANNEL,
+  BROWSER_EXTENSION_INVOKE_CHANNEL,
+  BROWSER_EXTENSION_FRAME_LIFETIME_CHANNEL
+} = await import('../../../shared/browser-extension-channels')
 const surface = await import('../../../preload/browser-extension-api-surface')
 const registry = await import('./browser-extension-namespace-registry')
 const host = await import('./browser-extension-api-host')
@@ -87,7 +108,15 @@ function frameEvent(
   // Node reports "null" for chrome-extension: URLs; Chromium reports the real extension origin.
   origin = url.split('/').slice(0, 3).join('/')
 ) {
-  const frame = { url, origin, processId, routingId, isDestroyed: () => false, send: vi.fn() }
+  const frame = {
+    url,
+    origin,
+    processId,
+    routingId,
+    isDestroyed: () => false,
+    send: vi.fn(),
+    postMessage: vi.fn()
+  }
   mocks.frames.set(`${processId}:${routingId}`, frame)
   return {
     frame,
@@ -133,6 +162,9 @@ describe('preload API surface', () => {
   it('pins the preload channel copies to the ones main listens on', () => {
     expect(surface.PRELOAD_BROWSER_EXTENSION_INVOKE_CHANNEL).toBe(BROWSER_EXTENSION_INVOKE_CHANNEL)
     expect(surface.PRELOAD_BROWSER_EXTENSION_EVENT_CHANNEL).toBe(BROWSER_EXTENSION_EVENT_CHANNEL)
+    expect(surface.PRELOAD_BROWSER_EXTENSION_FRAME_LIFETIME_CHANNEL).toBe(
+      BROWSER_EXTENSION_FRAME_LIFETIME_CHANNEL
+    )
   })
 
   it('installs exactly what main registers, under the same permission', () => {
@@ -393,4 +425,284 @@ it('retires the current host after extension support restarts in the same docume
   expect(contexts.getHostSessionState(isolated)?.frames.size).toBe(0)
   expect(contexts.browserExtensionEventHasListener(isolated, 'probe', 'onPing')).toBe(false)
   host.forgetBrowserExtensionContexts(isolated)
+})
+
+describe('extension subframe listener retirement', () => {
+  const listen = { type: 'listen', namespace: 'probe', event: 'onPing', active: true }
+
+  function isolatedSession() {
+    // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: host calls use the copied session members already exercised by the host fixtures.
+    const sess = { ...extensionSession } as unknown as Electron.Session
+    host.attachBrowserExtensionApiHostToSession(sess, 'subframes')
+    const state = contexts.getHostSessionState(sess)
+    if (!state) {
+      throw new Error('Missing session host')
+    }
+    return { sess, state }
+  }
+
+  function channel() {
+    const current = mocks.channels.at(-1)
+    if (!current) {
+      throw new Error('Listening frame did not acquire a native port')
+    }
+    return current
+  }
+
+  it('retires a detached filtered frame without dispatch or document navigation', async () => {
+    const { sess, state } = isolatedSession()
+    const page = frameEvent(`chrome-extension://${EXTENSION_ID}/frame.html`, sess, 20, 1)
+    await invoke(page.event, { ...listen, filters: [{ urls: ['https://never.invalid/*'] }] })
+    expect(contexts.browserExtensionEventHasListener(sess, 'probe', 'onPing')).toBe(true)
+    channel().port1.emit('close')
+    expect(state.frames.size).toBe(0)
+    expect(contexts.browserExtensionEventHasListener(sess, 'probe', 'onPing')).toBe(false)
+    host.emitBrowserExtensionEvent({ session: sess }, 'probe', 'onPing', ['removed'])
+    expect(page.frame.send).not.toHaveBeenCalled()
+    host.forgetBrowserExtensionContexts(sess)
+  })
+
+  it('shares one port across listeners and replaces it after final removal', async () => {
+    const { sess, state } = isolatedSession()
+    const page = frameEvent(`chrome-extension://${EXTENSION_ID}/frame.html`, sess, 21, 1)
+    await invoke(page.event, listen)
+    const first = channel()
+    const lateClose = first.port1.listeners('close')[0]
+    await invoke(page.event, listen)
+    await invoke(page.event, { ...listen, namespace: 'tabs', event: 'onCreated' })
+    expect(page.frame.postMessage).toHaveBeenCalledTimes(1)
+    await invoke(page.event, { ...listen, active: false })
+    expect(state.frames.size).toBe(1)
+    expect(first.port1.close).not.toHaveBeenCalled()
+    await invoke(page.event, { ...listen, namespace: 'tabs', event: 'onCreated', active: false })
+    expect(state.frames.size).toBe(0)
+    expect(first.port1.close).toHaveBeenCalledTimes(1)
+    expect(first.port1.listenerCount('close')).toBe(0)
+    await invoke(page.event, listen)
+    expect(channel()).not.toBe(first)
+    lateClose?.()
+    host.emitBrowserExtensionEvent({ session: sess }, 'probe', 'onPing', ['successor'])
+    expect(page.frame.send).toHaveBeenCalledTimes(1)
+    expect(state.frames.size).toBe(1)
+    host.forgetBrowserExtensionContexts(sess)
+  })
+
+  it('preserves sibling frames, windows, sessions and worker listeners', async () => {
+    const { sess, state } = isolatedSession()
+    const elsewhere = isolatedSession()
+    const removed = frameEvent(`chrome-extension://${EXTENSION_ID}/frame.html`, sess, 22, 1)
+    const sibling = frameEvent(`chrome-extension://${EXTENSION_ID}/frame.html`, sess, 22, 2)
+    sibling.event.sender = removed.event.sender
+    const window = frameEvent(`chrome-extension://${EXTENSION_ID}/page.html`, sess, 22, 3)
+    window.event.sender.id = 78
+    const other = frameEvent(`chrome-extension://${EXTENSION_ID}/page.html`, elsewhere.sess, 23, 1)
+    await invoke(removed.event, listen)
+    const owner = channel()
+    await invoke(sibling.event, listen)
+    await invoke(window.event, listen)
+    await invoke(other.event, listen)
+    const worker = contexts.ensureWorkerContext(
+      state,
+      EXTENSION_ID,
+      `chrome-extension://${EXTENSION_ID}/`
+    )
+    worker.events.add('probe.onPing')
+    worker.stream = { send: vi.fn(), close: vi.fn() }
+    owner.port1.emit('close')
+    host.emitBrowserExtensionEvent({}, 'probe', 'onPing', ['survivors'])
+    expect(removed.frame.send).not.toHaveBeenCalled()
+    for (const frame of [sibling.frame, window.frame, other.frame]) {
+      expect(frame.send).toHaveBeenCalledTimes(1)
+    }
+    expect(worker.stream.send).toHaveBeenCalledTimes(1)
+    expect(worker.stream.close).not.toHaveBeenCalled()
+    expect(state.frames.size).toBe(2)
+    expect(elsewhere.state.frames.size).toBe(1)
+    host.forgetBrowserExtensionContexts(sess)
+    host.forgetBrowserExtensionContexts(elsewhere.sess)
+  })
+
+  it.each([
+    'did-navigate',
+    'render-process-gone',
+    'destroyed',
+    'extension-unloaded',
+    'host-forgotten',
+    'invalid-frame',
+    'failed-send'
+  ])('closes a frame port exactly once on %s', async (retirement) => {
+    const { sess, state } = isolatedSession()
+    const page = frameEvent(`chrome-extension://${EXTENSION_ID}/frame.html`, sess, 24, 1)
+    await invoke(page.event, listen)
+    const owner = channel()
+    if (retirement === 'extension-unloaded') {
+      contexts.forgetExtensionContexts(sess, EXTENSION_ID)
+    } else if (retirement === 'host-forgotten') {
+      host.forgetBrowserExtensionContexts(sess)
+    } else if (retirement === 'invalid-frame') {
+      mocks.frames.delete('24:1')
+      host.emitBrowserExtensionEvent({ session: sess }, 'probe', 'onPing', [])
+    } else if (retirement === 'failed-send') {
+      page.frame.send.mockImplementation(() => {
+        throw new Error('Frame retired')
+      })
+      host.emitBrowserExtensionEvent({ session: sess }, 'probe', 'onPing', [])
+    } else {
+      page.event.sender.emit(retirement)
+    }
+    expect(state.frames.size).toBe(0)
+    expect(owner.port1.close).toHaveBeenCalledTimes(1)
+    expect(owner.port1.listenerCount('close')).toBe(0)
+    page.event.sender.emit('destroyed')
+    host.forgetBrowserExtensionContexts(sess)
+    expect(owner.port1.close).toHaveBeenCalledTimes(1)
+  })
+
+  it('releases both endpoints and the registry when frame transfer fails', async () => {
+    const { sess, state } = isolatedSession()
+    const page = frameEvent(`chrome-extension://${EXTENSION_ID}/frame.html`, sess, 25, 1)
+    page.frame.postMessage.mockImplementation(() => {
+      throw new Error('Frame retired before transfer')
+    })
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    try {
+      await expect(invoke(page.event, listen)).resolves.toEqual({
+        ok: false,
+        error: 'Frame retired before transfer'
+      })
+      const owner = channel()
+      expect(state.frames.size).toBe(0)
+      expect(contexts.browserExtensionEventHasListener(sess, 'probe', 'onPing')).toBe(false)
+      expect(owner.port1.close).toHaveBeenCalledTimes(1)
+      expect(owner.port2.close).toHaveBeenCalledTimes(1)
+      expect(owner.port1.listenerCount('close')).toBe(0)
+    } finally {
+      warning.mockRestore()
+      host.forgetBrowserExtensionContexts(sess)
+    }
+  })
+
+  it.each([1, 10, 100])('visits frame registrations linearly for %s extensions', async (count) => {
+    const { sess, state } = isolatedSession()
+    const pages: ReturnType<typeof frameEvent>[] = []
+    const ids: string[] = []
+    try {
+      for (let index = 0; index < count; index++) {
+        const suffix = index
+          .toString(16)
+          .padStart(4, '0')
+          .replace(/[0-9a-f]/g, (digit) => String.fromCharCode(97 + Number.parseInt(digit, 16)))
+        const id = `${'c'.repeat(28)}${suffix}`
+        ids.push(id)
+        extensions.set(id, makeExtension(id, ['probe']))
+        const page = frameEvent(`chrome-extension://${id}/page.html`, sess, 40, index + 1)
+        await invoke(page.event, listen)
+        pages.push(page)
+      }
+      let visits = 0
+      const values = state.frames.values.bind(state.frames)
+      const entries = state.frames[Symbol.iterator].bind(state.frames)
+      const countRows = <T>(iterator: MapIterator<T>): MapIterator<T> => {
+        const next = iterator.next.bind(iterator)
+        iterator.next = () => {
+          const row = next()
+          if (!row.done) {
+            visits++
+          }
+          return row
+        }
+        return iterator
+      }
+      vi.spyOn(state.frames, 'values').mockImplementation(() => countRows(values()))
+      vi.spyOn(state.frames, Symbol.iterator).mockImplementation(() => countRows(entries()))
+      host.emitBrowserExtensionEvent({ session: sess }, 'probe', 'onPing', ['scale'])
+      for (const page of pages) {
+        expect(page.frame.send).toHaveBeenCalledExactlyOnceWith(BROWSER_EXTENSION_EVENT_CHANNEL, {
+          namespace: 'probe',
+          event: 'onPing',
+          args: ['scale']
+        })
+      }
+      expect(visits).toBeLessThanOrEqual(count * 3)
+    } finally {
+      host.forgetBrowserExtensionContexts(sess)
+      for (const id of ids) {
+        extensions.delete(id)
+      }
+    }
+  })
+
+  it('keeps extension membership snapshotted while resolving current frames after callbacks', async () => {
+    const { sess } = isolatedSession()
+    const first = frameEvent(`chrome-extension://${EXTENSION_ID}/first.html`, sess, 41, 1)
+    const previous = frameEvent(`chrome-extension://${OTHER_ID}/old.html`, sess, 41, 2)
+    const successor = frameEvent(`chrome-extension://${OTHER_ID}/new.html`, sess, 41, 3)
+    const addedId = 'd'.repeat(32)
+    const added = frameEvent(`chrome-extension://${addedId}/new.html`, sess, 41, 4)
+    extensions.set(OTHER_ID, makeExtension(OTHER_ID, ['probe']))
+    extensions.set(addedId, makeExtension(addedId, ['probe']))
+    try {
+      await invoke(first.event, listen)
+      await invoke(previous.event, listen)
+      const oldChannel = channel()
+      host.emitBrowserExtensionEvent({ session: sess }, 'probe', 'onPing', (extension) => {
+        if (extension.id === EXTENSION_ID) {
+          oldChannel.port1.emit('close')
+          void invoke(successor.event, listen)
+          void invoke(added.event, listen)
+        }
+        return ['current frames']
+      })
+      expect(first.frame.send).toHaveBeenCalledTimes(1)
+      expect(previous.frame.send).not.toHaveBeenCalled()
+      expect(successor.frame.send).toHaveBeenCalledTimes(1)
+      expect(added.frame.send).not.toHaveBeenCalled()
+      host.emitBrowserExtensionEvent({ session: sess }, 'probe', 'onPing', ['next'])
+      expect(added.frame.send).toHaveBeenCalledTimes(1)
+    } finally {
+      host.forgetBrowserExtensionContexts(sess)
+      extensions.set(OTHER_ID, makeExtension(OTHER_ID, []))
+      extensions.delete(addedId)
+    }
+  })
+
+  it('delivers to a replacement registered while resolving the same extension arguments', async () => {
+    const { sess } = isolatedSession()
+    const previous = frameEvent(`chrome-extension://${EXTENSION_ID}/old.html`, sess, 42, 1)
+    const successor = frameEvent(`chrome-extension://${EXTENSION_ID}/new.html`, sess, 42, 2)
+    await invoke(previous.event, listen)
+    const oldChannel = channel()
+    try {
+      host.emitBrowserExtensionEvent({ session: sess }, 'probe', 'onPing', () => {
+        oldChannel.port1.emit('close')
+        void invoke(successor.event, listen)
+        return ['replacement']
+      })
+      expect(previous.frame.send).not.toHaveBeenCalled()
+      expect(successor.frame.send).toHaveBeenCalledTimes(1)
+      expect(oldChannel.port1.close).toHaveBeenCalledTimes(1)
+    } finally {
+      host.forgetBrowserExtensionContexts(sess)
+    }
+  })
+
+  it('keeps live frame iteration when a send replaces the final frame registration', async () => {
+    const { sess } = isolatedSession()
+    const previous = frameEvent(`chrome-extension://${EXTENSION_ID}/old.html`, sess, 43, 1)
+    const successor = frameEvent(`chrome-extension://${EXTENSION_ID}/new.html`, sess, 43, 2)
+    await invoke(previous.event, listen)
+    const oldChannel = channel()
+    previous.frame.send.mockImplementation(() => {
+      oldChannel.port1.emit('close')
+      void invoke(successor.event, listen)
+    })
+    try {
+      host.emitBrowserExtensionEvent({ session: sess }, 'probe', 'onPing', ['replacement'])
+      expect(previous.frame.send).toHaveBeenCalledTimes(1)
+      expect(successor.frame.send).toHaveBeenCalledTimes(1)
+      expect(oldChannel.port1.close).toHaveBeenCalledTimes(1)
+    } finally {
+      host.forgetBrowserExtensionContexts(sess)
+    }
+  })
 })

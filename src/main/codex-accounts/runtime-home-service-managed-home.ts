@@ -8,6 +8,7 @@ import {
 } from '../codex/codex-home-paths'
 import { syncSystemConfigIntoManagedCodexHome } from '../codex/codex-config-mirror'
 import { startCodexAccountSessionBridgeInBackground } from '../codex/codex-account-session-bridge'
+import { isCodexHistorySharedAcrossAccounts } from './codex-history-sharing'
 import {
   resolveHostCodexSessionSourceHome,
   resolveWslCodexSessionSourceHome
@@ -135,16 +136,29 @@ export abstract class CodexRuntimeHomeManagedHome extends CodexRuntimeHomeSync {
 
   // Bridge history in the background: /resume only sees launch-home rollouts, and scans can be large.
   protected startSelfContainedSessionBridgeForLaunch(perAccountHome: string): void {
+    if (!isCodexHistorySharedAcrossAccounts(this.store.getSettings())) {
+      return
+    }
     void startCodexAccountSessionBridgeInBackground({
       targetCodexHomePath: perAccountHome,
       sourceCodexHomePaths: this.getSelfContainedSessionBridgeSourceHomes()
     })
   }
 
+  // Reading a distro's history over 9P would boot it (E9); the WSL lane owns those homes.
+  protected isHostHistorySourceInWsl(): boolean {
+    const sourceHome = resolveHostCodexSessionSourceHome(this.store.getSettings())
+    return Boolean(sourceHome && parseWslUncPath(sourceHome))
+  }
+
   protected getSelfContainedSessionBridgeSourceHomes(): string[] {
     return [
       // Honor custom history sources without changing credential routing.
-      resolveHostCodexSessionSourceHome(this.store.getSettings()) ?? getSystemCodexHomePath(),
+      ...(this.isHostHistorySourceInWsl()
+        ? []
+        : [
+            resolveHostCodexSessionSourceHome(this.store.getSettings()) ?? getSystemCodexHomePath()
+          ]),
       // Resolve the mirror path without creating it for per-account launches.
       resolveOrcaManagedCodexHomePath(),
       ...this.getManagedHostAccountHomesForSessionDiscovery()
@@ -228,7 +242,8 @@ export abstract class CodexRuntimeHomeManagedHome extends CodexRuntimeHomeSync {
     const settings = this.store.getSettings()
     if (
       normalizeCodexRuntimeSelection(settings).host !== null ||
-      hasCustomCodexHomeOverrideForLaunch(launchEnv)
+      hasCustomCodexHomeOverrideForLaunch(launchEnv) ||
+      this.isHostHistorySourceInWsl()
     ) {
       return null
     }
@@ -250,7 +265,11 @@ export abstract class CodexRuntimeHomeManagedHome extends CodexRuntimeHomeSync {
     target: CodexAccountSelectionTarget,
     runtimeHomePath: string | null
   ): void {
-    if (process.platform !== 'win32' || !runtimeHomePath) {
+    if (
+      process.platform !== 'win32' ||
+      !runtimeHomePath ||
+      !isCodexHistorySharedAcrossAccounts(this.store.getSettings())
+    ) {
       return
     }
     const runtimeHomeWsl = parseWslUncPath(runtimeHomePath)

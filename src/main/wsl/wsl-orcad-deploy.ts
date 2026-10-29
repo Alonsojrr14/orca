@@ -40,6 +40,7 @@ import { readWslDistroRegistryIdShared } from './wsl-distro-registry-id'
 import type { WslOrcadHostTarget } from './wsl-orcad-host-target'
 import { createWslOrcadHostTransport, type WslOrcadHostTransport } from './wsl-orcad-host-transport'
 import { holdWslDistroWithContext } from './wsl-orcad-held-context'
+import { wslOrcadConnectStateHints } from './wsl-orcad-connect-state-snapshot'
 import { readWslOrcadIncumbent, type WslOrcadIncumbent } from './wsl-orcad-incumbent'
 import { adoptUnrecordedWslOrcad } from './wsl-orcad-instance-adoption'
 import {
@@ -133,10 +134,11 @@ async function launchOverTransport(
   // Read GUID alongside deploy; failure leaves the record without one.
   const distroId = (options.readRegistryId ?? readWslDistroRegistryIdShared)(name).catch(() => null)
   const first = await holdWslDistroWithContext(name, target, conn, holder, signal)
-  const held = first.held
+  const { held, connectState } = first
   let context = first.context
+  const hints = wslOrcadConnectStateHints(connectState, context.activationRecord)
   const slot = managedOrcadSlot(context, ORCAD_MANAGED_REMOTE_PORT, signal)
-  const recovery = await recoverInterruptedOrcadActivation(slot)
+  const recovery = await recoverInterruptedOrcadActivation(slot, connectState ?? undefined)
   if (recovery.outcome === 'pending' || recovery.outcome === 'refused') {
     throw new Error(recovery.reason)
   }
@@ -144,7 +146,12 @@ async function launchOverTransport(
     context = { ...context, activationRecord: await readOrcadActivationRecord(slot) }
   }
   // Adopt unrecorded orcad before deploy/wake or its instance lock blocks launch.
-  const adoption = await adoptUnrecordedWslOrcad(slot, context.activationRecord)
+  const adoption = await adoptUnrecordedWslOrcad(
+    slot,
+    context.activationRecord,
+    undefined,
+    hints.instanceLock(context.activationRecord)
+  )
   if (adoption.outcome === 'adopted') {
     context = { ...context, activationRecord: adoption.record }
   }
@@ -202,7 +209,8 @@ async function launchOverTransport(
       : {}),
     force: intent === 'force',
     appVersion,
-    recordedNodeRuntimeProbe: true
+    recordedNodeRuntimeProbe: true,
+    ...hints.deployPreRead(context.activationRecord)
   }).catch((error: unknown) => {
     if (!signal?.aborted) {
       recordWslOrcadUpdateFailure(failureHost, incumbentVersion, {

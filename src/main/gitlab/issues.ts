@@ -6,6 +6,7 @@ import { mapGitLabIssueInfo } from './mappers'
 import { glabApiWithHeaders, glabExecFileAsync, acquire, release, getIssueProjectRef, resolveIssueSource, classifyGlabError, classifyListFetchError, getGlabKnownHosts, glabRepoExecOptions, glabHostnameArgs, parseGlabJsonList, parseGlabPaginationHeader, type LocalGitExecOptions, type ProjectRef } from './gl-utils'
 import { encodedProject } from './project-path-encoding'
 import { isTaskRepositoryIneligible } from '../git/task-repository-eligibility'
+import { codeHostFailure, classifiedFailure } from '../../shared/code-host-failure-copy'
 
 // Distinguish a confirmed empty list from fetch failure.
 export type IssueListResult = {
@@ -129,7 +130,7 @@ export async function createIssue(
 ): Promise<{ ok: true; number: number; url: string } | { ok: false; error: string }> {
   const trimmedTitle = title.trim()
   if (!trimmedTitle) {
-    return { ok: false, error: 'Title is required' }
+    return codeHostFailure('titleRequired')
   }
   const knownHosts = await getGlabKnownHosts(connectionId, localGitOptions)
   const { source: projectRef } = await resolveIssueSource(
@@ -140,10 +141,7 @@ export async function createIssue(
     localGitOptions
   )
   if (!projectRef) {
-    return {
-      ok: false,
-      error: 'Could not resolve GitLab project for this repository'
-    }
+    return codeHostFailure('gitlab.projectUnresolved')
   }
   await acquire()
   try {
@@ -163,7 +161,7 @@ export async function createIssue(
     )
     const data = JSON.parse(stdout) as { iid?: number; web_url?: string; url?: string }
     if (typeof data.iid !== 'number') {
-      return { ok: false, error: 'Unexpected response from GitLab' }
+      return codeHostFailure('gitlab.unexpectedResponse')
     }
     return {
       ok: true,
@@ -199,10 +197,7 @@ export async function addIssueComment(
       )
     ).source
   if (!projectRef) {
-    return {
-      ok: false,
-      error: 'Could not resolve GitLab project for this repository'
-    }
+    return codeHostFailure('gitlab.projectUnresolved')
   }
   await acquire()
   try {
@@ -239,7 +234,7 @@ export async function addIssueComment(
     return { ok: true, comment }
   } catch (err) {
     const stderr = err instanceof Error ? err.message : String(err)
-    return { ok: false, error: classifyGlabError(stderr).message }
+    return classifiedFailure(classifyGlabError(stderr))
   } finally {
     release()
   }
