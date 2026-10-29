@@ -187,6 +187,32 @@ describe('structured agent executable resolution', () => {
       }
     )
 
+    it('uses the execution host grammar for native paths after a PATH launcher', () => {
+      const { directory } = executable()
+      const command = fileIn(directory, 'op.exe')
+      expect(
+        resolveStructuredAgentCommand(
+          'codex',
+          {
+            agentCmdOverrides: {
+              codex: String.raw`op.exe run --env-file="C:\Users\dev\work env.env" -- node C:\Tools\launcher.mjs codex`
+            }
+          },
+          { platform: 'win32', pathEnv: directory, homePath: directory }
+        )
+      ).toEqual({
+        command,
+        prefixArgs: [
+          'run',
+          String.raw`--env-file=C:\Users\dev\work env.env`,
+          '--',
+          'node',
+          String.raw`C:\Tools\launcher.mjs`,
+          'codex'
+        ]
+      })
+    })
+
     it('finds the .cmd shim for a bare name, as the stock lookup does', () => {
       const { directory } = executable()
       fileIn(directory, 'my-claude')

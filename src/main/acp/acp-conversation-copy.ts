@@ -46,10 +46,10 @@ export async function copyAcpConversation(
     signal.throwIfAborted()
     const launch = await waitForPromiseWithSignal(deps.readLaunch(input.identity), signal)
     signal.throwIfAborted()
-    deps.spec.assertCopyLaunchArgs?.([
-      ...launch.prefixArgs,
-      ...(await waitForPromiseWithSignal(Promise.resolve(deps.resolveLaunchArgs?.() ?? []), signal))
-    ])
+    deps.spec.assertCopyLaunchArgs?.(
+      await waitForPromiseWithSignal(Promise.resolve(deps.resolveLaunchArgs?.() ?? []), signal),
+      launch.prefixArgs
+    )
     signal.throwIfAborted()
     await assertCopyAccountSelected(deps, input.accountHome, launch.env, signal)
     signal.throwIfAborted()

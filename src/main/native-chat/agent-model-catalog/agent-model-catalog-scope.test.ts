@@ -107,7 +107,7 @@ describe('original operation through actual nested resolution', () => {
         },
         resolveCommand: () => {
           stages.push('lookup')
-          return '/fixture/claude'
+          return { command: '/fixture/claude', prefixArgs: [] }
         },
         resolveAuthPolicy: async () => {
           await stage('auth')

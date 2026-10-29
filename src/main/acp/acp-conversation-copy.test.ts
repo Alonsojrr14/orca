@@ -32,6 +32,17 @@ async function open(agent: 'omp' | 'opencode' = 'omp') {
   const rig = await openAcpAdapterRig({
     spec: acpLaunchSpecFor(agent)!,
     initialize: FORKS,
+    deps: { resolveLaunchArgs: () => ['--', '--server', 'literal-operand'] },
+    launch: {
+      command: 'launcher',
+      prefixArgs: ['run', '--', agent],
+      args: [
+        'run',
+        '--',
+        agent,
+        ...acpLaunchSpecFor(agent)!.args({ fullAccess: false, pluginDir: null })
+      ]
+    },
     script: (agent) =>
       agent.on('session/fork', (frame) => agent.reply(frame, { sessionId: 'copy-1' }))
   })
@@ -160,17 +171,24 @@ describe('copying a chat conversation for the CLI', () => {
     async (agent) => {
       const spec = acpLaunchSpecFor(agent)!
       const connect = vi.fn()
-      for (const inPrefix of [false, true]) {
+      for (const [prefixArgs, args] of [
+        [[], ['--server', 'https://other-host:4096']],
+        [
+          ['run', '--', 'opencode'],
+          ['--server', 'https://other-host:4096']
+        ],
+        [['run', '--', 'opencode', '--server=https://prefix-host:4096'], []]
+      ]) {
         await expect(
           copyAcpConversation(
             {
               spec,
               dataDirectory: '/orca-data',
-              resolveLaunchArgs: () => (inPrefix ? [] : ['--server', 'https://other-host:4096']),
+              resolveLaunchArgs: () => args,
               readLaunch: async () => ({
                 spec,
                 command: 'launcher',
-                prefixArgs: inPrefix ? ['--server', 'https://prefix-host:4096'] : [],
+                prefixArgs,
                 args: [],
                 cwd: '/workspace',
                 env: {},

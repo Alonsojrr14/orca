@@ -171,7 +171,7 @@ describe("a Claude chat whose Claude isn't running lists Claude's own `/` comman
     })}\n`
     let answer: string | Promise<string> = failed
     const probe = createClaudeCommandCatalogProbe({
-      resolveCommand: () => ({ command: 'claude', prefixArgs: [] }),
+      resolveCommand: () => ({ command: 'launcher', prefixArgs: ['run', '--', 'claude'] }),
       resolveInheritedEnv: async () => ({ PATH: '/bin' }),
       resolveAuthPolicy: () => ({ account: 'system' }),
       runListing: async (...call) => {
@@ -214,7 +214,12 @@ describe("a Claude chat whose Claude isn't running lists Claude's own `/` comman
         kind: 'command',
         description: 'Set a goal'
       })
-      expect(asked[0]?.[0]).toMatchObject({ cwd: workspace })
+      expect(asked[0]?.[0]).toMatchObject({
+        command: 'launcher',
+        cwd: workspace
+      })
+      expect(asked[0]?.[0].args.slice(0, 3)).toEqual(['run', '--', 'claude'])
+      expect(asked[0]?.[0].stdin).toContain('orca-command-discovery')
       expect(asked[0]?.[1].inheritedEnv?.CLAUDE_CONFIG_DIR).toBe(account)
       // Failed refresh must retain the provider list over folder fallback.
       answer = failed

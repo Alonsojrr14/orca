@@ -46,7 +46,10 @@ function resolveOverride(
   settings: CommandSettings | null | undefined,
   options: CommandOptions
 ) {
-  const plan = structuredAgentCommandPlan(settings?.agentCmdOverrides?.[agent] ?? '')
+  const plan = structuredAgentCommandPlan(
+    settings?.agentCmdOverrides?.[agent] ?? '',
+    options.platform ?? process.platform
+  )
   const overlay = settings?.agentDefaultEnv?.[agent]
   const command = plan
     ? resolveExecutableCommand(plan.program, {

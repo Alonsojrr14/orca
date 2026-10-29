@@ -64,18 +64,19 @@ describe('chat launcher argv', () => {
                 resolveLaunchArgs: () => ['--model', 'selected']
               })
             : agent === 'pi'
-              ? createPiRpcLaunchResolver({
-                  ...common,
-                  resolveCommand: () => process.execPath,
-                  probeVersion: readVersion
-                })
+              ? ({ identity: sessionIdentity }: { identity: typeof identity }) =>
+                  createPiRpcLaunchResolver({
+                    ...common,
+                    resolveCommand: () => process.execPath,
+                    probeVersion: readVersion
+                  })(sessionIdentity)
               : createAcpStructuredLaunchResolver(spec, {
                   ...common,
                   readJournal: () => null,
                   resolveCommand: () => process.execPath,
                   probeVersion: readVersion
                 })
-      const launches = []
+      const launches: Awaited<ReturnType<typeof resolve>>[] = []
       for (const command of [
         '',
         `"${process.execPath}"`,

@@ -3,13 +3,17 @@ import type { TuiAgent } from './tui-agent'
 import { parseAgentCommand } from './agent-command-plan'
 
 /** Literal program and prefix; chat never evaluates shell syntax. */
-export function structuredAgentCommandPlan(command: string) {
+export function structuredAgentCommandPlan(command: string, platform?: NodeJS.Platform) {
   const input = command.trim()
   if (!input || /[\0\r\n$`]/.test(input)) {
     return null
   }
   const windowsPath = /^(?:["']?)(?:[A-Za-z]:[\\/]|\\\\)/.test(input)
-  const parsed = parseAgentCommand('', input, windowsPath ? 'literal' : 'escape')
+  const parsed = parseAgentCommand(
+    '',
+    input,
+    platform === 'win32' || windowsPath ? 'literal' : 'escape'
+  )
   if (
     !parsed.ok ||
     parsed.env ||
