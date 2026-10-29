@@ -9,6 +9,7 @@ import { MOBILE_DICTATION_RECONNECT_GRACE_MS } from '../../../src/shared/rpc-con
 import { isRpcDeliveryUnknown } from '../transport/rpc-delivery-ambiguity'
 import { rpcPayloadMember } from '../transport/rpc-reader-payload'
 import { waitForRpcClientReconnected } from '../transport/rpc-client-reconnect-wait'
+import { DECISIVE_PROBE_TIMEOUT_MS } from '../transport/rpc-session-liveness-watchdog'
 import { isLogicalClientCutoverError } from '../transport/stable-logical-rpc-client'
 import { isLogicalClientSuspendedError } from '../transport/logical-client-suspended-error'
 import type {
@@ -141,15 +142,21 @@ export function enqueueMobileDictationAudioChunk(
     sampleRate: MOBILE_DICTATION_PCM_SAMPLE_RATE,
     seq: queue.pendingAudioBudget.nextSeq()
   }
+  const hostDedupesResends = queue.pendingAudioBudget.hostDedupesResends
   const sendChunk = sendAcrossConnectionMove(
     client,
-    () =>
+    () => {
+      // A reply this late, with nothing heard meanwhile, means a silently dead connection; probe now, not after the idle watchdog, and keep asking until it settles.
+      const overdue = hostDedupesResends
+        ? setInterval(() => client.probeLivenessNow?.(), DECISIVE_PROBE_TIMEOUT_MS)
+        : undefined
       // Wait for a reconnect only as long as the host keeps the session; past that, fail and keep the text so far.
-      dictationAudioChunkSend.request(client, params, {
-        timeoutMs: MOBILE_DICTATION_RECONNECT_GRACE_MS
-      }),
+      return dictationAudioChunkSend
+        .request(client, params, { timeoutMs: MOBILE_DICTATION_RECONNECT_GRACE_MS })
+        .finally(() => clearInterval(overdue))
+    },
     // A recording cancelled during the outage must not reach the host when it comes back.
-    queue.pendingAudioBudget.hostDedupesResends ? () => queue.isActive(dictationId) : undefined
+    hostDedupesResends ? () => queue.isActive(dictationId) : undefined
   )
     .then((reply) => {
       // Only newer hosts send the text, and only when it changed; any other result still acknowledges the chunk.

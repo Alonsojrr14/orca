@@ -183,6 +183,24 @@ describe('dictation through a reconnect', () => {
   })
 })
 
+async function startWith(rpc: FakeRpcClient, startResult: Record<string, unknown>) {
+  mount(rpc, [], [])
+  await act(async () => {
+    const started = dictation().start()
+    while (rpc.requests.length === 0) {
+      await Promise.resolve()
+    }
+    rpc.requests.splice(0)[0].resolve({ id: 'desktop', ok: true, result: startResult })
+    await started
+  })
+}
+
+function speak(): void {
+  for (const handler of seam.chunkHandlers) {
+    handler({ data: Uint8Array.from([1, 2]), droppedBytes: 0 })
+  }
+}
+
 describe('audio sent on a connection that died', () => {
   async function dropMidChunk(
     startResult: Record<string, unknown>,
@@ -191,20 +209,7 @@ describe('audio sent on a connection that died', () => {
     let state: ConnectionState = 'connected'
     const rpc = createFakeRpcClient({ getState: () => state })
     const sent: SentRequest[] = []
-    mount(rpc, [], [])
-    await act(async () => {
-      const started = dictation().start()
-      while (rpc.requests.length === 0) {
-        await Promise.resolve()
-      }
-      rpc.requests.splice(0)[0].resolve({ id: 'desktop', ok: true, result: startResult })
-      await started
-    })
-    const speak = () => {
-      for (const handler of seam.chunkHandlers) {
-        handler({ data: Uint8Array.from([1, 2]), droppedBytes: 0 })
-      }
-    }
+    await startWith(rpc, startResult)
     await act(async () => {
       speak()
       speak()
@@ -245,6 +250,44 @@ describe('audio sent on a connection that died', () => {
 
   it('never goes twice to a host that would feed it twice', async () => {
     await expect(dropMidChunk({})).resolves.toEqual([0, 1, 2])
+  })
+})
+
+describe('a chunk reply that stops coming', () => {
+  async function probesAround(startResult: Record<string, unknown>, overdueMs: number) {
+    vi.useFakeTimers()
+    try {
+      const rpc = createFakeRpcClient()
+      let probes = 0
+      rpc.probeLivenessNow = () => {
+        probes += 1
+      }
+      await startWith(rpc, startResult)
+      await act(async () => {
+        speak()
+        vi.advanceTimersByTime(overdueMs - 1)
+      })
+      const early = probes
+      await act(async () => {
+        vi.advanceTimersByTime(1)
+      })
+      const overdue = probes
+      await act(async () => {
+        vi.advanceTimersByTime(overdueMs)
+      })
+      return [early, overdue, probes]
+    } finally {
+      vi.useRealTimers()
+    }
+  }
+
+  it('asks for a decisive probe every four seconds the reply is late', async () => {
+    await expect(probesAround({ dedupesResentChunks: true }, 4000)).resolves.toEqual([0, 1, 2])
+  })
+
+  // A false alarm would end a live connection, and an old host cannot take the lost audio again.
+  it('leaves an old host to the idle watchdog', async () => {
+    await expect(probesAround({}, 4000)).resolves.toEqual([0, 0, 0])
   })
 })
 
