@@ -1,3 +1,4 @@
+import { openTestChats } from './structured-agent-session-open-test-chats.test-support'
 // Only user-close supplies personal cancellation; host eviction/quit leaves interrupted work reportable.
 // Provider and fallback turn-end writers both derive verdict from the journal Stop event.
 
@@ -113,7 +114,12 @@ async function runningTurn(): Promise<AgentSessionStatusEvent[]> {
 }
 
 async function settledTurn() {
-  await host.restoreReadableSessions([SESSION])
+  if (!host.hasSession(SESSION)) {
+    await host.flushAllStreamedEvents()
+    host = new StructuredAgentSessionHost(host.deps)
+    replaceHostTestState({ store: host.deps.store, host })
+  }
+  await openTestChats(host, [SESSION])
   const { items } = await host.journalSnapshot(SESSION)
   const turn = items.map((item) => readAgentJournalTurn(item.body)).find(Boolean)
   const [settled] = [...selectStructuredAgentSettledTurns(items).values()]

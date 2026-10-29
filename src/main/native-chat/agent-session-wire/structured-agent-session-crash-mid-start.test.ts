@@ -1,3 +1,4 @@
+import { openTestChats } from './structured-agent-session-open-test-chats.test-support'
 // Persist spawn identity before handshake so relaunch can stop the exact orphan instead of guessing.
 
 import { cp, mkdtemp, rm } from 'node:fs/promises'
@@ -143,7 +144,7 @@ describe('a host that dies while its Codex child is starting', () => {
         stopOwnerProcess
       }
     )
-    await relaunched.restoreReadableSessions()
+    await openTestChats(relaunched)
 
     expect(stopOwnerProcess).toHaveBeenCalledWith(CHILD_PID, 'SIGTERM')
     expect(store.getRecord(SESSION)?.lease).toMatchObject({
@@ -210,7 +211,7 @@ describe('a create replayed after the host that ran it died', () => {
         now: () => NOW + elapsedMs
       }
     )
-    await relaunched.restoreReadableSessions()
+    await openTestChats(relaunched)
     expect(store.getRecord(SESSION)?.lease).toMatchObject({
       claimStatus: 'released',
       handoffStage: null,
@@ -254,7 +255,7 @@ describe('a create answered before the host that ran it died', () => {
       Object.assign(adapterFor(restarted), { supportsCreate: () => true }),
       { mintSpawnToken: () => 'spawn-b', probeOwner: async () => ({ outcome: 'pid-absent' }) }
     )
-    await relaunched.restoreReadableSessions()
+    await openTestChats(relaunched)
     expect(store.getRecord(SESSION)?.lease).toMatchObject({ claimStatus: 'released' })
 
     await expect(relaunched.attach(CALLER, params)).resolves.toMatchObject({

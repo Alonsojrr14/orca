@@ -1,3 +1,4 @@
+import { openTestChats } from './structured-agent-session-open-test-chats.test-support'
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -115,7 +116,12 @@ async function restartAfterDeath(): Promise<void> {
 }
 
 async function reread() {
-  await host.restoreReadableSessions([SESSION])
+  if (!host.hasSession(SESSION)) {
+    await host.flushAllStreamedEvents()
+    host = new StructuredAgentSessionHost(host.deps)
+    replaceHostTestState({ store: host.deps.store, host })
+  }
+  await openTestChats(host, [SESSION])
   const { items } = await host.journalSnapshot(SESSION)
   const turnItemId = items.find((item) => item.body.kind === 'turn')?.itemId
   const stopRows = items.filter(

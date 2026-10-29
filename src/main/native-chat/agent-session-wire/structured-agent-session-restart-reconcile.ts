@@ -133,3 +133,13 @@ function hasUnreconciledLease(store: AgentSessionRecordStore, sessionId?: string
     ? store.listRecords().some((record) => record.lease.unreconciled)
     : store.getRecord(sessionId)?.lease.unreconciled === true
 }
+
+export function createStartupLeaseReconcile(
+  reconcile: () => Promise<AgentSessionWireRefusal | null>,
+  logger: StructuredAgentSessionLogger
+): () => Promise<void> {
+  const read = createReaderReconcile(reconcile, reportEachFailureOnce(logger))
+  return async () => {
+    await read()
+  }
+}

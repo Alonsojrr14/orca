@@ -1,3 +1,5 @@
+import { StructuredAgentSessionSavedStatus } from './structured-agent-session-saved-status'
+import type { AgentSessionConversationView } from '../../../shared/agent-session-conversation-view'
 import { StructuredAgentSessionRequestFailures } from './structured-agent-session-request-failures'
 import { structuredAgentSessionFailureWordsContext } from './structured-agent-session-send-preparation'
 import { AT_REST_COMMANDS_READ_BUDGET_MS } from './at-rest-command-catalog'
@@ -33,6 +35,7 @@ export class StructuredAgentSessionClientDelivery {
   readonly subscribers: AgentSessionSubscribers
   readonly waitForSendSettlement: StructuredAgentSessionSendSettlement['wait']
   private stopAtRestCommandUpdates: () => void = () => undefined
+  private readonly savedStatus
   private readonly statusFeed
   private readonly turnCompletionFeed
   readonly requestFailures
@@ -63,7 +66,9 @@ export class StructuredAgentSessionClientDelivery {
           sessions.get(sessionId)?.journal
         )
     })
+    this.savedStatus = new StructuredAgentSessionSavedStatus(deps)
     this.statusFeed = createStructuredAgentSessionHostStatusFeed({
+      onPublished: this.savedStatus.observe,
       sessions,
       starting,
       now,
@@ -124,6 +129,11 @@ export class StructuredAgentSessionClientDelivery {
       : adapter.atRestCommands?.read(record)
     return adapter.readCommands?.(sessionId) ?? commands
   }
+
+  drainStatusWrites = (): Promise<void> => this.savedStatus.drain()
+
+  publishSavedStatus = (record: AgentSessionConversationView, markerAt?: number): void =>
+    this.statusFeed.publishSaved(record, markerAt)
 
   publishStatus = (sessionId: string): void => this.statusFeed.publish(sessionId)
 
@@ -239,7 +249,8 @@ export class StructuredAgentSessionClientDelivery {
     this.turnCompletionFeed.forget(sessionId)
   }
 
-  closeAll(): void {
+  async closeAll(): Promise<void> {
+    await this.drainStatusWrites()
     this.requestFailures.clear()
     this.stopAtRestCommandUpdates()
     this.sendSettlement.closeAll()

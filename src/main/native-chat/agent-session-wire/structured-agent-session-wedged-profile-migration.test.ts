@@ -1,3 +1,4 @@
+import { openTestChats } from './structured-agent-session-open-test-chats.test-support'
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../../shared/agent-session-journal-types'
 // Real wedged record shapes must become acquirable while retaining conversation and provider history.
 // Migration releases the lease; only operations needing the agent may spawn it.
@@ -264,7 +265,7 @@ describe('already-wedged profiles become usable on load', () => {
       await seedRunningTurn(provider)
       openHost()
 
-      await host.restoreReadableSessions()
+      await openTestChats(host)
 
       expect(host.hasSession(SESSION)).toBe(true)
       const firstCursor = restoredJournal().cursor()
@@ -278,7 +279,7 @@ describe('already-wedged profiles become usable on load', () => {
       await host.flushAllStreamedEvents()
       store = await openTestAgentSessionRecordStore(root)
       openHost()
-      await host.restoreReadableSessions()
+      await openTestChats(host)
 
       expect(restoredJournal().cursor()).toEqual(firstCursor)
       expect(activeStructuredAgentSessionTurnId(restoredJournal().snapshot().items)).toBe(null)
@@ -332,7 +333,7 @@ describe('already-wedged profiles become usable on load', () => {
           : {})
       })
 
-      await host.restoreReadableSessions()
+      await openTestChats(host)
 
       expect(acquire).not.toHaveBeenCalled()
       expect(turnLifecycle('turn-1')).toEqual({
@@ -452,7 +453,7 @@ describe('already-wedged profiles become usable on load', () => {
       const failing = vi
         .spyOn(JournalLifecycleBatchAppender.prototype, 'appendPlanned')
         .mockRejectedValue(new Error('journal unavailable'))
-      await host.restoreReadableSessions()
+      await openTestChats(host)
       failing.mockRestore()
       expect(activeStructuredAgentSessionTurnId(restoredJournal().snapshot().items)).toBe('turn-1')
       expect(stopOwnerProcess).toHaveBeenCalledTimes(ownerOutlivedRestart ? 1 : 0)
@@ -493,7 +494,7 @@ describe('already-wedged profiles become usable on load', () => {
         resolveRecovery({ ...deps, delay: async () => {} }, sessionId)
       )
     try {
-      await host.restoreReadableSessions()
+      await openTestChats(host)
     } finally {
       recovery.mockRestore()
     }
@@ -524,7 +525,7 @@ describe('already-wedged profiles become usable on load', () => {
       await seedStore(wedgedRecord({ handoffStage: 'manual-recovery', ...lease }))
       openHost({ probeOwner: async () => ({ outcome: 'indeterminate', reason: 'no scan here' }) })
 
-      await host.restoreReadableSessions()
+      await openTestChats(host)
 
       expect(store.getRecord(SESSION)?.lease).toMatchObject({
         claimStatus: 'released',
@@ -592,7 +593,7 @@ describe('already-wedged profiles become usable on load', () => {
     )
     openHost()
 
-    await host.restoreReadableSessions()
+    await openTestChats(host)
 
     const lease = store.getRecord(SESSION)!.lease
     expect(lease).toMatchObject({ handoffStage: null, unreconciled: false })
@@ -611,7 +612,7 @@ describe('already-wedged profiles become usable on load', () => {
     await seedStore(wedgedRecord({ claimStatus: 'released', handoffStage: 'recovering' }))
     openHost()
 
-    await host.restoreReadableSessions()
+    await openTestChats(host)
 
     const lease = store.getRecord(SESSION)!.lease
     expect(lease).toMatchObject({ handoffStage: null, unreconciled: false })
@@ -640,7 +641,7 @@ describe('already-wedged profiles become usable on load', () => {
       }
     })
 
-    await host.restoreReadableSessions()
+    await openTestChats(host)
 
     const lease = store.getRecord(SESSION)!.lease
     expect(lease).toMatchObject({ handoffStage: null, unreconciled: false })
@@ -682,7 +683,7 @@ describe('already-wedged profiles become usable on load', () => {
       stopOwnerProcess: (pid) => order.push(`stop:${pid}`)
     })
 
-    await host.restoreReadableSessions()
+    await openTestChats(host)
     expect(order).toEqual([])
     expect(scan).not.toHaveBeenCalled()
     const fence = store.getRecord(SESSION)?.lease.runtimeFence ?? null
@@ -702,7 +703,7 @@ describe('already-wedged profiles become usable on load', () => {
     const stopOwnerProcess = vi.fn()
     let probe: AgentSessionOwnerProbe = { outcome: 'indeterminate', reason: 'no answer' }
     openHost({ probeOwner: async () => probe, stopOwnerProcess })
-    await host.restoreReadableSessions()
+    await openTestChats(host)
 
     // An unanswered probe cannot authorize takeover of a TUI transport surviving restart.
     const fence = store.getRecord(SESSION)?.lease.runtimeFence ?? null

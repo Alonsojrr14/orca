@@ -1,3 +1,6 @@
+import { seedSavedStructuredSessionTabs } from './structured-agent-session-saved-status'
+import type { AgentSessionConversationView } from '../../../shared/agent-session-conversation-view'
+import type { StructuredAgentSessionHostDeps } from './structured-agent-session-host-types'
 import type { AgentSessionRecord } from '../../../shared/agent-session-record'
 import type { AgentSessionRecordStore } from '../../runtime/agent-session-record-store'
 import type { StructuredAgentSessionLogger } from './structured-agent-session-logger'
@@ -62,31 +65,40 @@ type TabSessions = ReadonlyMap<
 
 export function createStructuredAgentSessionTabSurface(
   host: Parameters<typeof setStructuredAgentSessionTabVisibility>[0] & {
-    deps: {
+    deps: Pick<StructuredAgentSessionHostDeps, 'recoveryCapsule' | 'now'> & {
       store: Pick<
         AgentSessionRecordStore,
-        'getVisibleSessionTabIndex' | 'getSessionTabId' | 'showSessionTabs' | 'getConversation'
+        | 'getVisibleSessionTabIndex'
+        | 'getSessionTabId'
+        | 'showSessionTabs'
+        | 'getConversation'
+        | 'listConversations'
       >
     }
   },
   sessions: TabSessions,
-  forgetStatus: (sessionId: string) => void
+  forgetStatus: (sessionId: string) => void,
+  publishSavedStatus: (record: AgentSessionConversationView, markerAt?: number) => void
 ) {
-  // Retain restore failures as tabs so their reads can explain why.
+  // Legacy profile tabs remain addressable before their index is seeded.
   const unopened = new Set<string>()
   return {
     listSessionTabs: (): StructuredAgentSessionTab[] => [
       ...listStructuredAgentSessionTabs(sessions),
-      ...[...unopened].flatMap((sessionId) => {
+      ...[
+        ...new Set([...host.deps.store.getVisibleSessionTabIndex().sessionIds, ...unopened])
+      ].flatMap((sessionId) => {
         const record = sessions.has(sessionId) ? null : host.deps.store.getConversation(sessionId)
         return record
           ? [{ sessionId, workspaceId: record.location.workspaceId, agent: record.provider }]
           : []
       })
     ],
-    markUnopened: (sessionId: string): void => {
-      unopened.add(sessionId)
-    },
+    seedSessionTabs: (ids?: readonly string[]): Promise<void> =>
+      seedSavedStructuredSessionTabs(host.deps, ids, (record, markerAt) => {
+        unopened.add(record.sessionId)
+        publishSavedStatus(record, markerAt)
+      }),
     getPersistedVisibleSessionTabIndex: () => host.deps.store.getVisibleSessionTabIndex(),
     getSessionTabId: (sessionId: string): string | null =>
       host.deps.store.getSessionTabId(sessionId),

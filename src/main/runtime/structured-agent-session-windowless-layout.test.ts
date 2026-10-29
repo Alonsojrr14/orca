@@ -239,7 +239,7 @@ describe('a chat tab on a host with no window', () => {
     useChatHost({
       reconcileRestartLeases: async () => undefined,
       getPersistedVisibleSessionTabIndex: () => ({ present: true, sessionIds: ['chat-1'] }),
-      restoreReadableSessions: async () => undefined,
+      seedSessionTabs: async () => undefined,
       listSessionTabs: () => [{ sessionId: 'chat-1', workspaceId: WT, agent: 'codex' }]
     })
 

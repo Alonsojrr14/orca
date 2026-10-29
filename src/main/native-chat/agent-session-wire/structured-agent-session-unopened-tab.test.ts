@@ -85,7 +85,7 @@ it.each([
     const workspaceId = hostTestState().store.getRecord(SESSION)?.location.workspaceId
     const refusal = { code: 'agent_session_journal_unreadable', details: { reason } }
 
-    await host.restoreReadableSessions([SESSION])
+    await host.seedSessionTabs([SESSION])
 
     expect(host.hasSession(SESSION)).toBe(false)
     expect(host.listSessionTabs()).toEqual([

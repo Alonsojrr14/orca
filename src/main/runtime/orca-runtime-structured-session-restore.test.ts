@@ -70,7 +70,7 @@ describe('structured session cold restoration', () => {
     const refresh = vi.fn(async () => new Set<string>())
     const ensureHost = vi.fn(async () => undefined)
     const reconcileRestartLeases = vi.fn(async () => undefined)
-    const restoreReadableSessions = vi.fn(async () => undefined)
+    const seedSessionTabs = vi.fn(async () => undefined)
     const internal = runtime as unknown as {
       hasPersistedStructuredAgentSessionStore(): boolean
       refreshMobileSessionPtyRecords(): Promise<Set<string> | null>
@@ -79,14 +79,14 @@ describe('structured session cold restoration', () => {
     internal.hasPersistedStructuredAgentSessionStore = () => true
     internal.refreshMobileSessionPtyRecords = refresh
     internal.ensureStructuredAgentSessionHost = ensureHost
-    setStructuredAgentSessionHost({ reconcileRestartLeases, restoreReadableSessions } as never)
+    setStructuredAgentSessionHost({ reconcileRestartLeases, seedSessionTabs } as never)
 
     await runtime.prepareStructuredAgentSessionStartupRestoration()
 
     expect(ensureHost).toHaveBeenCalledOnce()
     expect(refresh).toHaveBeenCalledOnce()
     expect(reconcileRestartLeases).toHaveBeenCalledOnce()
-    expect(restoreReadableSessions).not.toHaveBeenCalled()
+    expect(seedSessionTabs).not.toHaveBeenCalled()
   })
 
   it('loads records, inventories PTYs, restores ownership, then projects tabs exactly once', async () => {
@@ -95,7 +95,7 @@ describe('structured session cold restoration', () => {
     const refresh = vi.fn(async () => new Set<string>())
     const ensureHost = vi.fn(async () => undefined)
     const reconcileRestartLeases = vi.fn(async () => undefined)
-    const restoreReadableSessions = vi.fn(async () => undefined)
+    const seedSessionTabs = vi.fn(async () => undefined)
     const internal = runtime as unknown as {
       hasPersistedStructuredAgentSessionStore(): boolean
       getKnownWorkspaceSessionWorktreeIds(): Set<string>
@@ -113,7 +113,7 @@ describe('structured session cold restoration', () => {
     internal.ensureStructuredAgentSessionHost = ensureHost
     setStructuredAgentSessionHost({
       reconcileRestartLeases,
-      restoreReadableSessions,
+      seedSessionTabs,
       listSessionTabs: () => []
     } as never)
 
@@ -129,7 +129,7 @@ describe('structured session cold restoration', () => {
     expect(hydrate).toHaveBeenCalledWith()
     expect(refresh).toHaveBeenCalledOnce()
     expect(reconcileRestartLeases).toHaveBeenCalledOnce()
-    expect(restoreReadableSessions).toHaveBeenCalledOnce()
+    expect(seedSessionTabs).toHaveBeenCalledOnce()
     expect(ensureHost).toHaveBeenCalledOnce()
     expect(ensureHost.mock.invocationCallOrder[0]).toBeLessThan(
       refresh.mock.invocationCallOrder[0] ?? Infinity
@@ -138,16 +138,16 @@ describe('structured session cold restoration', () => {
       reconcileRestartLeases.mock.invocationCallOrder[0] ?? Infinity
     )
     expect(reconcileRestartLeases.mock.invocationCallOrder[0]).toBeLessThan(
-      restoreReadableSessions.mock.invocationCallOrder[0] ?? Infinity
+      seedSessionTabs.mock.invocationCallOrder[0] ?? Infinity
     )
-    expect(restoreReadableSessions.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(seedSessionTabs.mock.invocationCallOrder[0]).toBeLessThan(
       hydrate.mock.invocationCallOrder[0] ?? Infinity
     )
   })
 
   it('prefers the durable visible-session index after a legacy profile drops agent tabs', async () => {
     const runtime = new OrcaRuntimeService()
-    const restoreReadableSessions = vi.fn(async () => undefined)
+    const seedSessionTabs = vi.fn(async () => undefined)
     const internal = runtime as unknown as {
       store: { getWorkspaceSession: () => unknown }
       hasPersistedStructuredAgentSessionStore(): boolean
@@ -177,18 +177,18 @@ describe('structured session cold restoration', () => {
         present: true,
         sessionIds: ['session-survives-rollback']
       }),
-      restoreReadableSessions,
+      seedSessionTabs,
       listSessionTabs: () => []
     } as never)
 
     await runtime.restoreStructuredAgentSessionTabs()
 
-    expect(restoreReadableSessions).toHaveBeenCalledWith(['session-survives-rollback'])
+    expect(seedSessionTabs).toHaveBeenCalledWith(['session-survives-rollback'])
   })
 
   it('treats an empty durable visible-session index as authoritative', async () => {
     const runtime = new OrcaRuntimeService()
-    const restoreReadableSessions = vi.fn(async () => undefined)
+    const seedSessionTabs = vi.fn(async () => undefined)
     const internal = runtime as unknown as {
       store: { getWorkspaceSession: () => unknown }
       hasPersistedStructuredAgentSessionStore(): boolean
@@ -231,13 +231,13 @@ describe('structured session cold restoration', () => {
     setStructuredAgentSessionHost({
       reconcileRestartLeases: async () => undefined,
       getPersistedVisibleSessionTabIndex: () => ({ present: true, sessionIds: [] }),
-      restoreReadableSessions,
+      seedSessionTabs,
       listSessionTabs: () => []
     } as never)
 
     await runtime.restoreStructuredAgentSessionTabs()
 
-    expect(restoreReadableSessions).toHaveBeenCalledWith([])
+    expect(seedSessionTabs).toHaveBeenCalledWith([])
   })
 
   it('normalizes a restored tab id and removes it when closed', async () => {
@@ -263,7 +263,7 @@ describe('structured session cold restoration', () => {
     internal.ensureStructuredAgentSessionHost = async () => undefined
     setStructuredAgentSessionHost({
       reconcileRestartLeases: async () => undefined,
-      restoreReadableSessions: async () => undefined,
+      seedSessionTabs: async () => undefined,
       close: closeStructuredSession,
       setSessionTabVisibility,
       listSessionTabs: () => [
@@ -377,7 +377,7 @@ describe('structured session cold restoration', () => {
     internal.ensureStructuredAgentSessionHost = async () => undefined
     setStructuredAgentSessionHost({
       reconcileRestartLeases: async () => undefined,
-      restoreReadableSessions: async () => undefined,
+      seedSessionTabs: async () => undefined,
       listSessionTabs: () => [
         {
           sessionId: 'agent-session:agent-session:restored-claude',
