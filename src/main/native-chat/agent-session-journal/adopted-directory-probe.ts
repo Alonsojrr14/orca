@@ -22,6 +22,7 @@ function comparison(raw) {
   return windows ? path.toLowerCase() : path;
 }
 async function main() {
+  process.stdin.setEncoding('utf8');
   let input = '';
   for await (const chunk of process.stdin) input += chunk;
   const request = JSON.parse(input);
