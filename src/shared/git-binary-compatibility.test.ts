@@ -45,11 +45,14 @@ import { registerGitRepositoryRegistrationBinaryCompatibilityCase } from './git-
 import { registerGitLocalBaseBranchBinaryCompatibilityCase } from './git-local-base-branch-binary-compatibility.test-cases'
 import { registerGitResolutionBinaryCompatibilityCases } from './git-resolution-binary-compatibility.test-cases'
 import { registerGitWorktreeBinaryCompatibilityCases } from './git-worktree-binary-compatibility.test-cases'
+import { registerPluginGitDownloadBinaryCompatibilityCase } from './plugin-git-download-binary-compatibility.test-cases'
 
 const image = process.env.ORCA_GIT_COMPAT_IMAGE
 const binary = process.env.ORCA_GIT_COMPAT_BINARY
 const expectedVersion = process.env.ORCA_GIT_COMPAT_VERSION
 const describeBinaryCompatibility = image || binary ? describe : describe.skip
+const PAIRS_REFS_TEST =
+  'pairs published, tracked and default refs with configured repositories, on the selected Git binary'
 
 type GitResult = { stdout: string; stderr: string }
 
@@ -112,7 +115,8 @@ describeBinaryCompatibility('real Git binary compatibility', () => {
     }
   })
 
-  it('pairs published, tracked and default refs with configured repositories, on the selected Git binary', async () => {
+  // Each Git call is a docker exec: image runs take 22-25 s of a 30 s default, so loaded runners tripped it.
+  it(PAIRS_REFS_TEST, { timeout: image ? 90_000 : undefined }, async () => {
     const root = join(repoPath, 'copy-url')
     await mkdir(root)
     const cwd = image ? '/repo/copy-url' : root
@@ -813,6 +817,7 @@ describeBinaryCompatibility('real Git binary compatibility', () => {
   })
 
   registerGitLocalBaseBranchBinaryCompatibilityCase(runGit, () => repoPath, Boolean(image))
+  registerPluginGitDownloadBinaryCompatibilityCase(runGit, () => repoPath)
   registerGitResolutionBinaryCompatibilityCases(runGit, (name) =>
     image ? `/repo/${name}.git` : join(repoPath, `${name}.git`)
   )

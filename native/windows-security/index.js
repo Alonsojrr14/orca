@@ -22,5 +22,6 @@ module.exports = {
     getAddon().writeGenericCredential(target, user, data),
   grantAccess: (path, sid, mask, options) => getAddon().grantAccess(path, sid, mask, options),
   grantAccessAsync: (path, sid, mask, options) =>
-    getAddon().grantAccessAsync(path, sid, mask, options)
+    getAddon().grantAccessAsync(path, sid, mask, options),
+  clearStdHandleInheritance: () => getAddon().clearStdHandleInheritance()
 }

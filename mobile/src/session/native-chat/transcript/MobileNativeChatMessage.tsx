@@ -12,7 +12,7 @@ import {
 import {
   isRenderableSubagentGroup,
   withoutSubagentGroupTwins
-} from '../../../../../src/shared/native-chat-subagent-summary'
+} from '../../../../../src/shared/native-chat/transcript/native-chat-subagent-summary'
 import type {
   NativeChatBlock,
   NativeChatMessage,
@@ -27,7 +27,7 @@ import {
 } from './MobileNativeChatReasoningRow'
 import { mobileNativeChatRowId } from '../../mobile-native-chat-reading-place'
 import { nativeChatWorkRunEntries } from '../../../../../src/shared/native-chat/native-chat-work-run'
-import { nativeChatReasoningDisclosureKey } from '../../../../../src/shared/native-chat-reasoning-row'
+import { nativeChatReasoningDisclosureKey } from '../../../../../src/shared/native-chat/transcript/native-chat-reasoning-row'
 import { MobileNativeChatTurnStatus } from './MobileNativeChatTurnStatus'
 import { MobileNativeChatNoticeRow } from './MobileNativeChatNoticeRow'
 import { MobileNativeChatRowOverlaysContext } from './mobile-native-chat-row-overlays'
@@ -48,6 +48,7 @@ import { agentMessageAttribution } from '../../mobile-agent-message-attribution'
 import { MobileNativeChatVisualContext } from '../visual/mobile-native-chat-visual-context'
 import { useMobileNativeChatFullMessage } from '../../MobileNativeChatFullContent'
 import { useMobileColorScheme } from '../../../theme/use-mobile-color-scheme'
+import { useMobileTranslation } from '../../../i18n/use-mobile-translation'
 import { MobileNativeChatPacedProse } from './MobileNativeChatPacedProse'
 import { Prose } from './MobileNativeChatProse'
 
@@ -120,6 +121,7 @@ function MobileNativeChatMessageImpl({
   onToggleUserMessage?: (messageId: string) => void
 }): React.JSX.Element {
   useMobileColorScheme()
+  const t = useMobileTranslation()
   const { shown: message, showFull, recovery } = useMobileNativeChatFullMessage(rowMessage)
   const attribution = agentMessageAttribution('Message from', message.from)
   const isUser = message.role === 'user' && attribution === null
@@ -338,7 +340,7 @@ function MobileNativeChatMessageImpl({
               <MobileSourceCopyButton
                 key={message.id}
                 text={copyText}
-                accessibilityLabel="Copy message"
+                accessibilityLabel={t('chat.message.copyMessage', 'Copy message')}
               />
             ) : null}
             <MobileNativeChatMessageTime timestamp={message.timestamp} fontScale={fontScale} />

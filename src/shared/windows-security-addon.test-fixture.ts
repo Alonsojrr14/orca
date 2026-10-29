@@ -124,6 +124,7 @@ export function createFakeWindowsSecurity(): FakeWindowsSecurity {
         dacl: daclFromSddl(fake.dacls.get(plainPath(addonPath)) ?? INHERITED_SDDL)
       }
     },
+    clearStdHandleInheritance: () => [],
     getDaclAces: (addonPath) => {
       const path = record('get', addonPath)
       return daclFromSddl(fake.dacls.get(path) ?? INHERITED_SDDL)
