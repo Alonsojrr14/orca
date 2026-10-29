@@ -389,7 +389,7 @@ describe('structured agent session tab retirement', () => {
   })
 })
 
-it('retains one logical owner across generations and retires ordinary close/purge only on the target host', async () => {
+it('releases ordinary close/purge owners while retaining the same-session other-host scope', async () => {
   const remote = { kind: 'environment', environmentId: 'selection-generations' } as const
   const local = { kind: 'local' } as const
   const sessionId = 'selection-lifetime'
@@ -473,7 +473,7 @@ it('retains one logical owner across generations and retires ordinary close/purg
     console.info(
       'selection-registry-lifetime',
       JSON.stringify({
-        generations: 10,
+        ownerScopes: 2,
         retainedPerChat: 1,
         retainedAfterScopedClose: 1,
         retainedAfterScopedPurge: 1

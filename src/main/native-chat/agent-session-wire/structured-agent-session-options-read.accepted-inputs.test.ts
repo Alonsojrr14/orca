@@ -135,15 +135,12 @@ it('uses Off for unpicked Claude Fast at rest and over a native On report, prese
     openConversation: async () => session,
     conversation: async () => session
   } as unknown as StructuredAgentSessionMutationContext
-  expect(
-    (await readStructuredAgentSessionOptions(context, SESSION, { readsWithoutModel: true })).current
-      .fastMode
-  ).toBe(false)
+  const starting = await readStructuredAgentSessionOptions(context, SESSION, {
+    readsWithoutModel: true
+  })
+  expect(starting.current.fastMode).toBe(false)
   expect(live).not.toHaveBeenCalled()
-  expect(
-    (await readStructuredAgentSessionOptions(context, SESSION, { readsWithoutModel: true })).current
-      .acceptedInputSources
-  ).toEqual({ fastMode: 'policy' })
+  expect(starting.current.acceptedInputSources).toEqual({ fastMode: 'policy' })
   session.child.phase = 'ready'
   expect(
     (await readStructuredAgentSessionOptions(context, SESSION, { readsWithoutModel: true })).current
@@ -151,14 +148,11 @@ it('uses Off for unpicked Claude Fast at rest and over a native On report, prese
   ).toBe(false)
   for (const fastMode of ['true', 'false']) {
     record.options = { fastMode }
-    expect(
-      (await readStructuredAgentSessionOptions(context, SESSION, { readsWithoutModel: true }))
-        .current.acceptedInputSources
-    ).toEqual({ fastMode: 'saved' })
-    expect(
-      (await readStructuredAgentSessionOptions(context, SESSION, { readsWithoutModel: true }))
-        .current.fastMode
-    ).toBe(fastMode === 'true')
+    const answer = await readStructuredAgentSessionOptions(context, SESSION, {
+      readsWithoutModel: true
+    })
+    expect(answer.current.acceptedInputSources).toEqual({ fastMode: 'saved' })
+    expect(answer.current.fastMode).toBe(fastMode === 'true')
   }
 })
 
@@ -217,8 +211,9 @@ it.each([false, true])(
         )
       }
     }
-    expect((await capture()).answer.current.acceptedInputSources).toEqual({})
-    expect((await capture()).selection).toEqual({})
+    const initial = await capture()
+    expect(initial.answer.current.acceptedInputSources).toEqual({})
+    expect(initial.selection).toEqual({})
     for (const model of ['opus[1m]', 'retired-unlisted']) {
       record.options = { model, effort: 'high', serviceTier: 'flex' }
       const captured = await capture()

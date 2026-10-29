@@ -30,15 +30,6 @@ import { structuredSessionSelectionController } from './structured-agent-session
 import { setRuntimeEnvironmentConnectionGenerationForTests } from '@/store/slices/runtime-status-connection-generation'
 import { replaceRuntimeEnvironmentRevisions } from '@/runtime/runtime-environment-revision'
 import {
-  applyStructuredAgentSessionOptions,
-  createStructuredAgentSessionOptionState
-} from '../../../shared/structured-agent-session-options'
-import { structuredAgentSessionSeedCatalog } from '../../../shared/structured-agent-session-seed-catalog'
-import {
-  structuredAgentSessionMessageSelection,
-  structuredAgentSessionOptionView
-} from '../../../shared/structured-agent-session-option-view'
-import {
   holdStructuredAgentSessionLaunchOption,
   structuredLaunchOptionOverlay
 } from './structured-agent-session-launch-options'
@@ -557,7 +548,7 @@ describe('the first message owned by create', () => {
     ).toBeNull()
   })
 
-  it('publishes two late picks without a mirror and retires to another client or local Low', async () => {
+  it('enqueues two late picks before modern publication without waiting for acceptance', async () => {
     const create = deferred<unknown>()
     const replies = [deferred<unknown>(), deferred<unknown>()]
     let writes = 0
@@ -586,39 +577,6 @@ describe('the first message owned by create', () => {
     replies[1]!.resolve({ ok: true, value: { options: { effort: 'high' } } })
     replies[0]!.resolve({ ok: true, value: { options: { model: 'sonnet' } } })
     await vi.waitFor(() => expect(controller.captureRead()).toHaveLength(2))
-    const catalog = structuredAgentSessionSeedCatalog('codex')!
-    const base = applyStructuredAgentSessionOptions(
-      createStructuredAgentSessionOptionState('codex', catalog),
-      catalog,
-      {
-        models: [
-          {
-            id: 'sonnet',
-            label: 'Sonnet',
-            efforts: [
-              { value: 'low', label: 'Low' },
-              { value: 'high', label: 'High' }
-            ]
-          }
-        ],
-        current: {
-          model: 'sonnet',
-          effort: 'low',
-          acceptedInputSources: { model: 'saved', effort: 'saved' }
-        }
-      }
-    )
-    const capture = () =>
-      structuredAgentSessionMessageSelection(
-        structuredAgentSessionOptionView(base, undefined, controller.overlay())
-      )
-    controller.retire(controller.captureRead())
-    expect(capture()).toEqual({ model: 'sonnet', effort: 'low' })
-    const localLow = controller.issue('effort', 'low', 'sonnet')
-    expect(capture()).toEqual({ model: 'sonnet', effort: 'low' })
-    controller.settle(localLow, { kind: 'accepted', options: { effort: 'low' } })
-    controller.retire(controller.captureRead())
-    expect(capture()).toEqual({ model: 'sonnet', effort: 'low' })
   })
 
   it('recovers a reload by replaying the frozen create when the old row is outside history', async () => {

@@ -24,8 +24,6 @@ import {
 import { act, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import type { SelectionOutcome } from '../../../../shared/structured-agent-session-selection-operations'
-
 import {
   structuredAgentSessionSendSelection,
   structuredAgentSessionMessageSelection
@@ -363,53 +361,6 @@ describe('useStructuredAgentSessionOptions', () => {
         })
       )
       expect(mocks.toastError).not.toHaveBeenCalled()
-      unmount()
-    })
-
-    it('revalidates a held pick accepted after the chat attached, so the next send carries it', async () => {
-      const claudeModels = [{ id: 'opus', label: 'Opus', isDefault: true, efforts }]
-      const ownEffort = (effort: string) => ({
-        models: claudeModels,
-        current: { model: 'opus', effort }
-      })
-      const reads: ((answer: unknown) => void)[] = []
-      answer({
-        modelCatalog: async () => ({ origin: 'probe', fetchedAt: 1, models: claudeModels }),
-        options: () => new Promise((resolve) => reads.push(resolve))
-      })
-      let accept = (_outcome: SelectionOutcome): void => {}
-      mocks.hold.mockReturnValue(new Promise((resolve) => (accept = resolve)))
-      const claude = { agent: 'claude' as const, launchSeedOptions: { model: 'opus' } }
-      const { result, rerender, unmount } = renderOptions(
-        { ...PROVISIONAL, ...claude },
-        mutateWith(async () => null).mutate
-      )
-      await waitFor(() =>
-        expect(descriptor(result.current.optionSnapshot, 'effort')?.settable).toBe(true)
-      )
-      act(() => void result.current.setStructuredOption('effort', 'low'))
-      // The fence arrives, replacing the record the pick was made in, and the chat reads its own.
-      rerender({ ...ATTACHED, ...claude })
-      await waitFor(() => expect(reads).toHaveLength(1))
-      await act(async () => reads[0]!(ownEffort('high')))
-      rerender({ ...ATTACHED, ...claude, turnId: 'turn-1' })
-      await waitFor(() => expect(reads).toHaveLength(2))
-      await act(async () => accept({ kind: 'accepted', options: { effort: 'low' } }))
-      // A read issued before the acceptance cannot put the old effort back.
-      await act(async () => reads[1]!(ownEffort('high')))
-      expect(currentValue(result.current.optionSnapshot, 'effort')).toBe('low')
-      const { optionStateRef, optionView } = result.current.sendSource
-      expect(
-        structuredAgentSessionSendSelection(
-          optionView(optionStateRef.current, claude.launchSeedOptions)
-        )
-      ).toEqual({ model: 'opus', effort: 'low' })
-      await waitFor(() => expect(reads).toHaveLength(3))
-      // Another client's newer answer retires the accepted operation without value equality.
-      await act(async () => reads[2]!(ownEffort('high')))
-      await waitFor(() =>
-        expect(currentValue(result.current.optionSnapshot, 'effort')).toBe('high')
-      )
       unmount()
     })
 

@@ -416,6 +416,8 @@ describe('picks made while a chat launches', () => {
       }
       const sessionId = 'perf-held-0'
       const state = getStructuredLaunchStateBySessionId(sessionId)!
+      const selection = state.selection
+      const seed = selection.seed
       const changed = vi.fn()
       const global = vi.fn()
       const unsubscribe = subscribeStructuredAgentLaunchStatus(global)
@@ -431,6 +433,9 @@ describe('picks made while a chat launches', () => {
       setOptionReplies.at(-1)!.resolve({ ok: true, value: { key: 'model', value: 'gpt-picked' } })
       await expect(pick).resolves.toEqual({ kind: 'accepted', options: { model: 'gpt-picked' } })
       await settle()
+      expect(state.selection).toBe(selection)
+      expect(state.selection.seed).toBe(seed)
+      expect(seed).toEqual({ model: 'gpt-seeded' })
       expect(global).not.toHaveBeenCalled()
       expect(storage).not.toHaveBeenCalled()
       expect(changed).toHaveBeenCalledTimes(3)
@@ -454,24 +459,5 @@ describe('picks made while a chat launches', () => {
       resetStructuredAgentLaunchRegistryForTests()
       resetStructuredAgentLaunchPersistenceForTests()
     }
-  })
-
-  it('keeps the seed immutable when a pick settles, awaiting a queried base', async () => {
-    mocks.launch.mockResolvedValue({ sessionId: SESSION_ID, fence: 1 })
-    startStructuredAgentLaunch(WORKTREE_ID, 'codex', { requestId: 'request-7' })
-    holdStructuredAgentSessionLaunchOption(SESSION_ID, 'effort', 'high')
-    await settle()
-    const seen: unknown[] = []
-    subscribeStructuredAgentLaunchStatus(() =>
-      seen.push(getStructuredAgentSessionLaunchSelection(SESSION_ID))
-    )
-    setOptionReplies[0]!.resolve({
-      ok: true,
-      value: { key: 'effort', value: 'high', options: { model: 'gpt-seeded', effort: 'high' } }
-    })
-    await settle()
-
-    expect(seen[0]).toBeNull()
-    expect(lifecycle()).toBeNull()
   })
 })
