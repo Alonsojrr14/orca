@@ -1920,22 +1920,30 @@
         "5c1c973855": "移除審查人",
         "commentTooLarge": "評論過長，無法安全提交。",
         "timeline": {
-          "completed": "已完成",
-          "notPlanned": "未計劃",
           "someone": "某人",
-          "assigned": "已指派",
-          "unassigned": "已取消指派",
-          "mentioned": "提到了這個",
-          "in": "在",
-          "closed": "關閉了這個",
-          "reopened": "重新開啟了這個",
-          "moved": "移動了這個",
-          "from": "從",
-          "to": "到",
           "activity": "活動",
           "noActivity": "暫無活動。",
           "pullRequestReference": "PR #{{number}}",
-          "issueReference": "議題 #{{number}}"
+          "issueReference": "議題 #{{number}}",
+          "movedFromToInProject": "<actor/> 在 <project/> 中將此項目從 <from/> 移至 <to/>",
+          "movedFromTo": "<actor/> 將此項目從 <from/> 移至 <to/>",
+          "movedToInProject": "<actor/> 在 <project/> 中將此項目移至 <to/>",
+          "movedTo": "<actor/> 將此項目移至 <to/>",
+          "movedFromInProject": "<actor/> 在 <project/> 中將此項目從 <from/> 移出",
+          "movedFrom": "<actor/> 將此項目從 <from/> 移出",
+          "movedInProject": "<actor/> 在 <project/> 中移動了此項目",
+          "movedThis": "<actor/> 移動了此項目",
+          "closedCompletedIn": "<actor/> 在 <target/> 中將此項目以已完成狀態關閉",
+          "closedCompleted": "<actor/> 將此項目以已完成狀態關閉",
+          "closedNotPlannedIn": "<actor/> 在 <target/> 中以「不予處理」為由關閉此項目",
+          "closedNotPlanned": "<actor/> 以「不予處理」為由關閉此項目",
+          "closedIn": "<actor/> 在 <target/> 中關閉了此項目",
+          "closedThis": "<actor/> 關閉了此項目",
+          "assignedUser": "<actor/> 指派了 <assignee/>",
+          "unassignedUser": "<actor/> 取消了對 <assignee/> 的指派",
+          "mentionedIn": "<actor/> 在 <target/> 中提到了此項目",
+          "mentionedThis": "<actor/> 提到了此項目",
+          "reopenedThis": "<actor/> 重新開啟了此項目"
         },
         "checkActionRequiredHint": "需要在 GitHub 上手動操作（例如核准工作流程執行），才能進行合併。",
         "e15a8b77ef": "此檢查沒有可用的行內詳細資訊。",
@@ -5564,8 +5572,6 @@
           "b589b77997": "導覽到目錄並按一下「選擇」以選擇它。"
         },
         "DeleteWorktreeDialog": {
-          "ff2a74ac0e": "和",
-          "91492c9ad6": "移除",
           "4f6750ca7b": "刪除工作區失敗",
           "42e610d6cf": "強制刪除失敗",
           "5cc1a6701c": "開啟設定",
@@ -5574,7 +5580,15 @@
           "fc23c4cbdf": "刪除工作區",
           "86f0ae1257": "刪除工作區",
           "removeFolderProjectInstead": "請移除資料夾專案，而非刪除此工作區。",
-          "gitBlocksMainWorktree": "Git 不允許移除主工作樹。"
+          "gitBlocksMainWorktree": "Git 不允許移除主工作樹。",
+          "removeBatchFolder_other": "從 Orca 移除 <target>{{count}} 個工作區</target>。磁碟上的專案資料夾不會被刪除。",
+          "removeBatchMixed_other": "從 Orca 移除 <target>{{count}} 個工作區</target>。Git 工作樹也會從 git 和磁碟中移除；資料夾工作區只會移除 Orca 中的工作區項目。",
+          "removeBatchGit_other": "從 git 移除 <target>{{count}} 個工作區</target>，並刪除其工作區資料夾。",
+          "removeSingleFolder": "從 Orca 移除 <target/>。磁碟上的專案資料夾不會被刪除。",
+          "removeSingleGit": "從 git 移除 <target/>，並刪除其工作區資料夾。",
+          "removeWithChildrenFolder_other": "從 Orca 移除 <target/> 和 <descendants>{{count}} 個子工作區</descendants>。磁碟上的專案資料夾不會被刪除。",
+          "removeWithChildrenMixed_other": "從 Orca 移除 <target/> 和 <descendants>{{count}} 個子工作區</descendants>。Git 工作樹也會從 git 和磁碟中移除；資料夾工作區只會移除 Orca 中的工作區項目。",
+          "removeWithChildrenGit_other": "從 git 移除 <target/> 和 <descendants>{{count}} 個子工作區</descendants>，並刪除其工作區資料夾。"
         },
         "DeleteWorktreeDirtyChangeHint": {
           "showLoadedPaths": "顯示已載入的路徑",
@@ -5629,17 +5643,32 @@
         "OrcaYamlTrustDialog": {
           "f3e2b868fb": "執行鉤子",
           "43b7bec4cd": "不執行",
-          "c494b3ccb1": "在",
-          "79afc6772b": "orca.yaml",
-          "531689199b": "永遠信任",
-          "bf800b7e04": "。執行前，請先確認您信任",
-          "831f2cd9f0": "在你的機器上執行",
-          "aa3ffb33fb": "這個存放庫的",
-          "c55beddbf8": "自您上次批准以來已發生變化。執行前請重新審查",
-          "95bf974a1a": "{{value0}} 指令碼",
-          "9e52effffd": "新的 {{value0}} 指令碼",
-          "e4a51dc4b3": "從 {{value1}} 執行 {{value0}}？",
-          "02b0ede5ad": "{{value0}} 的 {{value1}} 已變更 — 執行新版本嗎？"
+          "setupChangedTitle": "{{repo}} 的設定指令碼已變更 — 執行新版本？",
+          "archiveChangedTitle": "{{repo}} 的封存指令碼已變更 — 執行新版本？",
+          "issueCommandChangedTitle": "{{repo}} 的議題命令已變更 — 執行新版本？",
+          "vmRecipeChangedTitle": "{{repo}} 的 VM 配方已變更 — 執行新版本？",
+          "setupRunTitle": "執行 {{repo}} 的設定指令碼？",
+          "archiveRunTitle": "執行 {{repo}} 的封存指令碼？",
+          "issueCommandRunTitle": "執行 {{repo}} 的議題命令？",
+          "vmRecipeRunTitle": "執行 {{repo}} 的 VM 配方？",
+          "setupChangedBody": "<code>orca.yaml</code> 自您上次核准後已變更。它會在建立此工作區時執行，請在執行前重新審查。",
+          "archiveChangedBody": "<code>orca.yaml</code> 自您上次核准後已變更。它會在移除此工作區時執行，請在執行前重新審查。",
+          "issueCommandChangedBody": "<code>orca.yaml</code> 自您上次核准後已變更。它會在啟動已連結議題的此工作區時執行，請在執行前重新審查。",
+          "vmRecipeChangedBody": "<code>orca.yaml</code> 自您上次核准後已變更。它會在佈建 VM 前執行，請在執行前重新審查。",
+          "setupRunBody": "此存放庫的 <code>orca.yaml</code> 會在建立此工作區時於您的電腦上執行。僅在信任 <repo/> 時執行。",
+          "archiveRunBody": "此存放庫的 <code>orca.yaml</code> 會在移除此工作區時於您的電腦上執行。僅在信任 <repo/> 時執行。",
+          "issueCommandRunBody": "此存放庫的 <code>orca.yaml</code> 會在啟動已連結議題的此工作區時於您的電腦上執行。僅在信任 <repo/> 時執行。",
+          "vmRecipeRunBody": "此存放庫的 <code>orca.yaml</code> 會在佈建 VM 前於您的電腦上執行。僅在信任 <repo/> 時執行。",
+          "newSetupScript": "新的設定指令碼",
+          "setupScript": "設定指令碼",
+          "newArchiveScript": "新的封存指令碼",
+          "archiveScript": "封存指令碼",
+          "newIssueCommand": "新的議題命令",
+          "issueCommand": "議題命令",
+          "newVmRecipe": "新的 VM 配方",
+          "vmRecipe": "VM 配方",
+          "thisRepository": "此存放庫",
+          "alwaysTrustRepo": "一律信任 <repo/> 中的 <code>orca.yaml</code>"
         },
         "PendingWorktreeRow": {
           "af21e953d1": "取消工作樹建立",
@@ -12757,7 +12786,8 @@
             "31b4c3195d": "更多檔案管理員操作",
             "d95e30fe28": "重新整理檔案管理員",
             "6026b16950": "全部摺疊",
-            "c1f3f3ec70": "搜尋檔案內容"
+            "c1f3f3ec70": "搜尋檔案內容",
+            "openInApp": "在 {{app}} 中開啟"
           },
           "FileExplorerTreeStatus": {
             "ce03835e1f": "此工作區中沒有檔案",
@@ -12775,7 +12805,6 @@
             "6d1e0a7c3b": "無法載入提交檔案"
           },
           "HostedReviewActions": {
-            "4d5fb5a284": "關閉",
             "9845a71e17": "更多操作",
             "2bfaf4379c": "更多 {{value0}} 操作",
             "377269db6f": "{{value0}} 重新開啟",
@@ -12796,8 +12825,15 @@
             "markingReady": "正在標記為可供審查...",
             "markReady": "標記為可供審查",
             "draftMoreActions": "更多 {{value0}} 操作",
-            "closeDraft": "關閉",
-            "readyToast": "{{value0}} 已標記為可供審查"
+            "readyToast": "{{value0}} 已標記為可供審查",
+            "closeReview": "關閉 {{review}}",
+            "closeReviewConfirmTitle": "關閉 {{review}}？",
+            "reopenReviewConfirmTitle": "重新開啟 {{review}}？",
+            "closeConfirm": "關閉",
+            "reopenConfirm": "重新開啟",
+            "closeReviewFailed": "無法關閉 {{review}}",
+            "reopenReviewFailed": "無法重新開啟 {{review}}",
+            "markReadyFailed": "無法將 {{review}} 標記為可供審查"
           },
           "PortsPanel": {
             "3ea4a02a8f": "取消",
@@ -14449,6 +14485,7 @@
       },
       "mobile": {
         "MobileHero": {
+          "downloadApp": "下載應用程式",
           "a8fb43cf1c": "繼續",
           "3f90dbd274": "完成",
           "b622eba64d": "返回",
@@ -14537,10 +14574,7 @@
               },
               "stable": {
                 "tagline": "公開發布版，每週更新。"
-              },
-              "downloadApk": "下載 APK",
-              "openTestFlight": "開啟 TestFlight",
-              "openAppStore": "開啟 App Store"
+              }
             }
           }
         },
@@ -18667,39 +18701,34 @@
         "task": "背景任務",
         "outputFile": "輸出：{{value0}}",
         "detailsUnavailable": "無法取得此工作階段的任務詳細資訊。",
-        "countAgentsOne": "1 個代理程式",
-        "countAgentsMany": "{{value0}} 個代理程式",
-        "countShellOne": "1 個 Shell",
-        "countShellMany": "{{value0}} 個 Shell",
         "countShellCommandOne": "1 個 Shell 命令",
-        "countMonitorsOne": "1 個監控項目",
-        "countMonitorsMany": "{{value0}} 個監控項目",
-        "countWorkflowsOne": "1 個工作流程",
-        "countWorkflowsMany": "{{value0}} 個工作流程",
-        "countTasksOne": "1 個任務",
-        "countTasksMany": "{{value0}} 個任務",
-        "headerTotal": "{{value0}} 個背景任務",
         "stateWorking": "工作中",
-        "stateWorkingCount": "{{value0}} 處理中",
         "stateMonitoring": "監控中",
-        "stateMonitoringCount": "{{value0}} 監控",
         "stateWaiting": "等待",
-        "stateWaitingCount": "{{value0}} 等待",
         "stateBlocked": "已受阻",
-        "stateBlockedCount": "{{value0}} 個受阻",
         "stateDone": "完成",
-        "stateDoneCount": "{{value0}} 完畢",
         "stateIdle": "已停止",
-        "stateIdleCount": "{{value0}} 停止了",
         "stateUnverifiable": "狀態不可用",
-        "stateUnverifiableCount": "{{value0}} 狀態不可用",
         "reasonWaiting": "需要核准",
         "reasonBlocked": "失敗",
         "groupAgents": "代理程式",
         "groupShell": "shell",
         "groupMonitors": "監控項目",
         "groupWorkflows": "工作流程",
-        "groupTasks": "任務"
+        "groupTasks": "任務",
+        "countAgents_other": "{{count}} 個代理程式",
+        "countShell_other": "{{count}} 個 Shell",
+        "countMonitors_other": "{{count}} 個監控項目",
+        "countWorkflows_other": "{{count}} 個工作流程",
+        "countTasks_other": "{{count}} 個任務",
+        "headerTotal_other": "{{count}} 個背景任務",
+        "stateWorkingCount_other": "處理中：{{value0}}",
+        "stateMonitoringCount_other": "監控中：{{value0}}",
+        "stateWaitingCount_other": "等待中：{{value0}}",
+        "stateBlockedCount_other": "受阻：{{value0}}",
+        "stateDoneCount_other": "已完成：{{value0}}",
+        "stateIdleCount_other": "已停止：{{value0}}",
+        "stateUnverifiableCount_other": "狀態不可用：{{value0}}"
       },
       "jumpToLatest": "跳到最新訊息",
       "newRowsAnnouncement": "你離開期間有新訊息",
@@ -18797,18 +18826,16 @@
           "failed": "失敗",
           "stopped": "已停止",
           "unverifiable": "狀態不可用",
-          "workingCount": "{{value0}} 個執行中",
-          "idleCount": "{{value0}} 個閒置",
-          "failedCount": "{{value0}} 失敗",
-          "stoppedCount": "{{value0}} 個已停止",
-          "unverifiableCount": "{{value0}} 狀態不可用"
+          "workingCount_other": "{{count}} 個執行中",
+          "idleCount_other": "{{count}} 個閒置",
+          "failedCount_other": "{{count}} 個失敗",
+          "stoppedCount_other": "{{count}} 個已停止",
+          "unverifiableCount_other": "{{count}} 個狀態不可用"
         },
-        "startedOne": "已啟動 1 個子代理程式",
-        "startedN": "已啟動 {{value0}} 個子代理程式",
-        "ranOne": "已執行 1 個子代理程式",
-        "ranN": "已執行 {{value0}} 個子代理程式",
         "tokens": "{{value0}} token",
-        "unnamed": "子代理程式"
+        "unnamed": "子代理程式",
+        "started_other": "已啟動 {{count}} 個子代理程式",
+        "ran_other": "已執行 {{count}} 個子代理程式"
       },
       "rewind": {
         "unsupported": "此聊天無法返回到更早的訊息。",
@@ -20099,7 +20126,8 @@
       "count_one": "{{count}} 個正在執行的終端機",
       "count_other": "{{count}} 個正在執行的終端機"
     },
-    "restartedInputNotSent": "終端機在您輸入時重新啟動，部分輸入可能未送達。請先檢視新的 shell，再重新輸入。"
+    "restartedInputNotSent": "終端機在您輸入時重新啟動，部分輸入可能未送達。請先檢視新的 shell，再重新輸入。",
+    "typingBeforeStartNotSent": "終端機啟動期間輸入的部分按鍵未送出。"
   },
   "fileExplorer": {
     "root": {

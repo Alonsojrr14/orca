@@ -43,6 +43,11 @@ import {
   ORCAD_STARTUP_TIMING_ENV,
   ORCAD_STARTUP_TIMING_PREFIX
 } from '../orcad/orcad-startup-timing'
+import {
+  medianOrcadStartupTiming,
+  parseOrcadStartupTimingLine,
+  type OrcadStartupTimingReport
+} from '../orcad/orcad-startup-timing-summary'
 import { quotePosixShell } from '../../shared/shell-argument-quoting'
 import { ORCAD_LAUNCHER_FILENAME } from '../../shared/orcad-artifacts'
 import { verifyWslOrcadIdentity } from './wsl-orcad-pairing-identity'
@@ -357,23 +362,20 @@ function outputProbe(): { command: string; token: string } {
 }
 
 /** The newest startup timing line orcad logged; null when none parses. */
-async function readOrcadStartupTiming(): Promise<unknown> {
+async function readOrcadStartupTiming() {
   const line = await guest(
     `grep -hF ${quotePosixShell(ORCAD_STARTUP_TIMING_PREFIX)} "$HOME"/.orca-remote/orcad-*/${ORCAD_LOG_FILENAME} 2>/dev/null | tail -n 1`
   )
-  try {
-    return JSON.parse(
-      line.slice(line.indexOf(ORCAD_STARTUP_TIMING_PREFIX) + ORCAD_STARTUP_TIMING_PREFIX.length)
-    )
-  } catch {
-    return null
-  }
+  return parseOrcadStartupTimingLine(line)
 }
 
 /** (a) WSL host: holder boots the distro, orcad deploys and starts, a terminal spawns and prints. */
-async function restartThroughHost(
-  repoPath: string
-): Promise<Receipt & { phases: WslOrcadEnsurePhases | null }> {
+async function restartThroughHost(repoPath: string): Promise<
+  Receipt & {
+    phases: WslOrcadEnsurePhases | null
+    orcadStartup: OrcadStartupTimingReport | null
+  }
+> {
   await terminatePlain()
   createManager()
   const trace = createWslOrcadEnsureTrace()
@@ -392,6 +394,7 @@ async function restartThroughHost(
     })
     const createdMs = Math.round(performance.now() - started)
     const probe = outputProbe()
+    const sendStarted = performance.now()
     await held.call('terminal.send', {
       terminal: created.terminal.handle,
       text: probe.command,
@@ -409,11 +412,13 @@ async function restartThroughHost(
       100
     )
     const firstOutputMs = Math.round(performance.now() - started)
+    const sendToFirstOutputMs = Math.round(performance.now() - sendStarted)
     const orcadStartup = await readOrcadStartupTiming()
     await held.call('terminal.close', { terminal: created.terminal.handle }).catch(() => {})
     return {
       ensureMs,
       terminalCreatedMs: createdMs - ensureMs,
+      sendToFirstOutputMs,
       firstOutputMs,
       phases: summarizeWslOrcadEnsurePhases(trace.events),
       orcadStartup
@@ -512,6 +517,9 @@ async function distroRestartBaseline(): Promise<void> {
     bridgeExecLowerBound: bridge,
     medianHostFirstOutputMs: median(host, 'firstOutputMs'),
     medianHostEnsureMs: median(host, 'ensureMs'),
+    medianHostTerminalCreatedMs: median(host, 'terminalCreatedMs'),
+    medianHostSendToFirstOutputMs: median(host, 'sendToFirstOutputMs'),
+    medianOrcadStartup: medianOrcadStartupTiming(host.map((run) => run.orcadStartup)),
     medianHostPhases: medianWslOrcadEnsurePhases(host.map((run) => run.phases)),
     medianBridgeExecLowerBoundMs: median(bridge, 'firstOutputMs')
   }

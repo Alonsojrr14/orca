@@ -144,7 +144,7 @@ export function useMobileSessionTerminalRuntime(scope: MobileSessionScreenStateM
   const canCompose = inputGate.canCompose
   const canSend = inputGate.canSend && clientId !== null
   const liveInputEnabled = activeHandle ? liveInputTerminalHandles.has(activeHandle) : false
-  const { focusLiveInput, handleTerminalTap, resetLiveInputFocus } = useTerminalLiveInputFocus({
+  const { handleTerminalTap, resetLiveInputFocus } = useTerminalLiveInputFocus({
     activeHandleRef,
     canSend,
     inputRef: liveInputRef,
@@ -216,7 +216,6 @@ export function useMobileSessionTerminalRuntime(scope: MobileSessionScreenStateM
     canCompose,
     canSend,
     liveInputEnabled,
-    focusLiveInput,
     handleTerminalTap,
     resetLiveInputFocus,
     terminalInventoryRecoveryScope,

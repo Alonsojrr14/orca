@@ -21,7 +21,7 @@ import { MARKDOWN_TONES, scaledMarkdownText, styles } from './mobile-markdown-st
 import { MarkdownText } from './mobile-markdown-text'
 import { codeFenceClosed, plainText } from './mobile-markdown-tree'
 import { MermaidDiagram } from './pr-sidebar/MermaidDiagram'
-import { MobileSourceCopyButton } from './MobileSourceCopyButton'
+import { MobileMarkdownCodeBlock } from './MobileMarkdownCodeBlock'
 import { translate } from '../i18n/mobile-i18n'
 
 /** Prose base size — passed to MermaidDiagram fallback mono text. */
@@ -55,23 +55,12 @@ function renderCode(node: Code, key: number, ctx: MarkdownBlockContext): ReactNo
     )
   }
   return (
-    <View key={key} style={styles.codeBlock}>
-      <View style={styles.codeBody}>
-        {node.lang ? <NativeText style={styles.codeLanguage}>{node.lang}</NativeText> : null}
-        <MarkdownText
-          selectable
-          style={[styles.codeText, scaledMarkdownText(styles.codeText, ctx.textScale)]}
-        >
-          {node.value}
-        </MarkdownText>
-      </View>
-      {node.value ? (
-        <MobileSourceCopyButton
-          text={node.value}
-          accessibilityLabel={translate('components.markdownBlocks.copyCode', 'Copy code')}
-        />
-      ) : null}
-    </View>
+    <MobileMarkdownCodeBlock
+      key={key}
+      code={node.value}
+      language={node.lang ?? undefined}
+      textScale={ctx.textScale}
+    />
   )
 }
 
@@ -85,7 +74,7 @@ function renderList(node: List, key: number, ctx: MarkdownBlockContext, depth: n
             {item.checked == null
               ? node.ordered
                 ? `${(node.start ?? 1) + itemIndex}.`
-                : '-'
+                : '•'
               : item.checked
                 ? '[x]'
                 : '[ ]'}
@@ -103,12 +92,18 @@ function renderTable(node: Table, key: number, ctx: MarkdownBlockContext): React
   const rows = node.children.map((row) => row.children)
   // Rows lay out independently, so a shared width per column is what lines them up.
   const columnWidths = mobileMarkdownTableColumnWidths(
-    rows.map((cells) => cells.map((cell) => plainText(cell)))
+    rows.map((cells) => cells.map((cell) => plainText(cell))),
+    ctx.textScale
   )
   // A table keeps its own dark surface, so its spans keep the default palette.
   const cellCtx = { ...ctx, tone: MARKDOWN_TONES.default }
   return (
-    <ScrollView key={key} horizontal showsHorizontalScrollIndicator={false}>
+    <ScrollView
+      key={key}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.tableScroll}
+    >
       <View style={styles.table}>
         {rows.map((cells, rowIndex) => (
           <View key={rowIndex} style={styles.tableRow}>
@@ -120,7 +115,7 @@ function renderTable(node: Table, key: number, ctx: MarkdownBlockContext): React
                   styles.tableCell,
                   rowIndex === 0 ? styles.tableHeader : null,
                   scaledMarkdownText(styles.tableCell, ctx.textScale),
-                  { width: width * ctx.textScale, textAlign: node.align?.[cellIndex] ?? 'left' }
+                  { width, textAlign: node.align?.[cellIndex] ?? 'left' }
                 ]}
               >
                 {renderInline(cells[cellIndex]?.children ?? [], cellCtx)}

@@ -1269,14 +1269,21 @@
   {
     "filePath": "mobile/src/session/MobileSessionCommandDock.tsx",
     "kind": "jsx-attribute:accessibilityLabel",
-    "text": "Send command",
+    "text": "Live terminal input",
     "dynamic": false,
     "count": 1
   },
   {
     "filePath": "mobile/src/session/MobileSessionCommandDock.tsx",
     "kind": "jsx-attribute:accessibilityLabel",
-    "text": "Show keyboard for live terminal input",
+    "text": "Send command",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "mobile/src/session/MobileSessionCommandDock.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "Live input",
     "dynamic": false,
     "count": 1
   },

@@ -3,6 +3,7 @@ import { getAppEnvironment } from '../../shared/app-environment'
 import { readFetchResponseTextWithinLimit } from '../../shared/fetch-response-body'
 import { readNodeFileSyncWithinLimit } from '../../shared/node-bounded-file-reader'
 import { getVersionChannel, MAIN_RELEASE_REPO } from '../../shared/release-channel'
+import { isWslHostsInternalGateOpen } from '../../shared/wsl-host-internal-gate'
 import {
   parseWslHostsPolicy,
   WSL_HOSTS_POLICY_MAX_BYTES,
@@ -167,8 +168,11 @@ export class WslHostsPolicyLiveUpdater {
   }
 }
 
-/** Fetches only where WSL hosts can matter; the caller checks the local gate and platform. */
+/** Fetches only where the launch environment opened the gate, even while a cached block closes it. */
 export function startWslHostsPolicyLiveUpdates(): void {
+  if (process.platform !== 'win32' || !isWslHostsInternalGateOpen(process.env)) {
+    return
+  }
   const environment = getAppEnvironment()
   const updater = new WslHostsPolicyLiveUpdater({
     userDataPath: environment.getPath('userData'),

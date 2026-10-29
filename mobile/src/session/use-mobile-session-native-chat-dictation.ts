@@ -17,6 +17,7 @@ import {
   isDictationSetupRequiredError
 } from '../dictation/mobile-dictation-setup'
 import { useMobileNativeChatController } from './use-mobile-native-chat-controller'
+import { useMobileDictationLeaveHold } from './mobile-dictation-leave-hold'
 import { useMobileNativeChatReadability } from './use-mobile-native-chat-readability'
 import { useMobileNativeChatInputLease } from './native-chat/use-mobile-native-chat-input-lease'
 import { useMobileNativeChatSendError } from './native-chat/use-mobile-native-chat-send-error'
@@ -183,6 +184,8 @@ export function useMobileSessionNativeChatDictation(
     }
   })
 
+  const dictationLeaveHold = useMobileDictationLeaveHold(dictation)
+
   // Only a host setup read sets this; while false, the host's start refusal decides (older hosts, first tap before the read).
   const dictationNeedsSetupRef = useRef(false)
 
@@ -305,6 +308,7 @@ export function useMobileSessionNativeChatDictation(
     showNativeChat,
     showNativeChatRef,
     dictation,
+    dictationLeaveHold,
     startDictation,
     cancelDictation,
     handleDictationToggle,

@@ -38,7 +38,9 @@ const DRIVES: WindowsDriveMount[] = [
 describe('wslUncDrivePathToWindows', () => {
   it.each([
     [String.raw`\\wsl.localhost\Ubuntu\mnt\c\src\app`, String.raw`C:\src\app`],
-    ['//wsl$/ubuntu/MNT/d/work/', String.raw`D:\work`],
+    ['//wsl$/ubuntu/mnt/D/work/', String.raw`D:\work`],
+    // `/MNT` is an ordinary, case-sensitive Linux folder, as foldWslUncPathCaseInsensitiveParts says.
+    ['//wsl$/ubuntu/MNT/d/work/', null],
     [String.raw`\\wsl.localhost\Ubuntu\mnt\c`, 'C:\\'],
     [String.raw`\\wsl.localhost\Ubuntu\home\me\app`, null],
     [String.raw`\\wsl.localhost\Debian\mnt\c\src\app`, null],
@@ -157,6 +159,43 @@ describe('collectWslDriveUncScope: only real Windows drive folders', () => {
       repoIds: [],
       folderWorkspaceIds: [],
       refused: [{ kind: 'repo', id: 'upper', reason: 'not-windows-drive-mount' }]
+    })
+  })
+})
+
+describe('collectWslDriveUncScope overlaps', () => {
+  it('refuses a project nested with a refused one, whose shared folders would split', () => {
+    const repos = [
+      repo('outer', String.raw`\\wsl.localhost\Ubuntu\mnt\c\src`, {
+        worktreeBasePath: String.raw`\\wsl.localhost\Ubuntu\home\me\trees`
+      }),
+      repo('inner', String.raw`\\wsl.localhost\Ubuntu\mnt\c\src\app`),
+      repo('beside', String.raw`\\wsl.localhost\Ubuntu\mnt\c\srcx`)
+    ]
+    expect(
+      collectWslDriveUncScope({ repos, folderWorkspaces: [], projectGroups: [] }, 'Ubuntu', DRIVES)
+    ).toEqual({
+      repoIds: ['beside'],
+      folderWorkspaceIds: [],
+      refused: [
+        { kind: 'repo', id: 'outer', reason: 'mixed-locations' },
+        { kind: 'repo', id: 'inner', reason: 'overlaps-refused-project' }
+      ]
+    })
+  })
+
+  it('converts a project nested under a refused duplicate, since its original converts too', () => {
+    const repos = [
+      repo('outer', String.raw`\\wsl.localhost\Ubuntu\mnt\c\src`),
+      repo('outer-alias', '//wsl$/Ubuntu/mnt/c/src/'),
+      repo('inner', String.raw`\\wsl.localhost\Ubuntu\mnt\c\src\app`)
+    ]
+    expect(
+      collectWslDriveUncScope({ repos, folderWorkspaces: [], projectGroups: [] }, 'Ubuntu', DRIVES)
+    ).toEqual({
+      repoIds: ['outer', 'inner'],
+      folderWorkspaceIds: [],
+      refused: [{ kind: 'repo', id: 'outer-alias', reason: 'duplicate-windows-project' }]
     })
   })
 })

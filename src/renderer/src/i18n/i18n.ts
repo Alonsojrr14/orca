@@ -28,10 +28,7 @@ import { isPluginUiLanguage, type UiLanguage } from '../../../shared/ui-language
 import type { PluginLanguagePackRegistration } from '../../../shared/plugins/plugin-language-pack-artifact'
 import { replacePluginLanguagePackResources } from '../../../shared/plugins/plugin-language-pack-i18n-resources'
 import { withTimeout } from '../../../shared/promise-timeout-fallback'
-import {
-  resolvePluralFamilyKey,
-  withPluralCategoriesFromOther
-} from '../../../shared/i18n-plural-family'
+import { resolvePluralFamilyKey } from '../../../shared/i18n-plural-family'
 
 export const i18n: I18nInstance = i18next.createInstance()
 
@@ -53,13 +50,30 @@ function localeCatalogUrl(language: string): string | undefined {
   return Object.entries(NON_DEFAULT_LOCALE_URLS).find(([name]) => name === language)?.[1]
 }
 
-async function loadLocaleCatalog(language: string, url: string): Promise<Record<string, unknown>> {
+// Built-in catalogs ship every CLDR plural form (sync:localization-catalog), so they load as-is.
+async function fetchLocaleCatalog(url: string): Promise<Record<string, unknown>> {
   const response = await fetch(url, { cache: 'no-cache' })
   if (!response.ok) {
     throw new Error(`Language catalog request failed: ${response.status}`)
   }
-  const categories = new Intl.PluralRules(language).resolvedOptions().pluralCategories
-  return withPluralCategoriesFromOther(await response.json(), categories)
+  return response.json()
+}
+
+// The provider, onboarding switcher and backend can ask for one locale at once; share the fetch.
+const catalogRequests = new Map<string, Promise<Record<string, unknown>>>()
+
+function loadLocaleCatalog(language: string, url: string): Promise<Record<string, unknown>> {
+  const pending = catalogRequests.get(language)
+  if (pending) {
+    return pending
+  }
+  const request = fetchLocaleCatalog(url).finally(() => {
+    if (catalogRequests.get(language) === request) {
+      catalogRequests.delete(language)
+    }
+  })
+  catalogRequests.set(language, request)
+  return request
 }
 
 const lazyLocaleBackend: BackendModule = {
@@ -151,11 +165,19 @@ export async function loadRendererUiLanguage(language: UiLanguage): Promise<stri
       : resourceLanguage
   const url = localeCatalogUrl(locale)
   if (url && !i18n.hasResourceBundle(locale, 'translation')) {
-    const catalog = await withTimeout(loadLocaleCatalog(locale, url), 5000, null)
+    const request = loadLocaleCatalog(locale, url)
+    const catalog = await withTimeout(request, 5000, null)
     if (catalog === null) {
+      // A retry after a timeout must start a fresh request instead of joining the stalled one.
+      if (catalogRequests.get(locale) === request) {
+        catalogRequests.delete(locale)
+      }
       throw new Error('Language catalog unavailable')
     }
-    i18n.addResourceBundle(locale, 'translation', catalog, true, true)
+    if (!i18n.hasResourceBundle(locale, 'translation')) {
+      // Freshly parsed and never mutated, so skip i18next's defensive deep copy.
+      i18n.addResourceBundle(locale, 'translation', catalog, false, false, { skipCopy: true })
+    }
   }
   return locale
 }

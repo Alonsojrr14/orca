@@ -32,7 +32,8 @@ vi.mock('../managed-server/activation/orcad-activation-transaction-store', () =>
   readOrcadActivationTransaction: mocks.transaction
 }))
 vi.mock('../managed-server/activation/orcad-activation-record-store', () => ({
-  readOrcadActivationRecord: mocks.readRecord
+  readOrcadActivationRecord: mocks.readRecord,
+  orcadActivationPath: (_host: unknown, home: string) => `${home}/.orca-remote/orcad-active.json`
 }))
 vi.mock('../managed-server/install/remote-versioned-install', async (importOriginal) => ({
   ...(await importOriginal<typeof RemoteVersionedInstall>()),
@@ -112,7 +113,8 @@ function launch(kernel = '5.15.167.4-microsoft-standard-WSL2', options = {}) {
       mocks.steps.push('uname')
       return `__ORCA_WSL_KERNEL__ ${kernel}\n__ORCA_WSL_HOME__ /home/u\n\n__ORCA_REMOTE_PLATFORM__ Linux x86_64\n\n__ORCA_WSL_LIBC__\nldd (GNU libc) 2.39\n`
     }
-    return '4242\n'
+    const end = '\n__ORCA_WSL_CONNECT_STATE_END__\n'
+    return command.includes(end.trim()) ? `ABSENT${end}ABSENT${end}ABSENT${end}OPEN\n` : '4242\n'
   })
   return deployAndLaunchWslOrcad('Ubuntu-24.04', {
     holder: holder(),
@@ -192,6 +194,21 @@ describe('deployAndLaunchWslOrcad', () => {
     )
   })
 
+  it('hands its one connect-state read to recovery, adoption and deploy as hints', async () => {
+    const resolve = mocks.resolveContext.getMockImplementation()
+    mocks.resolveContext.mockImplementationOnce(async (target, connection, signal, h, known) => {
+      const context = await resolve?.(target, connection, signal, h, known)
+      const at = { conn: connection, host, remoteHome: '/home/u', userDataDir: '/home/u/.orca' }
+      return { ...context, activationRecord: await known.readActivationRecord(at) }
+    })
+    await launch()
+    const idle = { transactionAbsent: true, fenceOpen: true }
+    expect(mocks.recover).toHaveBeenCalledWith(expect.anything(), expect.objectContaining(idle))
+    expect(mocks.adopt.mock.calls[0][3]).toEqual({ state: 'absent' })
+    const record = emptyOrcadActivationRecord()
+    expect(mocks.deploy.mock.calls[0][0].preRead).toEqual({ record, fenceOpen: true })
+  })
+
   it('applies the SSH census and downgrade admission to the first deploy', async () => {
     await launch()
     const options = mocks.deploy.mock.calls[0][0]
@@ -202,6 +219,7 @@ describe('deployAndLaunchWslOrcad', () => {
       target: 'linux-x64-glibc',
       recordedNodeRuntimeProbe: true
     })
+    expect(options.preRead).toBeUndefined()
     const newer = { ...emptyOrcadActivationRecord(), active: '2.0.0+cd', activeAppVersion: '2.0.0' }
     expect(options.admitRecord(newer, '1.5.0+ab')).toBe(
       "Orca 2.0.0 last ran this host's server, newer than this Orca (1.5.0). Update Orca to start it."

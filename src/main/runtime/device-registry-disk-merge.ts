@@ -1,6 +1,7 @@
+import { statSync } from 'node:fs'
 import { writeDurableSecureJsonFile, writeSecureJsonFile } from '../../shared/secure-file'
 import type { DeviceEntry } from './device-entry'
-import { quarantineCorruptRegistry } from './device-registry-corruption'
+import { isMissingFileError, quarantineCorruptRegistry } from './device-registry-corruption'
 import { readDeviceRegistryFile, type DeviceRegistryFileRead } from './device-registry-file-read'
 
 /**
@@ -37,6 +38,8 @@ export class DeviceRegistryWriter {
   private readonly removedIds = new Set<string>()
   /** This process moved the file aside and no write has landed since: its absence is ours, not a revoke. */
   private quarantinedUntilWritten = false
+  /** Stat identity of the file when this process last read it; null forces the next re-read. */
+  private readStamp: string | null = null
 
   constructor(private readonly registryPath: string) {}
 
@@ -44,6 +47,27 @@ export class DeviceRegistryWriter {
     if (quarantineCorruptRegistry(this.registryPath)) {
       this.quarantinedUntilWritten = true
     }
+  }
+
+  /** Stamped before reading, so a write landing during the read is caught by the next check. */
+  read(): DeviceRegistryFileRead {
+    this.readStamp = fileStamp(this.registryPath)
+    return readDeviceRegistryFile(this.registryPath)
+  }
+
+  /**
+   * `current` merged over the file when another writer changed it since this process last read it,
+   * else null. Costs one stat when unchanged. An unreadable or corrupt file, or our own quarantine's
+   * absence, proves nothing about removals, so it changes nothing.
+   */
+  adoptExternalEdits(current: readonly DeviceEntry[]): DeviceEntry[] | null {
+    if (this.quarantinedUntilWritten || fileStamp(this.registryPath) === this.readStamp) {
+      return null
+    }
+    const disk = this.read()
+    return disk.unreadable || disk.corruptFilePending
+      ? null
+      : mergeDeviceRegistrySave(current, current, disk, this.removedIds)
   }
 
   /** Returns what was written. Security transitions pass `durable`. */
@@ -64,8 +88,20 @@ export class DeviceRegistryWriter {
         ? [...next]
         : mergeDeviceRegistrySave(before, next, disk, this.removedIds)
     const write = options.durable ? writeDurableSecureJsonFile : writeSecureJsonFile
+    // Stat after our rename can't tell our write from one right after it; re-read once instead.
+    this.readStamp = null
     write(this.registryPath, merged)
     this.quarantinedUntilWritten = false
     return merged
+  }
+}
+
+function fileStamp(registryPath: string): string {
+  try {
+    const stat = statSync(registryPath, { bigint: true })
+    return `${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeNs}:${stat.ctimeNs}`
+  } catch (error) {
+    // Never equal to a real stamp, so the file appearing or vanishing is noticed.
+    return isMissingFileError(error) ? 'missing' : 'unstattable'
   }
 }

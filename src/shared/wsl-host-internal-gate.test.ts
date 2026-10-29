@@ -1,31 +1,43 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import {
-  formatWslHostsServeOnlyArgument,
-  hasWslHostsServeOnlyArgument,
-  resolveWslHostsGateState
+  ignoreInheritedWslHostsGateState,
+  isWslHostsServing,
+  publishWslHostsGateState,
+  WSL_HOSTS_GATE_STATE_ENV
 } from './wsl-host-internal-gate'
 
-describe('WSL hosts gate state', () => {
-  it('is open whenever the internal gate is, whatever is saved', () => {
-    for (const hasSavedWslHost of [false, true]) {
-      for (const hasWslMoveCutover of [false, true]) {
-        expect(
-          resolveWslHostsGateState({ gateOpen: true, hasSavedWslHost, hasWslMoveCutover })
-        ).toBe('open')
-      }
-    }
+describe('WSL hosts gate state inherited from main', () => {
+  afterEach(() => {
+    publishWslHostsGateState({}, null)
   })
 
-  it('promotes a closed gate to serve-only for a saved host or a move journal entry, else stays closed', () => {
-    const closed = { gateOpen: false, hasSavedWslHost: false, hasWslMoveCutover: false }
-    expect(resolveWslHostsGateState(closed)).toBe('closed')
-    expect(resolveWslHostsGateState({ ...closed, hasSavedWslHost: true })).toBe('serve-only')
-    expect(resolveWslHostsGateState({ ...closed, hasWslMoveCutover: true })).toBe('serve-only')
+  // A child of a blocked run inherits ORCA_INTERNAL_WSL_HOSTS=1 but must not serve WSL state.
+  it('lets a child trust the state its parent published over the internal gate env', () => {
+    const gate = { ORCA_INTERNAL_WSL_HOSTS: '1' }
+    expect(isWslHostsServing({ ...gate, [WSL_HOSTS_GATE_STATE_ENV]: 'closed' })).toBe(false)
+    expect(isWslHostsServing({ ...gate, [WSL_HOSTS_GATE_STATE_ENV]: 'open' })).toBe(true)
+    expect(isWslHostsServing({ [WSL_HOSTS_GATE_STATE_ENV]: 'serve-only' })).toBe(true)
   })
 
-  it('reads back only the serve-only argument main stamps', () => {
-    expect(hasWslHostsServeOnlyArgument(['--x', formatWslHostsServeOnlyArgument()])).toBe(true)
-    expect(hasWslHostsServeOnlyArgument(['--orca-wsl-hosts-serve-only=0'])).toBe(false)
-    expect(hasWslHostsServeOnlyArgument([])).toBe(false)
+  it('falls back to the internal gate env when nothing valid was published', () => {
+    expect(isWslHostsServing({ ORCA_INTERNAL_WSL_HOSTS: '1' })).toBe(true)
+    expect(isWslHostsServing({ [WSL_HOSTS_GATE_STATE_ENV]: 'bogus' })).toBe(false)
+  })
+
+  it('ignores an inherited state once this process resolved the gate itself', () => {
+    const env: Record<string, string | undefined> = { [WSL_HOSTS_GATE_STATE_ENV]: 'open' }
+    publishWslHostsGateState(env, 'closed')
+
+    expect(env[WSL_HOSTS_GATE_STATE_ENV]).toBe('closed')
+    expect(isWslHostsServing({ [WSL_HOSTS_GATE_STATE_ENV]: 'open' })).toBe(false)
+  })
+
+  it("ignores an inherited state from main's entry on, before the gate is configured", () => {
+    ignoreInheritedWslHostsGateState()
+
+    expect(isWslHostsServing({ [WSL_HOSTS_GATE_STATE_ENV]: 'open' })).toBe(false)
+    expect(
+      isWslHostsServing({ ORCA_INTERNAL_WSL_HOSTS: '1', [WSL_HOSTS_GATE_STATE_ENV]: 'closed' })
+    ).toBe(true)
   })
 })

@@ -80,6 +80,13 @@ describe('mobile file syntax highlighting', () => {
     expect(resolveMobileSyntaxLanguage('kernels/reduce.cu')).toBe('cpp')
   })
 
+  it.each(['constructor', '__proto__'])('draws a %s fence tag as plain text', (language) => {
+    expect(highlightMobileCode('x = 1', language)).toEqual({
+      segments: [{ text: 'x = 1', kind: 'plain' }],
+      highlighted: false
+    })
+  })
+
   it('emits semantic syntax segments for highlighted code', () => {
     const result = highlightMobileCode('const label: string = "Orca"', 'typescript')
 

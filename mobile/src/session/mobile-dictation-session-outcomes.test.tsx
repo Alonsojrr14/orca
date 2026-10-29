@@ -282,6 +282,28 @@ describe('an audio interruption while recording', () => {
   })
 })
 
+describe('leaving the session while recording', () => {
+  it('stops and inserts what was said instead of leaving, and lets the next leave go', async () => {
+    const rpc = createFakeRpcClient()
+    const mounted = await startRecording(rpc, { liveInput: false })
+    const held: boolean[] = []
+    act(() => {
+      held.push(mounted.current().dictationLeaveHold.hold())
+    })
+    // Back is released while transcribing, so a swipe can leave too.
+    expect(mounted.current().dictationLeaveHold.holdsLeave).toBe(false)
+    act(() => {
+      held.push(mounted.current().dictationLeaveHold.hold())
+    })
+    expect(held).toEqual([true, false])
+    const methods = await settle(rpc, 'one more thing')
+    expect(methods.filter((method) => method === 'speech.dictation.finish')).toHaveLength(1)
+    expect(methods).not.toContain('speech.dictation.cancel')
+    expect(seen.inputs).toEqual(['one more thing'])
+    expect(seen.toasts).toEqual(['Dictation inserted'])
+  })
+})
+
 describe('a mic tap while the transcript is processing', () => {
   it('keeps the transcript that comes back', async () => {
     const rpc = createFakeRpcClient()

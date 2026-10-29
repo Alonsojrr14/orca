@@ -37,6 +37,7 @@ import { leaseAppImageGenerationForCurrentProcess } from './cli/appimage-generat
 import { wakeRememberedWslHosts } from './wsl/wsl-host-early-wake'
 import { wslHostsServing } from './wsl/wsl-host-gate'
 import { configureWslHostsGateFromDisk } from './wsl/wsl-host-gate-startup'
+import { ignoreInheritedWslHostsGateState } from '../shared/wsl-host-internal-gate'
 
 function openMainWindow(options: { revealOnDidFinishLoad?: boolean } = {}): BrowserWindow {
   return openMainWindowController(options)
@@ -101,6 +102,8 @@ const handleMacAppActivation = createMacAppActivationHandler({
   requestActivation: requestDesktopActivation
 })
 
+// A relaunch or installer inherits the parent's published WSL gate state; this process recomputes.
+ignoreInheritedWslHostsGateState()
 // The uninstaller's holder release runs instead of the app, never alongside it.
 const preflightReady =
   !runWslHolderUninstallPreflight() &&
@@ -114,7 +117,7 @@ if (preflightReady) {
   enableLinearRegexpFallback()
   void leaseAppImageGenerationForCurrentProcess()
   // Before any gate check: saved WSL work keeps a closed gate serving it.
-  configureWslHostsGateFromDisk(app.getPath('userData'))
+  configureWslHostsGateFromDisk(app.getPath('userData'), app.getVersion())
   // Why this early: a cold distro takes seconds to boot; starting now overlaps it with app startup.
   if (process.platform === 'win32' && wslHostsServing()) {
     wakeRememberedWslHosts(app.getPath('userData'))
