@@ -63,7 +63,7 @@ function resolverFor(
   return createClaudeStructuredLaunchResolver({
     store: { getRecord: () => value, pinLaunchDirectory: vi.fn() },
     resolveWorkspacePath: async (id) => `/repos/${id}`,
-    resolveCommand: () => '/usr/local/bin/claude',
+    resolveCommand: () => ({ command: '/usr/local/bin/claude', prefixArgs: [] }),
     resolveAuthPolicy: () => ({ account }),
     hasTranscript,
     resolveLaunchArgs: resolveLaunchArgs ?? (() => value?.launchArgs ?? []),
@@ -426,7 +426,7 @@ describe('claude structured launch resolution', () => {
       resolveLaunchArgs: () => [],
       store: { getRecord: () => record(), pinLaunchDirectory: vi.fn() },
       resolveWorkspacePath: async (id) => `/repos/${id}`,
-      resolveCommand: () => '/usr/local/bin/claude',
+      resolveCommand: () => ({ command: '/usr/local/bin/claude', prefixArgs: [] }),
       resolveAuthPolicy: () => ({ account: 'system' }),
       resolveInheritedEnv: async () => ({ PATH: '/shell/bin', SHELL_ONLY_MARKER: 'from-shell' })
     })({ identity: IDENTITY })
@@ -439,7 +439,7 @@ describe('claude structured launch resolution', () => {
       resolveLaunchArgs: () => [],
       store: { getRecord: () => record(), pinLaunchDirectory: vi.fn() },
       resolveWorkspacePath: async (id) => `/repos/${id}`,
-      resolveCommand: () => '/usr/local/bin/claude',
+      resolveCommand: () => ({ command: '/usr/local/bin/claude', prefixArgs: [] }),
       resolveAuthPolicy: () => ({ account: 'system' }),
       resolveInheritedEnv: async () => ({
         PATH: '/shell/bin',
@@ -458,7 +458,7 @@ describe('claude structured launch resolution', () => {
       resolveLaunchArgs: () => [],
       store: { getRecord: () => record(), pinLaunchDirectory: vi.fn() },
       resolveWorkspacePath: async (id) => `/repos/${id}`,
-      resolveCommand: () => '/usr/local/bin/claude',
+      resolveCommand: () => ({ command: '/usr/local/bin/claude', prefixArgs: [] }),
       resolveAuthPolicy: () => ({ account: 'system' }),
       resolveEnv: () => ({ CLAUDE_CONFIG_DIR: '/accounts/selected/home' }),
       resolveInheritedEnv: async () => ({ PATH: '/shell/bin', CLAUDE_CONFIG_DIR: '/shell/claude' })
@@ -472,7 +472,7 @@ describe('claude structured launch resolution', () => {
       resolveLaunchArgs: () => [],
       store: { getRecord: () => record(), pinLaunchDirectory: vi.fn() },
       resolveWorkspacePath: async (id) => `/repos/${id}`,
-      resolveCommand: () => '/usr/local/bin/claude',
+      resolveCommand: () => ({ command: '/usr/local/bin/claude', prefixArgs: [] }),
       resolveAuthPolicy: () => ({ account: 'managed' }),
       resolveInheritedEnv: async () => ({
         PATH: '/shell/bin',
@@ -517,7 +517,7 @@ describe('claude structured launch resolution', () => {
       resolveLaunchArgs: () => [],
       store: { getRecord: () => record(), pinLaunchDirectory: vi.fn() },
       resolveWorkspacePath: async (id) => `/repos/${id}`,
-      resolveCommand: () => claudeCommand,
+      resolveCommand: () => ({ command: claudeCommand, prefixArgs: [] }),
       resolveAuthPolicy: () => ({ account: 'system' }),
       resolveEnv: () => ({
         PATH: '/usr/bin',
@@ -566,7 +566,7 @@ describe('readable Claude thinking', () => {
       store: { getRecord: () => record(), pinLaunchDirectory: vi.fn() },
       resolveWorkspacePath: async (id) => `/repos/${id}`,
       resolveLaunchArgs: () => launchArgs,
-      resolveCommand: () => command,
+      resolveCommand: () => ({ command: command, prefixArgs: [] }),
       resolveAuthPolicy: () => ({ account: 'system' }),
       resolveEnv: () => ({ PROJECT_SHIM: '1', ANTHROPIC_API_KEY: 'sk-user' }),
       hasTranscript: async () => false,

@@ -1,5 +1,6 @@
+import { planAgentBinary } from './agent-command-plan'
 import { describe, expect, it } from 'vitest'
-import { structuredAgentCommandToken } from './tui-agent-launch-command-override'
+import { structuredAgentCommandPlan } from './tui-agent-launch-command-override'
 
 describe('structured agent command tokens', () => {
   it.each([
@@ -13,12 +14,16 @@ describe('structured agent command tokens', () => {
     ],
     ['~/bin/codex', '~/bin/codex']
   ])('accepts one literal executable %s', (input, token) => {
-    expect(structuredAgentCommandToken(input)).toBe(token)
+    expect(structuredAgentCommandPlan(input)).toEqual({ program: token, prefixArgs: [] })
   })
 
   it.each([
-    'npx claude',
-    'wrapper --flag',
+    'FOO=1 claude',
+    'env claude | cat',
+    'env --config=$SECRET claude',
+    'env `command` claude',
+    'env claude # comment',
+    'env * claude',
     'claude;codex',
     '$CLI',
     '"$HOME/bin/claude"',
@@ -27,6 +32,21 @@ describe('structured agent command tokens', () => {
     'claude\ncodex',
     '"unfinished'
   ])('rejects shell syntax %s', (command) => {
-    expect(structuredAgentCommandToken(command)).toBeNull()
+    expect(structuredAgentCommandPlan(command)).toBeNull()
+  })
+})
+
+it('shares literal prefix splitting while commit messages retain their environment and shell-character acceptance', () => {
+  expect(
+    structuredAgentCommandPlan('op run --env-file="work env" -- codex --profile work')
+  ).toEqual({
+    program: 'op',
+    prefixArgs: ['run', '--env-file=work env', '--', 'codex', '--profile', 'work']
+  })
+  expect(planAgentBinary('codex', 'FOO=1 launcher "$HOME" "*"')).toEqual({
+    ok: true,
+    binary: 'launcher',
+    prefixArgs: ['$HOME', '*'],
+    env: { FOO: '1' }
   })
 })

@@ -114,6 +114,7 @@ describe('copying a chat conversation for the CLI', () => {
         readLaunch: async () => ({
           spec,
           command: 'fake',
+          prefixArgs: [],
           args: [],
           cwd: '/repo',
           env: {},
@@ -159,26 +160,36 @@ describe('copying a chat conversation for the CLI', () => {
     async (agent) => {
       const spec = acpLaunchSpecFor(agent)!
       const connect = vi.fn()
-      await expect(
-        copyAcpConversation(
-          {
-            spec,
-            dataDirectory: '/orca-data',
-            resolveLaunchArgs: () => ['--server', 'https://other-host:4096'],
-            readLaunch: async () => {
-              throw new Error('not reached')
+      for (const inPrefix of [false, true]) {
+        await expect(
+          copyAcpConversation(
+            {
+              spec,
+              dataDirectory: '/orca-data',
+              resolveLaunchArgs: () => (inPrefix ? [] : ['--server', 'https://other-host:4096']),
+              readLaunch: async () => ({
+                spec,
+                command: 'launcher',
+                prefixArgs: inPrefix ? ['--server', 'https://prefix-host:4096'] : [],
+                args: [],
+                cwd: '/workspace',
+                env: {},
+                envToDelete: [],
+                fullAccess: true,
+                resume: null
+              }),
+              connect
             },
-            connect
-          },
-          {
-            ...input,
-            identity: { ...input.identity, agent },
-            accountHome: { kind: 'opencode', locator: { kind: 'unmanaged' } }
-          },
-          { track: () => {} }
-        )
-      ).rejects.toThrow('--server')
-      expect(connect).not.toHaveBeenCalled()
+            {
+              ...input,
+              identity: { ...input.identity, agent },
+              accountHome: { kind: 'opencode', locator: { kind: 'unmanaged' } }
+            },
+            { track: () => {} }
+          )
+        ).rejects.toThrow('--server')
+        expect(connect).not.toHaveBeenCalled()
+      }
     }
   )
 })

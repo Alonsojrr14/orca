@@ -25,13 +25,19 @@ const MAX_REMEMBERED = 32
 
 export type ClaudeCliLaunch = {
   command: string
+  prefixArgs?: readonly string[]
   cwd: string
   env: Record<string, string>
 }
 
 type ClaudeVersionProbe = (
   command: string,
-  launch: { cwd: string; env: Record<string, string>; timeoutMs: number }
+  launch: {
+    cwd: string
+    env: Record<string, string>
+    timeoutMs: number
+    prefixArgs?: readonly string[]
+  }
 ) => Promise<string | null>
 
 export type ClaudeCliFlagSupport = {
@@ -46,7 +52,10 @@ export type ClaudeCliFlagSupport = {
   /** Warm the version cache without waiting; failures remain retryable. */
   prewarm: (launch: ClaudeCliLaunch) => void
   /** Remember explicit flag rejection for this binary and cwd. */
-  observeExit: (launch: Pick<ClaudeCliLaunch, 'command' | 'cwd'>, error: Error) => void
+  observeExit: (
+    launch: Pick<ClaudeCliLaunch, 'command' | 'prefixArgs' | 'cwd'>,
+    error: Error
+  ) => void
 }
 
 // Key by resolved file, mtime and cwd to handle self-updates and project-specific shims.
@@ -87,6 +96,10 @@ export function createClaudeCliFlagSupport(
     now: () => performance.now()
   }
 ): ClaudeCliFlagSupport {
+  const keyOf = async (launch: Pick<ClaudeCliLaunch, 'command' | 'prefixArgs' | 'cwd'>) => {
+    const key = await deps.keyOf(launch.command, launch.cwd)
+    return key === null ? null : JSON.stringify([key, launch.prefixArgs ?? []])
+  }
   const known = new Map<string, BinaryFacts>()
   const probing = new Map<string, { settled: Promise<void>; startedAt: number }>()
   const touch = (key: string): BinaryFacts => {
@@ -121,6 +134,7 @@ export function createClaudeCliFlagSupport(
     const settled = deps
       .probe(launch.command, {
         cwd: launch.cwd,
+        prefixArgs: launch.prefixArgs,
         env: launch.env,
         timeoutMs: CLAUDE_CLI_FLAG_PROBE_KILL_AFTER_MS
       })
@@ -138,7 +152,7 @@ export function createClaudeCliFlagSupport(
     supports: async (flag, launch, budgetMs = deps.budgetMs, startProbe = true) => {
       // Include binary lookup in the launch's wait budget.
       const deadline = deps.now() + budgetMs
-      const key = await within(deps.keyOf(launch.command, launch.cwd), budgetMs)
+      const key = await within(keyOf(launch), budgetMs)
       if (key === undefined || key === null) {
         return false
       }
@@ -154,7 +168,7 @@ export function createClaudeCliFlagSupport(
       return answer(key, flag)
     },
     prewarm: (launch) => {
-      void deps.keyOf(launch.command, launch.cwd).then(
+      void keyOf(launch).then(
         (key) => {
           if (key !== null && versionOf(key) === undefined && !probing.has(key)) {
             probe(key, launch)
@@ -168,7 +182,7 @@ export function createClaudeCliFlagSupport(
       if (!option) {
         return
       }
-      void deps.keyOf(launch.command, launch.cwd).then((key) => {
+      void keyOf(launch).then((key) => {
         if (key !== null) {
           touch(key).refused.add(option)
         }

@@ -43,6 +43,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export type ClaudeStreamJsonLaunch = {
   /** Orca's resolved user CLI; the SDK falls back to a bundled binary that is not installed. */
   pathToClaudeCodeExecutable: string
+  prefixArgs?: readonly string[]
   options: ClaudeStructuredSdkOptions
   cwd: string
   env?: Record<string, string>
@@ -96,7 +97,7 @@ export async function openClaudeStreamJsonConnection(
   queryImpl?: typeof ClaudeAgentSdk.query
 ): Promise<ClaudeStreamJsonConnection> {
   const { query } = await loadClaudeAgentSdk()
-  const spawner = createClaudeCodeProcessSpawn(spawnImpl, process.platform)
+  const spawner = createClaudeCodeProcessSpawn(spawnImpl, process.platform, launch)
   // Always supply scrubbed env to prevent ambient auth leaks; only launch.env may pin CLAUDE_CONFIG_DIR.
   const env = await withoutRejectedClaudeApiKey(
     withoutKeys(

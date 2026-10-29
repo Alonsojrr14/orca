@@ -51,7 +51,7 @@ function harness(deps: Partial<CodexAtRestSkillsDeps> = {}) {
   const catalog = createCodexAtRestSkillCatalog({
     resolveWorkspacePath: async () => '/work/one',
     resolveLaunchArgs: () => [],
-    resolveCommand: () => '/bin/codex',
+    resolveCommand: () => ({ command: '/bin/codex', prefixArgs: [] }),
     runSession: async (invocation, body) => {
       calls.push(invocation)
       peak = Math.max(peak, ++live)
@@ -111,7 +111,7 @@ describe('a resting Codex chat lists the skills Codex would load', () => {
         'read-only'
       ],
       resolveEnvironment: async () => ({ PATH: '/bin', CUSTOM_AGENT_ENV: 'configured' }),
-      resolveCommand: () => '/bin/codex',
+      resolveCommand: () => ({ command: '/bin/codex', prefixArgs: [] }),
       sleep: () => new Promise((resolve) => settling.push(resolve)),
       runSession: async (invocation, body) => {
         invocations.push(invocation)
@@ -155,7 +155,7 @@ describe('a resting Codex chat lists the skills Codex would load', () => {
       const catalog = createCodexAtRestSkillCatalog({
         resolveWorkspacePath: async () => '/work',
         resolveLaunchArgs: () => [],
-        resolveCommand: () => '/bin/codex',
+        resolveCommand: () => ({ command: '/bin/codex', prefixArgs: [] }),
         now: () => 0,
         sleep,
         runSession: async (_invocation, body) => {

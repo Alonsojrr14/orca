@@ -97,6 +97,7 @@ export function claudeStructuredPermissionOptions(
 export type ClaudeStructuredLaunch = {
   /** Always Orca's resolved user CLI: the SDK's bundled binaries are excluded from the install. */
   pathToClaudeCodeExecutable: string
+  prefixArgs?: readonly string[]
   account?: ClaudeStructuredInvocation['account']
   options: ClaudeStructuredSdkOptions
   cwd: string
@@ -132,6 +133,7 @@ export type ClaudeStructuredLaunchPartDeps = {
 
 export type ClaudeStructuredInvocation = {
   command: string
+  prefixArgs: string[]
   env: Record<string, string>
   account: 'managed' | 'system'
 }
@@ -153,6 +155,7 @@ export async function resolveClaudeStructuredInvocation(
   // Preserve proxy credentials alongside ANTHROPIC_BASE_URL for every account.
   return {
     command: sources.command,
+    prefixArgs: sources.prefixArgs,
     env: claudeChildEnv(sources, decorateEnv, options),
     account: auth.account
   }
@@ -196,7 +199,12 @@ export function claudeStructuredLaunchPart(
     }
     const sources = await resolveClaudeChildEnvSources(envDeps)
     // Overlap the version probe with remaining launch preparation.
-    const probeLaunch = { command: sources.command, cwd, env: claudeProbeEnv(sources) }
+    const probeLaunch = {
+      command: sources.command,
+      prefixArgs: sources.prefixArgs,
+      cwd,
+      env: claudeProbeEnv(sources)
+    }
     const launchFlags = resolveClaudeLaunchFlags(
       { ...(deps.cliFlags ? { cliFlags: deps.cliFlags } : {}), prepareVisuals: basis.visuals },
       record.sessionId,
@@ -224,7 +232,7 @@ export function claudeStructuredLaunchPart(
     // Fixed homes can be checked before the final account-routing recheck.
     const resumedWithoutRouter = router ? undefined : await resumes(accountHome.path)
     // Resolve auth after awaited launch preparation; account routing is rechecked below.
-    const { command, env, account } = await resolveClaudeStructuredInvocation(
+    const { command, prefixArgs, env, account } = await resolveClaudeStructuredInvocation(
       envDeps,
       (base) =>
         withNativeChatVisualsEnv(
@@ -253,6 +261,7 @@ export function claudeStructuredLaunchPart(
     return {
       launch: {
         pathToClaudeCodeExecutable: command,
+        prefixArgs,
         account,
         options: {
           ...CLAUDE_STRUCTURED_BASE_OPTIONS,

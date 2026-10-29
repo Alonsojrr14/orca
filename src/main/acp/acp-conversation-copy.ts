@@ -44,14 +44,12 @@ export async function copyAcpConversation(
   let connection: AcpStructuredConnection | null = null
   try {
     signal.throwIfAborted()
-    const assertCopyLaunchArgs = deps.spec.assertCopyLaunchArgs
-    if (assertCopyLaunchArgs) {
-      assertCopyLaunchArgs(
-        await waitForPromiseWithSignal(Promise.resolve(deps.resolveLaunchArgs?.() ?? []), signal)
-      )
-    }
-    signal.throwIfAborted()
     const launch = await waitForPromiseWithSignal(deps.readLaunch(input.identity), signal)
+    signal.throwIfAborted()
+    deps.spec.assertCopyLaunchArgs?.([
+      ...launch.prefixArgs,
+      ...(await waitForPromiseWithSignal(Promise.resolve(deps.resolveLaunchArgs?.() ?? []), signal))
+    ])
     signal.throwIfAborted()
     await assertCopyAccountSelected(deps, input.accountHome, launch.env, signal)
     signal.throwIfAborted()

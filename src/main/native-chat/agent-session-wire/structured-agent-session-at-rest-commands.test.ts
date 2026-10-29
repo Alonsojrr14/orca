@@ -171,7 +171,7 @@ describe("a Claude chat whose Claude isn't running lists Claude's own `/` comman
     })}\n`
     let answer: string | Promise<string> = failed
     const probe = createClaudeCommandCatalogProbe({
-      resolveCommand: () => 'claude',
+      resolveCommand: () => ({ command: 'claude', prefixArgs: [] }),
       resolveInheritedEnv: async () => ({ PATH: '/bin' }),
       resolveAuthPolicy: () => ({ account: 'system' }),
       runListing: async (...call) => {
@@ -259,7 +259,7 @@ describe("a Claude chat whose Claude isn't running lists Claude's own `/` comman
     }
     const asked: unknown[][] = []
     const probe = createClaudeCommandCatalogProbe({
-      resolveCommand: () => 'claude',
+      resolveCommand: () => ({ command: 'claude', prefixArgs: [] }),
       resolveInheritedEnv: () => block('environment', { PATH: '/bin' }),
       resolveAuthPolicy: () => ({ account: 'system' }),
       runListing: async (...call) => {
@@ -291,7 +291,7 @@ describe("a Claude chat whose Claude isn't running lists Claude's own `/` comman
       resolveWorkspacePath: () => block('workspace', workspace),
       resolveEnvironment: () => block('environment', { PATH: '/bin' }),
       resolveLaunchArgs: () => block('arguments', []),
-      resolveCommand: () => '/bin/codex',
+      resolveCommand: () => ({ command: '/bin/codex', prefixArgs: [] }),
       runSession: async (invocation, body) => {
         asked.push([invocation])
         return body({
