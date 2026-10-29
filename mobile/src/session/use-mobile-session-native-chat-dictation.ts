@@ -11,6 +11,8 @@ import {
 } from '../terminal/terminal-live-dictation-routing'
 import {
   dictationFailureMessage,
+  dictationMicHidden,
+  dictationNeedsSetup,
   fetchDictationSetup,
   isDictationSetupRequiredError
 } from '../dictation/mobile-dictation-setup'
@@ -49,6 +51,7 @@ export function useMobileSessionNativeChatDictation(
     activeSessionTab,
     flushPendingLiveInputBeforeExternalSend,
     canSend,
+    canCompose,
     liveInputEnabled,
     showToast,
     resetLiveInputFocus
@@ -127,10 +130,11 @@ export function useMobileSessionNativeChatDictation(
   }
 
   const chatDictationDestination = useRef<((text: string) => boolean | void) | undefined>(undefined)
-  const dictationTargetReady = showNativeChat ? connState === 'connected' : canSend
+  // Starting needs the host, but a reconnect must not end a recording: the host keeps the session through it.
+  const dictationCanStart = showNativeChat ? connState === 'connected' : canSend
   const dictation = useMobileDictation({
     client,
-    enabled: dictationTargetReady && dictationEnabled,
+    enabled: (showNativeChat || canCompose) && dictationEnabled,
     onTranscript: (text) => {
       // Route dictation to the visible chat composer locally; terminal mode retains live-input routing.
       if (showNativeChatRef.current || chatDictationDestination.current) {
@@ -179,7 +183,18 @@ export function useMobileSessionNativeChatDictation(
     }
   })
 
+  // Only a host setup read sets this; while false, the host's start refusal decides (older hosts, first tap before the read).
+  const dictationNeedsSetupRef = useRef(false)
+
   const startDictation = useCallback(() => {
+    if (!dictationCanStart) {
+      return
+    }
+    if (dictationNeedsSetupRef.current) {
+      // Explain setup before the OS microphone prompt: mic access cannot help until the host can transcribe.
+      setShowDictationSetup(true)
+      return
+    }
     chatDictationDestination.current = captureMobileNativeChatTextDestination()
     const routeContext = activeHandle
       ? { handle: activeHandle, liveInputEnabled: liveInputTerminalHandles.has(activeHandle) }
@@ -191,7 +206,14 @@ export function useMobileSessionNativeChatDictation(
       }
       reportDictationFailure(err)
     })
-  }, [activeHandle, dictation, liveInputTerminalHandles, reportDictationFailure])
+  }, [
+    activeHandle,
+    dictation,
+    dictationCanStart,
+    liveInputTerminalHandles,
+    reportDictationFailure,
+    setShowDictationSetup
+  ])
 
   const cancelDictation = useCallback(() => {
     dictationRouteContextRef.current = null
@@ -233,12 +255,20 @@ export function useMobileSessionNativeChatDictation(
       const setup = await fetchDictationSetup(client)
       if (read === dictationSettingsReadRef.current) {
         setDictationMode(setup.dictationMode)
-        setDictationEnabled(setup.enabled !== false)
+        setDictationEnabled(!dictationMicHidden(setup))
+        dictationNeedsSetupRef.current = dictationNeedsSetup(setup)
       }
     } catch {
       // Keep the last settings when an older host cannot report them.
     }
   }, [client, connState, setDictationEnabled, setDictationMode])
+
+  // The sheet may have changed host setup: let the host judge taps until the fresh read lands.
+  const closeDictationSetup = useCallback(() => {
+    setShowDictationSetup(false)
+    dictationNeedsSetupRef.current = false
+    void refreshDictationMode()
+  }, [refreshDictationMode, setShowDictationSetup])
 
   useFocusEffect(
     useCallback(() => {
@@ -280,6 +310,7 @@ export function useMobileSessionNativeChatDictation(
     handleDictationToggle,
     handleDictationPressIn,
     handleDictationPressOut,
+    closeDictationSetup,
     refreshDictationMode
   }
 }

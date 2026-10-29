@@ -29,8 +29,6 @@ export type JournalLifecycleMutationInput = JournalItemAddress &
         linkage?: AgentJournalProducerLinkage
         turnScope: AgentJournalTurnScope
         ownerFence?: number
-        recovered?: true
-        recoveredAt?: number
       }
     | { kind: 'tombstone' }
   )
@@ -80,7 +78,6 @@ export function journalLifecycleMutationRow(
         revision,
         body: boundRunningToolOutput(mutation.body),
         ...(mutation.observedAt === undefined ? {} : { observedAt: mutation.observedAt }),
-        ...(mutation.recovered ? { recovered: true, recoveredAt: mutation.recoveredAt } : {}),
         ...journalItemEchoFields(mutation),
         turnScope: mutation.turnScope,
         ownerFence,

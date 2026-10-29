@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type * as AgentStatusModule from '@/lib/agent-status'
 import { clearRuntimeCompatibilityCacheForTests } from '../../runtime/runtime-rpc-client'
 import { createTestStore, makeTab, makeWorktree, seedStore } from './store-test-helpers'
-import { collectHibernatedCompletionEvidenceForWorktree } from './agent-status/agent-status-recovery-collection'
 import { shutdownBufferCaptures } from '@/components/terminal-pane/shutdown-buffer-captures'
 import {
   applySleepRuntimeRpcDefault,
@@ -639,45 +638,3 @@ describe('shutdownWorktreeTerminals (sleep) — agent status hygiene', () => {
     expect(s.acknowledgedAgentsByPaneKey['tab-1:0']).toBeUndefined()
   })
 })
-
-it.each(['success', 'failure', 'cancellation', 'restored'] as const)(
-  'keeps collector-produced %s evidence through the actual worktree drop',
-  (kind) => {
-    const store = createTestStore()
-    const wt = 'retention-worktree'
-    const paneKey = 'retention-tab:leaf'
-    seedStore(store, {
-      tabsByWorktree: { [wt]: [makeTab({ id: 'retention-tab', worktreeId: wt })] }
-    })
-    const outcome = kind === 'restored' ? 'cancellation' : kind
-    store.getState().setAgentStatus(
-      paneKey,
-      {
-        state: 'done',
-        agentType: 'codex',
-        prompt: 'retained original prompt',
-        mainAgent: { state: 'done', outcome, stateStartedAt: 100 },
-        ...(kind === 'restored' ? { restoredInterruption: true as const } : {})
-      },
-      'Codex',
-      { updatedAt: 100, stateStartedAt: 100 },
-      { worktreeId: wt }
-    )
-    const before = store.getState().agentStatusByPaneKey[paneKey]
-    const captured = collectHibernatedCompletionEvidenceForWorktree(store.getState(), wt, [paneKey])
-    const eligible = kind !== 'cancellation'
-    expect(captured).toHaveLength(eligible ? 1 : 0)
-    store.getState().dropAgentStatusByWorktree(wt, {
-      shutdownReason: 'auto-hibernate-completed-agent',
-      sleepingPaneKeys: [paneKey],
-      retainedCompletionEvidence: captured
-    })
-    expect(store.getState().agentStatusByPaneKey[paneKey]).toBeUndefined()
-    if (eligible) {
-      expect(store.getState().retainedAgentsByPaneKey[paneKey]?.entry).toEqual(before)
-      expect(store.getState().retentionSuppressedPaneKeys[paneKey]).not.toBe(true)
-    } else {
-      expect(store.getState().retainedAgentsByPaneKey[paneKey]).toBeUndefined()
-    }
-  }
-)

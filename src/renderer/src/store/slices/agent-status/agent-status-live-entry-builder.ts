@@ -1,3 +1,4 @@
+import { canonicalOrchestrationForRow } from '@/runtime/visible-agent-orchestration'
 import { sameAgentStatusTerminalOwner } from '../../../../../shared/agent-status-terminal-owner'
 import type { AppState } from '../../types'
 import { resolveAgentStatusLiveEntryMainAgent } from './agent-status-live-entry-main-agent'
@@ -141,7 +142,7 @@ export function buildAgentStatusLiveEntry(
   ) {
     return { entry: null, reason: 'suppressed-inherited-terminal' }
   }
-  const runtimeOrchestration = state.runtimeAgentOrchestrationByPaneKey[paneKey]
+  const runtimeOrchestration = canonicalOrchestrationForRow(state, paneKey)
   const runtimeMergedOrchestration = runtimeOrchestration
     ? mergeCurrentOrchestrationContext(existing?.orchestration, runtimeOrchestration)
     : undefined
@@ -263,7 +264,6 @@ export function buildAgentStatusLiveEntry(
     ...(payload.observation ? { observation: payload.observation } : {}),
     ...(programStatus ? { programStatus } : {}),
     interrupted: payload.interrupted,
-    restoredInterruption: payload.restoredInterruption,
     sessionBoundary:
       payload.sessionBoundary ??
       (existing?.state === 'done' &&

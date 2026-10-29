@@ -1,9 +1,3 @@
-import { DEFAULT_WATERMARKS } from './structured-agent-session-sink-watermarks'
-import {
-  publishCommitted,
-  createStructuredAgentSessionTransitionMembers,
-  type StructuredAgentSessionTransitionSink
-} from './structured-agent-session-transition'
 import type { JournalItemEcho } from '../agent-session-journal/journal-item-echo'
 import { agentJournalItemKey } from '../../../shared/agent-session-journal-item-key'
 import type {
@@ -15,13 +9,14 @@ import type {
 import type { AgentSessionTurnActivity } from '../../../shared/agent-session-wire'
 import type { AgentSessionJournal } from '../agent-session-journal/journal-store'
 import type { JournalLifecycleIdentityMutationInput } from '../agent-session-journal/journal-row-builders'
-import {
-  estimateStructuredAgentSessionItemBytes,
-  estimateStructuredAgentSessionLifecycleBatchBytes
-} from './structured-agent-session-event-sink-estimate'
+import { estimateStructuredAgentSessionItemBytes } from './structured-agent-session-event-sink-estimate'
 import { StructuredAgentSessionSinkQueue } from './structured-agent-session-event-sink-queue'
 import { structuredAgentSessionJournalAppendOptions } from './structured-agent-session-journal-append-options'
 import { createStructuredAgentSessionResolvedAppend } from './structured-agent-session-resolved-append'
+import {
+  createStructuredAgentSessionTransitionMembers,
+  type StructuredAgentSessionTransitionSink
+} from './structured-agent-session-transition'
 import type { StructuredAgentSessionLogger } from './structured-agent-session-logger'
 import type {
   StructuredAgentSessionIdentityResolver,
@@ -182,6 +177,17 @@ export type StructuredAgentSessionReadingControl = {
   resumeReading(): void
 }
 
+const DEFAULT_WATERMARKS: StructuredAgentSessionSinkWatermarks = {
+  pauseQueuedBytes: 16 * 1024 * 1024,
+  maxQueuedBytes: 32 * 1024 * 1024,
+  lowQueuedBytes: 8 * 1024 * 1024,
+  pauseQueuedOperations: 512,
+  maxQueuedOperations: 1_024,
+  lowQueuedOperations: 256,
+  maxLifecycleQueuedBytes: 16 * 1024 * 1024,
+  maxLifecycleQueuedOperations: 1_024
+}
+
 export function createDeferredStructuredAgentSessionEventSink(deps: {
   sessionId: string
   logger: StructuredAgentSessionLogger
@@ -216,7 +222,7 @@ export function createDeferredStructuredAgentSessionEventSink(deps: {
   ): StructuredAgentSessionSinkAdmission =>
     queue.submit(
       {
-        bytes: estimateStructuredAgentSessionLifecycleBatchBytes(settlementId, mutations),
+        bytes: Buffer.byteLength(JSON.stringify({ settlementId, mutations }), 'utf8') + 512,
         run: (bound) =>
           bound.journal.appendLifecycleBatch({
             settlementId,
@@ -313,11 +319,7 @@ export function createDeferredStructuredAgentSessionEventSink(deps: {
       },
       tryPublish: publish
     },
-    bind: (next) =>
-      queue.bind({
-        ...next,
-        publish: (activity) => publishCommitted(() => next.publish(activity))
-      }),
+    bind: (next) => queue.bind(next),
     unbind: () => queue.unbind(),
     close: () => queue.close(),
     drained: queue.barrier,

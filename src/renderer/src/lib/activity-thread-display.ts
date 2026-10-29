@@ -178,8 +178,6 @@ export function getActivityThreadStatusPreview(
     | 'lastAssistantMessage'
     | 'lastCompletedAssistantMessage'
     | 'interrupted'
-    | 'observation'
-    | 'structuredHostOwned'
     | 'mainAgent'
     | 'prompt'
   >,
@@ -215,8 +213,6 @@ export function resolveActivityThreadStatusPreview(
     | 'lastAssistantMessage'
     | 'lastCompletedAssistantMessage'
     | 'interrupted'
-    | 'observation'
-    | 'structuredHostOwned'
     | 'mainAgent'
     | 'prompt'
   >,

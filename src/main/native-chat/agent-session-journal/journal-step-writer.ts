@@ -19,10 +19,7 @@ export type JournalStep =
       resolve: () => JournalResolvedItem | null
       options: JournalItemAppendOptions
     }
-  | {
-      kind: 'settlement'
-      batch: JournalResolvedLifecycleBatchInput
-    }
+  | { kind: 'settlement'; batch: JournalResolvedLifecycleBatchInput }
 
 export class JournalStepWriter {
   constructor(
@@ -34,17 +31,12 @@ export class JournalStepWriter {
     }
   ) {}
 
-  /** Whether each step wrote; rejects with the error of the step that threw. */
-  append(
-    steps: readonly JournalStep[],
-    onWritten?: (wrote: boolean[]) => void
-  ): Promise<boolean[]> {
+  append(steps: readonly JournalStep[]): Promise<boolean[]> {
     return this.deps.serialize(() => {
       const wrote: boolean[] = []
       for (const step of steps) {
         wrote.push(this.deps.writeRows(() => this.plan(step)).length > 0)
       }
-      onWritten?.(wrote)
       return wrote
     })
   }

@@ -1,7 +1,3 @@
-import {
-  runStructuredAgentSessionSinkOperation,
-  type StructuredAgentSessionSinkOperation
-} from './structured-agent-session-sink-operation'
 import type {
   StructuredAgentSessionAppendOptions,
   StructuredAgentSessionEventTarget,
@@ -15,6 +11,18 @@ import type {
 } from './structured-agent-session-event-sink'
 import type { StructuredAgentSessionTransitionJournal } from './structured-agent-session-transition'
 import { StructuredAgentSessionFinalTailReservation } from './structured-agent-session-final-tail-reservation'
+
+export type StructuredAgentSessionSinkOperation = {
+  sequence: number
+  bytes: number
+  lifecycleBytes?: number
+  lifecycle?: boolean
+  finalTail?: true
+  /** Only publications coalesce by key; replacing journal writes would reorder them behind later work. */
+  publicationKey?: string
+  /** Handover synchronously joins the journal queue in submission order. */
+  run: (target: StructuredAgentSessionEventTarget) => Promise<unknown> | void
+}
 
 type Admitted = StructuredAgentSessionSinkOperation & {
   superseded?: boolean
@@ -199,39 +207,24 @@ export class StructuredAgentSessionSinkQueue {
     return { accepted: true }
   }
 
-  /** Journal-derived bodies join the existing operation's charge and release with it. */
-  private reserveExecutionBytes(operation: Admitted, bytes: number): void {
-    if (!Number.isSafeInteger(bytes) || bytes < 0) {
-      throw new Error('invalid structured agent-session execution reservation')
-    }
-    operation.bytes += bytes
-    this.queuedBytes += bytes
-    if (operation.lifecycle) {
-      operation.lifecycleBytes = (operation.lifecycleBytes ?? 0) + bytes
-      this.lifecycleQueuedBytes += bytes
-    }
-    this.updateBackpressure()
-  }
-
   private handOver(operation: Admitted, bound: StructuredAgentSessionEventTarget): void {
-    const reserveBytes = (bytes: number) => this.reserveExecutionBytes(operation, bytes)
     const earlier = this.handedOverSettled
     this.handedOverSequence = operation.sequence
     const key = operation.publicationKey
     let outcome: Promise<unknown>
     if (key === undefined) {
-      outcome = runStructuredAgentSessionSinkOperation(() => operation.run(bound, reserveBytes))
+      outcome = runNow(() => operation.run(bound))
     } else {
       this.waitingPublications.set(key, operation)
       // Publications read in journal order so they cannot overtake prior writes.
-      outcome = runStructuredAgentSessionSinkOperation(() =>
+      outcome = runNow(() =>
         bound.journal.readInOrder(() => {
           if (this.waitingPublications.get(key) === operation) {
             this.waitingPublications.delete(key)
           }
           return operation.superseded || this.closed || this.failure !== null
             ? undefined
-            : operation.run(bound, reserveBytes)
+            : operation.run(bound)
         })
       )
     }
@@ -326,4 +319,12 @@ export class StructuredAgentSessionSinkQueue {
 
 function lifecycleCost(operation: StructuredAgentSessionSinkOperation): number {
   return operation.lifecycle ? (operation.lifecycleBytes ?? operation.bytes) : 0
+}
+
+function runNow(run: () => Promise<unknown> | void): Promise<unknown> {
+  try {
+    return Promise.resolve(run())
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }

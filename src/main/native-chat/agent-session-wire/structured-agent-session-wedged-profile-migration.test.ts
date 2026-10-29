@@ -219,12 +219,6 @@ function turnLifecycle(turnId: string) {
   return item ? { ...readAgentJournalTurn(item.body), recovered: item.recovered } : null
 }
 
-/** A relaunch lists the chat without reading it; its first read opens it and settles it. */
-async function restoreThenOpen(): Promise<void> {
-  await host.restoreReadableSessions()
-  await host.journalSnapshot(SESSION)
-}
-
 function restoredJournal(): AgentSessionJournal {
   const restored = (
     host as unknown as { sessions: Map<string, { journal: AgentSessionJournal }> }
@@ -270,7 +264,7 @@ describe('already-wedged profiles become usable on load', () => {
       await seedRunningTurn(provider)
       openHost()
 
-      await restoreThenOpen()
+      await host.restoreReadableSessions()
 
       expect(host.hasSession(SESSION)).toBe(true)
       const firstCursor = restoredJournal().cursor()
@@ -284,7 +278,7 @@ describe('already-wedged profiles become usable on load', () => {
       await host.flushAllStreamedEvents()
       store = await openTestAgentSessionRecordStore(root)
       openHost()
-      await restoreThenOpen()
+      await host.restoreReadableSessions()
 
       expect(restoredJournal().cursor()).toEqual(firstCursor)
       expect(activeStructuredAgentSessionTurnId(restoredJournal().snapshot().items)).toBe(null)
@@ -338,7 +332,7 @@ describe('already-wedged profiles become usable on load', () => {
           : {})
       })
 
-      await restoreThenOpen()
+      await host.restoreReadableSessions()
 
       expect(acquire).not.toHaveBeenCalled()
       expect(turnLifecycle('turn-1')).toEqual({
@@ -360,19 +354,10 @@ describe('already-wedged profiles become usable on load', () => {
       )
       expect(published.filter((summary) => summary.sessionId === SESSION)).not.toEqual([])
       expect(published.map((summary) => summary.status)).not.toContain('working')
-      // Only a proven restart is Interrupted news; an unprobeable owner remains unconfirmed.
-      const outcome = verdict.state === 'interrupted' ? 'cancellation' : 'unconfirmed'
-      expect(published.at(-1)?.turnOutcome).toBe(outcome)
-      expect(published.at(-1)?.restoredInterruption).toBe(remote ? undefined : true)
-      expect(published.at(-1)?.statusStartedAt).toBe(SEEDED_TURN_STARTED_AT)
-      if (remote) {
-        expect(
-          restoredJournal()
-            .snapshot()
-            .items.find((item) => readAgentJournalTurn(item.body))?.recoveredAt
-        ).toEqual(expect.any(Number))
-      }
-      expect(new Set(published.map((summary) => summary.turnOutcome))).toEqual(new Set([outcome]))
+      // Crash evidence must never become a user-attributed cancellation.
+      expect(published.map((summary) => summary.turnOutcome)).toEqual(
+        published.map(() => (verdict.state === 'interrupted' ? 'interruption' : 'unconfirmed'))
+      )
     }
   )
 
@@ -467,7 +452,7 @@ describe('already-wedged profiles become usable on load', () => {
       const failing = vi
         .spyOn(JournalLifecycleBatchAppender.prototype, 'appendPlanned')
         .mockRejectedValue(new Error('journal unavailable'))
-      await restoreThenOpen()
+      await host.restoreReadableSessions()
       failing.mockRestore()
       expect(activeStructuredAgentSessionTurnId(restoredJournal().snapshot().items)).toBe('turn-1')
       expect(stopOwnerProcess).toHaveBeenCalledTimes(ownerOutlivedRestart ? 1 : 0)

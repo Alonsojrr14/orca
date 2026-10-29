@@ -26,7 +26,7 @@ import type {
 } from './structured-agent-session-host-types'
 import { structuredAgentSessionConversationFence } from './structured-agent-session-provider-child'
 import { structuredAgentSessionFailureWordsContext } from './structured-agent-session-send-preparation'
-import { recoverStructuredAgentSessionOpenRewind } from './structured-agent-session-open-rewind-recovery'
+import { recoverStructuredRewind } from './structured-rewind-recovery'
 import {
   retireOutgrownStructuredAgentSessionChild,
   structuredAgentSessionChildOwesWork
@@ -64,11 +64,6 @@ export function createStructuredAgentSessionConversationDelivery(input: {
   sessions: Map<string, StructuredAgentSessionHostSession>
   serialize: <T>(sessionId: string, task: () => Promise<T>) => Promise<T>
   trackStart: <T>(start: Promise<T>) => Promise<T>
-  cacheReacquisition?: (
-    sessionId: string
-  ) => StructuredAgentSessionConversationOpenOptions['cacheReacquisition']
-  onDeathEvidence?: (sessionId: string) => void
-  /** Claims the queued head's start during its ordered preparation. */
   startProviderChild: (sessionId: string, startedFor: string) => StructuredAgentSessionStartClaim
   deliveryOrder: StructuredAgentSessionDeliveryOrder
   startFlights?: StructuredAgentSessionDeliveryLoopDeps['startFlights']
@@ -82,7 +77,6 @@ export function createStructuredAgentSessionConversationDelivery(input: {
     StructuredAgentSessionClientDelivery,
     | 'publishRestored'
     | 'readChildWork'
-    | 'publishHandoverChanged'
     | 'childWorkOpen'
     | 'readStopping'
     | 'publishStatus'
@@ -210,7 +204,7 @@ export function createStructuredAgentSessionConversationDelivery(input: {
     currentWork: (sessionId) =>
       hostStructuredAgentSessionCurrentWork({ store: deps.store, sessions }, sessionId),
     readChildWork: input.clientDelivery.readChildWork,
-    workChanged: input.clientDelivery.publishHandoverChanged,
+    workChanged: (sessionId) => input.clientDelivery.publishGenerationEnded(sessionId),
     childWorkOpen: input.clientDelivery.childWorkOpen,
     stopping: input.clientDelivery.readStopping,
     now: () => deps.now?.() ?? Date.now(),
@@ -229,7 +223,7 @@ export function createStructuredAgentSessionConversationDelivery(input: {
     const { session } = opened
     sessions.set(sessionId, session)
     input.clientDelivery.publishRestored(sessionId)
-    await recoverStructuredAgentSessionOpenRewind(deps, sessionId, session)
+    await settleInterruptedCommands(deps, sessionId, session)
     if (session.journal.submissions().some(isQueuedAgentJournalSubmission)) {
       loop.wake(sessionId)
     }
@@ -263,7 +257,6 @@ export function createStructuredAgentSessionConversationDelivery(input: {
   }
   // Queue death-proof revisions without awaiting: the writer may already hold session serialization.
   const stopResettling = deps.store.onDeathEvidence((sessionId) => {
-    input.onDeathEvidence?.(sessionId)
     const session = sessions.get(sessionId)
     // User-close retires its handle; the next open can derive proof.
     if (session && session.child?.close?.cause !== 'user-close') {
@@ -295,9 +288,24 @@ export function createStructuredAgentSessionConversationDelivery(input: {
       stopResettling()
     },
     open: (sessionId, options) =>
-      openStructuredAgentSessionConversation({ deps, sessions, adoptOpened }, sessionId, {
-        ...options,
-        cacheReacquisition: options?.cacheReacquisition ?? input.cacheReacquisition?.(sessionId)
-      })
+      openStructuredAgentSessionConversation({ deps, sessions, adoptOpened }, sessionId, options)
+  }
+}
+
+/** Settle prepared rewinds orphaned across processes; provider-only proof waits for the next proven start. */
+async function settleInterruptedCommands(
+  deps: StructuredAgentSessionHostDeps,
+  sessionId: string,
+  session: StructuredAgentSessionHostSession
+): Promise<void> {
+  const fence = structuredAgentSessionConversationFence(deps.store, sessionId)
+  try {
+    await recoverStructuredRewind(deps, sessionId, session.journal, fence)
+  } catch (error) {
+    deps.logger.warn('settling an interrupted rewind on open failed', {
+      scope: 'rewind-recovery',
+      sessionId,
+      error
+    })
   }
 }

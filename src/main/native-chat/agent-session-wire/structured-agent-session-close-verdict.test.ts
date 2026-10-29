@@ -1,9 +1,3 @@
-vi.mock('../agent-session-journal/journal-legacy-rest-worker', async () => {
-  const { InProcessLegacyRestWorker } =
-    await import('../agent-session-journal/journal-legacy-rest-replay-test-support')
-  return { JournalLegacyRestWorker: InProcessLegacyRestWorker }
-})
-
 // Only user-close supplies personal cancellation; host eviction/quit leaves interrupted work reportable.
 // Provider and fallback turn-end writers both derive verdict from the journal Stop event.
 
@@ -12,10 +6,7 @@ import {
   AGENT_JOURNAL_THREAD_SCOPE,
   type AgentJournalTurnLifecycle
 } from '../../../shared/agent-session-journal-types'
-import type {
-  AgentSessionStatusEvent,
-  AgentSessionStatusSummary
-} from '../../../shared/agent-session-wire'
+import type { AgentSessionStatusEvent } from '../../../shared/agent-session-wire'
 import { readAgentJournalTurn } from '../../../shared/agent-session-turn-record'
 import { describeNativeChatTurnStatus } from '../../../shared/native-chat-turn-status'
 import { withNativeChatCutTurnNotices } from '../../../shared/native-chat-cut-turn-notice'
@@ -23,13 +14,9 @@ import { selectStructuredAgentSettledTurns } from '../../../shared/structured-ag
 import { AgentSessionRecoveryCapsule } from '../../runtime/agent-session-recovery-capsule'
 import { openTestJournalHostDatabase } from '../agent-session-journal/journal-host-database-test-support'
 import { StructuredAgentSessionHost } from './structured-agent-session-host'
-import { JournalLegacyRestInitializer } from '../agent-session-journal/journal-legacy-rest-initializer'
-import { setStructuredJournalReadiness } from './structured-agent-session-registry'
 import {
   adapter,
   attach,
-  CALLER,
-  envelope,
   hostTestState,
   replaceHostTestState
 } from './structured-agent-session-host-test-harness'
@@ -39,9 +26,6 @@ import {
   HOST_TEST_THREAD as THREAD
 } from './structured-agent-session-host-test-data'
 import { createStructuredAgentSessionLogger } from './structured-agent-session-logger'
-import { openTestAgentSessionRecordStore } from '../../runtime/agent-session-record-store-test-harness'
-import { structuredAgentSessionAgentStatus } from '../../../shared/structured-agent-session-agent-status'
-import { agentTurnEligibleForAttention } from '../../../shared/agent-main-agent-verdict'
 import { NO_STRUCTURED_AGENTS } from './structured-agent-session-adapter-router-test-support'
 
 const CUT_TURN = { provider: 'codex' as const, threadId: THREAD, turnId: 'cut-turn', ordinal: 1 }
@@ -128,23 +112,6 @@ async function runningTurn(): Promise<AgentSessionStatusEvent[]> {
   return statuses
 }
 
-/** The next Orca over the files a quit left: the one that reads them, since startup opens none. */
-function relaunch(): void {
-  const { store, root } = hostTestState()
-  host = new StructuredAgentSessionHost({
-    agents: NO_STRUCTURED_AGENTS,
-    logger: createStructuredAgentSessionLogger(),
-    store,
-    adapter: adapter(),
-    journalDatabase: openTestJournalHostDatabase(root),
-    claimKeyId: 'key-1',
-    mintSpawnToken: () => 'spawn-b',
-    now: () => HOST_TEST_NOW
-  })
-  replaceHostTestState({ store, host })
-}
-
-/** What the settle wrote, read back from the journal the next reader opens. */
 async function settledTurn() {
   await host.restoreReadableSessions([SESSION])
   const { items } = await host.journalSnapshot(SESSION)
@@ -166,93 +133,7 @@ function lastSummary(statuses: AgentSessionStatusEvent[]) {
   return last?.type === 'status' ? last.session : null
 }
 
-function attention(row: AgentSessionStatusSummary | null | undefined): boolean {
-  if (!row || row.status === null) {
-    throw new Error('missing status for attention consumer')
-  }
-  return agentTurnEligibleForAttention({
-    ...row,
-    ...structuredAgentSessionAgentStatus({ ...row, status: row.status })
-  })
-}
-
 describe('a turn cut short by closing its provider', () => {
-  it('keeps current Stop low priority through release and cache reacquisition, then restores it at its saved clock', async () => {
-    const trusted: AgentSessionStatusSummary[] = []
-    host.deps.statusSink = { publish: (row) => trusted.push(row), forget: () => {} }
-    const statuses = await runningTurn()
-    hostTestState().cancelTurn.mockImplementationOnce(async () => {
-      hostTestState().acquire.mock.calls[0]?.[0].events?.appendItem(
-        CUT_TURN,
-        {
-          kind: 'turn',
-          turnId: 'cut-turn',
-          state: 'interrupted',
-          startedAt: 1000,
-          completedAt: HOST_TEST_NOW
-        },
-        { turnScope: AGENT_JOURNAL_THREAD_SCOPE }
-      )
-      return { cancelled: true }
-    })
-    const stopped = await host.cancel(CALLER, {
-      envelope: envelope('agentSession.cancel', { turnId: 'cut-turn' }),
-      turnId: 'cut-turn'
-    })
-    expect(stopped).toMatchObject({ ok: true, value: { cancelled: true } })
-    await host.flushStreamedEvents(SESSION)
-    providerEnd = null
-    await host.close(SESSION, 'evict')
-    expect(hostTestState().store.getRecord(SESSION)?.lease.claimStatus).toBe('released')
-    await host.journalSnapshot(SESSION)
-    const beforeBackground = { trusted: [...trusted], statuses: [...statuses] }
-    const advance = vi.spyOn(JournalLegacyRestInitializer.prototype, 'advance')
-    setStructuredJournalReadiness(() => true)
-    try {
-      host.advanceLegacyRest()
-      await advance.mock.results.findLast((result) => result.value)?.value
-    } finally {
-      setStructuredJournalReadiness(() => false)
-    }
-    expect({ trusted, statuses }).toEqual(beforeBackground)
-    for (const row of [trusted.at(-1), lastSummary(statuses)]) {
-      expect(row).toMatchObject({
-        status: 'idle',
-        turnOutcome: 'cancellation',
-        statusStartedAt: HOST_TEST_NOW
-      })
-      expect(row?.restoredInterruption).toBeUndefined()
-      expect(attention(row)).toBe(false)
-    }
-    await host.flushAllStreamedEvents()
-    const store = await openTestAgentSessionRecordStore(hostTestState().root)
-    host = new StructuredAgentSessionHost({
-      agents: NO_STRUCTURED_AGENTS,
-      logger: createStructuredAgentSessionLogger(),
-      store,
-      adapter: adapter(),
-      journalDatabase: openTestJournalHostDatabase(hostTestState().root),
-      claimKeyId: 'key-1',
-      mintSpawnToken: () => 'spawn-restart',
-      now: () => HOST_TEST_NOW,
-      statusSink: { publish: (row) => trusted.push(row), forget: () => {} }
-    })
-    replaceHostTestState({ store, host })
-    const restored: AgentSessionStatusEvent[] = []
-    host.subscribeStatus({ id: 'restart-both', emit: (event) => restored.push(event) })
-    await host.restoreReadableSessions([SESSION])
-    await host.journalSnapshot(SESSION)
-    for (const row of [trusted.at(-1), lastSummary(restored)]) {
-      expect(row).toMatchObject({
-        status: 'idle',
-        turnOutcome: 'cancellation',
-        restoredInterruption: true,
-        statusStartedAt: 1000
-      })
-      expect(attention(row)).toBe(true)
-    }
-  })
-
   it("records the user's close of this chat as their cancellation", async () => {
     const statuses = await runningTurn()
 
@@ -360,7 +241,6 @@ describe('a turn cut short by closing its provider', () => {
     const statuses = await runningTurn()
 
     await host.flushAllStreamedEvents({ trigger: 'quit' })
-    relaunch()
 
     expect(statuses.findLast((event) => event.type === 'status')).toMatchObject({
       session: { status: 'idle', turnOutcome: 'interruption' }
@@ -421,7 +301,6 @@ describe('a turn cut short by closing its provider', () => {
     await runningTurn()
 
     await host.flushAllStreamedEvents({ trigger: 'quit' })
-    relaunch()
 
     const { turn, notices } = await settledTurn()
     expect(turn).toMatchObject({ state: 'interrupted' })

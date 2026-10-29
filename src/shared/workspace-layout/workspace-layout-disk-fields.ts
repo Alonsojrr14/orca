@@ -240,7 +240,6 @@ const SLEEPING = {
   terminalTitle: resumeRecord('terminalTitle'),
   lastAssistantMessage: resumeRecord('lastAssistantMessage'),
   interrupted: resumeRecord('interrupted'),
-  restoredInterruption: resumeRecord('restoredInterruption'),
   mainAgent: resumeRecord('mainAgent'),
   connectionId: resumeRecord('connectionId'),
   launchConfig: resumeRecord('launchConfig'),

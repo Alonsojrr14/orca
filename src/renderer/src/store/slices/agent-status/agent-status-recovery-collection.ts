@@ -17,7 +17,7 @@ import {
   type CollectSleepingAgentSessionRecordsOptions
 } from './agent-status-sleeping-records'
 import { getLaunchConfigForEntry } from './agent-status-launch-config'
-import { agentTurnEligibleForAttention } from '../../../../../shared/agent-main-agent-verdict'
+import { agentTurnEndedOnPurpose } from '../../../../../shared/agent-main-agent-verdict'
 import { isCompletedPiCompatibleAgentWithLiveRecoveryRecord } from '../../../../../shared/live-resume-anchor-record'
 
 export function collectSleepingAgentSessionRecordsForWorktree(
@@ -149,7 +149,7 @@ export function collectHibernatedCompletionEvidenceForWorktree(
       !allowedPaneKeys.has(paneKey) ||
       entry.state !== 'done' ||
       agentType === undefined ||
-      !agentTurnEligibleForAttention(entry)
+      agentTurnEndedOnPurpose(entry)
     ) {
       continue
     }

@@ -181,7 +181,8 @@ export async function acquireAcpStructuredSession(input: {
           sessionId,
           fence: acquire.fence,
           acquisitionGeneration: generation,
-          reportedOptions: options.observedCurrent(spec.permissionModeConfig?.values)
+          reportedOptions: options.observedCurrent(spec.permissionModeConfig?.values),
+          catalogListing: { models: options.read().models }
         })
       }
     })
@@ -203,7 +204,7 @@ export async function acquireAcpStructuredSession(input: {
       dialect: spec.dialect,
       now,
       childStops: () => session?.childStops ?? NO_ACP_CHILD_STOPS,
-      ...acpLaneChildWorkDelivery(deps, sessionId, events, () => lane),
+      ...acpLaneChildWorkDelivery(deps, sessionId, events),
       logger,
       onInputAccepted: (clientMessageId) => {
         if (isAcpReadySession(session)) {

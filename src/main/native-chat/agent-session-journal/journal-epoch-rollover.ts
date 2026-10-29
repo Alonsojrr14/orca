@@ -56,17 +56,15 @@ export function publishNewEpoch(input: {
     if (retired !== null) {
       deleteJournalEpochRows(db, sessionId, retired)
     }
-    // Before the rows, which keep the new epoch's open turn on its pointer.
-    publishJournalSessionEpoch(db, input.identity, input.epoch)
     for (const each of rows) {
       insertJournalRow(db, sessionId, each)
     }
     input.queue.receipt.write(db)
+    publishJournalSessionEpoch(db, input.identity, input.epoch)
   })
 
   // Adopt committed state before fallible work can leave writers targeting the deleted epoch.
   input.queue.receipt.committed()
   state.oldestSequence = 1
-  state.persistedRest = [null, null]
   input.onPublished({ state, newer: null, damage: null })
 }

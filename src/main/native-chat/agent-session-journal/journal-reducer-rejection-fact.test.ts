@@ -35,10 +35,7 @@ describe('a rejected dispatch', () => {
   }
 
   it("copies a rejection's typed fact onto the submission, and only on `rejected`", () => {
-    const rejection = {
-      kind: 'providerRejected' as const,
-      detail: { text: 'Too long', audience: 'person' }
-    }
+    const rejection = { kind: 'providerRejected', detail: { text: 'Too long', audience: 'person' } }
     const state = fold([
       submission,
       {
@@ -47,7 +44,7 @@ describe('a rejected dispatch', () => {
         state: 'rejected',
         providerItemId: null,
         reason: "The agent didn't accept this message.",
-        rejection,
+        rejection: { kind: 'providerRejected', detail: { text: 'Too long', audience: 'person' } },
         ...base(2)
       }
     ])

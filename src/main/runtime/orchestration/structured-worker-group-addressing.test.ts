@@ -97,7 +97,6 @@ function installHost(options: {
       present: true,
       sessionIds: options.tabListed ? [SESSION_ID] : []
     }),
-    withConversationUse: <T>(_id: string, task: () => Promise<T>) => task(),
     journalSnapshot: async () => ({ items: options.items ?? [idleTurn()] }),
     currentWork: () => null
   }

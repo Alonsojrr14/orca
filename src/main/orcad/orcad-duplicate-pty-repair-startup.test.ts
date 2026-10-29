@@ -164,7 +164,6 @@ vi.mock('../runtime/orca-runtime', () => ({
     }
     async closeNotificationDismissals() {}
     syncWindowGraph() {}
-    noteHeadlessStartupReady() {}
   }
 }))
 vi.mock('../runtime/runtime-rpc', () => ({

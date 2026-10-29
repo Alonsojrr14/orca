@@ -2,34 +2,15 @@
 
 import type { AgentChildWorkEvidence } from '../../../shared/agent-status-child-work-evidence'
 import { isLiveChildWork } from '../../../shared/agent-status-child-work-liveness'
-import { randomUUID } from 'node:crypto'
-import type { AgentJournalTurnScope } from '../../../shared/agent-session-journal-types'
-import type { StructuredAgentSessionChildWorkProducer } from './structured-agent-session-subagent-rows'
 
-export type ChildWorkLifetimeToken = {
-  readonly childWorkLifetime: true
-  readonly invocationId: string
-  journalWork?: {
-    producer: StructuredAgentSessionChildWorkProducer
-    turnScope?: AgentJournalTurnScope
-  }
-}
-const newToken = (): ChildWorkLifetimeToken => ({
-  childWorkLifetime: true,
-  invocationId: randomUUID()
-})
+export type ChildWorkLifetimeToken = { readonly childWorkLifetime: true }
+const newToken = (): ChildWorkLifetimeToken => ({ childWorkLifetime: true })
 
 type ChildLifetime = {
-  start?: Extract<AgentChildWorkEvidence, { type: 'live' }>
   run: string | undefined
   previous: Set<string>
   token: ChildWorkLifetimeToken
   closed: 'idle' | 'terminal' | 'stopped' | null
-}
-export type ChildWorkChange = {
-  token: ChildWorkLifetimeToken
-  start: Extract<AgentChildWorkEvidence, { type: 'live' }>
-  phase: 'open' | 'settled' | 'interrupted'
 }
 
 type SessionWork = {
@@ -40,19 +21,11 @@ type SessionWork = {
 export class StructuredAgentSessionOpenChildWork {
   private readonly sessions = new Map<string, SessionWork>()
 
-  observe(sessionId: string, evidence: readonly AgentChildWorkEvidence[]): ChildWorkChange[] {
-    const changes: ChildWorkChange[] = []
+  observe(sessionId: string, evidence: readonly AgentChildWorkEvidence[]): void {
     for (const edge of evidence) {
       if (edge.type === 'session-ended') {
-        for (const child of this.sessions.get(sessionId)?.history.values() ?? []) {
-          if (child.start && child.closed === null) {
-            changes.push({ token: child.token, start: child.start, phase: 'interrupted' })
-          }
-        }
         this.sessions.delete(sessionId)
       } else if (edge.type === 'live') {
-        const previous = this.sessions.get(sessionId)?.history.get(edge.child.handle.id)
-        const before = previous && { ...previous }
         this.live(
           sessionId,
           edge.child.handle.id,
@@ -60,33 +33,10 @@ export class StructuredAgentSessionOpenChildWork {
           edge.restart === true,
           isLiveChildWork(edge.child)
         )
-        const after = this.sessions.get(sessionId)?.history.get(edge.child.handle.id)
-        if (!after || (before?.token === after.token && before.closed === after.closed)) {
-          continue
-        }
-        if (before?.start && before.closed === null && before.token !== after.token) {
-          changes.push({ token: before.token, start: before.start, phase: 'interrupted' })
-        }
-        if (before?.token !== after.token) {
-          after.start = edge
-        }
-        if (after.start) {
-          changes.push({
-            token: after.token,
-            start: after.start,
-            phase: after.closed === null ? 'open' : 'settled'
-          })
-        }
       } else if (edge.type === 'ended' || edge.type === 'removed') {
-        const before = this.capture(sessionId, edge.handle.id)
         this.end(sessionId, edge.handle.id, edge.handle.runId)
-        const after = this.sessions.get(sessionId)?.history.get(edge.handle.id)
-        if (before && after?.start && !this.capture(sessionId, edge.handle.id)) {
-          changes.push({ token: after.token, start: after.start, phase: 'settled' })
-        }
       }
     }
-    return changes
   }
 
   /** Capture before Stop; reused run strings still require distinct lifetime tokens. */
@@ -103,11 +53,7 @@ export class StructuredAgentSessionOpenChildWork {
     return this.capture(sessionId, handleId) === captured
   }
 
-  stopped(
-    sessionId: string,
-    handleId: string,
-    token: ChildWorkLifetimeToken
-  ): ChildWorkChange | undefined {
+  stopped(sessionId: string, handleId: string, token: ChildWorkLifetimeToken): void {
     const session = this.sessions.get(sessionId)
     const child = session?.history.get(handleId)
     if (!session?.open.has(handleId) || child?.token !== token) {
@@ -115,7 +61,6 @@ export class StructuredAgentSessionOpenChildWork {
     }
     child.closed = 'stopped'
     session.open.delete(handleId)
-    return child.start && { token, start: child.start, phase: 'interrupted' }
   }
 
   forget(sessionId: string): void {

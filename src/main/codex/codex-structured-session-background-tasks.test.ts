@@ -103,7 +103,7 @@ async function adapterWithSession(
     readProcessStartTime: async () => 1_700_000_000_000,
     onEvent,
     onChildWorkEvidence: (sessionId, evidence) =>
-      void published.push({ sessionId, evidence: evidence.map((edge) => edge.type) })
+      published.push({ sessionId, evidence: evidence.map((edge) => edge.type) })
   })
   await acquireReadyCodexForTest(adapter, {
     identity: identity('session-1'),

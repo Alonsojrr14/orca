@@ -1,13 +1,11 @@
-import type { StructuredAgentSessionHostSession } from './structured-agent-session-host-types'
+import type { AgentSessionFailureWordsContext } from '../../../shared/agent-session-failure-words'
+import { structuredAgentSessionStartFailure } from './structured-agent-session-failure-text'
 import { agentJournalItemKey } from '../../../shared/agent-session-journal-item-key'
-import {
-  AGENT_JOURNAL_THREAD_SCOPE,
-  type AgentJournalCursor,
-  type AgentJournalSubmission
-} from '../../../shared/agent-session-journal-types'
+import { AGENT_JOURNAL_THREAD_SCOPE } from '../../../shared/agent-session-journal-types'
 import { isQueuedAgentJournalSubmission } from '../../../shared/agent-session-queued-submission'
 import { structuredAgentSessionStartFailureRowIdentity } from '../../../shared/structured-agent-session-start-failure-row-key'
 import type { JournalLifecycleMutationInput } from '../agent-session-journal/journal-row-builders'
+import type { StructuredAgentSessionHostSession } from './structured-agent-session-host-types'
 import type {
   StructuredAgentSessionStartFailureWords,
   StructuredAgentSessionStartFailureCause
@@ -15,6 +13,10 @@ import type {
 import type { StructuredAgentSessionResumeOutcome } from './structured-agent-session-agent-start'
 import type { AgentSessionRecord } from '../../../shared/agent-session-record'
 import { agentSessionFailureFact } from '../../../shared/agent-session-failure'
+import type {
+  AgentJournalCursor,
+  AgentJournalSubmission
+} from '../../../shared/agent-session-journal-types'
 import { failedProviderChildStart } from './structured-agent-session-provider-child'
 import { structuredAgentSessionEndedChildFailure } from './structured-agent-session-ended-child-failure'
 
@@ -153,4 +155,17 @@ export function oldestQueuedSubmission(
     }
   }
   return oldest
+}
+
+export async function recordStructuredAgentSessionDeliveryFailure(
+  session: Pick<StructuredAgentSessionHostSession, 'journal'> & { fence: number },
+  failure: NonNullable<ReturnType<typeof startThatFailedWhileQueued>>,
+  context: AgentSessionFailureWordsContext,
+  clientMessageId: string | null
+): Promise<void> {
+  await recordStructuredAgentSessionStartFailure(
+    session,
+    { startKey: failure.startKey, ...structuredAgentSessionStartFailure(failure.cause, context) },
+    clientMessageId
+  )
 }

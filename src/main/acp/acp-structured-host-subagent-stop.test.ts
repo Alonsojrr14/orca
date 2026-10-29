@@ -103,7 +103,6 @@ async function stoppingChild(reportsOutcome: boolean) {
         ? row.body.blocks.filter(isSubagentBlock).map((block) => ({ row, block }))
         : []
     )
-  await hosted.rig.settle()
   const original = (await rosters())[0]
   vi.setSystemTime(STOP_AT)
   const closeAt: number[] = []

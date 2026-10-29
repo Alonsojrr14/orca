@@ -1,4 +1,3 @@
-import type { ChildWorkAdmission } from '../native-chat/agent-session-wire/structured-agent-session-accepted-child-work'
 import { waitForPromiseWithSignal } from '../../shared/abort-signal-reason'
 import { dispatchClaudeCommand } from './claude-structured-command-dispatch'
 import type {
@@ -35,10 +34,7 @@ import {
   type ClaudeExitLifecycle
 } from './claude-structured-session-exit-lifecycle'
 import type { AgentSessionBackgroundTaskState } from '../../shared/agent-session-wire'
-import {
-  publishClaudeChildWork,
-  finishClaudeChildWorkAfterClose
-} from './claude-structured-child-work-delivery'
+import { drainClaudeChildWork } from './claude-child-work-evidence'
 import { emitClaudeStructuredSessionEvent } from './claude-structured-event-delivery'
 import {
   answerClaudeStructuredPrompt,
@@ -129,8 +125,11 @@ export class ClaudeStructuredSessionAdapter implements StructuredAgentSessionAda
     sessionId: string,
     session: ClaudeSession | null | undefined = this.sessions.get(sessionId),
     message: Record<string, unknown> | null = null
-  ): ChildWorkAdmission {
-    return publishClaudeChildWork(this.deps, sessionId, session, message)
+  ): void {
+    const evidence = drainClaudeChildWork(session, message, this.deps.now?.() ?? Date.now())
+    if (evidence.length > 0) {
+      this.deps.onChildWorkEvidence?.(sessionId, evidence, session?.events)
+    }
   }
 
   bindPromptItemId(sessionId: string, journalItemId: string, promptKey: string): void {
@@ -232,7 +231,7 @@ export class ClaudeStructuredSessionAdapter implements StructuredAgentSessionAda
     }
   }
   readOptions = (input: { sessionId: string; fence: number }) =>
-    readClaudeStructuredSessionOptions(this.session(input.sessionId), this.deps.requestTimeoutMs)
+    readClaudeStructuredSessionOptions(this.session(input.sessionId))
   readOptionRestoreFailures = (sessionId: string): readonly string[] => {
     const session = this.sessions.get(sessionId)
     return session?.retiredModel !== undefined && !session.options.has('model') ? ['model'] : []
@@ -254,9 +253,7 @@ export class ClaudeStructuredSessionAdapter implements StructuredAgentSessionAda
     try {
       return await close()
     } finally {
-      finishClaudeChildWorkAfterClose(this.deps, sessionId, session, (id, child) =>
-        this.publishChildWork(id, child)
-      )
+      this.publishChildWork(sessionId, session)
     }
   }
 

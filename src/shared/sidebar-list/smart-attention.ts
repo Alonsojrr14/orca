@@ -1,7 +1,7 @@
 import { detectAgentStatusFromTitle } from '../agent-detection'
 import { isAgentStatusFresh } from '../agent-status-freshness'
 import { agentEntryCompletionAt } from '../agent-completion-time'
-import { agentTurnEligibleForAttention } from '../agent-main-agent-verdict'
+import { agentTurnEndedOnPurpose } from '../agent-main-agent-verdict'
 import { migrationUnsupportedToAgentStatusEntry } from '../migration-unsupported-agent-entry'
 import { resolveDecayedAgentRowState } from '../agent-row-decay-state'
 import { tabHasLivePty } from '../tab-has-live-pty'
@@ -68,7 +68,7 @@ export function mostRecentAttentionInHistory(history: AgentStateHistoryEntry[]):
     // Why: history rows keep the verdict, so filter a stopped turn like the current entry.
     if (h.state === 'done' || h.state === 'blocked' || h.state === 'waiting') {
       // Why: Infinity from a corrupted row would pin the worktree atop Class 3 forever; treat non-finite as missing.
-      if (!agentTurnEligibleForAttention(h) || !Number.isFinite(h.startedAt)) {
+      if (agentTurnEndedOnPurpose(h) || !Number.isFinite(h.startedAt)) {
         continue
       }
       if (h.startedAt > max) {

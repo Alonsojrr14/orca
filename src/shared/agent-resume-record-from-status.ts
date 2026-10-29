@@ -30,7 +30,6 @@ export type ResumeRecordStatus = Pick<
   | 'lastAssistantMessage'
   | 'terminalResumeEligible'
   | 'interrupted'
-  | 'restoredInterruption'
   | 'mainAgent'
   | 'worktreeId'
 >

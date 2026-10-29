@@ -18,7 +18,6 @@ export type DeadGenerationJournal = UnopenedSendJournal & {
   appendPlannedLifecycleBatch: AgentSessionJournal['appendPlannedLifecycleBatch']
   pendingSubmissions?: AgentSessionJournal['pendingSubmissions']
   itemFence: AgentSessionJournal['itemFence']
-  requestFrontier?: AgentSessionJournal['requestFrontier']
 }
 
 export type StructuredAgentSessionUnfinishedWork = {
@@ -102,7 +101,6 @@ function isUnfinishedItem(item: AgentJournalRenderItem): boolean {
 /** Pending prompts wait on the user; cancel them without claiming the provider was mid-response. */
 export function isInProgressStructuredAgentSessionItem(item: AgentJournalRenderItem): boolean {
   return (
-    (item.body.kind === 'semantic-work' && item.body.phase === 'open') ||
     readAgentJournalTurn(item.body)?.state === 'running' ||
     (item.body.kind === 'tool-call' && item.body.state === 'running')
   )

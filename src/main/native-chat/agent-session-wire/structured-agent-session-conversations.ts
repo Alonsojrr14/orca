@@ -1,5 +1,4 @@
 import type { JournalRow } from '../agent-session-journal/journal-row-schema'
-import type { StructuredAgentSessionResidency } from './structured-agent-session-residency'
 import type { AgentSessionJournal } from '../agent-session-journal/journal-store'
 import type { StructuredAgentSessionHostSession } from './structured-agent-session-host-types'
 import type { StructuredAgentSessionLogger } from './structured-agent-session-logger'
@@ -14,7 +13,6 @@ export class StructuredAgentSessionConversations extends Map<
 
   constructor(
     private readonly delivery: {
-      residency?: () => Pick<StructuredAgentSessionResidency, 'opened' | 'released'> | undefined
       observe?: (
         sessionId: string,
         journal: AgentSessionJournal,
@@ -60,7 +58,6 @@ export class StructuredAgentSessionConversations extends Map<
         }
         try {
           this.delivery.deliver(sessionId, journal)
-          this.delivery.residency?.()?.released(sessionId)
         } catch (error) {
           this.delivery.logger.warn('delivering a journal commit failed', {
             scope: 'journal-delivery',
@@ -88,7 +85,6 @@ export class StructuredAgentSessionConversations extends Map<
     })
     this.activity.set(sessionId, this.delivery.now())
     const adopted = super.set(sessionId, session)
-    this.delivery.residency?.()?.opened(sessionId)
     this.delivery.observe?.(sessionId, journal)
     this.delivery.onOpened?.(sessionId)
     return adopted

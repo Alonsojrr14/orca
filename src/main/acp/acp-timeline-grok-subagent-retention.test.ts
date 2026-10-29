@@ -223,7 +223,7 @@ describe('a Grok subagent reported on long after the turn that spawned it', () =
       onFailed: (reason) => {
         throw new Error(reason)
       },
-      onChildWorkEvidence: (batch) => void evidence.push(...batch)
+      onChildWorkEvidence: (batch) => evidence.push(...batch)
     })
     lane.apply(
       lane.translator.notification(

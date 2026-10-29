@@ -1,19 +1,5 @@
-import { StructuredAgentSessionStatusWork } from './structured-agent-session-status-work'
-import { structuredAgentSessionOwnerEnded } from './structured-agent-session-current-work'
-// The host's answer to "what is every structured session doing", fanned out to session lists.
-//
-// A client used to learn whether a turn was running by replaying the journal through its own
-// reducer, which tied the answer to whichever surface happened to hold a reader open: hide the
-// chat and the sidebar froze on the last thing it had heard. The host always has the journal, so
-// it projects the status once per journal publication and sends only the changes.
-//
-// The last projection is kept after the session's provider child is evicted: an idle session is
-// still idle without a process, and a renderer that reloads must not lose every settled row until
-// each chat is reopened. Restart is the one boundary that forgets: the restore publishes each
-// restored chat's row from its record and its journal's saved open turn (`publishAtRest`), and the
-// chat's first open replaces that with the journal's own projection.
+// Project host journals for all session lists, retaining settled rows across idle eviction and renderer reload.
 
-import type { ChildWorkAdmission } from './structured-agent-session-accepted-child-work'
 import type {
   AgentSessionStatusEvent,
   AgentSessionStatusSummary
@@ -31,12 +17,9 @@ import {
   type StructuredAgentSessionStatusFeedDeps
 } from './structured-agent-session-status-feed-deps'
 import {
-  atRestStructuredStatusSummary,
   renamedStructuredStatusSummary,
   retainedStructuredStatusSummaries,
-  structuredAgentSessionStatusSummary,
-  withoutLiveExecution,
-  type StructuredAgentSessionAtRest
+  structuredAgentSessionStatusSummary
 } from './structured-agent-session-status-summary'
 import { structuredStatusChildWorkFields } from './structured-agent-session-status-child-work'
 import {
@@ -48,7 +31,10 @@ import {
   structuredStatusSummariesEqual
 } from './structured-agent-session-status-summary-equality'
 import type { StructuredAgentSessionChildWorkProducer } from './structured-agent-session-subagent-rows'
-import type { CapturedChildWorkStops } from './structured-agent-session-status-ownership'
+import {
+  StructuredAgentSessionStatusOwnership,
+  type CapturedChildWorkStops
+} from './structured-agent-session-status-ownership'
 
 export type { StructuredAgentSessionStatusSink } from './structured-agent-session-status-ownership'
 export type { StructuredAgentSessionStatusFeedDeps } from './structured-agent-session-status-feed-deps'
@@ -58,16 +44,13 @@ export type { StructuredAgentSessionStatusState } from './structured-agent-sessi
 export type { StructuredAgentSessionStatusSubscriber } from './structured-agent-session-status-feed-deps'
 
 export class StructuredAgentSessionStatusFeed {
-  private readonly ownership = new StructuredAgentSessionStatusWork(
-    () => this.deps,
-    (sessionId) => this.publish(sessionId)
+  private readonly ownership = new StructuredAgentSessionStatusOwnership(() =>
+    this.deps.statusSink?.()
   )
   private readonly subscribers = new Map<string, StructuredAgentSessionStatusSubscriber>()
   // Never evicted: chats are named only while in here, and AI Vault reads closed ones' names here.
   private readonly published = new Map<string, StatusPublication>()
-  /** The user's newest accepted send each session was last projected with; a new one retires
-   *  settled children. */
-  // Read per call: field initializers run before the constructor assigns `deps`.
+  private readonly acceptedSends = new Map<string, string>()
   private readonly projections = new StructuredAgentSessionJournalProjections((sessionId) =>
     this.deps.replacedRuntime?.(sessionId)
   )
@@ -104,7 +87,7 @@ export class StructuredAgentSessionStatusFeed {
 
   /** Drop sink roster membership and refresh retained child projections. */
   forget(sessionId: string): void {
-    this.ownership.forgetWork(sessionId)
+    this.acceptedSends.delete(sessionId)
     try {
       this.ownership.forget(sessionId)
     } catch (error) {
@@ -142,7 +125,14 @@ export class StructuredAgentSessionStatusFeed {
     if (!previous) {
       return
     }
-    const retained = withoutLiveExecution(previous)
+    const {
+      hostExecutionOwned: _hostExecutionOwned,
+      hostExecutionPhase: _hostExecutionPhase,
+      stopping: _stopping,
+      restartResume: _restartResume,
+      ...retained
+    } = previous
+    retained.runtimePermission = null
     this.published.set(sessionId, {
       summary: retained,
       firstInputSubmissionKey: publication?.firstInputSubmissionKey ?? null
@@ -171,8 +161,6 @@ export class StructuredAgentSessionStatusFeed {
     }
   }
 
-  hasUnknownRestart = (sessionId: string): boolean => this.projections.hasUnknownRestart(sessionId)
-
   readPublished = (sessionId: string): AgentSessionStatusSummary | undefined =>
     this.published.get(sessionId)?.summary
 
@@ -188,41 +176,6 @@ export class StructuredAgentSessionStatusFeed {
       : null
   }
 
-  /** A restored chat this host lists but has not opened, published like any row: to subscribers,
-   *  the sink and the status observer, as a re-projection of what the host already knew. */
-  publishAtRest(sessionId: string, rest: StructuredAgentSessionAtRest): void {
-    const record = this.deps.getConversation(sessionId)
-    if (record) {
-      if (
-        rest.known !== false ||
-        rest.interrupted ||
-        structuredAgentSessionOwnerEnded(
-          { ...record.ownerObservation, runtimeFence: record.currentFence },
-          this.deps.replacedRuntime?.(sessionId)
-        ) ||
-        (rest.known !== false &&
-          !rest.openTurn &&
-          record.ownerObservation.claimStatus === 'released')
-      ) {
-        this.projections.noteRestart(sessionId, rest)
-      }
-      if (this.deps.sessions.has(sessionId)) {
-        this.publish(sessionId)
-        return
-      }
-      const summary = atRestStructuredStatusSummary(record, rest, this.deps)
-      this.published.set(sessionId, { summary, firstInputSubmissionKey: null })
-      this.sink(summary, record.location)
-      this.broadcast({ type: 'status', session: summary })
-      try {
-        this.deps.onStatusChanged?.(summary, { replay: true, firstInputSubmissionKey: null })
-      } catch (error) {
-        this.logFailure('status-observer', 'status observer failed', sessionId, error)
-      }
-    }
-  }
-
-  /** Re-projects one session after its journal changed; equal projections are not re-sent. */
   publish(sessionId: string, journal?: AgentSessionJournal, options?: { replay?: boolean }): void {
     const session = this.deps.sessions.get(sessionId)
     if (!session) {
@@ -231,7 +184,7 @@ export class StructuredAgentSessionStatusFeed {
     const source = journal ?? session.journal
     const record = this.deps.getConversation(sessionId)
     const projection = this.projections.read(source, record, session)
-    this.ownership.retireSettledChildrenOnNewTurn(sessionId, session, projection.acceptedSendKey)
+    this.retireSettledChildrenOnNewTurn(sessionId, session, projection.acceptedSendKey)
     const summary = structuredAgentSessionStatusSummary({
       sessionId,
       session,
@@ -272,26 +225,27 @@ export class StructuredAgentSessionStatusFeed {
     })
   }
 
-  /** A finished child's record stays, with its outcome, until the user's next turn: the next send
-   *  the provider accepts (see `newestAcceptedSendKey`), unless it still owns live work. No surface
-   *  lists it (they list running children only); it stays so a late frame of its run cannot bring
-   *  it back as live, so an acknowledged Stop's provisional ending can be replaced by the task's
-   *  own, and so its live work keeps its owner. The provider ending the session removes nothing:
-   *  children still live settle `unknown`. The one earlier death is the host letting go of the
-   *  session, whose row takes every child record with it (see `forget`). A command never settles:
-   *  its record goes when it stops. */
-  /** The summary's child fields, from the records the store holds for the session. */
-  private childWorkFields = (
+  /** Retain settled children until the next accepted send to reject late revival and allow final outcomes.
+   * Live work keeps its owner; provider exit settles unknown, while host release removes all records. */
+  private retireSettledChildrenOnNewTurn(
     sessionId: string,
-    provider: StatusFeedSession['params']['provider']
-  ) => structuredStatusChildWorkFields(this.readChildWork(sessionId), provider)
-
-  publishHeldSends(...args: Parameters<StructuredAgentSessionStatusWork['publishHeldSends']>) {
-    return this.ownership.publishHeldSends(...args)
+    session: StatusFeedSession,
+    acceptedSendKey: string
+  ): void {
+    const previous = this.acceptedSends.get(sessionId)
+    this.acceptedSends.set(sessionId, acceptedSendKey)
+    if (previous === undefined || acceptedSendKey === previous) {
+      return
+    }
+    this.admitChildWork(sessionId, session, [{ type: 'turn-started', observedAt: this.deps.now() }])
   }
 
-  handoverChanged(sessionId: string, clientMessageId: string): void {
-    this.ownership.handoverChanged(sessionId, clientMessageId)
+  /** Exclude per-tick usage from global broadcasts; chat background channels retain it. */
+  private childWorkFields(
+    sessionId: string,
+    provider: StatusFeedSession['params']['provider']
+  ): Pick<AgentSessionStatusSummary, 'children' | 'backgroundTasks'> {
+    return structuredStatusChildWorkFields(this.readChildWork(sessionId), provider)
   }
 
   /** Publish evidence then refold parent/summary; sink failure must not block other publications. */
@@ -299,12 +253,12 @@ export class StructuredAgentSessionStatusFeed {
     sessionId: string,
     evidence: AgentChildWorkEvidence[],
     producer?: StructuredAgentSessionChildWorkProducer
-  ): ChildWorkAdmission {
+  ): void {
     const session = this.deps.sessions.get(sessionId)
-    if (!session) {
-      return { accepted: false, reason: 'closed' }
+    if (!session || !this.admitChildWork(sessionId, session, evidence, producer)) {
+      return
     }
-    return this.ownership.admitChildWork(sessionId, session, evidence, producer)
+    this.publish(sessionId)
   }
 
   readChildWork(sessionId: string): AgentChildWorkView[] | undefined {
@@ -336,7 +290,26 @@ export class StructuredAgentSessionStatusFeed {
   readChildWorkRecords = (sessionId: string): AgentChildWorkRecord[] | undefined =>
     this.ownership.readChildWorkRecords(sessionId)
 
-  /** A failing sink must never cost the subscribers their status event. */
+  private admitChildWork(
+    sessionId: string,
+    session: StatusFeedSession,
+    evidence: AgentChildWorkEvidence[],
+    producer?: StructuredAgentSessionChildWorkProducer
+  ): boolean {
+    try {
+      this.ownership.publishChildWork(sessionId, evidence, session.params.provider)
+    } catch (error) {
+      this.logFailure('child-work-publish', 'child work publish failed', sessionId, error)
+      return false
+    }
+    try {
+      this.deps.onChildWorkChanged?.(sessionId, producer)
+    } catch (error) {
+      this.logFailure('child-work-observer', 'child work observer failed', sessionId, error)
+    }
+    return true
+  }
+
   private sink(
     summary: AgentSessionStatusSummary,
     location?: StatusFeedSession['params']['location']

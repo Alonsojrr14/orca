@@ -1,6 +1,5 @@
 // Replay live epochs without rewriting history; damage/newer rows fail load and remain on disk.
 
-import type { AgentJournalCursor } from '../../../shared/agent-session-journal-types'
 import type Database from '../../sqlite/sync-database'
 import {
   applyJournalRow,
@@ -10,7 +9,7 @@ import {
 import {
   iterateJournalEpochRows,
   readJournalRowsAfter,
-  readJournalSessionProjection
+  readJournalSessionEpoch
 } from './journal-row-table'
 import { parseJournalRow, type JournalRow } from './journal-row-schema'
 
@@ -29,35 +28,18 @@ export type JournalLoad = {
   damage: JournalDamage | null
 }
 
-/** Replays one chat from the host's database. Returns null when the chat has no journal yet. */
-export function replayJournal(
-  db: Database.Database,
-  sessionId: string,
-  legacyCursor?: AgentJournalCursor
-): JournalLoad | null {
-  const projection = readJournalSessionProjection(db, sessionId)
-  if (projection === null) {
+export function replayJournal(db: Database.Database, sessionId: string): JournalLoad | null {
+  const epoch = readJournalSessionEpoch(db, sessionId)
+  if (epoch === null) {
     return null
   }
-  const { epoch } = projection
   const fold = startJournalRowFold({ sessionId, epoch })
-  let frontier: string | null | undefined
   for (const entry of iterateJournalEpochRows(db, sessionId, epoch)) {
-    if (
-      legacyCursor?.epoch === epoch &&
-      entry.seq > legacyCursor.sequence &&
-      frontier === undefined
-    ) {
-      frontier = fold.finish().state.rest.frontier()
-    }
     if (!fold.add(entry)) {
       break
     }
   }
-  const loaded = fold.finish()
-  loaded.state.persistedRest = projection.pair
-  loaded.state.rest.seedLegacy(projection.pair, frontier)
-  return loaded
+  return fold.finish()
 }
 
 export function startJournalRowFold(input: { sessionId: string; epoch: string }): {

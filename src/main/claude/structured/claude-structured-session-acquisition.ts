@@ -5,14 +5,24 @@ import { resolveClaudeReplayTurn } from '../claude-replay-turn-resolution'
 import { claudeStartedUnechoedSend } from '../claude-command-lifecycle'
 import { claudeSessionStateEndsTurn } from '../claude-session-state-turn-over'
 import { settleClaudeTurnEndWaiters } from '../claude-request-end-wait'
-import * as proof from './claude-structured-init-proof'
+import {
+  createClaudeInitProof,
+  readClaudeCapabilities,
+  observeClaudeReportedPermissionMode,
+  readClaudeFrameString,
+  readClaudeInit
+} from './claude-structured-init-proof'
 import { claudeConfigDirEnvPatch } from '../claude-config-dir-pin'
 import { claudeProcessIdentity } from './claude-structured-owner-identity'
 import { ClaudePromptRegistry } from '../claude-prompt-registry'
 import { adoptClaudeStructuredSpawnOptions } from '../claude-structured-spawn-options'
 import { observeClaudeExecutionModel } from '../claude-structured-execution-observations'
 import { observeClaudeFastModeFacts } from '../claude-structured-session-options'
-import { createClaudeSessionPublication } from './claude-structured-session-publication'
+import {
+  claudeSessionInitialization,
+  createClaudeSessionPublication,
+  reportClaudeOptions
+} from './claude-structured-session-publication'
 import * as sessionState from './claude-structured-session-state'
 import { resolveClaudeAcquisitionError } from '../claude-structured-session-close'
 import { withObservedProviderExit } from '../../native-chat/agent-session-wire/structured-agent-session-failure-text'
@@ -33,7 +43,10 @@ export async function acquireClaudeSession({
   acquisitions,
   exits,
   callbacks
-}: sessionState.ClaudeSessionAcquisitionInput): Promise<AgentSessionAcquisition> {
+}: Omit<
+  Parameters<typeof resolveClaudeAcquisitionLaunch>[0],
+  'previous' | 'attempt'
+>): Promise<AgentSessionAcquisition> {
   const sessionId = input.identity.sessionId
   const prompts = new ClaudePromptRegistry()
   const { previous, attempt } = acquisitions.start(sessionId, prompts)
@@ -44,7 +57,7 @@ export async function acquireClaudeSession({
     expectedProviderSessionId: string | null = null
   // Preserve the CLI diagnostic when SDK cleanup reports a generic error.
   let childEnded: Error | null = null
-  const initProof = proof.createClaudeInitProof()
+  const initProof = createClaudeInitProof()
   const translator = createClaudeSessionJournalTranslator(
     input.events,
     String(input.fence),
@@ -63,8 +76,8 @@ export async function acquireClaudeSession({
   const recordTurnEnd = claudeTurnResumePointWriter(sessionId, sessions, deps)
   const observedOptions: sessionState.ClaudeSession['reportedOptions'] = {}
   const onMessage = (message: Record<string, unknown>): void => {
-    const init = proof.readClaudeInit(message)
-    if (proof.readClaudeFrameString(message, 'session_id') !== expectedProviderSessionId) {
+    const init = readClaudeInit(message)
+    if (readClaudeFrameString(message, 'session_id') !== expectedProviderSessionId) {
       // Foreign init frames refuse startup; ordinary foreign frames are ignored.
       if (init || (message.type === 'system' && message.subtype === 'init')) {
         initProof.refuse()
@@ -72,21 +85,18 @@ export async function acquireClaudeSession({
       return
     }
     if (message.type === 'system' && message.subtype === 'init' && isRootClaudeFrame(message)) {
-      firstRootInit ??= { permissionMode: proof.readClaudeFrameString(message, 'permissionMode') }
+      firstRootInit ??= { permissionMode: readClaudeFrameString(message, 'permissionMode') }
       if (liveSession) {
         liveSession.firstRootInit = firstRootInit
       }
     }
-    const permissionChanged = proof.observeClaudeReportedPermissionMode(observedOptions, message)
+    const permissionChanged = observeClaudeReportedPermissionMode(observedOptions, message)
     const modelChanged =
       liveSession && init?.model ? observeClaudeExecutionModel(liveSession, init.model) : false
     if (init) {
       initProof.resolve(init)
       if (liveSession) {
-        liveSession.capabilities = proof.readClaudeCapabilities(
-          liveSession.capabilities,
-          init.message
-        )
+        liveSession.capabilities = readClaudeCapabilities(liveSession.capabilities, init.message)
       }
     }
     observedLeafUuid = readClaudeTranscriptEntryUuid(message) ?? observedLeafUuid
@@ -94,6 +104,9 @@ export async function acquireClaudeSession({
     if (liveSession) {
       liveSession.leafUuid = observedLeafUuid
       observeClaudeFastModeFacts(liveSession, message)
+      if (message.type === 'result' && sessions.get(sessionId) === liveSession) {
+        reportClaudeOptions(liveSession, sessions, input, deps.requestTimeoutMs, attempt, callbacks)
+      }
       if (claudeSessionStateEndsTurn(message) && sessions.get(sessionId) === liveSession) {
         settleClaudeTurnEndWaiters(liveSession)
       }
@@ -219,8 +232,7 @@ export async function acquireClaudeSession({
       input.events,
       connection,
       translator,
-      deps.now ? { now: deps.now } : {},
-      () => liveSession?.retryChildWork?.() ?? { accepted: true }
+      deps.now ? { now: deps.now } : {}
     )
     acquisitions.assertCurrent(sessionId, attempt)
     if (connection.pid === undefined) {
@@ -255,19 +267,9 @@ export async function acquireClaudeSession({
       process,
       acquisitionGeneration: sessionState.mintClaudeAcquisitionGeneration(deps),
       options: launch.savedOptions.options,
-      initialization: {
-        proof: initProof,
-        account: launch.account,
-        resumesTranscript: launch.resumesTranscript,
-        claudeConfigDir: launch.claudeConfigDir,
-        cwd: launch.cwd,
-        history: {
-          leafUuid: launch.resumeLeafUuid,
-          covered: !launch.resumesTranscript || launch.resumeLeafUuid === null,
-          contextActivity
-        },
-        onLateRefusal: (error) => callbacks.handleExit(sessionId, attempt, error)
-      },
+      initialization: claudeSessionInitialization(launch, initProof, contextActivity, (error) =>
+        callbacks.handleExit(sessionId, attempt, error)
+      ),
       ...(deps.mintLinkId ? { linkId: deps.mintLinkId() } : {}),
       observedAt: deps.now?.() ?? Date.now()
     })

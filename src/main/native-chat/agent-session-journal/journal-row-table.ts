@@ -4,20 +4,11 @@ import { AgentSessionJournalError } from './journal-write-guards'
 
 export type JournalStoredRow = { epoch: string; seq: number; ts: number; rowJson: string }
 
-const SELECT_EPOCH =
-  'SELECT epoch, open_turn_id, open_turn_since FROM journal_sessions WHERE session_id = ?'
-// A new epoch holds no turn until its own rows open one.
+const SELECT_EPOCH = 'SELECT epoch FROM journal_sessions WHERE session_id = ?'
 const PUBLISH_SESSION_EPOCH = `INSERT INTO journal_sessions (session_id, workspace_id, epoch)
 VALUES (?, ?, ?)
 ON CONFLICT(session_id) DO UPDATE SET
-  workspace_id = excluded.workspace_id, epoch = excluded.epoch,
-  open_turn_id = NULL, open_turn_since = NULL`
-const SELECT_REST_FACTS = `SELECT s.open_turn_id AS open_turn_id, s.open_turn_since AS open_turn_since,
-  r.seq AS last_seq, r.ts AS last_ts
-FROM journal_sessions s
-LEFT JOIN journal_rows r ON r.session_id = s.session_id AND r.epoch = s.epoch AND r.seq = (
-  SELECT MAX(seq) FROM journal_rows WHERE session_id = s.session_id AND epoch = s.epoch)
-WHERE s.session_id = ?`
+  workspace_id = excluded.workspace_id, epoch = excluded.epoch`
 const INSERT_ROW =
   'INSERT INTO journal_rows (session_id, epoch, seq, ts, row_json) VALUES (?, ?, ?, ?, ?)'
 const SELECT_ROWS_AFTER = `SELECT seq, ts, row_json FROM journal_rows
@@ -30,48 +21,6 @@ export function readJournalSessionEpoch(db: Database.Database, sessionId: string
   return typeof epoch === 'string' ? epoch : null
 }
 
-/** Actual load's SQL baseline; never inferred from the replayed semantic revision. */
-export function readJournalSessionProjection(db: Database.Database, sessionId: string) {
-  const row = db.prepare(SELECT_EPOCH).get(sessionId)
-  return typeof row?.epoch === 'string'
-    ? {
-        epoch: row.epoch,
-        pair: [
-          typeof row.open_turn_id === 'string' ? row.open_turn_id : null,
-          typeof row.open_turn_since === 'number' ? row.open_turn_since : null
-        ] as const
-      }
-    : null
-}
-
-/** What a restart reads of a chat without reading its history: its open root turn, and its newest
- *  row's place and save time. Two primary-key lookups. Null when the chat has no journal. */
-export type JournalRestFacts = {
-  known: boolean
-  openTurn: { itemId: string; since: number } | null
-  lastSequence: number
-  lastSavedAt: number
-}
-
-export function readJournalRestFacts(
-  db: Database.Database,
-  sessionId: string
-): JournalRestFacts | null {
-  const row = db.prepare(SELECT_REST_FACTS).get(sessionId)
-  if (!row) {
-    return null
-  }
-  const { open_turn_id: itemId, open_turn_since: since, last_seq: seq, last_ts: ts } = row
-  return {
-    known: itemId !== null || since === 0,
-    openTurn:
-      typeof itemId === 'string' ? { itemId, since: typeof since === 'number' ? since : 0 } : null,
-    lastSequence: typeof seq === 'number' ? seq : 0,
-    lastSavedAt: typeof ts === 'number' ? ts : 0
-  }
-}
-
-/** Points the chat at `epoch`, with no turn open. Only an epoch change writes this row. */
 export function publishJournalSessionEpoch(
   db: Database.Database,
   identity: { sessionId: string; workspaceId: string },
@@ -100,41 +49,7 @@ export function insertJournalRow(
   return Buffer.byteLength(rowJson, 'utf8')
 }
 
-export function writeJournalRestFact(
-  db: Database.Database,
-  sessionId: string,
-  open: JournalRestFacts['openTurn']
-): void {
-  db.prepare(
-    'UPDATE journal_sessions SET open_turn_id = ?, open_turn_since = ? WHERE session_id = ?'
-  ).run(open?.itemId ?? null, open?.since ?? 0, sessionId)
-}
-
-export function materializeJournalLegacyCut(
-  db: Database.Database,
-  sessionId: string,
-  at: number
-): void {
-  const loaded = readJournalSessionProjection(db, sessionId)
-  if (!loaded || loaded.pair[0] !== null || loaded.pair[1] !== null) {
-    return
-  }
-  const result = db
-    .prepare(`UPDATE journal_sessions SET open_turn_id = '', open_turn_since = ?
-    WHERE session_id = ? AND epoch = ?
-    AND open_turn_id IS NULL AND open_turn_since IS NULL`)
-    .run(at, sessionId, loaded.epoch)
-  if (result.changes === 0) {
-    const current = readJournalSessionProjection(db, sessionId)
-    if (!current || (current.pair[0] === null && current.pair[1] === null)) {
-      throw new Error('legacy restart fact was not saved')
-    }
-  }
-}
-
-// Why pages, not `.iterate()`: a lazily consumed cursor pins a read snapshot for as long as the
-// consumer reduces, and a WAL checkpoint cannot pass an open snapshot. Each page is one completed
-// statement, so the consumer's memory is bounded by a page while no snapshot outlives a fetch.
+// Page fetches release read snapshots before reduction so WAL checkpoints are not blocked.
 const EPOCH_ROW_PAGE_SIZE = 128
 
 export function* iterateJournalEpochRows(

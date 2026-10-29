@@ -15,7 +15,7 @@ import {
   type AgentStatusEntry
 } from '../../../../shared/agent-status-types'
 import { parsePaneKey } from '../../../../shared/stable-pane-id'
-import { agentTurnEligibleForAttention } from '../../../../shared/agent-main-agent-verdict'
+import { agentTurnEndedOnPurpose } from '../../../../shared/agent-main-agent-verdict'
 
 import {
   createWorktreeTabBucketProjection,
@@ -282,7 +282,7 @@ export function collectRetainedAgentsOnDisappear(args: {
     }
     // Retain finished/failed outcomes unless deliberately stopped; explicit teardown suppressors prevent stale done rows from resurfacing.
     const lastState = prev.row.state
-    if (lastState !== 'done' || !agentTurnEligibleForAttention(prev.row.entry)) {
+    if (lastState !== 'done' || agentTurnEndedOnPurpose(prev.row.entry)) {
       continue
     }
     toRetain.push({

@@ -6,7 +6,6 @@ import {
   AGENT_JOURNAL_THREAD_SCOPE,
   type AgentJournalTurnScope
 } from '../../../shared/agent-session-journal-types'
-import type { ChildWorkAdmission } from './structured-agent-session-accepted-child-work'
 import type { AgentChildWorkInput } from '../../../shared/agent-status-child-work'
 import type { AgentChildWorkView } from '../../../shared/agent-status-child-work-view'
 import type {
@@ -38,11 +37,8 @@ export type AgentChildWorkRowView = AgentChildWorkView &
 /** Writes through the reporting child’s sink and fence. */
 export type StructuredAgentSessionChildWorkProducer = Pick<
   StructuredAgentSessionEventSink,
-  'appendItem' | 'tryAppendItem' | 'written' | 'tryAppendTransition' | 'journalItems'
-> & {
-  /** Off-frame accepted changes join this producer's existing normalized suffix. */
-  continueWork?: (append: () => ChildWorkAdmission) => ChildWorkAdmission
-}
+  'appendItem' | 'tryAppendItem' | 'written'
+>
 
 type Row = {
   block: NativeChatSubagentBlock

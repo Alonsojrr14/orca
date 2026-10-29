@@ -25,7 +25,6 @@ import type { JournalWriteBody } from './journal-write-queue'
 export type AgentSessionJournalOptions = {
   identity: AgentSessionJournalIdentity
   database: JournalHostDatabase
-  legacyCursor?: AgentJournalCursor
   now?: () => number
   mintEpoch?: () => string
 }

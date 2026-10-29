@@ -1,4 +1,3 @@
-import type { StructuredAgentSessionChildWorkProducer } from '../native-chat/agent-session-wire/structured-agent-session-subagent-rows'
 import type { AgentSessionAccountKind } from '../../shared/agent-session-availability'
 import { throwIfSignalAborted, waitForPromiseWithSignal } from '../../shared/abort-signal-reason'
 import type { StructuredAgentSessionAcquireInput } from '../native-chat/agent-session-wire/structured-agent-session-adapter'
@@ -24,7 +23,11 @@ import {
 } from './codex-structured-session-options'
 import { CodexSkillReport } from './codex-structured-skill-report'
 import { codexAcquireCatalogAccess } from './codex-structured-acquire-catalog'
-import { reportedCodexThreadOptions } from './codex-structured-service-tier'
+import {
+  CODEX_DEFAULT_SERVICE_TIER,
+  reportedCodexThreadOptions
+} from './codex-structured-service-tier'
+import { readCodexConfiguredLaunchDefaults } from './codex-configured-launch-defaults'
 import {
   assertCodexConnectionOpen,
   codexSessionLifecycle,
@@ -51,7 +54,6 @@ type CodexOpenContext = {
   setPrimaryThreadId: (threadId: string) => void
   forceCloseUnexpected: CodexStructuredSessionTeardown['forceCloseUnexpected']
   unbindReadingControl?: () => void
-  workProducer?: StructuredAgentSessionChildWorkProducer
 }
 
 /** The host owns the open promise and closes the spawned child if this rejects. */
@@ -137,10 +139,23 @@ export async function openCodexStructuredSession(
     )
     current()
   }
+  const configured =
+    opened.serviceTier === undefined
+      ? await waitForPromiseWithSignal(
+          readCodexConfiguredLaunchDefaults(connection, deps.requestTimeoutMs, launch.cwd),
+          openInput.signal
+        )
+      : null
+  current()
+  const serviceTier =
+    opened.serviceTier === undefined
+      ? configured
+        ? (configured.serviceTier ?? CODEX_DEFAULT_SERVICE_TIER)
+        : undefined
+      : (opened.serviceTier ?? CODEX_DEFAULT_SERVICE_TIER)
   const catalogAccess = codexAcquireCatalogAccess(deps, launch, sessionId)
   const session: CodexSession = {
     events: input.events,
-    workProducer: start.workProducer,
     account: start.account,
     connection,
     ...codexSessionLifecycle(input.fence, generation),
@@ -158,6 +173,12 @@ export async function openCodexStructuredSession(
     prompts: attempt.window.prompts,
     options: restoredCodexSessionOptions(input.options),
     reportedOptions: reportedCodexThreadOptions(opened),
+    nativeDefaults: serviceTier ? { serviceTier } : {},
+    appliedTurnOptions: {
+      ...(opened.model ? { model: opened.model } : {}),
+      ...(opened.effort ? { effort: opened.effort } : {}),
+      ...(serviceTier ? { serviceTier } : {})
+    },
     appliedSettings: attempt.window.appliedSettings,
     ...(catalogAccess ? { catalogAccess } : {}),
     dispatchEchoes: start.dispatchEchoes,
@@ -165,14 +186,11 @@ export async function openCodexStructuredSession(
     backgroundTasks: new CodexBackgroundTaskTracker(
       opened.threadId,
       start.subagentExecutions,
-      codexChildWorkSink(sessionId, deps, start.workProducer ?? input.events)
+      codexChildWorkSink(sessionId, deps, input.events)
     ),
     forceCloseUnexpected: (reason) =>
       start.forceCloseUnexpected(sessionId, input.fence, generation, reason),
     ...(start.unbindReadingControl ? { unbindReadingControl: start.unbindReadingControl } : {})
-  }
-  if (opened.serviceTier) {
-    session.nativeDefaults = { ...session.nativeDefaults, serviceTier: opened.serviceTier }
   }
   current()
   sessions.set(sessionId, session)

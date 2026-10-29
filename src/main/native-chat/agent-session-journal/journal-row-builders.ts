@@ -17,12 +17,15 @@ import { agentJournalLinkageFields } from '../../../shared/agent-session-journal
 import { agentJournalItemKey } from '../../../shared/agent-session-journal-item-key'
 import { journalItemOwnerFence } from './journal-item-provenance'
 import type { JournalReducerState } from './journal-reducer'
+import type {
+  JournalDispatchRow,
+  JournalItemRow,
+  JournalLifecycleBatchRow,
+  JournalLifecycleMutation,
+  JournalSubmissionRow,
+  JournalTombstoneRow
+} from './journal-row-schema'
 import {
-  type JournalDispatchRow,
-  type JournalItemRow,
-  type JournalLifecycleBatchRow,
-  type JournalSubmissionRow,
-  type JournalTombstoneRow,
   MAX_JOURNAL_LIFECYCLE_BATCH_BYTES,
   MAX_JOURNAL_LIFECYCLE_BATCH_MUTATIONS
 } from './journal-row-schema'
@@ -62,7 +65,6 @@ export function journalItemRowBuilder(
     executionOwner?: number
     observedAt?: number
     recovered?: true
-    recoveredAt?: number
   },
   revisions?: Map<string, number>
 ): RowBuilder<JournalItemRow> {
@@ -78,7 +80,6 @@ export function journalItemRowBuilder(
       executionOwner: options.executionOwner,
       ts: options.observedAt ?? ts,
       recovered: options.recovered,
-      recoveredAt: options.recoveredAt,
       linkage: options,
       turnScope: options.turnScope,
       revisions
@@ -186,7 +187,7 @@ export function journalLifecycleBatchRowBuilder(
     }
     const current = state()
     const runningRevisions = revisions ?? new Map<string, number>()
-    const built = mutations.map((mutation) => {
+    const built: JournalLifecycleMutation[] = mutations.map((mutation) => {
       const itemId = journalLifecycleMutationItemId(mutation)
       const resolved = current.aliases.get(itemId) ?? itemId
       const revision = nextJournalItemRevision(current, itemId, runningRevisions)
@@ -243,7 +244,6 @@ export function buildJournalItemRow(
     executionOwner?: number
     ts: number
     recovered?: true
-    recoveredAt?: number
     linkage?: AgentJournalProducerLinkage
     turnScope: AgentJournalTurnScope
     revisions?: Map<string, number>
@@ -263,7 +263,7 @@ export function buildJournalItemRow(
     ...journalRowBase(input.state.epoch, input.seq, input.fence, input.ts, [body]),
     ownerFence: journalItemOwnerFence(input.state, resolved, input),
     ...(input.executionOwner === undefined ? {} : { executionOwner: input.executionOwner }),
-    ...(input.recovered ? { recovered: input.recovered, recoveredAt: input.recoveredAt } : {}),
+    ...(input.recovered ? { recovered: input.recovered } : {}),
     turnScope: input.turnScope,
     ...agentJournalLinkageFields(input.linkage)
   }

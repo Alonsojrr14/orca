@@ -28,7 +28,6 @@ export type JournalStoreHost = {
   /** Notify readers of durable draft-only transactions that append no journal row. */
   notifyCommitted: () => void
   identity: AgentSessionJournalIdentity
-  legacyCursor?: AgentJournalCursor
   now: () => number
   mintEpoch: () => string
   serialize: <T>(run: JournalWriteBody<T>) => Promise<T>
@@ -89,7 +88,6 @@ export function createJournalStoreCollaborators(host: JournalStoreHost): Journal
       now: host.now()
     })
   const rowWriter = new JournalRowWriter({
-    state: host.state,
     sessionId: host.identity.sessionId,
     now: host.now,
     serialize: host.serialize,
@@ -128,9 +126,7 @@ export function createJournalStoreCollaborators(host: JournalStoreHost): Journal
     stops: new JournalStopAcceptor({ writer: rowWriter, state: host.state }),
     // Import legacy cards once per open without failing the open.
     restore: () =>
-      restoreJournalStore(host, { epochController })
-        .then(() => rowWriter.synchronizeRestFact())
-        .then(() => queuedMessages.importAtOpen()),
+      restoreJournalStore(host, { epochController }).then(() => queuedMessages.importAtOpen()),
     rowWriter,
     submissionWriter: new JournalSubmissionWriter({
       state: host.state,

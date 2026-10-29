@@ -1,16 +1,10 @@
 import type { AgentStateHistoryEntry, AgentStatusEntry } from './agent-status-types'
-import { agentTurnEligibleForAttention } from './agent-main-agent-verdict'
+import { agentTurnEndedOnPurpose } from './agent-main-agent-verdict'
 
 /** The subset of a hook entry a completion time is derived from. */
 export type AgentCompletionSource = Pick<
   AgentStatusEntry,
-  | 'state'
-  | 'stateStartedAt'
-  | 'stateHistory'
-  | 'interrupted'
-  | 'mainAgent'
-  | 'restoredInterruption'
-  | 'sessionBoundary'
+  'state' | 'stateStartedAt' | 'stateHistory' | 'interrupted' | 'mainAgent' | 'sessionBoundary'
 >
 
 function mostRecentCompletedTurnInHistory(
@@ -20,7 +14,7 @@ function mostRecentCompletedTurnInHistory(
   for (const row of history ?? []) {
     if (
       row.state === 'done' &&
-      agentTurnEligibleForAttention(row) &&
+      !agentTurnEndedOnPurpose(row) &&
       Number.isFinite(row.startedAt) &&
       row.startedAt > max
     ) {
@@ -32,7 +26,7 @@ function mostRecentCompletedTurnInHistory(
 
 /** Share completion age and Smart Sort eligibility. Count non-user-stopped done turns (including failures), or the real completion displaced by a session boundary; same-state pings must not refresh it. */
 export function agentEntryCompletionAt(entry: AgentCompletionSource): number | null {
-  if (entry.state !== 'done' || !agentTurnEligibleForAttention(entry)) {
+  if (entry.state !== 'done' || agentTurnEndedOnPurpose(entry)) {
     return null
   }
   if (entry.sessionBoundary === true) {

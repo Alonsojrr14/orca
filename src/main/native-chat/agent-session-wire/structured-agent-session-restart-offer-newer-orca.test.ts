@@ -21,10 +21,7 @@ import {
   HOST_TEST_SESSION as SESSION
 } from './structured-agent-session-host-test-data'
 
-// Nothing here can continue a chat a newer Orca saved, so nothing is counted for it. Its offer is
-// kept: the offers file is shared by every Orca on the host, and the newer one can still act on it.
-// Nothing here writes to that file for such a chat. Listing reads no journal, so a chat whose rows a
-// newer Orca wrote is offered until something opens it; a whole newer database is known up front.
+// Preserve newer-chat offers byte-for-byte for a compatible build; this host cannot act on them.
 
 afterEach(() => vi.restoreAllMocks())
 
@@ -60,35 +57,15 @@ function offersFile(root: string): Promise<Buffer> {
 async function keptWithoutAWord(
   host: Awaited<ReturnType<typeof interruptedRestart>>['host'],
   root: string,
-  acquire: ReturnType<typeof vi.fn>,
-  offeredUntilOpened = false
+  acquire: ReturnType<typeof vi.fn>
 ) {
   const before = await offersFile(root)
-  expect((await host.restartResume.list()).map((offer) => offer.sessionId)).toEqual(
-    offeredUntilOpened ? [SESSION] : []
-  )
-  expect(await offersFile(root)).toEqual(before)
-  const action = await host.restartResume.continueAfterRestart([SESSION], 'modal')
-  expect(action.continued).toEqual(
-    offeredUntilOpened
-      ? [
-          expect.objectContaining({
-            outcome: 'refused',
-            reason: 'agent_session_journal_unreadable',
-            refusal: {
-              code: 'agent_session_journal_unreadable',
-              details: { reason: 'journalWrittenByNewerOrca' }
-            }
-          })
-        ]
-      : []
-  )
-  expect(acquire).not.toHaveBeenCalled()
   expect(await host.restartResume.list()).toEqual([])
+  expect(await offersFile(root)).toEqual(before)
+  expect((await host.restartResume.continueAfterRestart([SESSION], 'modal')).continued).toEqual([])
+  expect(acquire).not.toHaveBeenCalled()
   expect(await host.restartResume.listFailures()).toEqual([])
-  if (!offeredUntilOpened) {
-    expect(await offersFile(root)).toEqual(before)
-  }
+  expect(await offersFile(root)).toEqual(before)
   const capsule = new AgentSessionRecoveryCapsule(root)
   expect((await capsule.list(NOW)).map((marker) => marker.sessionId)).toEqual([SESSION])
   expect(await capsule.listFailed(NOW)).toEqual([])
@@ -97,7 +74,7 @@ async function keptWithoutAWord(
 it('keeps the offer of a chat whose journal a newer Orca wrote, and offers, runs and counts nothing', async () => {
   const { host, root, acquire } = await interruptedRestart()
   newerOrcaRow(root)
-  await keptWithoutAWord(host, root, acquire, true)
+  await keptWithoutAWord(host, root, acquire)
 })
 
 it('keeps the offer of every chat in a newer Orca database, and offers, runs and counts nothing', async () => {
@@ -130,8 +107,7 @@ it('keeps the offer and files nothing when the send is refused as a newer Orca c
   expect(await host.restartResume.listFailures()).toEqual([])
 })
 
-// A failure filed before the chat became a newer Orca's stays for that Orca, and is not shown here.
-it('lists a saved failure without reading history, then preserves it on an admitted newer-data refusal', async () => {
+it('keeps a failure already filed for a chat a newer Orca saved since, but does not show it', async () => {
   const { host, root, acquire } = await interruptedRestart()
   await host.restartResume.list()
   acquire.mockRejectedValueOnce(new Error('provider could not reconnect'))
@@ -140,8 +116,6 @@ it('lists a saved failure without reading history, then preserves it on an admit
   await host.close(SESSION, 'evict')
   newerOrcaRow(root)
 
-  expect(await host.restartResume.listFailures()).toMatchObject([{ sessionId: SESSION }])
-  await host.revealSession(SESSION)
   expect(await host.restartResume.listFailures()).toEqual([])
   expect(
     (await new AgentSessionRecoveryCapsule(root).listFailed(NOW)).map((f) => f.marker.sessionId)
@@ -167,13 +141,12 @@ it('still offers a damaged chat, and files its failure when acting on it', async
   ])
 })
 
-// Dismiss ends displayed offers without discovering per-row downgrade formats. Journals stay.
 it.each([
   ['after the dialog listed the offers', true, undefined],
   ['on a host that has not listed them yet', false, undefined],
   ['for a client shown only Codex', false, (agent: string) => agent === 'codex']
 ])(
-  'dismisses displayed offers without opening downgraded journal rows, %s',
+  "dismisses every listed offer and leaves a newer Orca's hidden one as it was, %s",
   async (_when, listFirst, audience) => {
     const NEWER = 'session-newer-orca'
     const created = await hostTestState().host.attach(
@@ -188,21 +161,25 @@ it.each([
     const capsule = JSON.parse(await readFile(path, 'utf8'))
     capsule.entries.push({ state: 'pending', marker: { ...marker, sessionId: NEWER } })
     await writeFile(path, JSON.stringify(capsule))
-    const before = liveTestJournalRows(openTestJournalHostDatabase(root).db, NEWER)
-    const opened = vi.spyOn(AgentSessionJournal.prototype, 'open')
+    const newerEntry = () =>
+      readFile(path, 'utf8').then((text) =>
+        JSON.stringify(
+          JSON.parse(text).entries.find(
+            (entry: { marker: { sessionId: string } }) => entry.marker.sessionId === NEWER
+          )
+        )
+      )
+    const before = await newerEntry()
 
     if (listFirst) {
-      // Listing and dismissal read no journal.
       expect((await host.restartResume.list()).map((candidate) => candidate.sessionId)).toEqual([
-        SESSION,
-        NEWER
+        SESSION
       ])
     }
     await host.restartResume.dismiss(undefined, audience)
 
     const left = await new AgentSessionRecoveryCapsule(root).list(NOW)
-    expect(left).toEqual([])
-    expect(opened).not.toHaveBeenCalled()
-    expect(liveTestJournalRows(openTestJournalHostDatabase(root).db, NEWER)).toEqual(before)
+    expect(left.map((offer) => offer.sessionId)).toEqual([NEWER])
+    expect(await newerEntry()).toBe(before)
   }
 )

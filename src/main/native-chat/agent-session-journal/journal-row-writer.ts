@@ -1,8 +1,5 @@
-import { isDeepStrictEqual } from 'node:util'
-import { stageJournalMutation } from './journal-mutation-stage'
-import type { JournalReducerState } from './journal-reducer'
 import type Database from '../../sqlite/sync-database'
-import { insertJournalRow, writeJournalRestFact } from './journal-row-table'
+import { insertJournalRow } from './journal-row-table'
 import type { JournalHostDatabase } from './journal-host-database'
 import type { AgentJournalCursor } from '../../../shared/agent-session-journal-types'
 import type { JournalRow } from './journal-row-schema'
@@ -39,7 +36,6 @@ export function writeReceiptIfChanged<T>(
 }
 
 export type JournalRowWriterDeps = {
-  state?: () => JournalReducerState
   sessionId: string
   now: () => number
   serialize: <T>(run: JournalWriteBody<T>) => Promise<T>
@@ -64,22 +60,14 @@ export class JournalRowWriter {
       const savedAt = this.deps.now()
       const row = build(this.deps.nextSequence(), savedAt)
       assertJournalFence(row.fence, this.deps.highestFence())
-      const fact = this.prepareFact([row])
-      // One INSERT: the chat's epoch pointer moves only when the epoch does.
       this.deps.database().transaction(
         (db) => {
           insertJournalRow(db, this.deps.sessionId, row, savedAt)
-          if (fact !== undefined) {
-            writeJournalRestFact(db, this.deps.sessionId, fact)
-          }
           receipt?.write(db, row)
         },
-        fact === undefined && !receipt && this.streamed([row])
+        !receipt && this.streamed([row])
       )
-      // COMMIT landed, so the row is durable: adopt it before anything that can
-      // fail. Rejecting here instead would leave the next append reusing a
-      // sequence the table already holds. The ledger first: it cannot throw, the fold can.
-      this.rememberFact(fact)
+      // Adopt durable sequence state before fallible work: nonthrowing receipt ledger, then fold.
       receipt?.committed()
       this.deps.commit([row], savedAt)
       return row
@@ -111,20 +99,15 @@ export class JournalRowWriter {
     for (const row of rows) {
       assertJournalFence(row.fence, this.deps.highestFence())
     }
-    const fact = this.prepareFact(rows)
     this.deps.database().transaction(
       (db) => {
         for (const row of rows) {
           insertJournalRow(db, this.deps.sessionId, row, ts)
         }
-        if (fact !== undefined) {
-          writeJournalRestFact(db, this.deps.sessionId, fact)
-        }
         receipt?.write(db, receiptRow?.(rows))
       },
-      fact === undefined && !receipt && this.streamed(rows)
+      !receipt && this.streamed(rows)
     )
-    this.rememberFact(fact)
     receipt?.committed()
     this.deps.commit(rows, ts)
     return rows
@@ -139,63 +122,6 @@ export class JournalRowWriter {
       epoch: row.epoch,
       sequence: row.seq
     }))
-  }
-
-  private prepareFact(rows: readonly JournalRow[]) {
-    const state = this.deps.state?.()
-    if (!state) {
-      return undefined
-    }
-    const next = this.streamed(rows) ? state : stageJournalMutation(state, rows)
-    const fact = next.rest.fact()
-    return isDeepStrictEqual(state.persistedRest, [fact?.itemId ?? null, fact?.since ?? 0])
-      ? undefined
-      : fact
-  }
-
-  private rememberFact(fact: ReturnType<JournalRowWriter['prepareFact']>): void {
-    if (fact !== undefined && this.deps.state) {
-      this.deps.state().persistedRest = [fact?.itemId ?? null, fact?.since ?? 0]
-    }
-  }
-
-  async synchronizeRestFact(): Promise<void> {
-    try {
-      await this.deps.serialize(() => {
-        const state = this.deps.state?.()
-        if (!state || this.deps.readOnly() || state.persistedRest?.[1] !== null) {
-          return
-        }
-        const fact = state.rest.fact()
-        const pair = [fact?.itemId ?? null, fact?.since ?? 0] as const
-        if (isDeepStrictEqual(state.persistedRest, pair)) {
-          return
-        }
-        this.deps.database().transaction((db) => {
-          const result = db
-            .prepare(`UPDATE journal_sessions SET open_turn_id = ?, open_turn_since = ?
-            WHERE session_id = ? AND epoch = ? AND open_turn_id IS ? AND open_turn_since IS ?
-            AND (SELECT MAX(seq) FROM journal_rows WHERE session_id = journal_sessions.session_id AND epoch = journal_sessions.epoch) = ?`)
-            .run(
-              ...pair,
-              this.deps.sessionId,
-              state.epoch,
-              ...(state.persistedRest ?? [null, null]),
-              state.lastSequence
-            )
-          if (result.changes !== 1) {
-            throw new Error('journal projection changed during open')
-          }
-        })
-        this.rememberFact(fact)
-      })
-    } catch (error) {
-      console.warn(
-        '[journal-open] rest projection synchronization failed',
-        this.deps.sessionId,
-        error
-      )
-    }
   }
 
   private streamed(rows: readonly JournalRow[]): boolean {

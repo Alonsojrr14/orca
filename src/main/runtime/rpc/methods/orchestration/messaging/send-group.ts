@@ -1,4 +1,3 @@
-import { setImmediate as yieldToEventLoop } from 'node:timers/promises'
 import type { MessagePriority, MessageType, OrchestrationDb } from '../../../../orchestration/db'
 import type { OrcaRuntimeService } from '../../../../orca-runtime'
 import { OrchestrationError } from '../../../../orchestration/orchestration-error'
@@ -168,13 +167,17 @@ export async function sendGroupMessage(args: {
           warnings: groupWarnings
         })
   // Read up front: a structured worker's status comes from its journal, which may need opening.
-  const statuses = new Map<string, string | null>()
-  if (groupAddress.toLowerCase() === '@idle') {
-    for (const candidate of candidates) {
-      statuses.set(candidate.handle, await runtime.getAgentStatusForHandle(candidate.handle))
-      await yieldToEventLoop()
-    }
-  }
+  const statuses =
+    groupAddress.toLowerCase() === '@idle'
+      ? new Map(
+          await Promise.all(
+            candidates.map(
+              async (candidate) =>
+                [candidate.handle, await runtime.getAgentStatusForHandle(candidate.handle)] as const
+            )
+          )
+        )
+      : new Map<string, string | null>()
   const handles = resolveGroupAddress(
     groupAddress,
     from,

@@ -1,4 +1,3 @@
-import { beginStructuredJournalForeground } from '../../../../native-chat/agent-session-wire/structured-agent-session-registry'
 import {
   isTerminalInputPaused,
   TerminalInputPausedError,
@@ -84,45 +83,40 @@ export async function sendTerminalStreamInput(
     requireWriteSettlement?: boolean
   }
 ): Promise<TerminalStreamInputOutcome> {
-  const finishForeground = beginStructuredJournalForeground()
+  const inputSource = terminalInputSourceForClient(args.client)
+  const action = { text: args.text, enter: false, interrupt: false }
+  const clientId = args.isMobile ? args.client?.id : undefined
+  const floorClaim: MobileInputFloorClaimHolder = { current: null }
+  const settlement = args.requireWriteSettlement ? { requireWriteSettlement: true as const } : {}
   try {
-    const inputSource = terminalInputSourceForClient(args.client)
-    const action = { text: args.text, enter: false, interrupt: false }
-    const clientId = args.isMobile ? args.client?.id : undefined
-    const floorClaim: MobileInputFloorClaimHolder = { current: null }
-    const settlement = args.requireWriteSettlement ? { requireWriteSettlement: true as const } : {}
-    try {
-      const result = await runtime.sendTerminal(args.terminal, action, {
-        inputKind: 'driving',
-        inputSource,
-        ...settlement,
-        ...(clientId
-          ? {
-              reserveWrite: (writePtyId: string) => {
-                const claim = runtime.beginMobileInputFloor(writePtyId, clientId)
-                if (!claim) {
-                  throw new Error('mobile_input_floor_unavailable')
-                }
-                floorClaim.current = claim
-              },
-              afterWrite: () => commitMobileInputFloorClaim(floorClaim)
-            }
-          : {})
-      })
-      const outcome = streamInputOutcome(result)
-      if (outcome === 'rejected') {
-        floorClaim.current?.rollback()
-      }
-      return outcome
-    } catch (error) {
+    const result = await runtime.sendTerminal(args.terminal, action, {
+      inputKind: 'driving',
+      inputSource,
+      ...settlement,
+      ...(clientId
+        ? {
+            reserveWrite: (writePtyId: string) => {
+              const claim = runtime.beginMobileInputFloor(writePtyId, clientId)
+              if (!claim) {
+                throw new Error('mobile_input_floor_unavailable')
+              }
+              floorClaim.current = claim
+            },
+            afterWrite: () => commitMobileInputFloorClaim(floorClaim)
+          }
+        : {})
+    })
+    const outcome = streamInputOutcome(result)
+    if (outcome === 'rejected') {
       floorClaim.current?.rollback()
-      if (error instanceof TerminalInputPausedError) {
-        return 'paused'
-      }
-      return isTerminalStreamInputRejection(error) ? 'rejected' : 'failed'
     }
-  } finally {
-    finishForeground()
+    return outcome
+  } catch (error) {
+    floorClaim.current?.rollback()
+    if (error instanceof TerminalInputPausedError) {
+      return 'paused'
+    }
+    return isTerminalStreamInputRejection(error) ? 'rejected' : 'failed'
   }
 }
 

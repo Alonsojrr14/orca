@@ -21,7 +21,6 @@ import { StructuredAgentSessionSendSettlement } from './structured-agent-session
 import { heldStructuredAgentSessionCurrentWork } from './structured-agent-session-host-current-work'
 import { structuredAgentSessionConversationFence } from './structured-agent-session-provider-child'
 import type { StructuredAgentSessionStatusSubscriber } from './structured-agent-session-status-feed'
-import type { StructuredAgentSessionAtRest } from './structured-agent-session-status-summary'
 import type { CapturedChildWorkStops } from './structured-agent-session-status-ownership'
 import { createStructuredAgentSessionHostStatusFeed } from './structured-agent-session-host-status-feed'
 import type { StructuredAgentSessionChildWorkProducer } from './structured-agent-session-subagent-rows'
@@ -112,10 +111,7 @@ export class StructuredAgentSessionClientDelivery {
     return record ? adapter.atRestCommands?.read(record) : undefined
   }
 
-  commands = async (id: string) => ({ commands: await this.readCommandsSettled(id) })
-
-  /** As `readCommands`, but a scan this read starts or finds running gets a short while to land,
-   *  for a client that asks once per menu and never hears a later change. */
+  /** Wait briefly for scans because one-shot menu readers do not receive later updates. */
   async readCommandsSettled(sessionId: string) {
     const { adapter, store } = this.deps()
     const live = adapter.readCommands?.(sessionId)
@@ -136,22 +132,11 @@ export class StructuredAgentSessionClientDelivery {
 
   publishRecordNotes = (sessionId: string): void => this.statusFeed.publishRecordNotes(sessionId)
 
-  publishHandoverChanged = (sessionId: string, clientMessageId: string): void => {
-    this.statusFeed.handoverChanged(sessionId, clientMessageId)
-    this.publishGenerationEnded(sessionId)
-  }
-
-  publishHeldSends = (
-    sessionId: string,
-    changes: readonly { clientMessageId: string; held: boolean }[],
-    producer: StructuredAgentSessionChildWorkProducer | undefined
-  ) => this.statusFeed.publishHeldSends(sessionId, changes, producer)
-
   publishChildWork = (
     sessionId: string,
     evidence: AgentChildWorkEvidence[],
     producer?: StructuredAgentSessionChildWorkProducer
-  ) => this.statusFeed.publishChildWork(sessionId, evidence, producer)
+  ): void => this.statusFeed.publishChildWork(sessionId, evidence, producer)
 
   readStopping = (sessionId: string): boolean => {
     const projection = this.statusFeed.journalProjection(sessionId)
@@ -211,12 +196,6 @@ export class StructuredAgentSessionClientDelivery {
     const journal = this.sessions.get(sessionId)?.journal
     return journal ? this.currentWork(sessionId, journal) : null
   }
-
-  hasUnknownRestart = (sessionId: string): boolean => this.statusFeed.hasUnknownRestart(sessionId)
-
-  /** A restored chat this host has not opened: its row from the record and journal rest facts. */
-  publishAtRest = (sessionId: string, rest: StructuredAgentSessionAtRest): void =>
-    this.statusFeed.publishAtRest(sessionId, rest)
 
   publishRestored = (sessionId: string): void => {
     this.statusFeed.publish(sessionId, undefined, { replay: true })

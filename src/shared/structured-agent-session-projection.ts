@@ -249,7 +249,6 @@ export type StructuredAgentSessionStatusProjection = {
   lastAssistantMessage?: string
   /** Idle-only latest-request verdict: turn outcome, host-observed end if absent, or refused-send failure. */
   turnOutcome?: AgentTurnOutcome
-  restoredInterruption?: true
   statusStartedAt?: number
 }
 

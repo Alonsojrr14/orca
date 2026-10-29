@@ -236,7 +236,7 @@ export function beginStructuredAgentSessionInputHandover(
       now: deps.now,
       acquireAborts: deps.acquireAborts,
       deliveryOrder: deps.deliveryOrder,
-      workChanged: (clientMessageId) => deps.workChanged?.(sessionId, clientMessageId),
+      workChanged: () => deps.workChanged?.(sessionId),
       holdClosedInput: (id, fence, cause) =>
         deps.holdClosedInput?.(
           sessionId,

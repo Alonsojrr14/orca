@@ -1,4 +1,3 @@
-import { STRUCTURED_AGENT_SESSION_HISTORY_SUBSCRIPTION } from './structured-agent-session-history-subscription'
 import {
   clientReadsCurrentRequests,
   STRUCTURED_AGENT_SESSION_CURRENT_REQUESTS_METHODS
@@ -6,10 +5,19 @@ import {
 import { clientSupportsSnapshotCatchUp } from './structured-agent-session-history-capability'
 // Require structured.v1 from remote callers before exposing journals/mutations; legacy mobile may receive session-tab metadata placeholders.
 
-import { projectBackgroundTaskHistory } from './structured-agent-session-background-task-capability'
-import { projectQueuedImageCardHistory } from './structured-agent-session-queued-image-capability'
-import { projectTurnItemHistory } from './structured-agent-session-turn-item-capability'
-import { defineMethod } from '../core'
+import {
+  projectBackgroundTaskEvent,
+  projectBackgroundTaskHistory
+} from './structured-agent-session-background-task-capability'
+import {
+  projectQueuedImageCardPublication,
+  projectQueuedImageCardHistory
+} from './structured-agent-session-queued-image-capability'
+import {
+  projectTurnItemEvent,
+  projectTurnItemHistory
+} from './structured-agent-session-turn-item-capability'
+import { defineMethod, defineStreamingMethod } from '../core'
 import {
   ensureStructuredHostInstalled as ensureHostInstalled,
   requireInstalledStructuredHost as requireInstalledHost,
@@ -30,8 +38,14 @@ import { STRUCTURED_AGENT_SESSION_REGENERATE_NAME_METHODS } from './structured-a
 import { STRUCTURED_AGENT_SESSION_RENAME_METHODS } from './structured-agent-session-rename'
 import { STRUCTURED_AGENT_SESSION_QUEUED_METHODS } from './structured-agent-session-queued-methods'
 import { STRUCTURED_AGENT_SESSION_RESTART_RESUME_METHODS } from './structured-agent-session-restart-resume'
-import { STRUCTURED_AGENT_SESSION_STATUS_METHODS } from './structured-agent-session-status-stream'
-import { structuredAgentSessionSubscriptionBase as subscriptionBaseFor } from './structured-agent-session-subscription-id'
+import {
+  bindStructuredAgentSessionStream,
+  STRUCTURED_AGENT_SESSION_STATUS_METHODS
+} from './structured-agent-session-status-stream'
+import {
+  structuredAgentSessionSubscriptionBase as subscriptionBaseFor,
+  structuredAgentSessionSubscriptionId as subscriptionIdFor
+} from './structured-agent-session-subscription-id'
 import { STRUCTURED_AGENT_SESSION_TURN_COMPLETION_METHODS } from './structured-agent-session-turn-completion-stream'
 import { STRUCTURED_AGENT_SESSION_THREAD_GOAL_METHODS } from './structured-agent-session-thread-goal'
 import { STRUCTURED_AGENT_SESSION_CONVERSATION_OUTLINE_METHODS } from './structured-agent-session-conversation-outline'
@@ -48,6 +62,7 @@ import {
   RewindParams,
   SendParams,
   SleepWorkspaceParams,
+  SubscribeParams,
   UnsubscribeParams
 } from './structured-agent-session-schemas'
 import { sendStructuredAgentSessionForClient } from './structured-agent-session-send-compatibility'
@@ -224,8 +239,44 @@ export const STRUCTURED_AGENT_SESSION_METHODS = [
       )
     }
   }),
-  STRUCTURED_AGENT_SESSION_HISTORY_SUBSCRIPTION,
-
+  defineStreamingMethod({
+    name: 'agentSession.subscribe',
+    permission: 'workspace',
+    params: SubscribeParams,
+    handler: async (params, ctx, emit) => {
+      const host = await requireInstalledHost(ctx, params.sessionId)
+      const subscriptionId = subscriptionIdFor(ctx, params.sessionId)
+      // A stream reads; it never keeps an agent alive or starts one.
+      let dispose = (): void => {}
+      const stream = bindStructuredAgentSessionStream(ctx, subscriptionId, () => dispose())
+      if (stream.isClosed()) {
+        return
+      }
+      // Resolve after opening snapshot/missed batch; a racing close disposes the bound stream.
+      dispose = await host.subscribe({
+        readsCurrentRequests: clientReadsCurrentRequests(ctx),
+        id: subscriptionId,
+        sessionId: params.sessionId,
+        projectQueuePublication: (publication) =>
+          projectQueuedImageCardPublication(publication, ctx),
+        emit: (event) =>
+          emit(
+            projectTurnItemEvent(
+              projectBackgroundTaskEvent(event, ctx),
+              ctx,
+              host.sessionAgent(params.sessionId)
+            )
+          ),
+        ...(params.cursor ? { cursor: params.cursor } : {}),
+        snapshotCatchUp: clientSupportsSnapshotCatchUp(ctx),
+        // Every phone's app, whatever its version, ends a stream over a frame its bridge cannot carry.
+        ...(ctx.clientKind === 'mobile' ? { boundedFrames: true } : {})
+      })
+      if (stream.isClosed()) {
+        dispose()
+      }
+    }
+  }),
   defineMethod({
     name: 'agentSession.unsubscribe',
     permission: 'workspace',

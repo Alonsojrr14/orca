@@ -16,17 +16,13 @@ import type { JournalRow } from './journal-row-schema'
 
 export function applyJournalDispatchRow(
   state: JournalReducerState,
-  row: Extract<JournalRow, { kind: 'dispatch' }>,
-  structuralCarried?: readonly string[]
+  row: Extract<JournalRow, { kind: 'dispatch' }>
 ): void {
-  const original = state.submissions.get(row.clientMessageId)
-  const submission = original ? { ...original } : undefined
+  const submission = state.submissions.get(row.clientMessageId)
   // Ignored dispatch rows must not change queue cards either.
   if (!submission || !journalDispatchRowApplies(submission)) {
     return
   }
-  state.submissions.set(row.clientMessageId, submission)
-  state.submissionVersion++
   submission.fence = row.fence
   submission.dispatchState = row.state
   submission.providerItemId = row.providerItemId
@@ -55,7 +51,7 @@ export function applyJournalDispatchRow(
   if (row.state === 'pending') {
     submission.handedOverAt = row.ts
     placeHandedOverMessage(state, submission, row)
-    foldStoppedHistoryCarried(state, row, structuralCarried)
+    foldStoppedHistoryCarried(state, row)
   } else if (row.state === 'rejected') {
     placeRejectedMessage(state, submission, row)
   }
@@ -67,7 +63,6 @@ export function applyJournalDispatchRow(
   if (row.state === 'accepted') {
     noteTurnAccepted(state, submission)
   }
-  state.submissions.set(row.clientMessageId, submission)
   if (row.state !== 'accepted' || !row.providerItemId) {
     return
   }
@@ -83,12 +78,10 @@ export function applyJournalDispatchRow(
 /** A rebind replaces coverage, including an empty set, before the new child receives input. */
 function foldStoppedHistoryCarried(
   state: JournalReducerState,
-  row: Extract<JournalRow, { kind: 'dispatch' }>,
-  structuralCarried?: readonly string[]
+  row: Extract<JournalRow, { kind: 'dispatch' }>
 ): void {
-  const input = structuralCarried ?? row.carries
-  const carried = Array.isArray(input)
-    ? input.filter((id): id is string => typeof id === 'string' && id.length > 0)
+  const carried = Array.isArray(row.carries)
+    ? row.carries.filter((id): id is string => typeof id === 'string' && id.length > 0)
     : []
   if (carried.length > 0) {
     state.stoppedHistoryCarried.set(row.clientMessageId, carried)

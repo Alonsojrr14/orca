@@ -25,7 +25,7 @@ import {
   type ProviderTimelineTurnRef
 } from './provider-timeline-rows'
 import {
-  visitProviderTimelineSettlement,
+  providerTimelineSettlement,
   runningProviderTimelineTurns,
   type ProviderTimelineTurnEnd
 } from './provider-timeline-settlement'
@@ -74,11 +74,15 @@ export function decideTurnOpen(
       ? {
           settle: {
             what: 'turn-superseded',
-            visit: (journal, emit) =>
-              visitProviderTimelineSettlement(journal, { turnItemId: superseded.itemId }, emit, {
-                turns: [superseded],
-                end: { state: 'interrupted', completedAt: event.at, outcome: 'superseded' }
-              })
+            resolve: (journal) =>
+              providerTimelineSettlement(
+                journal,
+                { turnItemId: superseded.itemId },
+                {
+                  turns: [superseded],
+                  end: { state: 'interrupted', completedAt: event.at, outcome: 'superseded' }
+                }
+              )
           }
         }
       : {}),
@@ -135,11 +139,8 @@ export function decideTurnEnd(
     ends: { turnItemId: turn.itemId, current: !state.open || state.open.itemId === turn.itemId },
     settle: {
       what: 'turn-end',
-      visit: (journal, emit) =>
-        visitProviderTimelineSettlement(journal, { turnItemId: turn.itemId }, emit, {
-          turns: [turn],
-          end
-        })
+      resolve: (journal) =>
+        providerTimelineSettlement(journal, { turnItemId: turn.itemId }, { turns: [turn], end })
     },
     commit: (next) => next.endTurn(turn)
   }
@@ -154,8 +155,7 @@ export function decideTurnSettled(
     ends: { turnItemId: turn.itemId, current: true },
     settle: {
       what: 'turn-settled',
-      visit: (journal, emit) =>
-        visitProviderTimelineSettlement(journal, { turnItemId: turn.itemId }, emit)
+      resolve: (journal) => providerTimelineSettlement(journal, { turnItemId: turn.itemId })
     },
     commit: (next) => next.stopTurn(turn)
   }
@@ -249,8 +249,8 @@ export function decideSessionEnd(
     settle: {
       what: 'session-end',
       recovered: true,
-      visit: (journal, emit) =>
-        visitProviderTimelineSettlement(journal, 'session', emit, {
+      resolve: (journal) =>
+        providerTimelineSettlement(journal, 'session', {
           turns: runningProviderTimelineTurns(journal),
           end: event.verdict,
           ...(event.endedAt !== undefined ? { lostAt: event.endedAt } : {})

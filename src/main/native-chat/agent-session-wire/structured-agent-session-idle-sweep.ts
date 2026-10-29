@@ -1,16 +1,5 @@
-// The one thing that puts an idle agent to rest.
-//
-// Nothing a viewer does keeps an agent alive or starts one: a chat on screen and a chat in a
-// background tab are the same to this sweep. Every few minutes it looks at each open conversation
-// and stops the provider child of one that has been quiet for the idle window and owes no work,
-// then drops the in-memory fold of one that is only a cache. The conversation itself — its
-// record, tab, status row and readers — is untouched, and the next send starts a new child.
-//
-// Owed work is derived on every tick, never stored, so there is nothing to disagree with it.
-//
-// It also bounds how many folds are resident at once: opening a chat past the cap drops the least
-// recently active folds that are only a cache, so memory follows the chats in use, not every chat
-// opened since launch.
+// Derive owed work each tick, independent of viewers; retire quiet children and cached folds,
+// preserving durable conversations for the next send.
 
 import { isQueuedAgentJournalSubmission } from '../../../shared/agent-session-queued-submission'
 import type { StructuredAgentSessionHostSession } from './structured-agent-session-host-types'
@@ -23,9 +12,6 @@ import {
 
 export const STRUCTURED_AGENT_SESSION_IDLE_SWEEP_INTERVAL_MS = 5 * 60_000
 export const STRUCTURED_AGENT_SESSION_IDLE_MS = 30 * 60_000
-/** Resident folds at rest: every chat a person can have on screen, plus the ones they switch
- *  between. Each fold holds its whole epoch, so this, not the tab count, bounds that memory. */
-export const STRUCTURED_AGENT_SESSION_MAX_RESIDENT = 24
 
 export type StructuredAgentSessionIdleSweepDeps = {
   sessions: ReadonlyMap<string, StructuredAgentSessionHostSession> & {
@@ -49,7 +35,6 @@ export type StructuredAgentSessionIdleSweepDeps = {
   logger: StructuredAgentSessionLogger
   intervalMs?: number
   idleMs?: number
-  maxResident?: number
 }
 
 export type StructuredAgentSessionChildWorkReads = {

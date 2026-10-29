@@ -150,9 +150,8 @@ async function session() {
     openConnection: codex.openConnection,
     readProcessStartTime: async () => 1_700_000_000_000,
     now: () => 1_700_000_000_500,
-    onChildWorkEvidence: (_sessionId, evidence) => {
+    onChildWorkEvidence: (_sessionId, evidence) =>
       reconcileAgentChildWorkEvidence({ store, admission, parent, provider: 'codex', evidence })
-    }
   })
   // The latest revision of each journal row, in first-written order.
   const rows = new Map<string, AgentJournalItemBody>()

@@ -15,10 +15,12 @@ import { supportsCodexStructuredLocation } from './codex-structured-location-sup
 import { CodexStructuredSessionTeardown } from './codex-structured-session-teardown'
 import {
   applyCodexStructuredSessionOption,
-  prepareLiveCodexSessionOptions,
   readLiveCodexSessionOptions
 } from './codex-structured-session-options'
-import { prepareCodexMessageDispatch } from './codex-structured-message-options'
+import {
+  prepareCodexMessageDispatch,
+  readCodexAppliedInputOptions
+} from './codex-structured-message-options'
 import {
   CodexAcquisitionRegistry,
   requireLiveCodexSession,
@@ -37,7 +39,7 @@ import { createCodexStructuredNotificationRetry } from './codex-structured-notif
 import { acquireCodexStructuredSession } from './codex-structured-session-acquire'
 import { codexStoppedRequestEndWait, settleCodexRequestEndWaiters } from './codex-request-end-wait'
 import { changeCodexThreadGoalWithSettings } from './codex-structured-thread-goal'
-import { publishCodexChildWork } from './codex-structured-child-work-delivery'
+import { startCodexTerminalStopProbe } from './codex-background-terminals'
 import { codexBackgroundTaskStops, stopCodexBackgroundTasks } from './codex-background-task-stops'
 import {
   compactCodexStructuredSession,
@@ -154,9 +156,9 @@ export class CodexStructuredSessionAdapter implements StructuredAgentSessionAdap
       )
       // Child records observe refused frames only after a retry reaches the journal.
       session.backgroundTasks.observe(event, session.prompts.takeAbandonedCommands())
-      settleCodexRequestEndWaiters(session)
       // After the journal and the parent's republished row, never ahead of either.
-      return publishCodexChildWork(this.sessions, event, session, this.deps)
+      session.backgroundTasks.publishChildWork()
+      startCodexTerminalStopProbe(this.sessions, event.sessionId, session, this.deps)
     }
     settleCodexRequestEndWaiters(session)
     this.deps.onEvent?.(event)
@@ -308,11 +310,12 @@ export class CodexStructuredSessionAdapter implements StructuredAgentSessionAdap
   readOptions = (input: { sessionId: string; fence: number }) =>
     readLiveCodexSessionOptions(this.session(input.sessionId), this.deps.requestTimeoutMs)
 
+  readAppliedInputOptions: NonNullable<StructuredAgentSessionAdapter['readAppliedInputOptions']> = (
+    input
+  ) => readCodexAppliedInputOptions(this.sessions.get(input.sessionId), input)
+
   projectOptions = (sessionId: string, options: Readonly<Record<string, string>>) =>
     projectCodexSessionOptions(this.sessions.get(sessionId), options)
-
-  prepareReadOptions = (input: { sessionId: string; fence: number }) =>
-    prepareLiveCodexSessionOptions(this.session(input.sessionId), this.deps.requestTimeoutMs)
 
   closeSession: NonNullable<StructuredAgentSessionAdapter['closeSession']> = (...args) =>
     this.teardown.close(...args)

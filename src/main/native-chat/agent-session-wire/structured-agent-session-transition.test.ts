@@ -87,126 +87,6 @@ async function rig(watermarks: Partial<StructuredAgentSessionSinkWatermarks> = {
 }
 
 describe('structured agent-session transitions', () => {
-  it.each([false, true])(
-    'charges and releases journal-derived bytes while retaining admission and overflow checks (overflow=%s)',
-    async (overflow) => {
-      const { journal, deferred, sink, publishes, bind } = await rig({
-        pauseQueuedBytes: 2048,
-        lowQueuedBytes: 0,
-        maxLifecycleQueuedOperations: 1
-      })
-      const id = identity('journal-derived')
-      await journal.appendItem(id, tool('read', 'running'), {
-        fence: 1,
-        turnScope: AGENT_JOURNAL_THREAD_SCOPE
-      })
-      const transition: StructuredAgentSessionTransition = {
-        lifecycle: true,
-        publish: true,
-        steps: [
-          {
-            kind: 'settlement',
-            settlementId: 'journal-derived',
-            reservedBytes: 512,
-            reserveFromJournal: (at) => {
-              expect(at.itemBody(agentJournalItemKey(id))).toMatchObject({ name: 'latest' })
-              return 16 * 1024
-            },
-            resolve: () => {
-              expect(deferred.state()).toMatchObject({
-                backpressured: true,
-                queuedOperations: 1,
-                queuedBytes: 16 * 1024 + 513
-              })
-              return [
-                {
-                  kind: 'item',
-                  identity: id,
-                  body: tool('x'.repeat(overflow ? 20_000 : 8_000), 'failed'),
-                  turnScope: AGENT_JOURNAL_THREAD_SCOPE
-                }
-              ]
-            }
-          }
-        ]
-      }
-      expect(sink.tryAppendTransition?.(transition)).toEqual({ accepted: true })
-      expect(sink.tryAppendTransition?.(transition)).toEqual({
-        accepted: false,
-        reason: 'backpressure'
-      })
-      await journal.appendItem(id, tool('latest', 'running'), {
-        fence: 1,
-        turnScope: AGENT_JOURNAL_THREAD_SCOPE
-      })
-      bind()
-      const written = await sink.written?.()
-      expect(written?.ok).toBe(!overflow)
-      expect(journal.itemBody(agentJournalItemKey(id))).toMatchObject({
-        state: overflow ? 'running' : 'failed'
-      })
-      expect(deferred.state()).toMatchObject({
-        queuedOperations: 0,
-        queuedBytes: 0,
-        failed: overflow
-      })
-      expect(publishes).toHaveLength(overflow ? 0 : 1)
-      deferred.close()
-    }
-  )
-
-  it.each([false, true])(
-    'publishes every transition in commit order (queued=%s)',
-    async (queued) => {
-      const { journal, deferred, sink, publishes, bind } = await rig()
-      bind()
-      const seen: unknown[] = []
-      const bodies = () => journal.snapshot().items.map((item) => item.body)
-      const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const issue = () => {
-        for (const [label, steps] of [
-          [
-            'start',
-            [itemStep(() => ({ identity: identity('live'), body: tool('live', 'running') }))]
-          ],
-          ['update', []]
-        ] as const) {
-          sink.tryAppendTransition?.({
-            lifecycle: false,
-            publish: true,
-            steps,
-            onPublished: () => {
-              seen.push([label, publishes.length, bodies()])
-              if (label === 'update') {
-                sink.tryAppendItem?.(identity('nested'), tool('nested', 'running'), {
-                  turnScope: AGENT_JOURNAL_THREAD_SCOPE
-                })
-                throw new Error('optional publication')
-              }
-            }
-          })
-        }
-      }
-      if (queued) {
-        await journal.readInOrder(issue)
-      } else {
-        issue()
-      }
-      await expect(sink.written?.()).resolves.toEqual({ ok: true })
-      expect(seen).toEqual([
-        ['start', 1, [tool('live', 'running')]],
-        ['update', 1, [tool('live', 'running')]]
-      ])
-      expect(bodies()).toEqual([tool('live', 'running'), tool('nested', 'running')])
-      expect(warning).toHaveBeenCalledExactlyOnceWith(
-        '[agent-session] committed publication failed',
-        expect.any(Error)
-      )
-      warning.mockRestore()
-      deferred.close()
-    }
-  )
-
   it('lands its steps back to back, each resolved after the one before it', async () => {
     const { journal, deferred, sink, publishes, bind } = await rig()
     bind()
@@ -382,8 +262,8 @@ BEGIN SELECT RAISE(ABORT, 'second step refused'); END`)
           {
             kind: 'settlement',
             settlementId: 'settle-all',
-            reservedBytes: running.length * 1024,
-            // The settled row is a candidate too; the fold, not the caller, rules it out.
+            reservedBytes: 1,
+            // Include an already-settled candidate so the fold must exclude it.
             resolve: (view) =>
               [...running, identity('done')].flatMap((id) => {
                 const body = view.itemBody(agentJournalItemKey(id))
@@ -440,7 +320,7 @@ BEGIN SELECT RAISE(ABORT, 'second chunk refused'); END`)
         {
           kind: 'settlement',
           settlementId: 'settle-all',
-          reservedBytes: running.length * 1024,
+          reservedBytes: 1,
           resolve: () => running.map(failedTool)
         }
       ]

@@ -65,7 +65,12 @@ import {
   heldAgentSessionIds,
   type AgentSessionStoreState
 } from './agent-session-store-state'
-import * as tabs from './agent-session/agent-session-tab-table'
+import {
+  agentSessionVisibleTabIndex,
+  listVisibleAgentSessionIds,
+  setAgentSessionTabVisibility,
+  showAgentSessionTabs
+} from './agent-session/agent-session-tab-table'
 import type { JournalHostDatabase } from '../native-chat/agent-session-journal/journal-host-database'
 import type { JournalOperationReceipt } from '../native-chat/agent-session-journal/journal-row-writer'
 import { agentSessionOperationOutcomeReceipt } from './agent-session-operation-receipt'
@@ -87,7 +92,6 @@ export const AGENT_SESSION_LEASE_TTL_MS = 30_000,
   AGENT_SESSION_LEASE_RENEW_INTERVAL_MS = 10_000
 
 export class AgentSessionRecordStore extends AgentSessionRecordPublication {
-  private readonly tabMembership = new tabs.AgentSessionTabMembership()
   readonly conversationReceipts: ReturnType<typeof createAgentSessionConversationReceipts>
 
   private constructor(
@@ -133,9 +137,7 @@ export class AgentSessionRecordStore extends AgentSessionRecordPublication {
 
   listRecords = (): AgentSessionRecord[] => [...this.state.records.values()]
 
-  iterateRecords = (): IterableIterator<AgentSessionRecord> => this.state.records.values()
-
-  /** The runtimes this one replaced for a chat, as found at load; absent for a chat it began. */
+  /** Replaced runtimes captured at load; absent for sessions this runtime created. */
   replacedRuntime = (sessionId: string) => this.transactions.replacedRuntimes.get(sessionId)
 
   /** Include unreadable records in presence queries. */
@@ -144,15 +146,15 @@ export class AgentSessionRecordStore extends AgentSessionRecordPublication {
   /** Record presence is permanent, including unreadable rows. */
   holdsRecords = (): boolean => this.state.records.size > 0 || this.state.unreadableRecords.size > 0
 
-  listVisibleSessionIds = (): string[] => tabs.listVisibleAgentSessionIds(this.state)
+  listVisibleSessionIds = (): string[] => listVisibleAgentSessionIds(this.state)
 
   getVisibleSessionTabIndex = (): { present: boolean; sessionIds: string[] } =>
-    tabs.agentSessionVisibleTabIndex(this.state)
+    agentSessionVisibleTabIndex(this.state)
 
   getSessionTabId = (sessionId: string): string | null =>
     this.state.sessionTabs?.tabIdFor(sessionId) ?? null
 
-  /** Persist chat-tab identity separately from rollback-sensitive profile tabs. */
+  /** Persist chat-tab identity separately from rollback-sensitive profile tabs; explicit tabId restores hidden tabs under their old ids. */
   setSessionTabVisibility(
     sessionId: string,
     visible: boolean,
@@ -161,8 +163,8 @@ export class AgentSessionRecordStore extends AgentSessionRecordPublication {
   ): Promise<void> {
     return this.transact((draft) => {
       check?.()
-      return tabs.setAgentSessionTabVisibility(draft, sessionId, visible, tabId)
-    }).then(() => this.tabMembership.publish([sessionId]))
+      return setAgentSessionTabVisibility(draft, sessionId, visible, tabId)
+    })
   }
 
   setSwitchedSessionTabVisibility(
@@ -180,16 +182,14 @@ export class AgentSessionRecordStore extends AgentSessionRecordPublication {
       ) {
         return false
       }
-      tabs.setAgentSessionTabVisibility(draft, sessionId, visible, tabId)
+      setAgentSessionTabVisibility(draft, sessionId, visible, tabId)
       return true
     })
   }
 
   /** Publish the complete tab index in one write; a partial index would drop remaining chats on restart. */
   showSessionTabs(sessionIds: readonly string[]): Promise<void> {
-    return this.transact((draft) => tabs.showAgentSessionTabs(draft, sessionIds)).then(() =>
-      this.tabMembership.publish(sessionIds)
-    )
+    return this.transact((draft) => showAgentSessionTabs(draft, sessionIds))
   }
 
   listByScope(location: AgentSessionExecutionLocation): AgentSessionRecord[] {
@@ -373,6 +373,4 @@ export class AgentSessionRecordStore extends AgentSessionRecordPublication {
       return next
     })
   }
-
-  onTabMembershipChanged = this.tabMembership.listen
 }

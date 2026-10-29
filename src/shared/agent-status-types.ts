@@ -128,7 +128,6 @@ export type AgentStatusEntry = {
   /** True when this `done` was reached via interrupt, not normal completion
    *  (agent-reported or Orca's guarded fallback). Undefined otherwise. */
   interrupted?: boolean
-  restoredInterruption?: true
   /** True when this `done` is a session boundary, not a completed turn. See AgentStatusPayload. */
   sessionBoundary?: boolean
   /** Dispatch hierarchy belongs to panes, not worktrees: workers can share the coordinator's worktree. */
@@ -176,7 +175,6 @@ export type AgentStatusPayload = {
   /** See the AgentStatusEntry field for semantics. */
   lastAssistantMessageIsToolOutput?: boolean
   interrupted?: boolean
-  restoredInterruption?: true
   /** done session boundaries (connect/resume/clear) are not turn completions; notifications/automations/badges/end clocks must ignore them (STA-3386). */
   sessionBoundary?: boolean
   /** Wall-clock ms when the lead turn ended while Claude background inventory kept the pane `working`.
@@ -216,7 +214,6 @@ export function pickParsedAgentStatusPayload(
       ? { lastAssistantMessageIsToolOutput: row.lastAssistantMessageIsToolOutput }
       : {}),
     ...(row.interrupted !== undefined ? { interrupted: row.interrupted } : {}),
-    ...(row.restoredInterruption === true ? { restoredInterruption: true } : {}),
     ...(row.sessionBoundary !== undefined ? { sessionBoundary: row.sessionBoundary } : {}),
     ...(row.turnCompletedAt !== undefined ? { turnCompletedAt: row.turnCompletedAt } : {}),
     ...(row.subagents !== undefined ? { subagents: row.subagents } : {}),
@@ -334,7 +331,6 @@ function normalizeAgentStatusObject(parsed: unknown): ParsedAgentStatusPayload |
       obj.lastAssistantMessageIsToolOutput === true ? true : undefined,
     // Why: only meaningful on `done`; coerce to undefined elsewhere so it can't leak stale truth across transitions.
     interrupted: obj.interrupted === true && state === 'done' ? true : undefined,
-    restoredInterruption: obj.restoredInterruption === true && state === 'done' ? true : undefined,
     sessionBoundary: obj.sessionBoundary === true && state === 'done' ? true : undefined,
     turnCompletedAt: normalizeTurnCompletedAtField(obj.turnCompletedAt, state),
     subagents: normalizeAgentSubagentsField(obj.subagents),

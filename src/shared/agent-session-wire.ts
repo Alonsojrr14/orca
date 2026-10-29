@@ -232,7 +232,6 @@ export type AgentSessionStatusSummary = {
   lastAssistantMessage?: string
   /** Latest request verdict only while idle; never carry it on running/blocked states. Absent or unknown arms mean unknown, never success. Published as mainAgent.outcome in agent status. */
   turnOutcome?: AgentTurnOutcome
-  restoredInterruption?: true
   /** Host-derived, unpersisted Stop progress while working until its turn ends; clear a settled no-op Stop. Older hosts omit it and older clients ignore it. */
   stopping?: true
   /** Optional live provider tasks let lists show children without journal subscriptions; derive from children when published. */

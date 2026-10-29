@@ -74,9 +74,7 @@ export function structuredAgentSessionLiveFence(
 }
 
 /** Unreconciled/recovering owners without a local child remain unverifiable, not current work. */
-export function structuredAgentSessionOwnerUnverifiable(
-  evidence: StructuredAgentSessionWorkEvidence
-) {
+function structuredAgentSessionOwnerUnverifiable(evidence: StructuredAgentSessionWorkEvidence) {
   const record = evidence.record
   const lease = record?.ownerObservation
   const fence = record?.currentFence
@@ -87,15 +85,7 @@ export function structuredAgentSessionOwnerUnverifiable(
   )
 }
 
-export function structuredAgentSessionOwnerEnded(
-  lease: Pick<AgentSessionRecord['lease'], 'runtimeFence' | 'claimStatus' | 'deathEvidence'>,
-  replaced: StructuredAgentSessionWorkEvidence['replaced']
-): boolean {
-  return !!lease.deathEvidence || structuredAgentSessionReplacedRuntimeEnded(lease, replaced)
-}
-
-/** Whether a runtime this one replaced granted the lease's generation, which is then over. A
- *  conflicted claim's agent is a terminal's, which no runtime's pipes held. */
+/** Replaced runtimes lost their pipes; conflicted terminal claims are outside that proof. */
 export function structuredAgentSessionReplacedRuntimeEnded(
   lease: Pick<AgentSessionRecord['lease'], 'runtimeFence' | 'claimStatus'>,
   replaced: StructuredAgentSessionReplacedEnd | undefined

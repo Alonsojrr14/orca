@@ -41,7 +41,6 @@ export function setStructuredAgentSessionHost(next: StructuredAgentSessionHost |
     console.warn('[structured-agent-session] watching for held chats failed', error)
   }
   publishHeld()
-  host?.advanceLegacyRest?.()
 }
 
 /** Includes saved/live chats; constructing a host holds none. */
@@ -58,41 +57,4 @@ export function onStructuredAgentSessionsHeldChanged(
 
 export function getStructuredAgentSessionHost(): StructuredAgentSessionHost | null {
   return host
-}
-
-let currentGraphReady: () => boolean = () => false
-let foreground = 0
-
-export function structuredJournalBackgroundReady(): boolean {
-  return currentGraphReady() && foreground === 0
-}
-
-export function setStructuredJournalReadiness(read: () => boolean): void {
-  currentGraphReady = read
-  wakeStructuredJournalBackground()
-}
-
-export function wakeStructuredJournalBackground(): void {
-  host?.advanceLegacyRest?.()
-}
-
-/** Observation only: actions never wait for background work. */
-export function beginStructuredJournalForeground(signal?: AbortSignal): () => void {
-  foreground++
-  host?.advanceLegacyRest?.()
-  let ended = false
-  const finish = (): void => {
-    if (ended) {
-      return
-    }
-    ended = true
-    foreground--
-    signal?.removeEventListener('abort', finish)
-    host?.advanceLegacyRest?.()
-  }
-  signal?.addEventListener('abort', finish, { once: true })
-  if (signal?.aborted) {
-    finish()
-  }
-  return finish
 }

@@ -188,7 +188,6 @@ async function launchServeMode(
     console.error('[runtime] Failed to start headless RPC transport:', error)
     throw error
   })
-  runtime.noteHeadlessStartupReady()
   scheduleAgentLaunchRecordWarmup(null)
   // Headless phones still register/unregister tokens, though this host dispatches no push notifications.
   startDesktopPushService(runtimeRpc)

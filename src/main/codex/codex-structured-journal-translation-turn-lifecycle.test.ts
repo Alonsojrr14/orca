@@ -462,7 +462,8 @@ describe('codex turn lifecycle rows', () => {
     } as unknown as CodexAppServerConnection
     const translate = vi
       .fn<Parameters<typeof createCodexStructuredNotificationRetry>[0]['translate']>()
-      .mockReturnValue({ accepted: false, reason: 'backpressure' })
+      .mockReturnValueOnce({ accepted: false, reason: 'backpressure' })
+      .mockReturnValue({ accepted: true })
     const retries = createCodexStructuredNotificationRetry({
       sessionFor: () => ({ connection, ended: false }) as CodexSession,
       translate
@@ -477,25 +478,11 @@ describe('codex turn lifecycle rows', () => {
         -1
       )
     ).toEqual({ accepted: false, reason: 'backpressure' })
+    await vi.advanceTimersByTimeAsync(50)
+
     expect(translate.mock.calls.map((call) => call[4])).toEqual([1_000, 1_000])
     expect(translate.mock.calls.map((call) => call[5])).toEqual([-1, -1])
-    expect(connection.pauseReading).toHaveBeenCalledOnce()
     expect(connection.resumeReading).not.toHaveBeenCalled()
-    await vi.advanceTimersByTimeAsync(50)
-    expect(translate).toHaveBeenCalledTimes(4)
-    expect(connection.resumeReading).not.toHaveBeenCalled()
-
-    translate.mockReturnValue({ accepted: true })
-    await vi.advanceTimersByTimeAsync(25)
-    expect(translate.mock.calls.map((call) => call[4])).toEqual(Array(5).fill(1_000))
-    expect(translate.mock.calls.map((call) => call[5])).toEqual(Array(5).fill(-1))
-    for (const call of translate.mock.calls) {
-      expect(call[3]).toBe(translate.mock.calls[0][3])
-    }
-    expect(connection.resumeReading).toHaveBeenCalledOnce()
-    await vi.advanceTimersByTimeAsync(50)
-    expect(translate).toHaveBeenCalledTimes(5)
-    expect(connection.resumeReading).toHaveBeenCalledOnce()
   })
 
   it('restores historical turn rows with optional endpoints in milliseconds', () => {

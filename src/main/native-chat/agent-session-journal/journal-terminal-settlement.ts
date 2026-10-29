@@ -16,9 +16,6 @@ import { endedJournalReasoning } from './journal-reasoning-row'
 
 /** Unsettled lifecycle rows must not be shed under pressure. */
 export function requiresTerminalSettlement(body: AgentJournalItemBody): boolean {
-  if (body.kind === 'semantic-work') {
-    return body.phase === 'open'
-  }
   if (body.kind === 'tool-call') {
     return body.state === 'running'
   }

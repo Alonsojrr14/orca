@@ -652,8 +652,7 @@ describe("the reopen's mark", () => {
     expect(rig.host.collaboratorsForTests().sessions.has(SESSION)).toBe(false)
   })
 
-  // The startup restore lists a visible chat; its first read opens it like any reader's.
-  it('a chat first opened after a crash holds its cards', async () => {
+  it('a chat the startup restore reopens after a crash holds its cards', async () => {
     const working = await rig.workingSend()
     const queued = rig.send('queued behind work', 'queue-if-active')
     await queued.result
@@ -661,7 +660,6 @@ describe("the reopen's mark", () => {
     const sent = rig.dispatch.mock.calls.length
     rig.crashRestartHostProcess()
     await rig.host.restoreReadableSessions([SESSION])
-    await rig.host.journalSnapshot(SESSION)
     expect(rig.host.collaboratorsForTests().sessions.has(SESSION)).toBe(true)
     await observationClock.observe(100)
     expect(await rig.handoff(queued.id)).toBeUndefined()

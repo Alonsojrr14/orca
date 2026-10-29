@@ -142,6 +142,7 @@ function Probe() {
     deviceTokenRef,
     flushPendingLiveInputBeforeExternalSend: async () => true,
     canSend: env.connected,
+    canCompose: true,
     liveInputEnabled: false,
     showToast: () => {},
     resetLiveInputFocus: () => {}
@@ -329,6 +330,18 @@ describe('the mic follows the host dictation mode', () => {
     await render()
     expect(micBinding()).toBe('hidden')
     expect(env.captureEnabled).toBe(false)
+  })
+
+  it('offers the mic on a host that never had a speech model selected', async () => {
+    env.connected = true
+    env.deferReply = true
+    env.slowReply = Promise.resolve({
+      id: 'first-run',
+      ok: true,
+      result: { enabled: false, selectedModelId: '', dictationMode: 'toggle', models: [] }
+    })
+    await render()
+    expect(micBinding()).toBe('toggle')
   })
 
   it('keeps legacy controls when the host omits the enabled field', async () => {

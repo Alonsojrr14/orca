@@ -1,7 +1,3 @@
-// @vitest-environment happy-dom
-import { act, renderHook } from '@testing-library/react'
-import { useAppStore } from '../store'
-import { useRuntimeGraphSync } from '../app-shell/use-runtime-graph-sync'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   getRuntimeMobileSessionSyncKey,
@@ -215,36 +211,4 @@ describe('getRuntimeMobileSessionSyncKey scheduling inputs', () => {
 
     expect(runtimeMobileSessionSyncKeysEqual(baseKey, resizedKey)).toBe(false)
   })
-})
-
-it('publishes restoration readiness only after the real committed hook and deferred graph task', async () => {
-  vi.useFakeTimers()
-  const initial = useAppStore.getState()
-  const syncWindowGraph = vi.fn(async (_graph: { startupRestorationReady?: boolean }) => ({}))
-  Object.assign(window, { api: { runtime: { syncWindowGraph } } })
-  useAppStore.setState({ workspaceSessionReady: true, terminalStartupRestorationReady: false })
-  const view = renderHook(useRuntimeGraphSync)
-  try {
-    expect(syncWindowGraph).not.toHaveBeenCalled()
-    await flushRuntimeGraphSyncTimer()
-    expect(syncWindowGraph.mock.lastCall?.[0]).toMatchObject({ startupRestorationReady: false })
-    act(() => useAppStore.setState({ terminalStartupRestorationReady: true }))
-    expect(syncWindowGraph).toHaveBeenCalledTimes(1)
-    await flushRuntimeGraphSyncTimer()
-    expect(syncWindowGraph.mock.lastCall?.[0]).toMatchObject({ startupRestorationReady: true })
-    act(() => useAppStore.setState({ terminalStartupRestorationReady: false }))
-    await flushRuntimeGraphSyncTimer()
-    expect(syncWindowGraph.mock.lastCall?.[0]).toMatchObject({ startupRestorationReady: false })
-    view.unmount()
-    const count = syncWindowGraph.mock.calls.length
-    await flushRuntimeGraphSyncTimer()
-    expect(syncWindowGraph).toHaveBeenCalledTimes(count)
-    const replacement = renderHook(useRuntimeGraphSync)
-    await flushRuntimeGraphSyncTimer()
-    expect(syncWindowGraph.mock.lastCall?.[0]).toMatchObject({ startupRestorationReady: false })
-    replacement.unmount()
-  } finally {
-    view.unmount()
-    useAppStore.setState(initial, true)
-  }
 })

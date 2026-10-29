@@ -9,6 +9,7 @@ const seen = vi.hoisted(() => ({
   toasts: new Array<string>(),
   errorHaptics: 0,
   setupSheetOpens: 0,
+  micPermissionRequests: 0,
   clipboard: new Array<string>(),
   inputs: new Array<string>(),
   audioListeners: new Map<string, (event: { data: string }) => void>()
@@ -24,7 +25,10 @@ vi.mock('@orca/expo-two-way-audio', () => ({
     return { remove: () => seen.audioListeners.delete(name) }
   },
   initialize: () => Promise.resolve(true),
-  requestMicrophonePermissionsAsync: () => Promise.resolve({ granted: true }),
+  requestMicrophonePermissionsAsync: () => {
+    seen.micPermissionRequests += 1
+    return Promise.resolve({ granted: true })
+  },
   tearDown: () => {},
   toggleRecording: () => true
 }))
@@ -122,6 +126,7 @@ function mount(
       activeHandleRef: useRef('t1'),
       flushPendingLiveInputBeforeExternalSend: async () => true,
       canSend: true,
+      canCompose: true,
       liveInputEnabled: options.liveInput,
       showToast: (message: string) => {
         seen.toasts.push(message)
@@ -192,6 +197,7 @@ beforeEach(() => {
   seen.toasts.length = 0
   seen.errorHaptics = 0
   seen.setupSheetOpens = 0
+  seen.micPermissionRequests = 0
   seen.clipboard.length = 0
   seen.inputs.length = 0
   seen.audioListeners.clear()
@@ -213,6 +219,35 @@ describe('a mic tap the desktop refuses because dictation is not set up', () => 
       expect(seen.toasts).toEqual([])
     })
   }
+})
+
+describe('a mic tap after the host reported dictation is not set up', () => {
+  it('opens setup without asking for the microphone, then lets the host judge the tap after the sheet closes', async () => {
+    const rpc = createFakeRpcClient()
+    const mounted = mount(rpc, { liveInput: false, sendLive: async () => true })
+    await act(async () => {
+      const read = mounted.current().refreshDictationMode()
+      for (const request of rpc.requests.splice(0)) {
+        request.resolve({
+          id: 'desktop',
+          ok: true,
+          result: { enabled: false, selectedModelId: '', dictationMode: 'toggle', models: [] }
+        })
+      }
+      await read
+    })
+    act(() => mounted.current().handleDictationToggle())
+    expect(seen.setupSheetOpens).toBe(1)
+    expect(seen.micPermissionRequests).toBe(0)
+    expect(rpc.requests).toEqual([])
+
+    // Closing the sheet hands the next tap to the host until a fresh read lands.
+    act(() => mounted.current().closeDictationSetup())
+    act(() => mounted.current().handleDictationToggle())
+    await settle(rpc, '')
+    expect(seen.setupSheetOpens).toBe(1)
+    expect(seen.micPermissionRequests).toBe(1)
+  })
 })
 
 describe('a mic tap the desktop refuses for a reason setup cannot fix', () => {

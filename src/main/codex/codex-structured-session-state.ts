@@ -1,11 +1,12 @@
-import type * as sink from '../native-chat/agent-session-wire/structured-agent-session-event-sink'
-import type { ChildWorkAdmission } from '../native-chat/agent-session-wire/structured-agent-session-accepted-child-work'
 import type { CodexAppliedSettings } from './codex-structured-applied-settings'
 import type { StructuredAgentSessionChildWorkProducer } from '../native-chat/agent-session-wire/structured-agent-session-subagent-rows'
 import type { StructuredAgentSessionLogger } from '../native-chat/agent-session-wire/structured-agent-session-logger'
 import type { StructuredAgentSessionAtRestCommands } from '../native-chat/agent-session-wire/structured-agent-session-at-rest-commands'
 import type { AgentSessionAccountKind } from '../../shared/agent-session-availability'
-import type * as journal from '../../shared/agent-session-journal-types'
+import type {
+  AgentJournalAnsweredTurnIdentity,
+  AgentJournalItemIdentity
+} from '../../shared/agent-session-journal-types'
 import { randomUUID } from 'node:crypto'
 import type { AgentJournalDispatchRejection } from '../../shared/agent-session-failure-words'
 import { cancelProcessAcquisition } from '@orca/process-host/cancel-process-acquisition'
@@ -32,6 +33,7 @@ import type { StructuredAgentSessionProviderOpen } from '../native-chat/agent-se
 import type { NativeChatVisualsLaunch } from '../native-chat/native-chat-visuals-delivery'
 import type { AgentChatPermissionChoice } from '../../shared/agent-chat-permission-mode'
 import type { CodexSandboxPolicy } from './codex-structured-sandbox-policy'
+import type { StructuredAgentSessionEventSink } from '../native-chat/agent-session-wire/structured-agent-session-event-sink'
 
 export type CodexSessionCatalogAccess = AgentModelCatalogSessionAccess & {
   read?: (verifiedOnly?: boolean) => ReturnType<AgentModelCatalogStore['get']>
@@ -103,24 +105,19 @@ export type CodexStructuredSessionAdapterDeps = {
     sessionId: string,
     evidence: AgentChildWorkEvidence[],
     producer?: StructuredAgentSessionChildWorkProducer
-  ) => ChildWorkAdmission | void
-  /** A send admitted earlier: its identity once Codex echoes it, or its rejection when the turn
-   *  Codex answered it into ended without taking it. */
+  ) => void
+  /** Settle an admitted send by provider echo or rejection at its answered turn's end. */
   onDispatchSettledLate?: (
     input: { sessionId: string; clientMessageId: string } & (
-      | { providerIdentity: journal.AgentJournalItemIdentity }
+      | { providerIdentity: AgentJournalItemIdentity }
       | ({
           state: 'rejected'
-          answeredInTurn?: journal.AgentJournalAnsweredTurnIdentity
+          answeredInTurn?: AgentJournalAnsweredTurnIdentity
         } & AgentJournalDispatchRejection)
     )
   ) => void
   /** The sends Codex holds (`CodexDispatchEchoes.heldSends`) changed with no journal row. */
-  onHeldSendsChanged?: (input: {
-    sessionId: string
-    changes: { clientMessageId: string; held: boolean }[]
-    producer: StructuredAgentSessionChildWorkProducer | undefined
-  }) => ChildWorkAdmission | void
+  onHeldSendsChanged?: (input: { sessionId: string }) => void
   openConnection?: typeof openCodexAppServerConnection
   readProcessStartTime?: (pid: number) => Promise<number | null>
   mintLinkId?: () => string
@@ -137,7 +134,7 @@ export type CodexStructuredSessionAdapterDeps = {
 }
 
 export type CodexSession = {
-  events?: sink.StructuredAgentSessionEventSink
+  events?: StructuredAgentSessionEventSink
   account?: AgentSessionAccountKind
   connection: CodexAppServerConnection
   ended: boolean
@@ -177,16 +174,14 @@ export type CodexSession = {
   }
   /** The configured personality and tier a reset returns to, read before the first override. */
   nativeDefaults?: { personality?: string; serviceTier?: string }
-  /** Overrides actually attempted on this child, independently of future saved picks. */
+  /** Acquisition facts overlaid by controls actually sent, independently of reports or saved picks. */
   appliedTurnOptions?: Readonly<Record<string, string>>
   appliedSettings?: CodexAppliedSettings
   /** Optional for adapters without a host catalog store. */
   catalogAccess?: CodexSessionCatalogAccess
   dispatchEchoes: CodexDispatchEchoes
   translator: CodexJournalTranslator | null
-  /** Ephemeral roster behind the background-tasks strip; never durable state. */
-  workProducer?: StructuredAgentSessionChildWorkProducer
-  endWritten?: Promise<sink.StructuredAgentSessionSinkBarrier>
+  /** Ephemeral compatibility roster; durable child records own runtime state. */
   backgroundTasks: CodexBackgroundTaskTracker
   skillReport?: CodexSkillReport
   unbindReadingControl?: () => void

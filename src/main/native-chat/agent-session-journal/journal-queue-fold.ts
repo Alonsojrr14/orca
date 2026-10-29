@@ -196,22 +196,16 @@ function settleHandOffInDoubt(state: JournalReducerState, clientMessageId: strin
 
 // Command turns already show their refusal; returned cards would block following work.
 function spendReportedCommandCards(state: JournalReducerState): void {
-  while (spendOneReportedCommandCard(state)) {
-    // A group member is removed by its original card transition.
+  for (const card of state.queue.cards.values()) {
+    if (
+      card.state === 'returned' &&
+      card.body.command &&
+      card.consumedAs !== null &&
+      commandTurnReported(state, card.consumedAs)
+    ) {
+      setCard(state, { ...card, state: 'withdrawn' })
+    }
   }
-}
-
-export function spendOneReportedCommandCard(state: JournalReducerState): boolean {
-  const key = state.selection.nextReportedCard(state)
-  if (key === undefined) {
-    return false
-  }
-  const card = state.queue.cards.get(key)
-  if (!card) {
-    throw new Error('missing returned command card')
-  }
-  setCard(state, { ...card, state: 'withdrawn' })
-  return true
 }
 
 function setCard(state: JournalReducerState, card: QueuedMessageRow): void {

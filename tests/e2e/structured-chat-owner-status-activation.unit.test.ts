@@ -162,8 +162,7 @@ describe('a chat at rest keeps its worktree activatable', () => {
     store = await openTestAgentSessionRecordStore(root)
     openHost()
     await host.restoreReadableSessions()
-    // Listed from its record, not read: activation needs no open conversation.
-    expect(host.hasSession(SESSION)).toBe(false)
+    expect(host.hasSession(SESSION)).toBe(true)
     expect(store.getRecord(SESSION)?.lease).toMatchObject({
       claimStatus: 'released',
       ownerProcess: null

@@ -8,10 +8,7 @@ import type {
 import type { JournalLifecycleMutationInput } from '../agent-session-journal/journal-row-builders'
 import type { AgentSessionJournal } from '../agent-session-journal/journal-store'
 import type { JournalStep } from '../agent-session-journal/journal-step-writer'
-import {
-  estimateStructuredAgentSessionItemBytes,
-  estimateStructuredAgentSessionSettlementBytes
-} from './structured-agent-session-event-sink-estimate'
+import { estimateStructuredAgentSessionItemBytes } from './structured-agent-session-event-sink-estimate'
 import type {
   StructuredAgentSessionItemAppendOptions,
   StructuredAgentSessionSinkAdmission
@@ -21,18 +18,7 @@ import { structuredAgentSessionJournalAppendOptions } from './structured-agent-s
 
 export type StructuredAgentSessionTransitionJournal = Pick<
   AgentSessionJournal,
-  | 'epoch'
-  | 'visitItems'
-  | 'itemBody'
-  | 'item'
-  | 'visitItemsWithLinkage'
-  | 'canonicalItemId'
-  | 'agent'
-  | 'sessionId'
-  | 'submission'
-  | 'requestFrontier'
-  | 'runningTurn'
-  | 'readInOrder'
+  'epoch' | 'visitItems' | 'itemBody' | 'item' | 'visitItemsWithLinkage' | 'canonicalItemId'
 >
 
 export type StructuredAgentSessionTransitionStep =
@@ -51,10 +37,8 @@ export type StructuredAgentSessionTransitionStep =
       /** Journal deduplicates settlements by this ID. */
       settlementId: string
       recovered?: true
-      /** Admission charge; bounds mutations together with any journal-derived reservation. */
+      /** Queue pacing only; the journal chooses actual mutations. */
       reservedBytes: number
-      /** Reserve journal-derived bodies on the write lane, after preceding writes land. */
-      reserveFromJournal?: (journal: StructuredAgentSessionTransitionJournal) => number
       /** Resolve at execution; an empty result writes nothing. */
       resolve: (
         journal: StructuredAgentSessionTransitionJournal
@@ -98,9 +82,9 @@ function transitionAppend(
         (transition.publish ? 1 : 0),
       lifecycle: transition.lifecycle,
       finalTail: transition.finalTail,
-      run: async (bound, reserveBytes) => {
+      run: async (bound) => {
         const { journal, fence } = bound
-        await journal.appendSteps(
+        const wrote = await journal.appendSteps(
           transition.steps.map((step): JournalStep =>
             step.kind === 'item'
               ? {
@@ -125,38 +109,15 @@ function transitionAppend(
                     fence,
                     ownerFence: fence,
                     recovered: step.recovered,
-                    resolve: () => {
-                      const journalBytes = step.reserveFromJournal?.(journal) ?? 0
-                      if (step.reserveFromJournal) {
-                        reserveBytes(journalBytes)
-                      }
-                      const mutations = step.resolve(journal)
-                      if (
-                        estimateStructuredAgentSessionSettlementBytes(mutations) >
-                        step.reservedBytes + journalBytes
-                      ) {
-                        throw new Error(STEP_OVERFLOW)
-                      }
-                      return mutations
-                    }
+                    resolve: () => step.resolve(journal)
                   }
                 }
-          ),
-          (wrote) => {
-            if (transition.publish && wrote.includes(true)) {
-              bound.publish()
-            }
-            publishCommitted(transition.onPublished)
-          }
+          )
         )
+        if (transition.publish && wrote.includes(true)) {
+          bound.publish()
+        }
+        transition.onPublished?.()
       }
     })
-}
-
-export function publishCommitted(publish: (() => void) | undefined): void {
-  try {
-    publish?.()
-  } catch (error) {
-    console.warn('[agent-session] committed publication failed', error)
-  }
 }

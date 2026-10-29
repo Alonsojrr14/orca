@@ -172,8 +172,7 @@ export class JournalLifecycleBatchAppender {
                     fence: input.fence,
                     ownerFence: only.ownerFence,
                     observedAt: only.observedAt,
-                    recovered: only.recovered ?? input.recovered,
-                    recoveredAt: only.recoveredAt
+                    recovered: input.recovered
                   },
                   revisions
                 )

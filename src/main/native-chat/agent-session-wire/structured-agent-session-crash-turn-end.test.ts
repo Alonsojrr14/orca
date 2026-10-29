@@ -199,31 +199,6 @@ afterEach(async () => {
 })
 
 describe('a turn a crash cut short mid-tool', () => {
-  // The row is read from the journal's saved open turn, so the sidebar says Interrupted at once;
-  // the chat's history is read, and its turn settled, only when something opens it.
-  it('reads Interrupted before anything opens the chat, and the first open settles the turn', async () => {
-    openHost({ probeOwner: async () => ({ outcome: 'pid-absent' }) })
-
-    await host.restoreReadableSessions([SESSION])
-
-    expect(host.hasSession(SESSION)).toBe(false)
-    expect(host.readStatusSummary(SESSION)).toMatchObject({
-      status: 'idle',
-      turnOutcome: 'cancellation',
-      restoredInterruption: true,
-      statusStartedAt: TOOL_STARTED_AT - 2_000,
-      latestPrompt: ''
-    })
-    expect(await settledTurn()).toMatchObject(INTERRUPTED_TURN)
-    expect(host.readStatusSummary(SESSION)).toMatchObject({
-      status: 'idle',
-      turnOutcome: 'cancellation',
-      restoredInterruption: true,
-      statusStartedAt: TOOL_STARTED_AT - 2_000,
-      latestPrompt: 'run the loop'
-    })
-  })
-
   it('ends at the last renewal, not at the tool call the provider last reported', async () => {
     openHost({ probeOwner: async () => ({ outcome: 'pid-absent' }) })
 
@@ -355,14 +330,12 @@ describe('a turn a read reached before the reconcile proved its owner dead', () 
       published
         .filter((summary) => summary.sessionId === SESSION && summary.turnOutcome)
         .map((summary) => summary.turnOutcome)
-    // Restored Interrupted is news at its saved time; the turn keeps its worked duration.
-    expect(outcomes()).toEqual(['cancellation'])
-    expect(published.at(-1)?.restoredInterruption).toBe(true)
+    expect(outcomes()).toEqual(['interruption'])
 
     await host.reconcileRestartLeases()
     await drainSession()
 
-    expect(outcomes().at(-1)).toBe('cancellation')
+    expect(outcomes().at(-1)).toBe('interruption')
     const [timing] = selectStructuredAgentTurnTimings(
       (await host.journalSnapshot(SESSION)).items
     ).values()

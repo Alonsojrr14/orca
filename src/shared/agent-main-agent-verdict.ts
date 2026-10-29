@@ -5,26 +5,22 @@ import type { AgentMainAgentStatus } from './main-agent-status'
 export type AgentMainAgentVerdictSource = {
   state: AgentStatusState
   interrupted?: boolean
-  restoredInterruption?: true
   mainAgent?: { state: AgentStatusState; outcome?: AgentTurnOutcome }
 }
 
 /** Copy both verdict forms through agentVerdictFields so history, sleep and worktree ps records cannot lose one. */
 export type AgentVerdictFields = {
   interrupted?: true
-  restoredInterruption?: true
   mainAgent?: AgentMainAgentStatus
 }
 
 /** The verdict-bearing fields to copy from a row onto another record. */
 export function agentVerdictFields(row: {
   interrupted?: boolean
-  restoredInterruption?: true
   mainAgent?: AgentMainAgentStatus
 }): AgentVerdictFields {
   return {
     ...(row.interrupted === true ? { interrupted: true } : {}),
-    ...(row.restoredInterruption === true ? { restoredInterruption: true } : {}),
     ...(row.mainAgent ? { mainAgent: row.mainAgent } : {})
   }
 }
@@ -90,9 +86,4 @@ export function agentTurnEndedOnPurpose(row: AgentMainAgentVerdictSource): boole
     case null:
       return false
   }
-}
-
-/** Restored cuts are news at their saved time; this does not change why a turn ended. */
-export function agentTurnEligibleForAttention(row: AgentMainAgentVerdictSource): boolean {
-  return row.restoredInterruption === true || !agentTurnEndedOnPurpose(row)
 }

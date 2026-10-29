@@ -67,7 +67,7 @@ function codexWith(routes: Record<string, Route>) {
   const codex = fakeCodex(routes)
   const evidence: AgentChildWorkEvidence[] = []
   const adapter = adapterFor(codex, {}, [], {
-    onChildWorkEvidence: (_sessionId, edges) => void evidence.push(...edges)
+    onChildWorkEvidence: (_sessionId, edges) => evidence.push(...edges)
   })
   const live = () => codex.connections.at(-1)!
   const calls = (): Call[] => live().calls

@@ -22,7 +22,6 @@ export async function runTerminalLeaseSubscription(args: TerminalSubscriptionArg
     return
   }
   emit({ type: 'subscribed', streamId: null, lines: [], truncated: false })
-  args.finishJournalSetup?.()
   await streamClosed
 }
 
@@ -112,6 +111,5 @@ export async function runTerminalJsonSubscription(args: TerminalSubscriptionArgs
       rows: event.rows
     })
   })
-  args.finishJournalSetup?.()
   await streamClosed
 }

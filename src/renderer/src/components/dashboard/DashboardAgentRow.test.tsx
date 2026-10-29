@@ -612,24 +612,3 @@ describe('DashboardAgentRow', () => {
     })
   })
 })
-
-it('uses neutral accessibility for native cancellation summaries', () => {
-  const markup = renderRow(
-    makeAgent(
-      { state: 'done' },
-      {
-        state: 'done',
-        mainAgent: { state: 'done', outcome: 'cancellation', stateStartedAt: 2_000 },
-        observation: {
-          origin: 'structured',
-          authorityId: 'host',
-          incarnation: 0,
-          revision: 1,
-          observedAt: 2_000
-        }
-      }
-    )
-  )
-  expect(markup).toContain('aria-label="Interrupted"')
-  expect(markup).not.toContain('Interrupted by user')
-})

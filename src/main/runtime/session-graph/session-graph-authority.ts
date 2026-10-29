@@ -1,4 +1,3 @@
-import { wakeStructuredJournalBackground } from '../../native-chat/agent-session-wire/structured-agent-session-registry'
 import type { OrcaRuntimeWithResolveBrowserNetworkExecutionHostForWorktree as ResolveBrowserNetworkExecutionHostForWorktreeMethods } from '../terminal/launch/terminal-workspace-scope'
 import { OrcaRuntimeWithHasTerminalsForWorktree } from './session-graph-reload-lifecycle'
 import { HEADLESS_RUNTIME_WINDOW_ID } from '../../../shared/runtime-types'
@@ -33,23 +32,6 @@ import { resolveRemoteCliBrowserScopeSelector } from '../desktop-browser-bridge/
 import type { RpcContext } from '../rpc/core'
 
 export abstract class OrcaRuntimeWithTransitionGraphReloadToTerminalState extends OrcaRuntimeWithHasTerminalsForWorktree {
-  protected structuredJournalBackgroundReady = (): boolean =>
-    this.graphStatus === 'ready' &&
-    this.startupRestorationReady &&
-    this.authoritativeWindowId !== null &&
-    (this.authoritativeWindowId === HEADLESS_RUNTIME_WINDOW_ID || this.rendererGeneration !== null)
-
-  shouldRelayTerminalBrowserOpens(): boolean {
-    return this.authoritativeWindowId === HEADLESS_RUNTIME_WINDOW_ID
-  }
-
-  protected noteStartupRestorationReady(windowId: number, startupRestorationReady: boolean): void {
-    if (windowId !== HEADLESS_RUNTIME_WINDOW_ID) {
-      this.startupRestorationReady = startupRestorationReady
-      wakeStructuredJournalBackground()
-    }
-  }
-
   protected abstract resolveBrowserNetworkExecutionHostForWorktree(
     ...args: Parameters<
       ResolveBrowserNetworkExecutionHostForWorktreeMethods['resolveBrowserNetworkExecutionHostForWorktree']
@@ -64,7 +46,6 @@ export abstract class OrcaRuntimeWithTransitionGraphReloadToTerminalState extend
       return
     }
     this.graphStatus = 'unavailable'
-    wakeStructuredJournalBackground()
     this.setTerminalSideEffectConsumerAvailable(false)
     this.rememberDetachedPreAllocatedLeaves()
     this.tabs.clear()
@@ -81,23 +62,11 @@ export abstract class OrcaRuntimeWithTransitionGraphReloadToTerminalState extend
     return windowId !== HEADLESS_RUNTIME_WINDOW_ID && this.headlessGraphFallbackAvailable
   }
 
-  noteHeadlessStartupReady(): void {
-    if (this.authoritativeWindowId !== HEADLESS_RUNTIME_WINDOW_ID) {
-      return
-    }
-    this.startupRestorationReady = true
-    wakeStructuredJournalBackground()
-  }
-
   protected restoreHeadlessGraphAuthority(): void {
     this.rendererGraphEpoch += 1
     this.authoritativeWindowId = HEADLESS_RUNTIME_WINDOW_ID
-    wakeStructuredJournalBackground()
     this.graphStatus = 'ready'
-    wakeStructuredJournalBackground()
     this.rendererGeneration = null
-    wakeStructuredJournalBackground()
-    this.noteHeadlessStartupReady()
     this.setTerminalSideEffectConsumerAvailable(false)
     this.tabs.clear()
     this.leaves.clear()

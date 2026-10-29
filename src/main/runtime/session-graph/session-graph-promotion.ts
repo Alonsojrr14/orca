@@ -1,4 +1,3 @@
-import { wakeStructuredJournalBackground } from '../../native-chat/agent-session-wire/structured-agent-session-registry'
 import type { OrcaRuntimeWithHasTerminalsForWorktree as HasTerminalsForWorktreeMethods } from './session-graph-reload-lifecycle'
 import type { OrcaRuntimeWithBindPtyIncarnationHandle as BindPtyIncarnationHandleMethods } from '../terminal/identity/terminal-handle-bindings'
 import type { OrcaRuntimeWithResolveExitWaiters as ResolveExitWaitersMethods } from '../terminal/wait/terminal-wait-settlements'
@@ -153,7 +152,6 @@ export abstract class OrcaRuntimeWithAttachWindow extends OrcaRuntimeWithNotifyS
       this.persistWindowlessPtyBindingsForDesktopAttach()
       this.pendingHeadlessPromotionWindowId = windowId
       this.authoritativeWindowId = windowId
-      wakeStructuredJournalBackground()
       this.beginGraphReload(windowId)
       return
     }
@@ -161,9 +159,6 @@ export abstract class OrcaRuntimeWithAttachWindow extends OrcaRuntimeWithNotifyS
       // Every windowless gap needs handoff: promoted serve windows can close while new PTYs arrive.
       this.persistWindowlessPtyBindingsForDesktopAttach()
       this.authoritativeWindowId = windowId
-      wakeStructuredJournalBackground()
-      this.startupRestorationReady = false
-      wakeStructuredJournalBackground()
     }
   }
 

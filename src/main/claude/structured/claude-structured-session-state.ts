@@ -1,5 +1,3 @@
-import type { ClaudeSessionAcquireContext } from '../claude-structured-acquisition-launch'
-import type { ChildWorkAdmission } from '../../native-chat/agent-session-wire/structured-agent-session-accepted-child-work'
 import type { StructuredAgentSessionChildWorkProducer } from '../../native-chat/agent-session-wire/structured-agent-session-subagent-rows'
 import type { StructuredAgentSessionLogger } from '../../native-chat/agent-session-wire/structured-agent-session-logger'
 import type { AgentJournalDispatchRejection } from '../../../shared/agent-session-failure-words'
@@ -99,7 +97,7 @@ export type ClaudeStructuredSessionAdapterDeps = {
     sessionId: string,
     evidence: AgentChildWorkEvidence[],
     producer?: StructuredAgentSessionChildWorkProducer
-  ) => ChildWorkAdmission | void
+  ) => void
   openConnection?: typeof openClaudeStreamJsonConnection
   readProcessStartTime?: (pid: number) => Promise<number | null>
   mintLinkId?: () => string
@@ -175,6 +173,7 @@ export type ClaudeSession = {
   fastModeReportedMutation?: number
   fastModeState?: AgentSessionFastModeState
   fastModeDisabledReason?: string
+  fastModeDisabledMutation?: number
   fastModePerSessionOptIn?: boolean
   /** Mutation sequence of the last model report; newer writes outrank it. */
   reportedModelMutation: number
@@ -200,6 +199,7 @@ export type ClaudeSession = {
   /** Monotonic fence advanced when a dispatch starts, including unresolved dispatches. */
   dispatchSequence: number
   /** Fences overlapping option writes so a late completion cannot restore stale state. */
+  settingsObservation?: { pending: boolean }
   optionMutationSequence: number
   /** Latest resume point written at a turn end; close and exit persist after it settles. */
   resumePointWrite?: { leafUuid: string; settled: Promise<void> }
@@ -214,7 +214,6 @@ export type ClaudeSession = {
   translator: ClaudeJournalTranslator | null
   events: StructuredAgentSessionEventSink | undefined
   unbindReadingControl?: () => void
-  retryChildWork?: () => ChildWorkAdmission
   /** Provider identity and initialize proof retained for the host-awaited open. */
   link: AgentSessionProviderHandleLink
   initialization: {
@@ -353,8 +352,6 @@ export async function cancelClaudeAcquisitionAttempt(
     finished: attempt.finished
   })
 }
-
-export type ClaudeSessionAcquisitionInput = ClaudeSessionAcquireContext
 
 export type ClaudeAcquireCallbacks = {
   deliver: (attempt: ClaudeAcquisitionAttempt, sessionId: string, event: () => void) => void

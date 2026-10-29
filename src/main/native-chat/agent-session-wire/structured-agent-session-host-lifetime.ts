@@ -205,7 +205,7 @@ export type StructuredAgentSessionCloseCause = Extract<
 /** Idle cache eviction also retains waiting cards so unseen closes cannot introduce reopen pauses. */
 export function structuredAgentSessionConversationClosable(
   session: StructuredAgentSessionHostSession,
-  _atRest = false
+  atRest = false
 ): boolean {
   return (
     session.child === null &&
@@ -213,7 +213,8 @@ export function structuredAgentSessionConversationClosable(
       finalizingStructuredAgentSessionInput(session.journal, id)
     ) &&
     !session.journal.submissions().some(isQueuedAgentJournalSubmission) &&
-    session.journal.pendingSubmissions().length === 0
+    session.journal.pendingSubmissions().length === 0 &&
+    !(atRest && session.journal.queuedMessages.awaitReopenMark())
   )
 }
 
@@ -231,12 +232,7 @@ export async function closeStructuredAgentSessionConversationUnderSerialize(
   }
   context.sessions.delete(sessionId)
   context.closeStatus(sessionId)
-  try {
-    await session.journal.close()
-  } catch (error) {
-    context.sessions.set(sessionId, session)
-    throw error
-  }
+  await session.journal.close()
   return true
 }
 

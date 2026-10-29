@@ -1,5 +1,3 @@
-import { agentEntryCompletionAt } from '../agent-completion-time'
-import { agentTurnEndedOnPurpose } from '../agent-main-agent-verdict'
 import { describe, expect, it } from 'vitest'
 import type { AgentStatusEntry } from '../agent-status-types'
 import { IDLE, mostRecentAttentionInHistory, resolveAttention } from './smart-attention'
@@ -50,31 +48,4 @@ describe('attention for a turn end the host observed', () => {
       expect(latest('cancellation')).toBe(NOW - 4_000)
     }
   )
-})
-
-it('retains restored Stop news at its saved time in current and history, without changing its cause', () => {
-  const entry = { ...doneEntry('cancellation'), restoredInterruption: true as const }
-  expect(agentTurnEndedOnPurpose(entry)).toBe(true)
-  expect(agentEntryCompletionAt(entry)).toBe(NOW - 90_000)
-  expect(resolveAttention([{ kind: 'hook', entry, hasLivePty: false }], NOW)).toEqual({
-    cls: 2,
-    attentionTimestamp: NOW - 90_000
-  })
-  expect(
-    mostRecentAttentionInHistory([
-      {
-        state: 'done',
-        prompt: '',
-        startedAt: NOW - 90_000,
-        mainAgent: entry.mainAgent,
-        restoredInterruption: true
-      }
-    ])
-  ).toBe(NOW - 90_000)
-  expect(
-    resolveAttention([{ kind: 'hook', entry, hasLivePty: false }], NOW + 7 * 86400_000)
-  ).toEqual(IDLE)
-  expect(
-    resolveAttention([{ kind: 'hook', entry: doneEntry('cancellation'), hasLivePty: false }], NOW)
-  ).toEqual(IDLE)
 })

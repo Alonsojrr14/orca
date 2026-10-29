@@ -37,7 +37,6 @@ export type RuntimeWorktreeAgentRow = {
   toolName: string | null
   toolInput: string | null
   interrupted: boolean
-  restoredInterruption?: true
   /** Main-agent state/verdict/clock even while subagents keep the row working; old hosts omit it, falling back to interrupted. */
   mainAgent?: AgentMainAgentStatus
   /** Same as `terminal show`, only when requested: null is "looked, no wait"; absent is not evaluated (structured workers, old hosts). */

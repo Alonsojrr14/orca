@@ -1,3 +1,4 @@
+import type { AgentModelCatalogSource } from '../agent-model-catalog/agent-model-catalog-service-contract'
 import type { StructuredAgentSessionDeliveryLoop } from './structured-agent-session-delivery-loop'
 import type {
   OpenedStructuredAgentSessionConversation,
@@ -89,7 +90,8 @@ export type StructuredAgentSessionProviderChild = StructuredAgentSessionProvider
   readonly startedFor?: string
   /** Launch-time permission mode, memory-only. */
   readonly permissionMode?: AgentChatPermissionChoice
-  /** Read adapter-held sends at each decision. */
+  /** The launch source that may publish observations for this child. */
+  readonly catalogSource?: AgentModelCatalogSource
   readonly heldSends?: () => ReadonlySet<string> | undefined
   readonly exitObservation?: DeferredStructuredAgentSessionEventSink['exitObservation']
   close?: StructuredAgentSessionChildClose
@@ -160,10 +162,7 @@ export type StructuredAgentSessionHostDeps = {
   /** Execution-host path for a new floating session. */
   resolveWorkspacePath?: (workspaceId: string) => Promise<string>
   now?: () => number
-  /** The idle sweep's period and window. Tests drive these; production takes the defaults. */
-  idleSweep?: { intervalMs?: number; idleMs?: number; maxResident?: number }
-  /** How long a start may stay silent, and its ceiling. Tests drive these; production takes the
-   *  host constants. */
+  idleSweep?: { intervalMs?: number; idleMs?: number }
   startupLimits?: Partial<StructuredAgentSessionStartupLimits>
   /** Absent means no dispatch ownership. */
   hasOpenDispatch?: (
@@ -218,7 +217,7 @@ export type AgentSessionHandoverContext = StructuredAgentSessionCommandHandoverC
   continueInput?: StructuredAgentSessionContinueInput
   acquireAborts?: Pick<StructuredAgentSessionAcquireAborts, 'begin'>
   deliveryOrder?: StructuredAgentSessionDeliveryOrder
-  workChanged?: (clientMessageId: string) => void
+  workChanged?: () => void
   holdClosedInput?: (
     clientMessageId: string,
     fence: number,

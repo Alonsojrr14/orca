@@ -27,7 +27,7 @@ export function journalRenderItem(
     sequence: row.seq,
     ...(sequenceIndex > 0 ? { sequenceIndex } : {}),
     observedAt: row.ts,
-    ...(row.recovered ? { recoveredAt: row.recoveredAt ?? row.ts } : {}),
+    ...(row.recovered ? { recoveredAt: row.ts } : {}),
     ...(row.recovered ? { recovered: row.recovered } : {}),
     turnScope,
     ...agentJournalLinkageFields(producer)

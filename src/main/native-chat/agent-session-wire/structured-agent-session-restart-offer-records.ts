@@ -8,14 +8,17 @@ export type StructuredAgentSessionRestartOfferRecords = {
   readActionMarkers: (
     sessionIds: readonly string[] | undefined
   ) => Promise<AgentSessionResumeMarker[]>
-  /** A user's newer message ended these offers; delete them rather than re-filter forever.
-   *  Advisory: a failed prune must never fail the read that noticed it. */
+  revealMarkers: (markers: readonly AgentSessionResumeMarker[]) => Promise<void>
+  revealEvery: () => Promise<void>
+  /** Delete superseded offers; advisory prune failure must not fail the triggering read. */
   retireSuperseded: (superseded: readonly AgentSessionResumeMarker[]) => void
 }
 
 export function createStructuredAgentSessionRestartOfferRecords(deps: {
   capsule?: Pick<AgentSessionRecoveryCapsule, 'list' | 'forgetSuperseded'>
   readFailedMarkers: () => Promise<AgentSessionResumeMarker[]>
+  hasSession: (sessionId: string) => boolean
+  reveal: (sessionId: string) => Promise<void>
   logger: StructuredAgentSessionLogger
   now: () => number
   /** Share the capsule mutation lane with offer operations. */
@@ -32,6 +35,13 @@ export function createStructuredAgentSessionRestartOfferRecords(deps: {
       return []
     }
   }
+  const revealMarkers = async (markers: readonly AgentSessionResumeMarker[]): Promise<void> => {
+    for (const marker of markers) {
+      if (!deps.hasSession(marker.sessionId)) {
+        await deps.reveal(marker.sessionId)
+      }
+    }
+  }
   return {
     readMarkers,
     readActionMarkers: async (sessionIds) => {
@@ -45,6 +55,9 @@ export function createStructuredAgentSessionRestartOfferRecords(deps: {
       )
       return [...pending, ...retried]
     },
+    revealMarkers,
+    revealEvery: async () =>
+      revealMarkers([...(await readMarkers()), ...(await deps.readFailedMarkers())]),
     retireSuperseded: (superseded) => {
       const capsule = deps.capsule
       if (!capsule || superseded.length === 0) {

@@ -56,21 +56,3 @@ describe('agentVerdictStatusLine', () => {
     expect(agentVerdictStatusLine({ state: 'done', interrupted: true })).toBe('Interrupted by user')
   })
 })
-
-it('uses neutral native wording for restored cuts and native Stops, preserving hook Stop and live failure', () => {
-  const stopped = { state: 'done', interrupted: true } as const
-  expect(agentVerdictStatusLine(stopped, true)).toBe('Interrupted')
-  expect(
-    agentVerdictStatusLine({
-      ...stopped,
-      observation: {
-        origin: 'structured',
-        authorityId: 'host',
-        incarnation: 0,
-        revision: 1,
-        observedAt: 1
-      }
-    })
-  ).toBe('Interrupted')
-  expect(agentVerdictStatusLine(FAILED, true)).toBe('Failed')
-})

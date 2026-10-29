@@ -12,7 +12,6 @@ export type AgentStateHistoryEntry = {
   /** True when this `done` was a cancellation (agent hook like Claude `is_interrupt`,
    *  or Orca's guarded fallback). Always falsy for non-`done` states so retention logic can preserve it. */
   interrupted?: boolean
-  restoredInterruption?: true
   /** The main agent's own status when this state was left, copied with `interrupted` by
    *  `agentVerdictFields`; read the verdict through `agentMainAgentVerdict`. */
   mainAgent?: AgentMainAgentStatus

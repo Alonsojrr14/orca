@@ -1,12 +1,5 @@
 // Exercise grammar events through the real deferred sink and on-disk journal.
 
-import { readJournalRestFacts } from '../agent-session-journal/journal-row-table'
-import {
-  openTestJournalHostDatabase,
-  closeTestJournalHostDatabase,
-  createTrackedJournalOpener,
-  type TestJournalOptions
-} from '../agent-session-journal/journal-host-database-test-support'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -25,11 +18,15 @@ import {
   isBackgroundTaskBlock,
   type NativeChatBackgroundTaskBlock
 } from '../../../shared/native-chat-types'
+import {
+  closeTestJournalHostDatabase,
+  createTrackedJournalOpener,
+  type TestJournalOptions
+} from '../agent-session-journal/journal-host-database-test-support'
 import type { AgentSessionJournal } from '../agent-session-journal/journal-store'
 import {
   createDeferredStructuredAgentSessionEventSink,
-  type StructuredAgentSessionEventSink,
-  type StructuredAgentSessionSinkBarrier
+  type StructuredAgentSessionEventSink
 } from '../agent-session-wire/structured-agent-session-event-sink'
 import { testEventSinkLogging } from '../agent-session-wire/structured-agent-session-logger-test-support'
 import {
@@ -149,7 +146,7 @@ export async function closeProviderTimelineRigs(): Promise<void> {
 /** Admit before journal binding to simulate resume events without a journal view. */
 export type UnboundProviderTimelineAssembler = {
   assembler: ProviderTimelineAssembler
-  bind(): Promise<StructuredAgentSessionSinkBarrier>
+  bind(): Promise<void>
   drained(): Promise<void>
 }
 
@@ -180,7 +177,7 @@ export function openUnboundProviderTimelineAssembler(
     assembler,
     bind: async () => {
       deferred.bind({ journal, fence: 1, publish: () => {} })
-      return deferred.drained()
+      await deferred.drained()
     },
     drained: async () => {
       await deferred.drained()
@@ -198,8 +195,6 @@ export type ProviderTimelineRig = {
   /** Alternate same-generation assembler; leave the original unused. */
   assemble(overrides?: Partial<ProviderTimelineAssemblerDeps>): ProviderTimelineAssembler
   rows(): Promise<AgentJournalRenderItem[]>
-  /** Closes the original journal and database, then reads the persisted chat through a new store. */
-  restFacts(): ReturnType<typeof readJournalRestFacts>
   reopenJournal(): Promise<AgentSessionJournal>
   row(itemId: string): Promise<AgentJournalRenderItem | undefined>
   turn(turnKey: string, namespace?: string): Promise<AgentJournalTurnLifecycle | undefined>
@@ -285,7 +280,6 @@ export async function openProviderTimelineRig(
     assembler: build(),
     sink,
     eventSink: deferred.sink,
-    restFacts: () => readJournalRestFacts(openTestJournalHostDatabase(root).db, SESSION),
     reopenJournal: async () => {
       await rows()
       await journal.close()

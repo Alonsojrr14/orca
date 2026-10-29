@@ -1,18 +1,19 @@
-import { LegacyQueueDisplayCorrections } from './journal-legacy-display-corrections'
-import { legacyQueuedChange } from './journal-legacy-queue-classification'
-export { legacyQueuedChange } from './journal-legacy-queue-classification'
-import { isDeepStrictEqual } from 'node:util'
-import { agentJournalItemKey } from '../../../shared/agent-session-journal-item-key'
-import { structuredAgentSessionCommandTurnIdentity } from '../../../shared/structured-agent-session-command-turn-identity'
 // Adopt legacy cards and delete their rows atomically, using the same fold before and after import.
 // Retry failed bulk import on next open; do not loop while the host is running.
 
+import type { AgentJournalSubmission } from '../../../shared/agent-session-journal-types'
+import { journalDispatchRowApplies, queuedHandOffOutcome } from './journal-dispatch-settlement'
 import { journalQueueRowBuilder, type JournalQueuedChange } from './journal-queue-events'
 import { queuedCardFromChange } from './journal-queue-fold'
+import { queuedChangeOf } from './journal-queue-retention'
 import type { JournalReducerState } from './journal-reducer'
 import type { JournalOperationReceipt } from './journal-row-writer'
 import type { JournalQueuedMessagesDeps } from './journal-store-contracts'
-import type { QueuedMessageRow } from './queued-message-table'
+import { foldQueuedHandOffInDoubt } from './journal-submission-fold'
+import {
+  QUEUED_MESSAGE_HELD_DELIVERY_UNCONFIRMED,
+  type QueuedMessageRow
+} from './queued-message-table'
 import {
   LEGACY_QUEUED_MESSAGE_COLUMNS,
   readStoredQueuedMessageRow
@@ -23,134 +24,140 @@ type LegacyDeps = Pick<
   'sessionId' | 'database' | 'state' | 'serialize' | 'readOnly' | 'writer' | 'committed'
 >
 
+/** Preserve handoff links; copy refusals only when their original rows are no longer in this epoch. */
+export function legacyQueuedChange(
+  state: JournalReducerState,
+  row: QueuedMessageRow
+): JournalQueuedChange | null {
+  const unconfirmed = row.state === 'waiting' ? unconfirmedHandOff(state, row) : null
+  const attempt = row.state === 'waiting' ? (unconfirmed?.attempt ?? null) : row.consumedAs
+  if (row.state === 'withdrawn' || (row.state === 'dispatched' && attempt === null)) {
+    return null
+  }
+  const holdReason = unconfirmed?.holdReason ?? (row.state === 'waiting' ? row.holdReason : null)
+  const change: JournalQueuedChange = {
+    ...queuedChangeOf(row),
+    ...(holdReason !== null ? { holdReason } : {}),
+    ...(attempt !== null ? { attempt } : {}),
+    ...(row.state === 'returned' && (attempt === null || !state.submissions.has(attempt))
+      ? {
+          returned: {
+            reason: row.returnedReason,
+            ...(row.returnedRejection ? { rejection: row.returnedRejection } : {})
+          }
+        }
+      : {})
+  }
+  const card = queuedCardFromChange(state, row.messageId, change)
+  return unanswered(card, state.submissions) ? change : null
+}
+
+/** Legacy refusals may have cleared handoff links without proving non-delivery.
+ * Spend unchanged cards on uncertain attempts; edited/resubmitted cards require explicit Send. */
+function unconfirmedHandOff(
+  state: JournalReducerState,
+  row: QueuedMessageRow
+):
+  | { attempt: string; holdReason?: undefined }
+  | { attempt?: undefined; holdReason: string }
+  | null {
+  const attempts = [...state.submissions.values()]
+    .filter((submission) => submission.queuedMessageId === row.messageId)
+    .sort((a, b) => (a.submittedSequence ?? 0) - (b.submittedSequence ?? 0))
+  if (!attempts.some(handOffInDoubt)) {
+    return null
+  }
+  const latest = attempts.at(-1)!
+  return handOffInDoubt(latest) && latest.payloadFingerprint === row.fingerprint
+    ? { attempt: latest.clientMessageId }
+    : { holdReason: QUEUED_MESSAGE_HELD_DELIVERY_UNCONFIRMED }
+}
+
+function handOffInDoubt(submission: AgentJournalSubmission): boolean {
+  return submission.dispatchState === 'rejected' && queuedHandOffOutcome(submission) === 'inDoubt'
+}
+
+function unanswered(
+  card: QueuedMessageRow,
+  submissions: ReadonlyMap<string, AgentJournalSubmission>
+): boolean {
+  if (card.state !== 'dispatched') {
+    return card.state !== 'withdrawn'
+  }
+  const handOff = card.consumedAs === null ? undefined : submissions.get(card.consumedAs)
+  return handOff === undefined || journalDispatchRowApplies(handOff) || handOffInDoubt(handOff)
+}
+
 export class LegacyQueuedCards {
   private revision = 0
   private stored: { revision: number; rows: readonly QueuedMessageRow[] } | null = null
-  private owner?: JournalReducerState
-  private loadedRevision = -1
-  private viewRevision = 0
-  private readonly originals = new Map<string, QueuedMessageRow>()
-  private readonly classified = new Map<string, QueuedMessageRow>()
-  private readonly display = new LegacyQueueDisplayCorrections()
+  private viewed: {
+    owner: JournalReducerState
+    key: string
+    cards: readonly QueuedMessageRow[]
+    display?: JournalReducerState
+  } | null = null
 
   constructor(private readonly deps: LegacyDeps) {}
 
-  private refresh(): void {
-    const state = this.deps.state()
-    if (this.owner !== state || this.loadedRevision !== this.revision) {
-      for (const old of this.originals.values()) {
-        state.selection.order.update('legacyPositions', old.messageId, undefined)
-        state.selection.groups.update('unorderedLegacyPositions', old.messageId, false)
-        this.register(state, old, false)
-      }
-      for (const old of this.classified.values()) {
-        this.register(state, old, false)
-      }
-      this.originals.clear()
-      this.classified.clear()
-      this.display.clear()
-      for (const row of this.rows()) {
-        this.originals.set(row.messageId, row)
-        this.register(state, row, true)
-        state.selection.groups.update('dirtyLegacy', row.messageId, true)
-      }
-      this.owner = state
-      this.loadedRevision = this.revision
-      this.viewRevision++
-    }
-    for (;;) {
-      const id = state.selection.groups.next('dirtyLegacy')?.key
-      if (id === undefined) {
-        break
-      }
-      state.selection.groups.update('dirtyLegacy', id, false)
-      const original = this.originals.get(id)
-      if (!original) {
-        continue
-      }
-      const change = legacyQueuedChange(state, original)
-      const card = change ? queuedCardFromChange(state, id, change) : undefined
-      const old = this.classified.get(id)
-      if (old) {
-        this.register(state, old, false)
-      }
-      this.register(state, original, true)
-      if (card) {
-        this.register(state, card, true)
-      }
-      if (!isDeepStrictEqual(old, card)) {
-        if (card) {
-          this.classified.set(id, card)
-        } else {
-          this.classified.delete(id)
-        }
-        this.viewRevision++
-      }
-      state.selection.order.update(
-        'legacyPositions',
-        id,
-        card ? { sequence: card.position, ordinal: 0 } : undefined
-      )
-      state.selection.groups.update(
-        'unorderedLegacyPositions',
-        id,
-        card?.position !== undefined && card.position !== card.position
-      )
-      if (this.display.correct(state, id, card)) {
-        this.viewRevision++
-      }
-    }
-  }
-
-  private register(state: JournalReducerState, row: QueuedMessageRow, present: boolean): void {
-    if (row.state === 'waiting') {
-      state.selection.groups.update(`legacyQueue:${row.messageId}`, row.messageId, present)
-    }
-    if (row.consumedAs !== null && row.state !== 'waiting') {
-      state.selection.groups.update(`legacyRaw:${row.consumedAs}`, row.messageId, present)
-      if (row.body.command) {
-        const report = agentJournalItemKey(
-          structuredAgentSessionCommandTurnIdentity(row.consumedAs)
-        )
-        state.selection.groups.update(`legacyReport:${report}`, row.messageId, present)
-      }
-    }
-  }
-
+  /** Disable fallback when no readable legacy cards remain; classify retained cards through the live fold. */
   key(): string {
-    this.refresh()
-    return this.originals.size === 0 ? '' : `${this.revision}:${this.viewRevision}`
+    if (this.rows().length === 0) {
+      return ''
+    }
+    const { epoch, lastSequence } = this.deps.state()
+    return `${this.revision}:${epoch}:${lastSequence}`
   }
 
   cards(): readonly QueuedMessageRow[] {
-    this.refresh()
-    return [...this.originals.keys()].flatMap((id) => {
-      const card = this.classified.get(id)
-      return card ? [card] : []
-    })
+    const key = this.key()
+    if (key === '') {
+      this.viewed = null
+      return []
+    }
+    const state = this.deps.state()
+    if (this.viewed?.key !== key || this.viewed.owner !== state) {
+      const cards = this.rows().flatMap((row) => {
+        const change = legacyQueuedChange(state, row)
+        return change ? [queuedCardFromChange(state, row.messageId, change)] : []
+      })
+      this.viewed = { owner: state, key, cards }
+    }
+    return this.viewed.cards
   }
 
-  get(messageId: string): QueuedMessageRow | undefined {
-    this.refresh()
-    return this.classified.get(messageId)
-  }
-
-  maximumPosition(): number {
-    this.refresh()
-    const selection = this.deps.state().selection
-    return selection.groups.has('unorderedLegacyPositions')
-      ? Number.NaN
-      : Math.max(0, selection.order.maximum('legacyPositions')?.sequence ?? 0)
-  }
-
+  // Failed adoption cannot hide spent sends; derive display changes only on copied state.
   displayState(): JournalReducerState {
-    this.refresh()
-    return this.display.displayState(this.deps.state())
-  }
-
-  normalizationKey(): string {
-    this.refresh()
-    return this.display.normalizationKey(this.deps.state())
+    const state = this.deps.state()
+    const cards = this.cards()
+    if (this.viewed?.display) {
+      return this.viewed.display
+    }
+    const handedOff = cards.flatMap((card) => {
+      const submission =
+        card.consumedAs === null ? undefined : state.submissions.get(card.consumedAs)
+      return submission && handOffInDoubt(submission) ? [{ ...submission }] : []
+    })
+    if (handedOff.length === 0) {
+      if (this.viewed) {
+        this.viewed.display = state
+      }
+      return state
+    }
+    const display = {
+      ...state,
+      normalizedHandOffs: new Set(state.normalizedHandOffs),
+      items: new Map(state.items),
+      submissions: new Map(state.submissions)
+    }
+    for (const submission of handedOff) {
+      display.submissions.set(submission.clientMessageId, submission)
+      foldQueuedHandOffInDoubt(display, submission)
+    }
+    if (this.viewed) {
+      this.viewed.display = display
+    }
+    return display
   }
 
   /** Resolve adoption on the write lane from current disk state; null means no legacy card. */

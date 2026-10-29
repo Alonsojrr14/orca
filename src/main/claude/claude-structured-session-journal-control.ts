@@ -1,4 +1,3 @@
-import type { ChildWorkAdmission } from '../native-chat/agent-session-wire/structured-agent-session-accepted-child-work'
 import {
   bindClaudeContextUsageCapture,
   type ClaudeContextUsageCaptureOptions
@@ -72,8 +71,7 @@ function retryOwedWritesOnDrain(
 export function bindClaudeJournalReadingControl(
   sink: StructuredAgentSessionEventSink | undefined,
   connection: Pick<ClaudeStreamJsonConnection, 'pauseReading' | 'resumeReading'>,
-  translator: ClaudeJournalTranslator | null,
-  retryChildWork: () => ChildWorkAdmission = () => ({ accepted: true })
+  translator: ClaudeJournalTranslator | null
 ): (() => void) | undefined {
   if (!connection.pauseReading || !connection.resumeReading) {
     return undefined
@@ -86,8 +84,7 @@ export function bindClaudeJournalReadingControl(
     },
     resumeReading: () => {
       sinkPaused = false
-      const rows = retryOwedWritesOnDrain(translator)
-      const retried = rows.accepted ? retryChildWork() : rows
+      const retried = retryOwedWritesOnDrain(translator)
       if (!sinkPaused && (retried.accepted || retried.reason !== 'backpressure')) {
         connection.resumeReading?.()
       }
@@ -99,11 +96,10 @@ export function bindClaudeConnectionJournalControls(
   sink: StructuredAgentSessionEventSink | undefined,
   connection: ClaudeStreamJsonConnection,
   translator: ClaudeJournalTranslator | null,
-  capture: ClaudeContextUsageCaptureOptions,
-  retryChildWork?: () => ChildWorkAdmission
+  capture: ClaudeContextUsageCaptureOptions
 ): (() => void) | undefined {
   const unbinds = [
-    bindClaudeJournalReadingControl(sink, connection, translator, retryChildWork),
+    bindClaudeJournalReadingControl(sink, connection, translator),
     bindClaudeContextUsageCapture(connection, translator, capture)
   ].filter((unbind): unbind is () => void => unbind !== undefined)
   return unbinds.length === 0

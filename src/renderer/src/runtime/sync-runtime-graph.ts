@@ -10,11 +10,6 @@ export function setRuntimeGraphStoreStateGetter(getter: (() => AppState) | null)
   graphState.getStoreState = getter
 }
 
-export function setRuntimeGraphStartupRestorationReady(ready: boolean): void {
-  graphState.startupRestorationReady = ready
-  scheduleRuntimeGraphSync()
-}
-
 export function setRuntimeGraphSyncEnabled(enabled: boolean): void {
   graphState.syncEnabled = enabled
   if (!enabled) {

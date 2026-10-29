@@ -100,8 +100,8 @@ export async function openHostRig(
     ...options,
     deps: {
       onEvent: (event) => void hosted.host?.handleAdapterEvent(event),
-      onChildWorkEvidence: (sessionId, evidence, producer) =>
-        hosted.host?.publishChildWorkEvidence(sessionId, evidence, producer),
+      onChildWorkEvidence: (sessionId, evidence) =>
+        hosted.host?.publishChildWorkEvidence(sessionId, evidence),
       onDispatchSettledLate: (settlement) =>
         void hosted.host
           ?.settleLateDispatch(settlement)
@@ -222,8 +222,6 @@ export async function openAttachedHostRig(
   await rig.ready()
   resumed = true
   const rows = async () => {
-    await rig.host.flushStreamedEvents(SESSION)
-    // The optional roster write is queued by the committed work publication.
     await rig.host.flushStreamedEvents(SESSION)
     return (await rig.host.history({ sessionId: SESSION, direction: 'tail' })).page.items
   }

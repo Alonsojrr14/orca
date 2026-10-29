@@ -1,4 +1,3 @@
-import { estimateStructuredAgentSessionSettlementBytes } from './structured-agent-session-event-sink-estimate'
 // Stage bounded external-history catch-up without blocking provider open; agents supply only history/view logic.
 
 import { createHash } from 'node:crypto'
@@ -98,10 +97,9 @@ export function createHistoryCatchUpBatch() {
       const content = expectedItems.length ? [digestOf, expectedItems, mutations] : digestOf
       const digest = createHash('sha256').update(JSON.stringify(content)).digest('hex')
       const settlementId = `${settlementPrefix}:${digest}`
-      // Include per-mutation transition overhead, the batch envelope and the publication byte.
+      // Include batch-envelope cost and the transition’s publication byte.
       const reservedBytes =
-        estimateStructuredAgentSessionSettlementBytes(mutations) +
-        Buffer.byteLength(JSON.stringify({ settlementId, ...expectations }), 'utf8') +
+        Buffer.byteLength(JSON.stringify({ settlementId, mutations, ...expectations }), 'utf8') +
         512
       if (reservedBytes + 1 > HISTORY_CATCH_UP_MAX_BYTES) {
         throw new Error('too-large')

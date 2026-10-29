@@ -3,7 +3,6 @@
 // other unhanded sends are rejected (journal-unsent-send-hold.ts / queued-message-pause.ts).
 // Settlement needs no lease and starts no provider child.
 
-import { materializeJournalLegacyCut } from '../agent-session-journal/journal-row-table'
 import type { JournalHostDatabase } from '../agent-session-journal/journal-host-database'
 import type { AgentSessionJournal } from '../agent-session-journal/journal-store'
 import { openAgentSessionJournal } from '../agent-session-journal/journal-store-factory'
@@ -31,14 +30,12 @@ export type OpenedStructuredAgentSessionConversation = {
 export type StructuredAgentSessionConversationOpenDeps = {
   store: Pick<AgentSessionRecordStore, 'getConversation' | 'replacedRuntime'>
   journalDatabase: JournalHostDatabase
-  recoveryCapsule?: StructuredAgentSessionHostDeps['recoveryCapsule']
   logger: StructuredAgentSessionHostDeps['logger']
 }
 
 /** Acquisition retains prior death evidence because reservation clears it. */
 export type StructuredAgentSessionConversationOpenOptions = {
   acquisition?: boolean
-  cacheReacquisition?: { reopenFloor: ReturnType<AgentSessionJournal['reopenFloor']> }
 }
 
 export type StructuredAgentSessionConversationOpenContext = {
@@ -93,27 +90,7 @@ export async function openStructuredAgentSessionConversationJournal(
     expectedRuntimeFence: fence
   })
   const identity = journalIdentityFor(record, params)
-  let legacyCursor
-  try {
-    const marker = (await deps.recoveryCapsule?.list(Date.now()))?.find(
-      (entry) => entry.sessionId === sessionId
-    )
-    if (marker) {
-      materializeJournalLegacyCut(deps.journalDatabase.db, sessionId, marker.recordedAt)
-      legacyCursor = marker.journalCursor
-    }
-  } catch (error) {
-    deps.logger.warn('saving legacy restart fact on open failed', {
-      scope: 'legacy-restart-fact',
-      sessionId,
-      error
-    })
-  }
-  const journal = await openAgentSessionJournal({
-    identity,
-    database: deps.journalDatabase,
-    legacyCursor
-  })
+  const journal = await openAgentSessionJournal({ identity, database: deps.journalDatabase })
   try {
     // A handed-over row found here stays doubt: it reads as sent, and nothing narrows it later.
     await journal.markPendingSubmissionsUnknown(fence)
@@ -135,16 +112,9 @@ export async function openStructuredAgentSessionConversationJournal(
       error
     })
   }
-  // Cache reacquisition preserves the prior pause, including a failed mark's fallback.
-  if (options.cacheReacquisition) {
-    journal.restoreReopenFloor(options.cacheReacquisition.reopenFloor)
-  }
-  if (!options.cacheReacquisition) {
-    await markStructuredQueueReopen(sessionId, journal, fence, deps.logger)
-  }
-  // No child in this process writes to a journal nobody had open, so whatever it shows running
-  // belongs to a generation that is gone, whatever the lease still claims. Settled before any
-  // reader or child sees it.
+  // Mark after recovering cards; idle sweeping never closes handles while cards wait.
+  await markStructuredQueueReopen(sessionId, journal, fence, deps.logger)
+  // No local child writes unopened journals; settle the gone generation before readers/new children.
   if (!options.acquisition) {
     await settleGoneGeneration(deps, record, journal)
   }

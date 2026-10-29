@@ -40,7 +40,6 @@ export function ResumeCandidateRow({
 }): React.JSX.Element {
   const agentLabel = formatAgentTypeLabel(candidate.agent)
   const title =
-    candidate.conversationName?.trim() ||
     candidate.latestPrompt.trim() ||
     translate('auto.components.NativeChatResumeOnRestartModal.untitled', 'Untitled chat')
   const model = candidate.model?.trim() ?? ''

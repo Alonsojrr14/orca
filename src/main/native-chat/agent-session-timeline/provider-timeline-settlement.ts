@@ -69,12 +69,12 @@ export type ProviderTimelineSettlementEnding = {
   lostAt?: number
 }
 
-export function visitProviderTimelineSettlement(
+export function providerTimelineSettlement(
   journal: StructuredAgentSessionTransitionJournal,
   scope: ProviderTimelineSettlementScope,
-  emit: (mutation: JournalLifecycleMutationInput) => void,
   ending?: ProviderTimelineSettlementEnding
-): void {
+): JournalLifecycleMutationInput[] {
+  const mutations: JournalLifecycleMutationInput[] = []
   journal.visitItemsWithLinkage((itemId, _sequence, body, attribution) => {
     const turnScope = attribution.turnScope ?? AGENT_JOURNAL_THREAD_SCOPE
     const historical = scope === 'session' && journal.item(itemId)
@@ -96,15 +96,16 @@ export function visitProviderTimelineSettlement(
     const identity = settled ? parseAgentJournalItemKey(itemId) : null
     if (settled && identity) {
       // Omitted linkage preserves the original producer.
-      emit({ kind: 'item', identity, body: settled, turnScope })
+      mutations.push({ kind: 'item', identity, body: settled, turnScope })
     }
   })
   for (const turn of ending?.turns ?? []) {
     const ended = ending ? endedTurnRow(journal, turn, ending.end) : null
     if (ended) {
-      emit({ kind: 'item', ...ended, turnScope: AGENT_JOURNAL_THREAD_SCOPE })
+      mutations.push({ kind: 'item', ...ended, turnScope: AGENT_JOURNAL_THREAD_SCOPE })
     }
   }
+  return mutations
 }
 
 export function runningProviderTimelineTurns(

@@ -1,3 +1,4 @@
+import { hostDictationErrorMessage } from '../../../src/shared/host-dictation-error-messages'
 import type { RpcOperationSender } from '../transport/rpc-operation-sender'
 import type { RpcResponse } from '../transport/types'
 import { interpretOrThrowRefusalMessage } from '../transport/rpc-refusal-message'
@@ -39,21 +40,11 @@ function isSpeechlessServerError(message: string): boolean {
   return message.startsWith('speech_unavailable')
 }
 
-const DICTATION_SESSION_LOST_MESSAGE = 'Dictation lost its connection to the computer. Try again.'
-const HOST_DICTATION_ERROR_MESSAGES: Readonly<Record<string, string>> = {
-  // The host has one speech model, so one dictation runs at a time across the computer and every phone.
-  dictation_already_active: 'Dictation is already in use on the computer or another phone.',
-  dictation_requires_mobile_client: 'Re-pair this phone with the computer to use dictation.',
-  dictation_owner_mismatch: DICTATION_SESSION_LOST_MESSAGE,
-  dictation_stream_not_started: DICTATION_SESSION_LOST_MESSAGE,
-  dictation_stream_closing: DICTATION_SESSION_LOST_MESSAGE
-}
-
 export function dictationFailureMessage(message: string): string {
   if (isSpeechlessServerError(message)) {
     return SPEECHLESS_SERVER_MESSAGE
   }
-  return HOST_DICTATION_ERROR_MESSAGES[message] ?? message
+  return hostDictationErrorMessage(message) ?? message
 }
 
 function isSpeechlessServerReply(reply: RpcResponse): boolean {
@@ -127,12 +118,18 @@ export function isModelInFlight(model: MobileSpeechModel): boolean {
   return model.status === 'downloading' || model.status === 'extracting'
 }
 
-export function isDictationReady(setup: MobileSpeechSetup): boolean {
-  if (!setup.enabled || !setup.selectedModelId) {
-    return false
+// Hide the mic only when dictation was turned off with a model chosen; with none chosen a tap explains setup.
+export function dictationMicHidden(setup: MobileSpeechSetup): boolean {
+  return setup.enabled === false && setup.selectedModelId !== ''
+}
+
+// Mirror the host's start refusals on what it reported; absent fields or an uncatalogued (user) model stay the host's call.
+export function dictationNeedsSetup(setup: MobileSpeechSetup): boolean {
+  if (setup.enabled === false || setup.selectedModelId === '') {
+    return true
   }
-  const selected = setup.models.find((m) => m.id === setup.selectedModelId)
-  return selected?.status === 'ready'
+  const status = setup.models.find((m) => m.id === setup.selectedModelId)?.status
+  return status !== undefined && status !== 'ready'
 }
 
 // Keep copy short and host-neutral: the paired computer may be a headless server.

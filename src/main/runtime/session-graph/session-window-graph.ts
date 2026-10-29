@@ -1,8 +1,7 @@
-import { assertUniqueRuntimeGraphTabIds } from './session-graph-tab-identities'
-import { wakeStructuredJournalBackground } from '../../native-chat/agent-session-wire/structured-agent-session-registry'
 import { OrcaRuntimeWithAttachWindow } from './session-graph-promotion'
 import type {
   RuntimeRendererSyncWindowGraph,
+  RuntimeSyncedTab,
   RuntimeSyncWindowGraph,
   RuntimeSyncWindowGraphResult
 } from '../../../shared/runtime-session-contracts'
@@ -11,17 +10,22 @@ import type { RuntimeLeafRecord } from '../runtime-terminal-state-records'
 
 import { ORCA_LAYOUT_OWNER_IS_MAIN } from '../../../shared/layout-owner-switch'
 
-export abstract class OrcaRuntimeWithSyncWindowGraph extends OrcaRuntimeWithAttachWindow {
-  protected abstract noteStartupRestorationReady(
-    windowId: number,
-    startupRestorationReady: boolean
-  ): void
+type Graph = RuntimeSyncWindowGraph
 
+/** The runtime indexes graph tabs by bare id, so duplicate ids cannot be routed safely. */
+function assertUniqueRuntimeGraphTabIds(tabs: readonly RuntimeSyncedTab[]): void {
+  const seen = new Set<string>()
+  for (const tab of tabs) {
+    if (seen.has(tab.tabId)) {
+      throw new Error('duplicate_runtime_tab_id')
+    }
+    seen.add(tab.tabId)
+  }
+}
+
+export abstract class OrcaRuntimeWithSyncWindowGraph extends OrcaRuntimeWithAttachWindow {
   /** Layout-owner builds: main's panes in place of the window's (session-tabs-inventory.ts). */
-  protected abstract withMainSurfaces(
-    windowId: number,
-    graph: RuntimeSyncWindowGraph
-  ): RuntimeSyncWindowGraph
+  protected abstract withMainSurfaces(windowId: number, graph: Graph): Graph
   declare protected terminalGroupGridSizes?: RuntimeSyncWindowGraph['terminalGroupGridSizes']
   declare protected singleGroupWorkspaceGridSize?: RuntimeSyncWindowGraph['singleGroupWorkspaceGridSize']
 
@@ -35,6 +39,10 @@ export abstract class OrcaRuntimeWithSyncWindowGraph extends OrcaRuntimeWithAtta
       this.controllerKnowsPtyIsLive(ptyId) &&
       this.getPtyLivenessVerdict(ptyId)?.status !== 'exited'
     )
+  }
+
+  shouldRelayTerminalBrowserOpens(): boolean {
+    return this.authoritativeWindowId === HEADLESS_RUNTIME_WINDOW_ID
   }
 
   syncWindowGraph(
@@ -77,11 +85,7 @@ export abstract class OrcaRuntimeWithSyncWindowGraph extends OrcaRuntimeWithAtta
       this.headlessGraphFallbackAvailable = true
       this.servesHeadlessGraph = true
       this.rendererGeneration = null
-      wakeStructuredJournalBackground()
     }
-    const startupRestorationReady =
-      'startupRestorationReady' in graph && graph.startupRestorationReady === true
-    // Switch point: main's own panes stand in for the window's list of a workspace main owns.
     graph = ORCA_LAYOUT_OWNER_IS_MAIN ? this.withMainSurfaces(windowId, graph) : graph
 
     if (graph.terminalGroupGridSizes) {
@@ -293,7 +297,6 @@ export abstract class OrcaRuntimeWithSyncWindowGraph extends OrcaRuntimeWithAtta
     if (rendererGeneration !== undefined) {
       this.rendererGeneration = rendererGeneration
     }
-    this.noteStartupRestorationReady(windowId, startupRestorationReady)
     for (const leaf of this.leaves.values()) {
       this.adoptPreAllocatedHandle(leaf)
       const previousLeaf = previousLeaves.get(this.getLeafKey(leaf.tabId, leaf.leafId))

@@ -6,7 +6,6 @@
 // History pages lack row v: extensions must also remain safe for older clients (journal-closed-sets.test.ts).
 
 import { z } from 'zod'
-import { AgentSessionSemanticWorkSchema } from './agent-session-semantic-work'
 import { AgentSessionContextUsageSchema } from './agent-session-context-usage-schema'
 import { AgentJournalThreadGoalStateSchema } from './agent-session-journal-thread-goal-schema'
 import { AgentSessionFailureFactSchema } from './agent-session-failure-fact-schema'
@@ -194,7 +193,6 @@ const TurnLifecycleFields = {
 }
 
 const KnownItemBody = z.discriminatedUnion('kind', [
-  AgentSessionSemanticWorkSchema,
   MessageBody,
   z.object({
     kind: z.literal('tool-call'),

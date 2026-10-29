@@ -1,4 +1,3 @@
-import { structuredJournalBackgroundReady } from '../../native-chat/agent-session-wire/structured-agent-session-registry'
 import './unused-default-rpc-methods.test-fixture'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
@@ -35,12 +34,6 @@ function createDispatcher(methods: readonly RpcAnyMethodDeclaration[]): RpcDispa
   const db = new OrchestrationDb(':memory:')
   databases.push(db)
   const runtime = new OrcaRuntimeService()
-  runtime.syncWindowGraph(1, {
-    tabs: [],
-    leaves: [],
-    rendererGeneration: 'rpc-fixture',
-    startupRestorationReady: true
-  })
   runtime.setOrchestrationDb(db)
   vi.spyOn(runtime, 'getTerminalPromptRequestBinding').mockReturnValue({
     ptyId: 'pty-prompt',
@@ -203,39 +196,3 @@ describe('RpcDispatcher unary transport parity', () => {
     ).resolves.toMatchObject({ ok: false, error: { code: 'method_not_supported' } })
   })
 })
-
-it.each(TRANSPORTS)(
-  'keeps upgrade work paused through the complete awaited %s unary invocation and errors',
-  async (transport) => {
-    for (const fail of [false, true]) {
-      const entered = Promise.withResolvers<void>()
-      const finish = Promise.withResolvers<void>()
-      const dispatcher = createDispatcher([
-        defineMethod({
-          name: 'worktree.list',
-          permission: 'workspace',
-          params: AnyParams,
-          handler: async () => {
-            entered.resolve()
-            await finish.promise
-            if (fail) {
-              throw new Error('user operation failed')
-            }
-            return { done: true }
-          }
-        })
-      ])
-      const result = call(dispatcher, transport, {
-        id: 'foreground',
-        authToken: 'token',
-        method: 'worktree.list',
-        params: {}
-      })
-      await entered.promise
-      expect(structuredJournalBackgroundReady()).toBe(false)
-      finish.resolve()
-      expect(await result).toMatchObject({ ok: !fail })
-      expect(structuredJournalBackgroundReady()).toBe(true)
-    }
-  }
-)

@@ -183,7 +183,6 @@ export type RuntimeSyncWindowGraph = {
 
 export type RuntimeRendererSyncWindowGraph = RuntimeSyncWindowGraph & {
   rendererGeneration: string
-  startupRestorationReady?: boolean
 }
 
 export type RuntimeNativeChatLaunchDraftResolution = {

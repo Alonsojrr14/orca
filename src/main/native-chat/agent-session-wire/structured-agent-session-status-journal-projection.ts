@@ -1,7 +1,3 @@
-import {
-  atRestStructuredStatusSummary,
-  type StructuredAgentSessionAtRest
-} from './structured-agent-session-status-summary'
 import { agentJournalSubmissionKey } from '../../../shared/agent-session-journal-item-key'
 import { isRootAgentJournalItem } from '../../../shared/agent-session-journal-producer'
 import { isStructuredAgentSessionCommandEntry } from '../../../shared/structured-agent-session-command-entry'
@@ -11,12 +7,10 @@ import { projectStructuredAgentSessionStatusState } from '../../../shared/struct
 import type { AgentSessionJournal } from '../agent-session-journal/journal-store'
 import {
   structuredAgentSessionCurrentWork,
-  structuredAgentSessionReplacedRuntimeEnded,
   type StructuredAgentSessionWorkEvidence
 } from './structured-agent-session-current-work'
 import { newestAcceptedSendKey } from './structured-agent-session-status-child-work'
 import { structuredAgentSessionStopping } from './structured-agent-session-stopping'
-import { latestNativeChatOrcaStopCut } from '../../../shared/native-chat/native-chat-orca-stop-cut'
 
 export type StructuredAgentSessionStatusState = ReturnType<
   typeof projectStructuredAgentSessionStatusState
@@ -29,9 +23,7 @@ export type StructuredAgentSessionJournalProjection = {
   fence: number | undefined
   /** Live authority may change without a journal row. */
   liveFence: number | null
-  /** `StructuredAgentSessionCurrentWork.revision`: what this host saw end with no row or lease
-   *  write still changes the row. */
-  restored: unknown
+  /** Include observed row-free/lease-free child endings in cache identity. */
   workRevision: number
   /** Stop settlement edges write no row and need an independent cache key. */
   stopRevision: number
@@ -43,32 +35,7 @@ export type StructuredAgentSessionJournalProjection = {
 }
 
 export class StructuredAgentSessionJournalProjections {
-  private readonly restored = new Map<
-    string,
-    {
-      rest: StructuredAgentSessionAtRest
-      baseline?: { epoch: string; revision: number }
-    }
-  >()
-
-  hasUnknownRestart = (sessionId: string): boolean =>
-    this.restored.get(sessionId)?.rest.known === false
-
-  noteRestart(sessionId: string, rest: StructuredAgentSessionAtRest): void {
-    const previous = this.restored.get(sessionId)
-    // Completed startup summaries are placeholders; the opened journal owns their verdict and clock.
-    if (!rest.interrupted && rest.known !== false) {
-      if (previous?.rest.known === false) {
-        this.restored.delete(sessionId)
-      }
-      return
-    }
-    if (!previous || (previous.rest.known === false && rest.known !== false)) {
-      this.restored.set(sessionId, { rest, baseline: previous?.baseline })
-    }
-  }
-
-  // Task progress must not sort and scan an unchanged conversation. Journal identity owns cleanup.
+  // Key by journal lifetime; task-progress frames must not rescan unchanged conversations.
   private readonly byJournal = new WeakMap<
     AgentSessionJournal,
     StructuredAgentSessionJournalProjection
@@ -110,8 +77,7 @@ export class StructuredAgentSessionJournalProjections {
       projection.fence !== fence ||
       projection.liveFence !== work.liveFence ||
       projection.workRevision !== work.revision ||
-      projection.stopRevision !== stopRevision ||
-      projection.restored !== this.restored.get(journal.sessionId)
+      projection.stopRevision !== stopRevision
     ) {
       // Journal sequence captures sends; lease/live-work/Stop keys capture row-free changes.
       const snapshot = journal.snapshot()
@@ -144,7 +110,6 @@ export class StructuredAgentSessionJournalProjections {
       }
       projection = {
         ...cursor,
-        restored: this.restored.get(journal.sessionId),
         contextId,
         firstInputSubmissionKey,
         submissionCount: snapshot.submissions.length,
@@ -169,86 +134,9 @@ export class StructuredAgentSessionJournalProjections {
           work.scope
         )
       }
-      projection.state = this.restartVerdict(
-        projection.state,
-        journal,
-        record,
-        seen?.child !== undefined && seen.child !== null,
-        snapshot
-      )
       this.byJournal.set(journal, projection)
     }
     return projection
-  }
-  private restartVerdict(
-    state: StructuredAgentSessionStatusState,
-    journal: AgentSessionJournal,
-    record: AgentSessionConversationView | null,
-    liveChild: boolean,
-    snapshot: ReturnType<AgentSessionJournal['snapshot']>
-  ): StructuredAgentSessionStatusState {
-    if (!record) {
-      return state
-    }
-    const id = record.sessionId
-    if (liveChild) {
-      this.restored.delete(id)
-    }
-    const presentation = this.restored.get(id)
-    const version = { epoch: journal.epoch, revision: journal.restRevision() }
-    if (presentation) {
-      const before = presentation.baseline ?? {
-        epoch: journal.epoch,
-        revision: journal.openedRestRevision
-      }
-      if (before && (before.epoch !== version.epoch || before.revision !== version.revision)) {
-        this.restored.delete(id)
-      } else {
-        presentation.baseline = version
-        const rest = presentation.rest
-        const saved = atRestStructuredStatusSummary(record, rest, { now: () => rest.lastSavedAt })
-        return {
-          ...state,
-          summary: {
-            ...state.summary,
-            status: saved.status,
-            turnOutcome: saved.turnOutcome,
-            restoredInterruption: saved.restoredInterruption,
-            statusStartedAt: saved.statusStartedAt
-          }
-        }
-      }
-    }
-    const cut = journal.restFact()
-    const replaced = this.replacedRuntime?.(id)
-    const fence = cut && journal.itemFence(cut.itemId)
-    const ended =
-      !liveChild &&
-      (!!record.ownerObservation.deathEvidence?.runtimeEnd ||
-        (replaced &&
-          structuredAgentSessionReplacedRuntimeEnded(
-            { ...record.ownerObservation, runtimeFence: record.currentFence },
-            replaced
-          ) &&
-          fence !== undefined &&
-          fence !== null &&
-          fence <= replaced.fence))
-    return cut &&
-      (state.summary.status === 'idle' || state.summary.status === null) &&
-      (ended ||
-        latestNativeChatOrcaStopCut(snapshot.items, snapshot.submissions)?.turnItemId ===
-          cut.itemId)
-      ? {
-          ...state,
-          summary: {
-            ...state.summary,
-            status: 'idle',
-            turnOutcome: 'cancellation',
-            restoredInterruption: true,
-            statusStartedAt: cut.since
-          }
-        }
-      : state
   }
 }
 

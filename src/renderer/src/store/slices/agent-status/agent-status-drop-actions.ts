@@ -13,7 +13,7 @@ import {
   shouldReplaceRetainedWithLive
 } from './agent-status-pane-key-tab-binding'
 import { retireAgentPaneAuthorityAliasesByOwnerTab } from '../agent-pane-authority'
-import { agentTurnEligibleForAttention } from '../../../../../shared/agent-main-agent-verdict'
+import { agentTurnEndedOnPurpose } from '../../../../../shared/agent-main-agent-verdict'
 
 function removeAcknowledgement(
   acknowledgements: Record<string, number>,
@@ -37,7 +37,7 @@ export function createAgentStatusDropActions(
   return {
     dropAgentStatus: (paneKey, opts?: DropAgentStatusOptions) => {
       let liveExisted = false
-      set((s) => {
+      set((s, changedPaneKeys) => {
         const hasLive = paneKey in s.agentStatusByPaneKey
         liveExisted = hasLive
         const hasRetained = paneKey in s.retainedAgentsByPaneKey
@@ -77,6 +77,7 @@ export function createAgentStatusDropActions(
         }
         const nextLive = hasLive ? { ...s.agentStatusByPaneKey } : s.agentStatusByPaneKey
         if (hasLive) {
+          changedPaneKeys.add(paneKey)
           delete nextLive[paneKey]
         }
         const nextRetained = hasRetained
@@ -120,7 +121,7 @@ export function createAgentStatusDropActions(
     dropAgentStatusByTabPrefix: (tabIdPrefix, opts?: DropAgentStatusByTabPrefixOptions) => {
       const retiredAliasPaneKeys = retireAgentPaneAuthorityAliasesByOwnerTab(tabIdPrefix)
       let hadLive = false
-      set((s) => {
+      set((s, changedPaneKeys) => {
         const dropped = buildAgentStatusTabPrefixDropPatch(
           s,
           tabIdPrefix,
@@ -128,6 +129,9 @@ export function createAgentStatusDropActions(
           opts
         )
         hadLive = dropped.hadLive
+        for (const key of dropped.removedPaneKeys) {
+          changedPaneKeys.add(key)
+        }
         return dropped.patch
       })
       if (hadLive) {
@@ -140,7 +144,7 @@ export function createAgentStatusDropActions(
 
     dropHibernatedAgentStatusPane: (worktreeId, paneKey, opts?: DropHibernatedAgentPaneOptions) => {
       let hadLive = false
-      set((s) => {
+      set((s, changedPaneKeys) => {
         const liveEntry = s.agentStatusByPaneKey[paneKey]
         const hasLive = liveEntry !== undefined
         const hasRetained = paneKey in s.retainedAgentsByPaneKey
@@ -162,7 +166,7 @@ export function createAgentStatusDropActions(
         if (
           liveEntry?.state === 'done' &&
           liveEntry.agentType !== undefined &&
-          agentTurnEligibleForAttention(liveEntry)
+          !agentTurnEndedOnPurpose(liveEntry)
         ) {
           retainedEvidence.set(
             paneKey,
@@ -202,6 +206,7 @@ export function createAgentStatusDropActions(
         hadLive = hasLive
         const nextLive = hasLive ? { ...s.agentStatusByPaneKey } : s.agentStatusByPaneKey
         if (hasLive) {
+          changedPaneKeys.add(paneKey)
           delete nextLive[paneKey]
         }
         const nextLaunchConfigs = hasLaunchConfig

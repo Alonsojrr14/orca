@@ -11,16 +11,6 @@ import { isJournalTag } from './agent-session-journal-open-union'
 export type AgentJournalContentVerdict = 'readable' | 'unreadable' | 'malformed'
 
 export function readAgentJournalItemBody(body: unknown): AgentJournalContentVerdict {
-  if (
-    typeof body === 'object' &&
-    body !== null &&
-    'kind' in body &&
-    body.kind === 'semantic-work' &&
-    'version' in body &&
-    body.version !== 1
-  ) {
-    return 'unreadable'
-  }
   return isAdmissibleAgentJournalItemBody(body) ? 'readable' : 'malformed'
 }
 

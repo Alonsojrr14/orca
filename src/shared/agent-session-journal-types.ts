@@ -1,6 +1,5 @@
 import type { AgentJournalTurnScope } from './agent-session-journal-turn-scope'
 export type { AgentJournalTurnScope } from './agent-session-journal-turn-scope'
-import type { AgentSessionSemanticWork } from './agent-session-semantic-work'
 import type { AgentSessionProviderContextBoundary } from './agent-session-provider-context'
 // Persist/republish plain JSON only. Append-only rows are upcast on read, never rewritten;
 // unreadable versions/kinds must refuse writes rather than be skipped or compacted away.
@@ -350,7 +349,6 @@ export type AgentJournalStatusItem =
 export type AgentJournalTurnItem = { kind: 'turn' } & AgentJournalTurnLifecycle
 
 export type AgentJournalItemBody =
-  | AgentSessionSemanticWork
   | AgentJournalMessageItem
   | AgentJournalToolCallItem
   | AgentJournalDiffItem
@@ -384,7 +382,10 @@ export type AgentJournalRowAttribution = AgentJournalProducerLinkage & {
   turnScope: AgentJournalTurnScope
 }
 
-export type { AgentJournalPosition } from './agent-session-journal-position'
+export type AgentJournalPosition = {
+  sequence: number
+  index: number
+}
 
 /** Order by sequence; provider observedAt can precede earlier sequences after crash recovery. */
 export type AgentJournalRenderItem = AgentJournalProducerLinkage & {

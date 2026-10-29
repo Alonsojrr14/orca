@@ -1,33 +1,13 @@
 import type { JournalItemEcho } from './journal-item-echo'
-import { semanticWorkKeyAgrees } from '../../../shared/agent-session-semantic-work'
-// Persisted journal row shapes plus read-time upcasting.
-//
-// The journal is append-only, so migration is upcasting on read and never an
-// in-place rewrite. A row whose version this build does not understand is
-// UNREADABLE, not skippable: the caller fails the load as a newer Orca's chat rather
-// than render a partial timeline or compact past a row it cannot interpret.
-//
-// A row whose KIND this build does not know is UNREADABLE the same way, and kept
-// on disk, when it has the envelope every row keeps: a non-empty `epoch`, an
-// integer `seq` >= 1, an integer `fence` and a numeric `ts`. So a new kind keeps
-// that envelope; changing the envelope is a `v` bump. Builds from before this
-// rule delete the journal from an unknown kind, so a new kind either ships its
-// reader first and is written only once no supported build lacks that reader,
-// or is written at a bumped `v`.
-//
-// Inside a known row with that envelope the same holds a level down. A lifecycle mutation of a kind
-// this build does not know, or a sent message of a kind it does not know, is UNREADABLE, whatever
-// else in the row fails; unusable annotations are dropped. A body of a kind it does not know is
-// READABLE and drawn by nobody (agent-session-journal-schemas.ts). Any other failure is damage, and
-// the chat fails to load with every row kept (journal-open.ts). Builds from before this rule delete
-// the journal from such a row, so the same reader-first-or-`v` rule applies to a new mutation or
-// sent-message kind.
+// Upcast on read; preserve unknown versions/kinds and fail load instead of skipping history.
+// New kinds need reader-first rollout or a version bump because older builds may delete them.
+// Unknown body kinds remain readable; malformed annotations are dropped, malformed content fails load.
 
+import type { AgentSessionFailureFact } from '../../../shared/agent-session-failure'
 import type { AgentSessionExecutionOptions } from '../../../shared/agent-session-execution-options'
 import {
   AGENT_SESSION_JOURNAL_SCHEMA_VERSION,
   type AgentJournalDispatchState,
-  type AgentJournalSubmission,
   type AgentJournalItemBody,
   type AgentJournalMessageItem,
   type AgentJournalProducerLinkage,
@@ -53,10 +33,7 @@ export type JournalRowBase = AgentJournalProducerLinkage & {
   /** Timestamp is observational; seq determines ordering. */
   ts: number
   recovered?: true
-  recoveredAt?: number
-  /** Which turn the item this row creates belongs to. Rides the base, and is not a `v` bump,
-   *  for the reason linkage does. Absent on rows from hosts that predate it: the reducer
-   *  derives one for them on read. */
+  /** Additive base field; absent legacy scopes are derived during replay. */
   turnScope?: AgentJournalTurnScope
 }
 
@@ -166,11 +143,8 @@ export type JournalDispatchRow = JournalRowBase & {
   turnScope?: AgentJournalTurnScope
   /** Host-only ordered IDs of stopped messages carried into provider history on pending. */
   carries?: string[]
-  /** On `rejected`: why, typed. Older readers keep the key and ignore it; a malformed one is
-   *  dropped when read, never the row. */
-  rejection?: AgentJournalSubmission['rejection']
-  /** On `rejected`: the card the host kept this send as (`AgentJournalSubmission`). Older readers
-   *  keep the key and ignore it. */
+  /** Drop malformed typed rejection annotations without rejecting the row. */
+  rejection?: AgentSessionFailureFact
   keptAsQueuedMessageId?: string
   /** Explicit null means no answered turn; absent is legacy. Unknown joins degrade to null. */
   answeredInTurn?: { turnItemId: string; via: string } | null
@@ -185,8 +159,6 @@ export type JournalLifecycleMutation =
         itemId: string
         revision: number
         body: AgentJournalItemBody
-        recovered?: true
-        recoveredAt?: number
         turnScope?: AgentJournalTurnScope
         /** Source creation time; absent uses the batch row's timestamp. */
         observedAt?: number
@@ -290,26 +262,18 @@ function fieldsContent(hold: boolean): AgentJournalContentVerdict {
   return hold ? 'readable' : 'malformed'
 }
 
-/** Each kind's own fields, keyed by every kind the union holds: a kind without a check here fails
- *  to compile, never reads as a newer build's kind. */
-function journalItemContent(record: Record<string, unknown>): AgentJournalContentVerdict {
-  return combinedContent(
-    fieldsContent(
-      typeof record.itemId === 'string' &&
-        Number.isInteger(record.revision) &&
-        semanticWorkKeyAgrees(record.itemId, record.body)
-    ),
-    readAgentJournalItemBody(record.body)
-  )
-}
-
+// Exhaustive kind keys make missing checks a compile error.
 const ROW_CONTENT_CHECK_BY_KIND: Record<
   JournalRow['kind'],
   (record: Record<string, unknown>) => AgentJournalContentVerdict
 > = {
   epoch: (record) =>
     fieldsContent(typeof record.reason === 'string' && isPlainObject(record.providerHandle)),
-  item: journalItemContent,
+  item: (record) =>
+    combinedContent(
+      fieldsContent(typeof record.itemId === 'string' && Number.isInteger(record.revision)),
+      readAgentJournalItemBody(record.body)
+    ),
   tombstone: (record) =>
     fieldsContent(typeof record.itemId === 'string' && Number.isInteger(record.revision)),
   submission: (record) =>
@@ -363,7 +327,11 @@ const MUTATION_CONTENT_CHECK_BY_KIND: Record<
   JournalLifecycleMutation['kind'],
   (mutation: Record<string, unknown>) => AgentJournalContentVerdict
 > = {
-  item: journalItemContent,
+  item: (mutation) =>
+    combinedContent(
+      fieldsContent(typeof mutation.itemId === 'string' && Number.isInteger(mutation.revision)),
+      readAgentJournalItemBody(mutation.body)
+    ),
   tombstone: (mutation) =>
     fieldsContent(typeof mutation.itemId === 'string' && Number.isInteger(mutation.revision))
 }

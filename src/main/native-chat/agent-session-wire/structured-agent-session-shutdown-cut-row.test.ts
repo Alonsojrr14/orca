@@ -114,9 +114,6 @@ async function restartAfterDeath(): Promise<void> {
   await host.reconcileRestartLeases()
 }
 
-/** The next Orca over the files a quit left: the one that reads them, since startup opens none. */
-const relaunch = restartAfterDeath
-
 async function reread() {
   await host.restoreReadableSessions([SESSION])
   const { items } = await host.journalSnapshot(SESSION)
@@ -136,7 +133,6 @@ describe('the row a quit writes for the reply it cut', () => {
     await runningTurn()
 
     await host.flushAllStreamedEvents({ trigger })
-    await relaunch()
 
     const { items, turnItemId, stopRows, readerErrors } = await reread()
     expect(stopRows).toHaveLength(1)
@@ -159,7 +155,6 @@ describe('the row a quit writes for the reply it cut', () => {
     await runningTurn()
 
     await host.flushAllStreamedEvents({ trigger: 'update' })
-    await relaunch()
 
     const { stopRows, readerErrors } = await reread()
     expect(stopRows).toEqual([])
@@ -171,7 +166,6 @@ describe('the row a quit writes for the reply it cut', () => {
     await runningTurn()
 
     await host.flushAllStreamedEvents({ trigger: 'update' })
-    await relaunch()
 
     const { stopRows } = await reread()
     expect(stopRows).toEqual([])

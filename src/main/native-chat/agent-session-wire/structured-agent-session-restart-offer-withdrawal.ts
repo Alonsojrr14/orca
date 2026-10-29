@@ -24,18 +24,7 @@ export function createStructuredAgentSessionRestartOfferWithdrawal(deps: {
   now: () => number
   enqueue: <T>(operation: () => Promise<T>) => Promise<T>
 }) {
-  const observed = new Map<string, { marker: AgentSessionResumeMarker; moved: boolean }>()
   const movedOn = (marker: AgentSessionResumeMarker): boolean => {
-    const key = marker.sessionId
-    const prior = observed.get(key)
-    const previous = prior?.marker.teardownId === marker.teardownId ? prior : undefined
-    const observation = previous ?? { marker, moved: false }
-    observed.set(key, observation)
-    const moved = readMovedOn(marker) || observation.moved
-    observation.moved = moved
-    return moved
-  }
-  const readMovedOn = (marker: AgentSessionResumeMarker): boolean => {
     const session = deps.sessions.get(marker.sessionId)
     if (!session) {
       return false
@@ -71,15 +60,7 @@ export function createStructuredAgentSessionRestartOfferWithdrawal(deps: {
 
   return {
     movedOn,
-    beforeClose: (sessionId: string) => {
-      const observation = observed.get(sessionId)
-      if (observation) {
-        movedOn(observation.marker)
-      }
-    },
-    /** The chat's agent proved a start: the offer and any failure record go from the recovery file,
-     *  unless the start was for one of that offer's own continuations. Advisory: a failed write is
-     *  logged, never raised. */
+    /** Retire offer/failure after independent proven startup; failures log without blocking. */
     onAgentStarted: (sessionId: string): void => {
       const session = deps.sessions.get(sessionId)
       const capsule = deps.capsule

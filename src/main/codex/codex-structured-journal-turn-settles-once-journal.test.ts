@@ -2,9 +2,6 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { AGENT_JOURNAL_THREAD_SCOPE } from '../../shared/agent-session-journal-types'
-import { agentJournalItemKey } from '../../shared/agent-session-journal-item-key'
-import { codexTurnLifecycleIdentity } from './codex-structured-journal-translation-turns'
 import { readAgentJournalTurn } from '../../shared/agent-session-turn-record'
 import {
   completedStructuredAgentTurnSeconds,
@@ -67,8 +64,6 @@ async function session() {
       observedAt
     })
   return {
-    journal,
-    sink: deferred.sink,
     on,
     drained: () => deferred.drained(),
     items: async () => {
@@ -85,54 +80,6 @@ function turnRecord(rows: Awaited<ReturnType<Awaited<ReturnType<typeof session>>
 }
 
 describe('a failed Codex turn in the journal', () => {
-  it('settles multiple running tools behind a queued context revision without losing turn fields', async () => {
-    const { on, journal, sink, drained, items } = await session()
-    expect(on('turn/started', { turn: { id: TURN } }, 1_000)).toEqual({ accepted: true })
-    for (let index = 0; index < 4; index++) {
-      expect(
-        on(
-          'item/started',
-          {
-            turnId: TURN,
-            item: {
-              type: 'commandExecution',
-              id: `exec-${index}`,
-              command: `run-${index}`,
-              status: 'inProgress'
-            }
-          },
-          1_100 + index
-        ).accepted
-      ).toBe(true)
-    }
-    const contextUsage = { window: { tokens: 200_000, capturedAt: 1_500 } }
-    const identity = codexTurnLifecycleIdentity(SESSION, TURN)
-    sink.tryReviseResolvedItem?.(
-      4096,
-      (at) => {
-        const body = at.itemBody(agentJournalItemKey(identity))
-        return body?.kind === 'turn' ? { identity, body: { ...body, contextUsage } } : null
-      },
-      { turnScope: AGENT_JOURNAL_THREAD_SCOPE, lifecycle: true }
-    )
-    expect(on('turn/completed', { turn: { id: TURN, status: 'failed' } }, 2_000)).toEqual({
-      accepted: true
-    })
-    await expect(drained()).resolves.toEqual({ ok: true })
-    await expect(sink.written?.()).resolves.toEqual({ ok: true })
-    const rows = await items()
-    expect(rows.filter(({ body }) => body.kind === 'tool-call').map(({ body }) => body)).toEqual(
-      Array.from({ length: 4 }, () => expect.objectContaining({ state: 'failed' }))
-    )
-    expect(turnRecord(rows)).toMatchObject({
-      state: 'completed',
-      outcome: 'failure',
-      contextUsage,
-      completedAt: 2_000
-    })
-    expect(journal.runningTurn()).toBeNull()
-  })
-
   it('keeps the failed completion, its duration and the start, when it lands while the error is still queued', async () => {
     const { on, drained, items } = await session()
     on('turn/started', { turn: { id: TURN } }, 1_000)

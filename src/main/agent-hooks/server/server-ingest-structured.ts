@@ -77,7 +77,6 @@ export abstract class AgentHookServerIngestStructured extends AgentHookServerIng
       mainAgent,
       // Older readers use interrupted instead of mainAgent.
       interrupted: mainAgentTurnInterrupted(mainAgent),
-      ...(summary.restoredInterruption === true ? { restoredInterruption: true as const } : {}),
       prompt: summary.latestPrompt,
       agentType: summary.agent,
       ...(summary.model ? { model: summary.model } : {}),

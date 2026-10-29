@@ -49,7 +49,7 @@ export type StructuredAgentSessionDeliveryLoopDeps = {
   record: (sessionId: string) => AgentSessionRecord | null
   currentWork: (sessionId: string) => StructuredAgentSessionCurrentWork | null
   /** Publish row-free changes in current work. */
-  workChanged?: (sessionId: string, clientMessageId: string) => void
+  workChanged?: (sessionId: string) => void
   holdClosedInput?: (
     sessionId: string,
     clientMessageId: string,

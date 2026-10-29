@@ -123,26 +123,6 @@ export function showAgentSessionTabs(
 
 export type PersistedAgentSessionTab = { tabId: string; sessionId: string }
 
-/** Observes committed saved membership; listeners never gate or fail the tab write. */
-export class AgentSessionTabMembership {
-  private readonly listeners = new Set<(id: string) => void>()
-  listen = (listener: (id: string) => void): (() => void) => {
-    this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
-  }
-  publish(ids: readonly string[]): void {
-    for (const id of ids) {
-      for (const listener of this.listeners) {
-        try {
-          listener(id)
-        } catch (error) {
-          console.warn('[agent-session] observing saved tab membership failed', error)
-        }
-      }
-    }
-  }
-}
-
 /** Check tab-id conflicts before spawn; claim only on publication so failed creates leave no restorable tab. */
 export function assertReservedTabUnheld(
   state: AgentSessionStoreState,

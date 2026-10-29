@@ -1,6 +1,3 @@
-import type { StructuredAgentSessionAttachContext } from './structured-agent-session-attach-context'
-import type { StructuredAgentSessionClientDelivery } from './structured-agent-session-client-delivery'
-import type { StructuredAgentSessionConversationDelivery } from './structured-agent-session-host-delivery'
 import type {
   AgentSessionExecutionLocation,
   AgentSessionRecord
@@ -16,7 +13,7 @@ type WorkspaceSleepHost = {
   deps: Pick<StructuredAgentSessionHostDeps, 'store' | 'logger' | 'hasOpenDispatch' | 'now'>
   tasks: StructuredAgentSessionTaskQueue
   lifetime: Pick<StructuredAgentSessionConversationLifetime, 'closeForWorkspaceSleep'>
-  sessions: Pick<StructuredAgentSessionConversations, 'get'>
+  sessions: StructuredAgentSessionConversations
   deliveryRunning: (sessionId: string) => boolean
   childWorkIncomplete: (sessionId: string) => boolean
   publishRecordNotes: (sessionId: string) => void
@@ -137,29 +134,4 @@ async function settleWorkspaceSleepChat(
     host.publishRecordNotes(sessionId)
   }
   return marked ? { stopped: true } : null
-}
-
-export function sleepStructuredAgentSessionHostWorkspace(
-  context: Pick<StructuredAgentSessionAttachContext, 'deps' | 'runtimeState' | 'sessions'>,
-  tasks: StructuredAgentSessionTaskQueue,
-  lifetime: StructuredAgentSessionConversationLifetime,
-  clientDelivery: StructuredAgentSessionClientDelivery,
-  conversationDelivery: StructuredAgentSessionConversationDelivery,
-  workspaceId: string,
-  markAsleep?: boolean
-) {
-  return sleepStructuredAgentSessionWorkspace(
-    {
-      deps: context.deps,
-      tasks,
-      lifetime,
-      sessions: context.sessions,
-      deliveryRunning: (id) =>
-        conversationDelivery.loop.isRunning(id) || context.runtimeState.startFlights.has(id),
-      childWorkIncomplete: clientDelivery.childWorkIncomplete,
-      publishRecordNotes: clientDelivery.publishRecordNotes
-    },
-    workspaceId,
-    markAsleep
-  )
 }

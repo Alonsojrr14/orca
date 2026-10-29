@@ -8,7 +8,6 @@ import {
 import {
   scheduleRuntimeGraphSync,
   setRuntimeGraphStoreStateGetter,
-  setRuntimeGraphStartupRestorationReady,
   setRuntimeGraphSyncEnabled
 } from '../runtime/sync-runtime-graph'
 import { useAppStore } from '../store'
@@ -16,12 +15,6 @@ import { useAppStore } from '../store'
 /** Keeps the mobile runtime graph republished as the store's session-visible state changes. */
 export function useRuntimeGraphSync(): void {
   const workspaceSessionReady = useAppStore((s) => s.workspaceSessionReady)
-  const terminalStartupRestorationReady = useAppStore((s) => s.terminalStartupRestorationReady)
-
-  useEffect(() => {
-    setRuntimeGraphStartupRestorationReady(workspaceSessionReady && terminalStartupRestorationReady)
-    return () => setRuntimeGraphStartupRestorationReady(false)
-  }, [workspaceSessionReady, terminalStartupRestorationReady])
 
   useEffect(() => {
     setRuntimeGraphStoreStateGetter(useAppStore.getState)

@@ -307,17 +307,17 @@ describe('CLI and worker thread entry guard', () => {
     expect(() => runEntryWriteBundle(plugin, bundle)).not.toThrow()
   })
 
-  it.each(['port-scan-command-worker-entry', 'journal-legacy-rest-worker-entry'])(
-    'rejects an Electron require reachable from %s',
-    (name) => {
-      const plugin = createPlainNodeEntryGuardPlugin()
-      const bundle: Rollup.OutputBundle = {
-        [`${name}.js`]: entryChunk(name, 'require("electron")')
-      }
-
-      expect(() => runEntryWriteBundle(plugin, bundle)).toThrow('requires electron')
+  it('rejects an Electron require reachable from a worker entry', () => {
+    const plugin = createPlainNodeEntryGuardPlugin()
+    const bundle: Rollup.OutputBundle = {
+      'port-scan-command-worker-entry.js': entryChunk(
+        'port-scan-command-worker-entry',
+        'require("electron")'
+      )
     }
-  )
+
+    expect(() => runEntryWriteBundle(plugin, bundle)).toThrow('requires electron')
+  })
 
   it('names the worker-thread runtime so the failure is actionable', () => {
     const plugin = createPlainNodeEntryGuardPlugin()

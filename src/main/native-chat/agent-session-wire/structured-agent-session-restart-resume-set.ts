@@ -26,8 +26,6 @@ export type StructuredAgentSessionResumeCandidate = {
   trigger: AgentSessionResumeTrigger
   recordedAt: number
   latestPrompt: string
-  conversationName?: string
-  /** Which machine ran it, so the offer carries the same host badge the sidebar shows. */
   executionHostId: AgentSessionRecord['location']['executionHostId']
   /** Distinguish folder workspaces from git worktrees without inferring names. */
   workspaceKind: AgentSessionRecord['location']['workspaceKind']
@@ -117,7 +115,6 @@ export function structuredAgentSessionResumableSet(
       trigger: marker.trigger,
       recordedAt: marker.recordedAt,
       latestPrompt: input.latestPrompt(marker.sessionId),
-      ...(record.conversationName ? { conversationName: record.conversationName } : {}),
       executionHostId: record.location.executionHostId,
       workspaceKind: record.location.workspaceKind,
       ...(model === undefined ? {} : { model }),

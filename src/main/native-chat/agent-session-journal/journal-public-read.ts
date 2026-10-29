@@ -1,4 +1,5 @@
 import type { AgentJournalSnapshot } from '../../../shared/agent-session-journal-types'
+import { agentJournalSubmissionKey } from '../../../shared/agent-session-journal-item-key'
 import { renderJournalState, type JournalReducerState } from './journal-reducer'
 
 /** Only a committed journal owner can certify reuse across public reads. */
@@ -13,12 +14,7 @@ export function createJournalPublicReader() {
         view?: ReturnType<typeof readJournalPublicView>
       }
     | undefined
-  return (
-    raw: JournalReducerState,
-    display: JournalReducerState,
-    revision: string,
-    normalizationKey = () => journalNormalizationKey(display)
-  ) => {
+  return (raw: JournalReducerState, display: JournalReducerState, revision: string) => {
     const { epoch, lastSequence: sequence } = raw
     if (
       current?.raw !== raw ||
@@ -31,7 +27,7 @@ export function createJournalPublicReader() {
     const source = current
     return (source.view ??= readJournalPublicView(
       display,
-      () => (source.normalizationKey ??= normalizationKey())
+      () => (source.normalizationKey ??= journalNormalizationKey(display))
     ))
   }
 }
@@ -56,5 +52,12 @@ export function readJournalPublicView(
 }
 
 function journalNormalizationKey(state: JournalReducerState): string {
-  return state.selection.normalizationKey(state.epoch)
+  const corrections = [...state.normalizedHandOffs].sort().flatMap((id) => {
+    const item = state.items.get(agentJournalSubmissionKey(id))
+    const submission = state.submissions.get(id)
+    return item && submission
+      ? [[id, item.sequence, item.observedAt, item.turnScope, submission.queuedMessageId ?? null]]
+      : []
+  })
+  return corrections.length === 0 ? '' : JSON.stringify([state.epoch, corrections])
 }

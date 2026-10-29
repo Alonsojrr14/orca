@@ -2,26 +2,20 @@ import {
   AGENT_JOURNAL_THREAD_SCOPE,
   type AgentJournalSubmission
 } from '../../../shared/agent-session-journal-types'
-import {
-  parseAgentJournalItemKey,
-  agentJournalSubmissionKey
-} from '../../../shared/agent-session-journal-item-key'
+import { agentJournalSubmissionKey } from '../../../shared/agent-session-journal-item-key'
 import { readAgentSessionExecutionOptions } from '../../../shared/agent-session-execution-options'
 import { journalRenderItem } from './journal-render-item'
 import { statedOrDerivedTurnScope, upsertJournalItem } from './journal-item-fold'
 import type { JournalReducerState } from './journal-reducer'
 import type { JournalRow } from './journal-row-schema'
 import { journalDispatchRowApplies } from './journal-dispatch-settlement'
-import {
-  queuedHandOffDisplayItem,
-  queuedHandOffDisplaySubmission
-} from './journal-queued-hand-off-display'
+import { DISPATCH_DOUBT_PROVIDER_ENDED_UNANSWERED } from './journal-dispatch-doubt-reasons'
+import { dispatchWasWithdrawn } from '../../../shared/structured-agent-session-dispatch-rejection'
 
 export function applyJournalSubmission(
   state: JournalReducerState,
   row: Extract<JournalRow, { kind: 'submission' }>
 ): void {
-  state.submissionVersion++
   const options = readAgentSessionExecutionOptions(row.options)
   state.submissions.set(row.clientMessageId, {
     clientMessageId: row.clientMessageId,
@@ -83,17 +77,24 @@ export function placeHandedOverMessage(
 /** Uncertain handoffs remain spent at their handover position; derive display without rewriting rejection. */
 export function foldQueuedHandOffInDoubt(
   state: JournalReducerState,
-  original: AgentJournalSubmission
+  submission: AgentJournalSubmission
 ): void {
-  const submission = queuedHandOffDisplaySubmission(original)
   state.normalizedHandOffs.add(submission.clientMessageId)
   const itemId = agentJournalSubmissionKey(submission.clientMessageId)
   const item = state.items.get(itemId)
   const place = state.queuedHandOffPlaces.get(submission.clientMessageId)
   if (item && place) {
-    state.items.set(itemId, queuedHandOffDisplayItem(item, place)!)
+    const { sequenceIndex: _rejectedAt, ...rest } = item
+    state.items.set(itemId, { ...rest, ...place })
   }
-  state.submissions.set(submission.clientMessageId, submission)
+  if (dispatchWasWithdrawn(submission) && !submission.answeredInTurn) {
+    delete submission.queuedMessageId
+    return
+  }
+  submission.dispatchState = 'unknown'
+  submission.reason = DISPATCH_DOUBT_PROVIDER_ENDED_UNANSWERED
+  submission.recovered = true
+  delete submission.rejection
 }
 
 /** Place proven rejections at settlement in thread scope; uncertain deliveries retain their position. */
@@ -116,15 +117,6 @@ export function placeRejectedMessage(
   })
 }
 
-export function journalSubmissionAt(state: JournalReducerState, resolvedItemId: string) {
-  const identity = parseAgentJournalItemKey(resolvedItemId)
-  if (identity?.provider !== 'orca') {
-    return undefined
-  }
-  const raw = state.selection.rawAt(resolvedItemId)
-  return raw === undefined ? undefined : state.submissions.get(raw)
-}
-
 export function acceptSubmissionFromProviderItem(
   state: JournalReducerState,
   providerItemId: string,
@@ -134,13 +126,12 @@ export function acceptSubmissionFromProviderItem(
   if (providerItemId === resolvedItemId) {
     return
   }
-  const original = journalSubmissionAt(state, resolvedItemId)
-  const submission = original ? { ...original } : undefined
+  const submission = [...state.submissions.values()].find(
+    (candidate) => agentJournalSubmissionKey(candidate.clientMessageId) === resolvedItemId
+  )
   if (!submission || !journalDispatchRowApplies(submission)) {
     return
   }
-  state.submissions.set(submission.clientMessageId, submission)
-  state.submissionVersion++
   submission.fence = row.fence
   submission.dispatchState = 'accepted'
   noteTurnAccepted(state, submission)
@@ -148,7 +139,6 @@ export function acceptSubmissionFromProviderItem(
   submission.reason = null
   submission.resolvedAt = row.ts
   delete submission.recovered
-  state.submissions.set(submission.clientMessageId, submission)
   state.receipts.set(submission.clientMessageId, {
     clientMessageId: submission.clientMessageId,
     providerItemId,

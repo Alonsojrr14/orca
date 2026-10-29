@@ -16,14 +16,7 @@ import {
 import type { CodexPendingJournalPrompt } from './codex-structured-journal-settlement'
 import type { CodexJournalTranslationAdmission } from './codex-structured-journal-contracts'
 import { CODEX_JOURNAL_ADMITTED } from './codex-structured-journal-contracts'
-import {
-  estimateStructuredAgentSessionSettlementBytes,
-  estimateStructuredAgentSessionItemBytes
-} from '../native-chat/agent-session-wire/structured-agent-session-event-sink-estimate'
-import {
-  codexTurnRowReservedBytes,
-  reviseCodexTurnRow
-} from './codex-structured-journal-translation-turns'
+import { reviseCodexTurnRow } from './codex-structured-journal-translation-turns'
 
 const ADMITTED: StructuredAgentSessionSinkAdmission = { accepted: true }
 
@@ -44,16 +37,7 @@ export function appendCodexLifecycleMutations(
           kind: 'settlement',
           settlementId,
           reservedBytes:
-            estimateStructuredAgentSessionSettlementBytes(mutations) +
-            mutations.reduce(
-              (kept, mutation) =>
-                kept +
-                (mutation.kind === 'item' && mutation.body.kind === 'turn'
-                  ? codexTurnRowReservedBytes(mutation.identity, mutation.body) -
-                    estimateStructuredAgentSessionItemBytes(mutation.identity, mutation.body)
-                  : 0),
-              0
-            ),
+            Buffer.byteLength(JSON.stringify({ settlementId, mutations }), 'utf8') + 512,
           resolve: (journal) =>
             mutations.map((mutation) =>
               mutation.kind === 'item' && mutation.body.kind === 'turn'

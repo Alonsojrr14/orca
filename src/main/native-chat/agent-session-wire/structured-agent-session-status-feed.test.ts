@@ -1,4 +1,3 @@
-import { registerStatusFeedRestorationContracts } from './structured-agent-session-status-feed-restoration.spec'
 import { agentSessionConversationView } from '../../../shared/agent-session-conversation-view'
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../../shared/agent-session-journal-types'
 import { mkdtemp, rm } from 'node:fs/promises'
@@ -30,13 +29,13 @@ import { testEventSinkLogging } from './structured-agent-session-logger-test-sup
 import { codexProviderHandle } from '../../../shared/agent-session-provider-handle-encoding'
 
 const SESSION = 'status-session'
-export const TURN_IDENTITY = {
+const TURN_IDENTITY = {
   provider: 'codex',
   threadId: 'thread-1',
   turnId: 'turn-1',
   ordinal: 0
 } as const
-export const USER_IDENTITY = {
+const USER_IDENTITY = {
   provider: 'codex',
   threadId: 'thread-1',
   turnId: 'turn-1',
@@ -57,7 +56,7 @@ afterEach(async () => {
   await rm(root, { recursive: true, force: true })
 })
 
-export async function openJournal(sessionId = SESSION, now?: () => number) {
+async function openJournal(sessionId = SESSION, now?: () => number) {
   return journals.open({
     identity: {
       sessionId,
@@ -71,7 +70,7 @@ export async function openJournal(sessionId = SESSION, now?: () => number) {
   })
 }
 
-export function feedFor(
+function feedFor(
   sessions: Map<string, Parameters<typeof indexed>[0]>,
   record: Partial<AgentSessionRecord> | null = null,
   onStatusChanged?: StructuredAgentSessionStatusFeedDeps['onStatusChanged'],
@@ -87,7 +86,6 @@ export function feedFor(
     ...(onStatusChanged ? { onStatusChanged } : {}),
     ...(sink ? { statusSink: () => sink } : {}),
     sessions: {
-      has: (sessionId: string) => sessions.has(sessionId),
       get: (sessionId: string) => {
         const session = sessions.get(sessionId)
         return session ? indexed(session) : undefined
@@ -97,7 +95,8 @@ export function feedFor(
           yield [sessionId, indexed(session)] as const
         }
       }
-    },
+    } as unknown as ReadonlyMap<string, ReturnType<typeof indexed>>,
+    // A partial record still has a lease: the feed reads the conversation's fence off it.
     getConversation: () =>
       record ? agentSessionConversationView({ ...agentSessionRecordFixture(), ...record }) : null,
     now: () => (now += 1)
@@ -773,13 +772,4 @@ describe('the status sink sees the roster the broadcast cache deliberately lacks
       session: expect.objectContaining({ sessionId: SESSION, status: 'idle' })
     })
   })
-})
-
-registerStatusFeedRestorationContracts({
-  openJournal,
-  feedFor,
-  directory: () => root,
-  SESSION,
-  TURN_IDENTITY,
-  USER_IDENTITY
 })

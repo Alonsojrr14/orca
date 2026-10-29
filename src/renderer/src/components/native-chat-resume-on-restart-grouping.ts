@@ -13,7 +13,6 @@ export type ResumeCandidate = {
   agent: StructuredAgentId
   trigger: 'quit' | 'update'
   latestPrompt: string
-  conversationName?: string
   recordedAt: number
   /** Optional on the wire: an older host omits them, and a row must still render. */
   executionHostId?: ExecutionHostId

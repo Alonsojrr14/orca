@@ -50,7 +50,6 @@ export function resumeStatusFromHookRow(
     connectionId: isLocalHookConnectionId(row.connectionId) ? null : row.connectionId,
     lastAssistantMessage: row.lastAssistantMessage,
     interrupted: row.interrupted,
-    restoredInterruption: row.restoredInterruption,
     ...(row.mainAgent ? { mainAgent: row.mainAgent } : {}),
     ...(row.worktreeId ? { worktreeId: row.worktreeId } : {})
   }

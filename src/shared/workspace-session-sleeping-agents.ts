@@ -98,7 +98,6 @@ export const sleepingAgentSessionRecordSchema = z
     terminalTitle: z.string().optional(),
     lastAssistantMessage: z.string().optional(),
     interrupted: z.boolean().optional(),
-    restoredInterruption: z.literal(true).optional(),
     // A malformed value drops the field, never the record.
     mainAgent: z.unknown().transform(normalizeMainAgentStatusField).optional(),
     connectionId: z.string().nullable().optional(),

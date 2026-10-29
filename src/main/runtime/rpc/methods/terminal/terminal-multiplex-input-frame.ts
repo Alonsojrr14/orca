@@ -1,4 +1,3 @@
-import { beginStructuredJournalForeground } from '../../../../native-chat/agent-session-wire/structured-agent-session-registry'
 import {
   decodeTerminalStreamText,
   type TerminalStreamFrame
@@ -25,34 +24,29 @@ export function handleMultiplexInputFrame(
   const sequenced = inputSessionId !== null
   // Mark policy-dropped locked/unclaimed input applied so replay cannot run it later; empty sequences fill abandoned slots.
   const deliver = async (): Promise<TerminalInputWriteOutcome> => {
-    const finishForeground = beginStructuredJournalForeground()
-    try {
-      if (!text || isTerminalInputLockedForClient(runtime, stream.ptyId, stream.client)) {
-        return 'applied'
-      }
-      const claimed = await inputClaimTail
-      if (!claimed || isTerminalInputLockedForClient(runtime, stream.ptyId, stream.client)) {
-        return 'applied'
-      }
-      const outcome = await sendTerminalStreamInput(runtime, {
-        terminal: stream.terminal,
-        text,
-        client: stream.client,
-        isMobile: stream.isMobile,
-        // Why: an ack drops the client's replay copy, so it must wait for the provider's handoff.
-        requireWriteSettlement: sequenced
-      })
-      if (!sequenced && outcome !== 'paused') {
-        state.notifyStreamWriteUnavailable(stream, outcome)
-      }
-      return outcome === 'delivered' || outcome === 'paused'
-        ? 'applied'
-        : outcome === 'rejected'
-          ? 'refused'
-          : 'delivery-unknown'
-    } finally {
-      finishForeground()
+    if (!text || isTerminalInputLockedForClient(runtime, stream.ptyId, stream.client)) {
+      return 'applied'
     }
+    const claimed = await inputClaimTail
+    if (!claimed || isTerminalInputLockedForClient(runtime, stream.ptyId, stream.client)) {
+      return 'applied'
+    }
+    const outcome = await sendTerminalStreamInput(runtime, {
+      terminal: stream.terminal,
+      text,
+      client: stream.client,
+      isMobile: stream.isMobile,
+      // Ack only after provider handoff because clients delete their replay copy.
+      requireWriteSettlement: sequenced
+    })
+    if (!sequenced && outcome !== 'paused') {
+      state.notifyStreamWriteUnavailable(stream, outcome)
+    }
+    return outcome === 'delivered' || outcome === 'paused'
+      ? 'applied'
+      : outcome === 'rejected'
+        ? 'refused'
+        : 'delivery-unknown'
   }
   if (inputSessionId === null) {
     void deliver()

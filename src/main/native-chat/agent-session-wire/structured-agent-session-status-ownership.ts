@@ -15,12 +15,6 @@ import {
   StructuredAgentSessionOpenChildWork,
   type ChildWorkLifetimeToken
 } from './structured-agent-session-open-child-work'
-import {
-  acceptedChildWork,
-  finishChildWorkAdmission,
-  type ChildWorkAdmission
-} from './structured-agent-session-accepted-child-work'
-import type { StructuredAgentSessionChildWorkProducer } from './structured-agent-session-subagent-rows'
 
 export type StructuredAgentSessionStatusSink = {
   publish: (
@@ -42,7 +36,7 @@ export type StructuredAgentSessionStatusSink = {
 
 export type CapturedChildWorkStops = {
   current: (handleId: string) => boolean
-  acknowledge: (evidence: readonly AgentChildWorkEvidence[]) => ChildWorkAdmission
+  acknowledge: (evidence: readonly AgentChildWorkEvidence[]) => void
 }
 
 /** Retain addresses through record removal for final callbacks. */
@@ -97,24 +91,14 @@ export class StructuredAgentSessionStatusOwnership {
   publishChildWork(
     sessionId: string,
     evidence: AgentChildWorkEvidence[],
-    provider: AgentSessionRecord['provider'],
-    producer?: StructuredAgentSessionChildWorkProducer,
-    capture?: Parameters<typeof acceptedChildWork>[2],
-    published?: () => void
-  ): ChildWorkAdmission {
-    const changes = this.open.observe(sessionId, evidence)
-    return acceptedChildWork(changes, producer, capture, () => {
-      const subject = this.subjects.get(sessionId)
-      if (subject && this.landed.has(sessionId)) {
-        try {
-          this.sink()?.publishChildWork?.(subject, evidence, provider)
-        } finally {
-          published?.()
-        }
-      } else {
-        published?.()
-      }
-    })()
+    provider: AgentSessionRecord['provider']
+  ): void {
+    this.open.observe(sessionId, evidence)
+    const subject = this.subjects.get(sessionId)
+    if (!subject || !this.landed.has(sessionId)) {
+      return
+    }
+    this.sink()?.publishChildWork?.(subject, evidence, provider)
   }
 
   /** Capture lifetimes before provider awaits so Stop cannot close replacement runs. */
@@ -127,23 +111,14 @@ export class StructuredAgentSessionStatusOwnership {
       current: (handleId) =>
         captured.has(handleId) && this.open.matches(sessionId, handleId, captured.get(handleId)),
       acknowledge: (evidence) => {
-        const changes = evidence.flatMap((edge) => {
-          if (edge.type !== 'stop-acknowledged') {
-            return []
+        for (const edge of evidence) {
+          if (edge.type === 'stop-acknowledged') {
+            const token = captured.get(edge.handleId)
+            if (token) {
+              this.open.stopped(sessionId, edge.handleId, token)
+            }
           }
-          const token = captured.get(edge.handleId)
-          const change = token && this.open.stopped(sessionId, edge.handleId, token)
-          return change ? [change] : []
-        })
-        const append = acceptedChildWork(changes)
-        const producer = changes[0]?.token.journalWork?.producer
-        const admission = producer?.continueWork?.(append) ?? append()
-        void finishChildWorkAdmission(admission, producer).then((result) => {
-          if (!result.ok) {
-            console.warn('[agent-session] captured Stop ended unwritten', result.error)
-          }
-        })
-        return admission
+        }
       }
     }
   }

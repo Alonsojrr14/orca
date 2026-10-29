@@ -1,4 +1,3 @@
-import type { StructuredAgentSessionTransitionJournal } from './structured-agent-session-transition'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -6,11 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { agentJournalItemKey } from '../../../shared/agent-session-journal-item-key'
 import { codexProviderHandle } from '../../../shared/agent-session-provider-handle-encoding'
 import { createTrackedJournalOpener } from '../agent-session-journal/journal-host-database-test-support'
-import {
-  createDeferredStructuredAgentSessionEventSink,
-  type StructuredAgentSessionEventSink,
-  type StructuredAgentSessionHistoryJournal
-} from './structured-agent-session-event-sink'
+import type { StructuredAgentSessionEventSink } from './structured-agent-session-event-sink'
+import { createDeferredStructuredAgentSessionEventSink } from './structured-agent-session-event-sink'
 import { testEventSinkLogging } from './structured-agent-session-logger-test-support'
 import type { HistoryCatchUpPlan } from './structured-agent-session-history-catch-up'
 import {
@@ -22,25 +18,18 @@ describe('history catch-up runner', () => {
   afterEach(() => vi.useRealTimers())
   function fixture() {
     let barriers = 0
-    const journal: StructuredAgentSessionHistoryJournal & StructuredAgentSessionTransitionJournal =
-      {
-        epoch: 'epoch-1',
-        agent: 'codex',
-        sessionId: 'session-1',
-        requestFrontier: () => null,
-        runningTurn: () => null,
-        submission: () => undefined,
-        readInOrder: async (read) => read(),
-        cursor: () => ({ epoch: 'epoch-1', sequence: 0 }),
-        item: () => null,
-        itemBody: () => null,
-        canonicalItemId: (key: string) => key,
-        visitItems: vi.fn(),
-        visitItemsWithLinkage: vi.fn(),
-        receiptFor: () => null,
-        submissions: () => [],
-        historyOrigin: () => null
-      }
+    const journal = {
+      epoch: 'epoch-1',
+      cursor: () => ({ epoch: 'epoch-1', sequence: 0 }),
+      item: () => null,
+      itemBody: () => null,
+      canonicalItemId: (key: string) => key,
+      visitItems: vi.fn(),
+      visitItemsWithLinkage: vi.fn(),
+      receiptFor: () => null,
+      submissions: () => [],
+      historyOrigin: () => null
+    }
     const append = vi.fn<NonNullable<StructuredAgentSessionEventSink['tryAppendTransition']>>(
       () => ({ accepted: true })
     )

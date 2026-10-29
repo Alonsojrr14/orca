@@ -1,4 +1,3 @@
-import { wakeStructuredJournalBackground } from '../../native-chat/agent-session-wire/structured-agent-session-registry'
 import type { OrcaRuntimeWithTransitionGraphReloadToTerminalState as TransitionGraphReloadToTerminalStateMethods } from './session-graph-authority'
 import type { OrcaRuntimeWithBindPtyIncarnationHandle as BindPtyIncarnationHandleMethods } from '../terminal/identity/terminal-handle-bindings'
 import type { OrcaRuntimeWithResolveWaiter as ResolveWaiterMethods } from '../orca-runtime-resolve-waiter'
@@ -104,9 +103,6 @@ export abstract class OrcaRuntimeWithHasTerminalsForWorktree extends OrcaRuntime
     // Compare incarnations against the rebuilt graph before staling proven process identities.
     this.rendererGraphEpoch += 1
     this.graphStatus = 'reloading'
-    wakeStructuredJournalBackground()
-    this.startupRestorationReady = false
-    wakeStructuredJournalBackground()
     const revision = this.graphReloadLifecycle.begin(windowId)
     this.setTerminalSideEffectConsumerAvailable(false)
     this.rememberDetachedPreAllocatedLeaves()
@@ -148,7 +144,6 @@ export abstract class OrcaRuntimeWithHasTerminalsForWorktree extends OrcaRuntime
       const restoresPublishedInventory =
         this.sessionTabsInventoryPublicationEpoch === this.rendererGraphEpoch - 1
       this.graphStatus = 'ready'
-      wakeStructuredJournalBackground()
       this.setTerminalSideEffectConsumerAvailable(true)
       for (const leaf of this.leaves.values()) {
         this.adoptPreAllocatedHandle(leaf)
@@ -174,7 +169,6 @@ export abstract class OrcaRuntimeWithHasTerminalsForWorktree extends OrcaRuntime
       this.pendingHeadlessPromotionWindowId = null
     }
     this.graphStatus = 'ready'
-    wakeStructuredJournalBackground()
     this.setTerminalSideEffectConsumerAvailable(windowId !== HEADLESS_RUNTIME_WINDOW_ID)
     this.refreshWritableFlags()
   }
@@ -212,6 +206,7 @@ export abstract class OrcaRuntimeWithHasTerminalsForWorktree extends OrcaRuntime
     if (this.shouldRestoreHeadlessGraph(windowId)) {
       this.pendingHeadlessPromotionWindowId = null
       this.restoreHeadlessGraphAuthority()
+      this.republishBrowserSessionTabs()
       return
     }
     // Without an authoritative graph, live-terminal operations must fail closed.
@@ -219,10 +214,8 @@ export abstract class OrcaRuntimeWithHasTerminalsForWorktree extends OrcaRuntime
       this.rendererGraphEpoch += 1
     }
     this.graphStatus = 'unavailable'
-    wakeStructuredJournalBackground()
     this.setTerminalSideEffectConsumerAvailable(false)
     this.authoritativeWindowId = null
-    wakeStructuredJournalBackground()
     this.rememberDetachedPreAllocatedLeaves()
     for (const [ptyId, handle] of this.handleByPtyId) {
       if (this.handleByPtyIncarnation.get(ptyId)?.handle === handle) {
@@ -237,6 +230,16 @@ export abstract class OrcaRuntimeWithHasTerminalsForWorktree extends OrcaRuntime
     this.clearPtyIncarnationHandles()
     // Keep pre-allocated CLI handles for reconnect adoption.
     this.rejectAllWaiters('terminal_handle_stale')
+    this.republishBrowserSessionTabs()
+  }
+
+  // Renderer browser rows are listed only while their window exists; a version bump lets every client apply the drop.
+  private republishBrowserSessionTabs(): void {
+    for (const [worktreeId, snapshot] of this.mobileSessionTabsByWorktree) {
+      if (snapshot.tabs.some((tab) => tab.type === 'browser')) {
+        this.republishMobileSessionTabsSnapshot(worktreeId)
+      }
+    }
   }
 
   protected handleGraphReloadTimeout(windowId: number): void {

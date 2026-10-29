@@ -127,18 +127,15 @@ async function pipeline() {
   const viewOf = (providerId: string) =>
     published &&
     server.getStructuredChildWorkViews(published).find((view) => view.providerId === providerId)
-  const record = (
-    subject: AgentStatusStructuredSessionSubject,
-    waiting = server
-      .getStructuredChildWorkViews(subject)
-      .flatMap((view) =>
-        view.state === 'waiting' && view.membership === 'live' ? [view.providerId ?? '?'] : []
-      )
-  ): void => {
+  const record = (subject: AgentStatusStructuredSessionSubject): void => {
     published = subject
     const cards = pendingCards(journal.snapshot().items)
     publishes.push({
-      waiting,
+      waiting: server
+        .getStructuredChildWorkViews(subject)
+        .flatMap((view) =>
+          view.state === 'waiting' && view.membership === 'live' ? [view.providerId ?? '?'] : []
+        ),
       askers: cards.flatMap((card) => (card.agentId ? [card.agentId] : [])),
       row: parentRow(server),
       unwaited: parentRow(unwaited)
@@ -175,20 +172,7 @@ async function pipeline() {
       readChildWork: (subject) => server.getStructuredChildWorkViews(subject)
     })
   })
-  feed.subscribe({
-    id: 'permission-stream',
-    emit: (event) => {
-      if (event.type === 'status' && published) {
-        record(
-          published,
-          (event.session.children ?? []).flatMap((view) =>
-            view.state === 'waiting' && view.membership === 'live' ? [view.providerId ?? '?'] : []
-          )
-        )
-      }
-    }
-  })
-  // As the host publishes: the sink's own publish, and every journal commit a microtask later.
+  // Match host publication on sink publish and deferred journal commits.
   const deferred = createDeferredStructuredAgentSessionEventSink(testEventSinkLogging(SESSION))
   const publishStatus = () => feed.publish(SESSION, journal)
   const target = { journal, fence: FENCE, publish: publishStatus }
@@ -219,8 +203,7 @@ async function pipeline() {
     readProcessStartTime: async () => 1_700_000_000_000,
     now,
     persistHandle: async () => {},
-    onChildWorkEvidence: (sessionId, evidence, producer) =>
-      feed.publishChildWork(sessionId, evidence, producer),
+    onChildWorkEvidence: (sessionId, evidence) => feed.publishChildWork(sessionId, evidence),
     onEvent: (event) => hooks.onEvent?.(event)
   })
   await adapter.acquire({

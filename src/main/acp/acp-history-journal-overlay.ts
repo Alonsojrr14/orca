@@ -1,6 +1,3 @@
-import type { AgentType } from '../../shared/agent-status-types'
-import { readAgentJournalTurn } from '../../shared/agent-session-turn-record'
-import { runningStructuredAgentSessionTurnItemBySequence } from '../../shared/structured-agent-session-live-turn'
 import type { AgentJournalRenderItem } from '../../shared/agent-session-journal-types'
 import { parseAgentJournalItemKey } from '../../shared/agent-session-journal-item-key'
 import {
@@ -26,24 +23,13 @@ export class AcpHistoryJournalOverlay {
   readonly journal: StructuredAgentSessionTransitionJournal
   readonly sink: ProviderTimelineSink
 
-  constructor(epoch: string, identity: { agent: AgentType; sessionId: string }) {
+  constructor(epoch: string) {
     const item = (key: string) => this.staged.get(key)?.item ?? null
     const visitItemsWithLinkage: StructuredAgentSessionTransitionJournal['visitItemsWithLinkage'] =
       (visit) =>
         this.staged.forEach(({ item }) => visit(item.itemId, item.sequence, item.body, item))
     this.journal = {
       epoch,
-      agent: identity.agent,
-      sessionId: identity.sessionId,
-      submission: () => undefined,
-      readInOrder: async (read) => read(),
-      runningTurn: () =>
-        runningStructuredAgentSessionTurnItemBySequence(
-          [...this.staged.values()].map(({ item }) => item)
-        ),
-      requestFrontier: () =>
-        [...this.staged.values()].find(({ item }) => readAgentJournalTurn(item.body))?.item
-          .itemId ?? null,
       item,
       canonicalItemId: (key) => key,
       itemBody: (key) => item(key)?.body ?? null,

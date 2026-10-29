@@ -21,18 +21,14 @@ export type StatusFeedSession = {
     location: AgentSessionConversationView['location']
     provider: AgentSessionConversationView['provider']
   }
-  child?: Pick<
-    StructuredAgentSessionProviderChild,
-    'phase' | 'generation' | 'fence' | 'heldSends'
-  > | null
+  child?: Pick<StructuredAgentSessionProviderChild, 'phase' | 'generation' | 'fence'> | null
   lastEndedChild?: Pick<StructuredAgentSessionEndedChild, 'fence' | 'rootGone'>
   operationalRevision?: number
   restartResume?: AgentSessionStatusSummary['restartResume']
 }
 
 export type StructuredAgentSessionStatusFeedDeps = {
-  sessions: Pick<ReadonlyMap<string, StatusFeedSession>, 'get' | 'has'> &
-    Iterable<readonly [string, StatusFeedSession]>
+  sessions: ReadonlyMap<string, StatusFeedSession>
   starting?: (sessionId: string) => boolean
   getConversation: (sessionId: string) => AgentSessionConversationView | null
   listConversations?: () => AgentSessionConversationView[]

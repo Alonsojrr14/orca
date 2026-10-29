@@ -4,7 +4,6 @@ import type { AgentJournalApprovalItem } from '../../../shared/agent-session-jou
 import {
   closeProviderTimelineRigs,
   openProviderTimelineRig,
-  openUnboundProviderTimelineAssembler,
   providerItemId,
   providerTurnItemId,
   runningTool
@@ -24,83 +23,6 @@ const approval: AgentJournalApprovalItem = {
 }
 
 describe('provider timeline session end', () => {
-  it.each(['turn.end', 'session.ended'] as const)(
-    'settles large queued bodies and context revisions at %s through the real sink',
-    async (type) => {
-      const rig = await openProviderTimelineRig()
-      const { assembler, bind } = openUnboundProviderTimelineAssembler(rig.journal)
-      expect(
-        assembler.apply({ type: 'turn.open', turn: 'large', at: 1_000 }).admission.accepted
-      ).toBe(true)
-      const input = '\u0000'.repeat(32 * 1024)
-      for (let index = 0; index < 3; index++) {
-        expect(
-          assembler.apply({
-            type: 'item.open',
-            item: `large-${index}`,
-            body: { ...runningTool('read'), input: { input } }
-          }).admission.accepted
-        ).toBe(true)
-      }
-      const contextUsage = { window: { tokens: 200_000, capturedAt: 1_500 } }
-      expect(
-        assembler.apply({ type: 'context.usage', usage: contextUsage }).admission.accepted
-      ).toBe(true)
-      const result =
-        type === 'turn.end'
-          ? assembler.apply({ type, at: 2_000, state: 'completed', outcome: 'failure' })
-          : assembler.apply({ type, verdict: { state: 'interrupted', completedAt: 2_000 } })
-      expect(result.admission.accepted).toBe(true)
-      await expect(bind()).resolves.toEqual({ ok: true })
-      const rows = rig.journal.snapshot().items
-      const calls = rows.filter(({ body }) => body.kind === 'tool-call')
-      expect(calls).toHaveLength(3)
-      for (const { body } of calls) {
-        expect(body).toMatchObject({ state: 'failed', input: { input } })
-      }
-      expect(rows.find(({ body }) => body.kind === 'turn')?.body).toMatchObject({
-        state: type === 'turn.end' ? 'completed' : 'interrupted',
-        completedAt: 2_000,
-        contextUsage
-      })
-    }
-  )
-
-  it('settles restored rows and queued revisions larger than the live admission budget', async () => {
-    const rig = await openProviderTimelineRig()
-    rig.assembler.apply({ type: 'turn.open', turn: 'restored', at: 1_000 })
-    const itemId = providerItemId('item', 'restored-tool')
-    const identity = parseAgentJournalItemKey(itemId)
-    if (!identity) {
-      throw new Error('item key did not parse')
-    }
-    await rig.journal.appendItem(identity, runningTool('read'), {
-      fence: 1,
-      turnScope: { kind: 'turn', turnItemId: providerTurnItemId('restored') }
-    })
-    const { assembler, bind } = openUnboundProviderTimelineAssembler(rig.journal)
-    expect(
-      assembler.apply({ type: 'session.ended', verdict: { state: 'unverifiable' } }).admission
-        .accepted
-    ).toBe(true)
-    const input = 'restored'.repeat(200_000)
-    // Another writer revises the row after admission and before the sink binds.
-    await rig.journal.appendItem(
-      identity,
-      { ...runningTool('read'), input: { input } },
-      { fence: 1, turnScope: { kind: 'turn', turnItemId: providerTurnItemId('restored') } }
-    )
-    await expect(bind()).resolves.toEqual({ ok: true })
-    expect(rig.journal.itemBody(itemId)).toMatchObject({
-      state: 'failed',
-      endedAs: 'unverifiable',
-      input: { input }
-    })
-    expect(rig.journal.itemBody(providerTurnItemId('restored'))).toMatchObject({
-      state: 'unverifiable'
-    })
-  })
-
   it('ends the open turn interrupted with no verdict when the child exit was observed', async () => {
     const rig = await openProviderTimelineRig()
     rig.assembler.apply({ type: 'turn.open', turn: 'turn-1', at: 1_000 })

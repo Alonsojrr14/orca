@@ -155,7 +155,6 @@ it('restores a chat for reading while the reconcile keeps failing, and reports i
   await host.reconcileRestartLeases()
 
   await expect(host.restoreReadableSessions([SESSION])).resolves.toBeUndefined()
-  await host.journalSnapshot(SESSION)
 
   expect(host.hasSession(SESSION)).toBe(true)
   expect(store.getRecord(SESSION)?.lease.unreconciled).toBe(true)
@@ -202,7 +201,6 @@ it('restores a chat for reading when resolving its recovery cannot write the sto
   writes.failing = true
 
   await expect(host.restoreReadableSessions([SESSION])).resolves.toBeUndefined()
-  await host.journalSnapshot(SESSION)
 
   expect(host.hasSession(SESSION)).toBe(true)
   expect(store.getRecord(SESSION)?.lease.handoffStage).toBe('recovering')

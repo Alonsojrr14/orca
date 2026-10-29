@@ -13,14 +13,7 @@ import type { AgentMessageSource } from '../../../shared/agent-session/agent-ses
 const hostRef: { current: unknown } = { current: null }
 
 vi.mock('../../native-chat/agent-session-wire/structured-agent-session-registry', () => ({
-  getStructuredAgentSessionHost: () =>
-    hostRef.current === null
-      ? null
-      : {
-          withConversationUse: <T>(_id: string, task: () => Promise<T>) => task(),
-          withAutomaticConversation: <T>(_id: string, task: () => Promise<T>) => task(),
-          ...(typeof hostRef.current === 'object' ? hostRef.current : {})
-        }
+  getStructuredAgentSessionHost: () => hostRef.current
 }))
 
 const {
@@ -83,7 +76,6 @@ describe('structured mailbox pointer host', () => {
     // Read the full timeline: a busy turn's lifecycle item may be far from the tail, and false idle can interrupt it.
     const items = [runningTurn(), ...transcript(500)]
     hostRef.current = {
-      hasSession: () => false,
       journalSnapshot: () => ({ items, submissions: [] }),
       currentWork: () => null
     }
@@ -97,7 +89,6 @@ describe('structured mailbox pointer host', () => {
     const submissions = [{ clientMessageId: 'op1', dispatchState: 'unknown' }]
     hostRef.current = {
       deps: { store: { getConversation: () => null } },
-      hasSession: () => false,
       journalSnapshot: () => ({ items: [], submissions }),
       currentWork: () => null
     }
@@ -131,7 +122,6 @@ describe('structured mailbox pointer host', () => {
             })
         }
       },
-      hasSession: () => false,
       journalSnapshot: () => ({
         items,
         submissions: [pointerSubmission('earlier', 2, 6), current]
@@ -157,7 +147,6 @@ describe('structured mailbox pointer host', () => {
             })
         }
       },
-      hasSession: () => false,
       journalSnapshot: () => ({
         items: [],
         submissions: [pointerSubmission('earlier', 2, 2), current]
@@ -175,7 +164,6 @@ describe('structured mailbox pointer host', () => {
     // Unreadable sessions retain pointers; treating them as empty would authorize an unseen send.
     expect(await createStructuredMailboxPointerHost().readSessionFacts('s1')).toBeNull()
     hostRef.current = {
-      hasSession: () => false,
       journalSnapshot: () => {
         throw new Error('agent_session_ownership_unknown')
       }

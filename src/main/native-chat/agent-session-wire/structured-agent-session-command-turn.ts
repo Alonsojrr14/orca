@@ -234,7 +234,9 @@ export function structuredAgentSessionHandoverOrigin(
   journal: AgentSessionJournal,
   submission: AgentJournalSubmission
 ): number {
-  const handedOver = journal.submission(submission.clientMessageId)
+  const handedOver = journal
+    .submissions()
+    .find((entry) => entry.clientMessageId === submission.clientMessageId)
   return handedOver?.handedOverAt ?? submission.submittedAt
 }
 
