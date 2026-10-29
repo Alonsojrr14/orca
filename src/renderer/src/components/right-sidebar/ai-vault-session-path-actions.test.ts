@@ -1,4 +1,4 @@
-import type { AiVaultAgent } from '../../../../shared/ai-vault-types'
+import type { AiVaultAgent, AiVaultSession } from '../../../../shared/ai-vault-types'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   canOpenAiVaultSessionLogInOrca,
@@ -42,7 +42,11 @@ describe('canOpenAiVaultSessionLogInOrca', () => {
     ['kimi', '/home/user/.kimi-code/sessions/session_1/state.json'],
     ['claude', '/home/user/.claude/unrecognized.db']
   ])('withholds %s storage without a single conversation file: %s', (agent, filePath) => {
-    const session = { agent, filePath, executionHostId: 'local' }
+    const session: Pick<AiVaultSession, 'agent' | 'filePath' | 'executionHostId'> = {
+      agent,
+      filePath,
+      executionHostId: 'local'
+    }
     expect(canOpenAiVaultSessionLogInOrca(session)).toBe(false)
   })
 

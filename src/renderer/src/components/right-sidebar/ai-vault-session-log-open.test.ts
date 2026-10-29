@@ -1,4 +1,4 @@
-import type { AiVaultAgent } from '../../../../shared/ai-vault-types'
+import type { AiVaultAgent, AiVaultSession } from '../../../../shared/ai-vault-types'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { toastMock, toastErrorMock, getStateMock } = vi.hoisted(() => ({
@@ -126,8 +126,8 @@ describe('openAiVaultSessionLogInOrca', () => {
   it('never opens a plain OpenCode V2 database', async () => {
     const state = makeState()
     getStateMock.mockReturnValue(state)
-    const session = {
-      agent: 'opencode2' as const,
+    const session: Pick<AiVaultSession, 'agent' | 'filePath' | 'executionHostId'> = {
+      agent: 'opencode2',
       filePath: '/home/user/.local/share/opencode/opencode.db',
       executionHostId: 'local'
     }
@@ -163,7 +163,13 @@ describe('openAiVaultSessionLogInOrca', () => {
     const state = makeState()
     getStateMock.mockReturnValue(state)
     // Counts describe parsed turns, not whether the source format has a file resource.
-    const session = { agent, filePath, executionHostId: 'local', messageCount: 0 }
+    const session: Pick<AiVaultSession, 'agent' | 'filePath' | 'executionHostId' | 'messageCount'> =
+      {
+        agent,
+        filePath,
+        executionHostId: 'local',
+        messageCount: 0
+      }
     await openAiVaultSessionLogInOrca(session)
     expect(state.openFile).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({
