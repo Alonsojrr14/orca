@@ -856,6 +856,9 @@
         "openManageSessions": "Abrir Gerenciar sessões",
         "administratorSearchDescription": "Veja as permissões do Orca no Windows ou reinicie com aprovação de administrador.",
         "administratorApproval": "O Windows pedirá aprovação. Use sua conta habitual."
+      },
+      "limit": {
+        "savedUnreadable": "Não foi possível ler o limite de terminais salvo neste host. Usando {{value}}. Digite um valor e pressione Enter para substituí-lo."
       }
     },
     "agents": {
@@ -15733,7 +15736,6 @@
                     "pane": {
                       "id": {
                         "copy": {
-                          "savedUnreadable": "Não foi possível ler o limite de terminais salvo neste host. Usando {{value}}. Digite um valor e pressione Enter para substituí-lo.",
                           "failed": "Não foi possível copiar o ID do painel"
                         }
                       }

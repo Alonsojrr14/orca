@@ -85,7 +85,7 @@ function TerminalLimitField({ scope }: { scope: SettingsHostScope }): React.JSX.
     const request = controller.current
     if (
       !status?.editable ||
-      (draft === null && !status.savedUnreadable) ||
+      draft === null ||
       saving.current ||
       !request ||
       request.signal.aborted
@@ -96,12 +96,11 @@ function TerminalLimitField({ scope }: { scope: SettingsHostScope }): React.JSX.
       setFailed(true)
       return
     }
-    const text = draft ?? String(status.maxTerminals)
-    if (text === '' || !Number.isFinite(Number(text))) {
+    if (draft === '' || !Number.isFinite(Number(draft))) {
       setDraft(null)
       return
     }
-    const value = Math.max(1, Math.min(maximum, Math.trunc(Number(text))))
+    const value = Math.max(1, Math.min(maximum, Math.trunc(Number(draft))))
     if (value === status.maxTerminals && !status.savedUnreadable) {
       setDraft(null)
       return

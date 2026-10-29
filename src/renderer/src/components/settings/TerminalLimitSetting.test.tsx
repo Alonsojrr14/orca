@@ -9,6 +9,7 @@ import type { SettingsHostScope } from './settings-host-scope'
 import type { TerminalLimitStatus } from '../../../../shared/terminal-limit-policy'
 import { useAppStore } from '@/store'
 import { i18n } from '@/i18n/i18n'
+import ptCatalog from '@/i18n/locales/pt.json'
 import { getTerminalAdvancedSearchEntries } from './terminal-advanced-platform-search'
 import { matchesSettingsSearch } from './settings-search'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
@@ -242,17 +243,25 @@ it('finds localized capacity in both the catalog and the rendered row filter', a
   search.query = 'aucun-résultat'
   await render()
   expect(container.querySelector('input')).toBeNull()
+  expect(ptCatalog.settings.terminal.limit.savedUnreadable).toContain('Não foi possível ler')
 })
 
-it.each([256, 384])(
-  'repairs an unreadable saved limit by committing %s, including the effective value',
-  async (maximum) => {
+it.each([
+  ['Enter', 256],
+  ['blur', 256],
+  ['Enter', 384]
+] as const)(
+  'repairs an unreadable saved limit with %s at %s, including the edited effective value',
+  async (event, maximum) => {
     vi.mocked(readTerminalLimit).mockResolvedValue({ ...base, savedUnreadable: true })
     await render()
     expect(input().disabled).toBe(false)
     expect(container.textContent).toContain('Using 256')
+    await type('')
     await type(String(maximum))
-    await enter()
+    await (event === 'Enter'
+      ? enter()
+      : act(async () => input().dispatchEvent(new FocusEvent('focusout', { bubbles: true }))))
     expect(saveTerminalLimit).toHaveBeenCalledWith(
       expect.anything(),
       { maxTerminals: maximum, daemonNonce: 'daemon-a' },
@@ -275,4 +284,34 @@ it('uses the selected-host transport and refuses unsupported capability without 
   vi.mocked(callHostRoute).mockResolvedValue({ capabilities: [] })
   await expect(transport.readTerminalLimit(route, signal)).resolves.toBeNull()
   expect(callHostRoute).toHaveBeenCalledExactlyOnceWith(route, 'status.get', undefined, { signal })
+})
+
+it('preserves unhealthy above-bound readback on untouched and canceled commits', async () => {
+  vi.mocked(readTerminalLimit).mockResolvedValue({
+    ...base,
+    maxTerminals: 384,
+    systemPtyLimit: 128,
+    source: 'saved',
+    savedUnreadable: true
+  })
+  await render()
+  const blur = async () =>
+    act(async () => input().dispatchEvent(new FocusEvent('focusout', { bubbles: true })))
+  await enter()
+  await blur()
+  expect(input().value).toBe('384')
+  expect(saveTerminalLimit).not.toHaveBeenCalled()
+  await type('64')
+  await act(async () =>
+    input().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+  )
+  await blur()
+  await enter()
+  expect(input().value).toBe('384')
+  expect(saveTerminalLimit).not.toHaveBeenCalled()
+  await type('64')
+  await blur()
+  await enter()
+  expect(input().value).toBe('64')
+  expect(saveTerminalLimit).toHaveBeenCalledTimes(1)
 })
