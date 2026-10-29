@@ -24,6 +24,7 @@ export async function pruneManagedOrcadVersions(args: {
   serverTarget: NodeRuntimeTarget
   activeVersion: string
   readiness: ServeReadiness
+  keepStagedWithinDays?: number
 }): Promise<void> {
   const liveDaemonVersion = provenLiveDaemonVersion(args.readiness)
   // Unknown daemon versions could still execute from any candidate tree; skip GC.
@@ -40,6 +41,9 @@ export async function pruneManagedOrcadVersions(args: {
       liveDaemonVersion,
       // Default and compat builds share one runtime store.
       nodeRuntimePins: nodeRuntimeStorePins(args.serverTarget),
+      ...(args.keepStagedWithinDays !== undefined
+        ? { keepStagedWithinDays: args.keepStagedWithinDays }
+        : {}),
       signal: args.slot.signal
     })
   } catch (error) {
@@ -78,6 +82,10 @@ export async function pruneSupersededOrcadCandidates(
     slot,
     serverTarget,
     activeVersion: candidateVersion,
-    readiness
+    readiness,
+    keepStagedWithinDays: STAGED_BUILD_KEEP_DAYS
   })
 }
+
+// Desktops on different releases share hosts; without a grace period each re-uploads what the other pruned.
+const STAGED_BUILD_KEEP_DAYS = 3
