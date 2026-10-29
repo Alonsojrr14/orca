@@ -1,4 +1,3 @@
-import type { StructuredAgentSessionSendControl } from '../../../src/shared/structured-agent-session-send-mutation'
 import { selectAgentSessionCurrentRequests } from '../../../src/shared/agent-session-current-requests'
 
 import { useCallback } from 'react'
@@ -10,7 +9,8 @@ import { pendingPromptsAllUnanswerableHere } from '../../../src/shared/agent-ses
 import {
   SkillRefLimitError,
   structuredAgentSessionSendBody,
-  type StructuredAgentSessionAttachment
+  type StructuredAgentSessionAttachment,
+  type StructuredAgentSessionSendControl
 } from '../../../src/shared/structured-agent-session-send-mutation'
 import type { AgentJournalSkillRef } from '../../../src/shared/agent-session-journal-types'
 import { MAX_SKILL_REFS } from '../../../src/shared/rpc-contract/structured-agent-session-message-params'
