@@ -6,7 +6,10 @@ import { useAppStore } from '@/store'
 import { makeFolderWorkspace, makeRepo, makeWorktree } from '../worktree-jump-palette-test-fixtures'
 import type { AiVaultSession } from '../../../../shared/ai-vault-types'
 import { searchHit } from '../../../../shared/ai-vault-search-test-fixture'
-import { STRUCTURED_AGENT_SESSION_RESUME_HISTORY_RUNTIME_CAPABILITY } from '../../../../shared/protocol-version'
+import {
+  STRUCTURED_AGENT_SESSION_RESUME_HISTORY_RUNTIME_CAPABILITY,
+  STRUCTURED_AGENT_SESSION_RESUME_LINKED_CWD_RUNTIME_CAPABILITY
+} from '../../../../shared/protocol-version'
 import { aiVaultSearchHitToSession } from './ai-vault-search-session'
 import type { AiVaultSessionVirtualList } from './AiVaultSessionVirtualList'
 import type { AiVaultResumeInChatEligibility } from './ai-vault-session-resume-in-chat'
@@ -31,7 +34,8 @@ const panelRows = vi.hoisted(
 vi.mock('@/runtime/local-runtime-capabilities', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   readLocalRuntimeCapabilitiesOrUnknown: () => [
-    STRUCTURED_AGENT_SESSION_RESUME_HISTORY_RUNTIME_CAPABILITY
+    STRUCTURED_AGENT_SESSION_RESUME_HISTORY_RUNTIME_CAPABILITY,
+    STRUCTURED_AGENT_SESSION_RESUME_LINKED_CWD_RUNTIME_CAPABILITY
   ]
 }))
 vi.mock('@/lib/agent-session-launch-plan', async (importOriginal) => ({

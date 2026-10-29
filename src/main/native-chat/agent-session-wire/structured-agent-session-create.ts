@@ -15,7 +15,7 @@ import type { StructuredAgentSessionAttachContext } from './structured-agent-ses
 import { reserveRequestFor, type AgentSessionAttachParams } from './structured-agent-session-attach'
 import { openStructuredAgentSessionConversationJournal } from './structured-agent-session-conversation-open'
 import {
-  prepareAdoptedTranscript,
+  prepareCreateTranscript,
   importAdoptedTranscript
 } from './structured-agent-session-adopted-import'
 import {
@@ -156,7 +156,7 @@ async function foundConversation(
   }
   const prepared = replayed
     ? { ok: true as const, items: null }
-    : await prepareAdoptedTranscript(params)
+    : await prepareCreateTranscript(context, params)
   if (!prepared.ok) {
     const { refusal } = prepared
     return {
