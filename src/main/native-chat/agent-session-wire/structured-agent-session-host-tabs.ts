@@ -83,17 +83,19 @@ export function createStructuredAgentSessionTabSurface(
   // Legacy profile tabs remain addressable before their index is seeded.
   const unopened = new Set<string>()
   return {
-    listSessionTabs: (): StructuredAgentSessionTab[] => [
-      ...listStructuredAgentSessionTabs(sessions),
-      ...[
-        ...new Set([...host.deps.store.getVisibleSessionTabIndex().sessionIds, ...unopened])
-      ].flatMap((sessionId) => {
-        const record = sessions.has(sessionId) ? null : host.deps.store.getConversation(sessionId)
-        return record
-          ? [{ sessionId, workspaceId: record.location.workspaceId, agent: record.provider }]
-          : []
-      })
-    ],
+    listSessionTabs: (): StructuredAgentSessionTab[] => {
+      const index = host.deps.store.getVisibleSessionTabIndex()
+      const listed = index.present ? index.sessionIds : [...unopened]
+      return [
+        ...listStructuredAgentSessionTabs(sessions),
+        ...listed.flatMap((sessionId) => {
+          const record = sessions.has(sessionId) ? null : host.deps.store.getConversation(sessionId)
+          return record
+            ? [{ sessionId, workspaceId: record.location.workspaceId, agent: record.provider }]
+            : []
+        })
+      ]
+    },
     seedSessionTabs: (ids?: readonly string[]): Promise<void> =>
       seedSavedStructuredSessionTabs(host.deps, ids, (record, markerAt) => {
         unopened.add(record.sessionId)

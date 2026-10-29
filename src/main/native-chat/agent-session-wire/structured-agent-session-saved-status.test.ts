@@ -1,6 +1,6 @@
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../../shared/agent-session-journal-types'
 import * as journalFactory from '../agent-session-journal/journal-store-factory'
-import { expect, it, vi } from 'vitest'
+import { afterEach, expect, it, vi } from 'vitest'
 import { agentSessionConversationView } from '../../../shared/agent-session-conversation-view'
 import { agentSessionRecordFixture } from '../../../shared/agent-session-record.test-fixture'
 import type {
@@ -31,6 +31,9 @@ import {
   QUEUED_BEFORE_QUIT
 } from './structured-agent-session-restart-interruption-test-harness'
 import { StructuredAgentSessionHost } from './structured-agent-session-host'
+import type { AgentSessionResumeMarker } from '../../../shared/agent-session-resume-marker'
+
+afterEach(() => vi.restoreAllMocks())
 
 it('maps saved turn edges and legacy markers without using rename time', () => {
   const record = agentSessionConversationView({ ...agentSessionRecordFixture(), updatedAt: 99_000 })
@@ -248,6 +251,18 @@ it('lists only indexed unopened chats, keeps legacy targets, and opens history o
     expect(host.listSessionTabs()).toEqual([])
     await host.setSessionTabVisibility(SESSION, true)
     expect(host.listSessionTabs()).toHaveLength(1)
+    const capsule = host.deps.recoveryCapsule
+    if (!capsule) {
+      throw new Error('the fixture needs a recovery capsule')
+    }
+    const markers = Promise.withResolvers<AgentSessionResumeMarker[]>()
+    vi.spyOn(capsule, 'list').mockReturnValueOnce(markers.promise)
+    const seeding = host.seedSessionTabs()
+    await host.setSessionTabVisibility(SESSION, false)
+    markers.resolve([])
+    await seeding
+    expect(host.listSessionTabs()).toEqual([])
+    await host.setSessionTabVisibility(SESSION, true)
     // An older build's chat backfills only when it is actually opened.
     await store.transitionHandoff(SESSION, ({ lastTurn: _turn, ...record }) => record)
     await host.revealSession(SESSION)
