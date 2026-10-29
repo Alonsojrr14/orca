@@ -48,7 +48,7 @@ const mocks: DirectLaunchMocks = vi.hoisted(() => ({
   openModalFallback: vi.fn(),
   resolvePrBase: vi.fn(),
   getConnectionId: vi.fn(),
-  // SAFETY: each test supplies the store slices its production launch reads.
+  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: each test supplies the store slices its production launch reads.
   store: {} as Record<string, unknown> & DirectLaunchStoreActions
 }))
 
