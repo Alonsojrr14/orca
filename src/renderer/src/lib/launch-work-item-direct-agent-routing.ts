@@ -1,3 +1,4 @@
+import { readAgentLaunchPreferencesForWorkspace } from '@/components/settings/use-host-agent-launch-preferences'
 import type { AgentLaunchPreferences } from '@/components/settings/use-host-agent-launch-preferences'
 import { agentLaunchCommandErrorMessage } from '@/lib/launch-work-item-direct-messages'
 import { toast } from 'sonner'
@@ -67,35 +68,32 @@ export async function resolveDirectWorkItemAgent(args: {
   agentOverride?: TuiAgent
   worktreeId: string
   repoHost: RepoHostFields
-  launchConnectionId: string | null
-  repoConnectionId: string | null
-  detectedAgentsPromise: Promise<string[]> | null
   latestStore: AppState
-}): Promise<{ agent: TuiAgent | null; unavailable: boolean }> {
+}): Promise<{ agent: TuiAgent | null; unavailable: boolean; store: AppState }> {
   // Why: the new workspace's own host answers; a paired server's project must not probe this client.
   const workspace = worktreeLaunchWorkspace(args.worktreeId)
   const ids = (
-    args.agentOverride === undefined &&
-    args.detectedAgentsPromise &&
-    args.launchConnectionId === args.repoConnectionId
-      ? await args.detectedAgentsPromise
-      : await ensureDetectedAgentsForNewWorktree(args.latestStore, args.worktreeId, args.repoHost)
+    await ensureDetectedAgentsForNewWorktree(args.latestStore, args.worktreeId, args.repoHost)
   ).filter(isTuiAgent)
+  const current = useAppStore.getState()
   const wanted =
     args.agentOverride ??
-    (args.agentLaunchPreferences ?? useAppStore.getState().settings)?.defaultTuiAgent
+    (args.agentLaunchPreferences ?? readAgentLaunchPreferencesForWorkspace(current, workspace))
+      .defaultTuiAgent
   // Chat facts can only change the pick when the wanted agent's CLI is not detected.
   const choices =
     wanted && wanted !== 'blank' && !ids.includes(wanted)
       ? await acquireAgentLaunchChoices(workspace, async () => ids)
       : null
   const store = useAppStore.getState()
-  const preferences = args.agentLaunchPreferences ?? store.settings
+  const preferences =
+    args.agentLaunchPreferences ?? readAgentLaunchPreferencesForWorkspace(store, workspace)
   // A new workspace may not be in the store yet; its own detection answers then.
   const detected = [...(choices?.detected ?? ids)]
   // A chosen agent may open as a chat without its CLI; the automatic pick stays on detected ones.
   if (args.agentOverride !== undefined) {
     return {
+      store,
       agent: args.agentOverride,
       unavailable:
         !isTuiAgentEnabled(args.agentOverride, preferences?.disabledTuiAgents) ||
@@ -104,6 +102,7 @@ export async function resolveDirectWorkItemAgent(args: {
     }
   }
   return {
+    store,
     agent: resolveDefaultAgentForWorkspace({
       defaultTuiAgent: preferences?.defaultTuiAgent,
       detectedAgentIds: detected,
