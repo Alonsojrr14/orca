@@ -4,9 +4,8 @@ import {
 } from './runtime-linear-command-dependencies'
 import {
   LinearAgentAccessError,
-  classifyLinearError,
   linearError,
-  linearMessage
+  toLinearAccessError
 } from '../linear/issue-context/errors'
 import { runLinearWriteAction } from './runtime-linear-write-action'
 import type { LinearWriteFailure } from '../linear/linear-issue-write-support'
@@ -76,6 +75,6 @@ export class RuntimeLinearCommentLookupCommands extends RuntimeLinearWriteResult
         nextSteps: ['Reconnect Linear from Orca settings.']
       })
     }
-    return linearError(classifyLinearError(error), linearMessage(error))
+    return toLinearAccessError(error)
   }
 }

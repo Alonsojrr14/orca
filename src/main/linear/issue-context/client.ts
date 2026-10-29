@@ -14,7 +14,7 @@ import {
   type LinearClientForWorkspace
 } from '../client'
 import { ISSUE_QUERY, SEARCH_QUERY, mapIssue, pickSearchIssue, type RawIssueResponse } from './raw'
-import { LinearAgentAccessError, classifyLinearError, linearError, linearMessage } from './errors'
+import { LinearAgentAccessError, linearError, toLinearAccessError } from './errors'
 import { getFanoutClientEntries, workspaceFailure, type WorkspaceReadFailure } from './fanout'
 import { ambiguousWorkspace, resolveWorkspaceSelector, unknownWorkspace } from './workspaces'
 
@@ -134,7 +134,7 @@ function getExplicitClientEntries(
     if (error instanceof LinearAgentAccessError) {
       throw error
     }
-    throw linearError(classifyLinearError(error), linearMessage(error))
+    throw toLinearAccessError(error)
   }
 }
 
@@ -182,7 +182,7 @@ export async function withLinearRead<T>(
         nextSteps: ['Reconnect Linear from Orca settings.']
       })
     }
-    throw linearError(classifyLinearError(error), linearMessage(error))
+    throw toLinearAccessError(error)
   } finally {
     release()
   }

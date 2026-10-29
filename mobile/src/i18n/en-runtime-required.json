@@ -1,0 +1,129 @@
+{
+  "agentHistory": {
+    "panel": {
+      "skipped_one": "{{count}} transcript skipped",
+      "skipped_other": "{{count}} transcripts skipped"
+    },
+    "sessionHistoryList": {
+      "messages_one": "{{count}} message",
+      "messages_other": "{{count}} messages"
+    }
+  },
+  "app": {
+    "terminalSettings": {
+      "restoreAfterMinutes_one": "After {{count}} minute",
+      "restoreAfterMinutes_other": "After {{count}} minutes",
+      "restoreAfterSeconds_one": "After {{count}}s",
+      "restoreAfterSeconds_other": "After {{count}}s"
+    }
+  },
+  "components": {
+    "codexResetCredit": {
+      "available_one": "{{count}} reset available",
+      "available_other": "{{count}} resets available"
+    },
+    "diffReviewDrawers": {
+      "fileSummary_one": "{{fileCount}} file reviewed, {{count}} note",
+      "fileSummary_other": "{{fileCount}} file reviewed, {{count}} notes",
+      "filesSummary_one": "{{fileCount}} files reviewed, {{count}} note",
+      "filesSummary_other": "{{fileCount}} files reviewed, {{count}} notes",
+      "stageableFiles_one": "{{count}} reviewed unstaged files can be staged",
+      "stageableFiles_other": "{{count}} reviewed unstaged files can be staged",
+      "unsentNotes_one": "{{count}} unsent notes",
+      "unsentNotes_other": "{{count}} unsent notes"
+    },
+    "diffReviewFileSummary": {
+      "notes_one": "{{count}} note",
+      "notes_other": "{{count}} notes"
+    },
+    "diffReviewHeader": {
+      "unsentNotes_one": "{{count}} unsent note",
+      "unsentNotes_other": "{{count}} unsent notes"
+    },
+    "worktreeListRow": {
+      "children_one": "{{count}} child",
+      "children_other": "{{count}} children"
+    }
+  },
+  "dictation": {
+    "setup": {
+      "alreadyActive": "Dictation is already in use on the computer or another phone.",
+      "repairRequired": "Re-pair this phone with the computer to use dictation.",
+      "sessionLost": "Dictation lost its connection to the computer. Try again."
+    }
+  },
+  "hostScreen": {
+    "hostScreenHeader": {
+      "activeFilters_one": "Workspace options ({{count}} filter active)",
+      "activeFilters_other": "Workspace options ({{count}} filters active)"
+    }
+  },
+  "pullRequest": {
+    "checksSection": {
+      "failingChecks_one": "{{count}} failing check",
+      "failingChecks_other": "{{count}} failing checks"
+    },
+    "commentCard": {
+      "daysAgo_one": "{{count}}d ago",
+      "daysAgo_other": "{{count}}d ago",
+      "hoursAgo_one": "{{count}}h ago",
+      "hoursAgo_other": "{{count}}h ago",
+      "minutesAgo_one": "{{count}}m ago",
+      "minutesAgo_other": "{{count}}m ago",
+      "monthsAgo_one": "{{count}}mo ago",
+      "monthsAgo_other": "{{count}}mo ago",
+      "yearsAgo_one": "{{count}}y ago",
+      "yearsAgo_other": "{{count}}y ago"
+    },
+    "commentsSection": {
+      "resolvedComment_one": "Resolved comment by {{author}}",
+      "resolvedComment_other": "Resolved comment by {{author}} ({{count}})",
+      "resolvedThread_one": "Resolved thread by {{author}}",
+      "resolvedThread_other": "Resolved thread by {{author}} ({{count}})"
+    },
+    "conflictingFilesSection": {
+      "commitsBehind_one": "{{count}} commit behind (base commit: {{baseCommit}})",
+      "commitsBehind_other": "{{count}} commits behind (base commit: {{baseCommit}})"
+    },
+    "prActionsState": {
+      "mergeThrough_one": "Merge through #{{number}} · {{count}} PR",
+      "mergeThrough_other": "Merge through #{{number}} · {{count}} PRs",
+      "queueThrough_one": "Queue through #{{number}} · {{count}} PR",
+      "queueThrough_other": "Queue through #{{number}} · {{count}} PRs"
+    },
+    "prChecksPresentation": {
+      "failing_one": "{{count}} failing",
+      "failing_other": "{{count}} failing",
+      "neutral_one": "{{count}} neutral",
+      "neutral_other": "{{count}} neutral",
+      "passed_one": "{{count}} passed",
+      "passed_other": "{{count}} passed",
+      "pending_one": "{{count}} pending",
+      "pending_other": "{{count}} pending"
+    }
+  },
+  "settings": {
+    "appUpdateSettingsRows": {
+      "lastCheckedDays_one": "Last checked {{count}}d ago",
+      "lastCheckedDays_other": "Last checked {{count}}d ago",
+      "lastCheckedHours_one": "Last checked {{count}}h ago",
+      "lastCheckedHours_other": "Last checked {{count}}h ago",
+      "lastCheckedMinutes_one": "Last checked {{count}}m ago",
+      "lastCheckedMinutes_other": "Last checked {{count}}m ago"
+    },
+    "pendingCredentialCleanupCard": {
+      "cleanupUnconfirmed_one": "Couldn't confirm cleanup for {{count}} credential on this device.",
+      "cleanupUnconfirmed_other": "Couldn't confirm cleanup for {{count}} credentials on this device."
+    }
+  },
+  "worktree": {
+    "agentRowDisplay": {
+      "days_one": "{{count}}d",
+      "days_other": "{{count}}d",
+      "hours_one": "{{count}}h",
+      "hours_other": "{{count}}h",
+      "minutes_one": "{{count}}m",
+      "minutes_other": "{{count}}m"
+    }
+  }
+}

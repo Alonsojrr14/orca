@@ -1,0 +1,1496 @@
+{
+  "settings": {
+    "appearance": {
+      "theme": {
+        "system": "System",
+        "light": "Light",
+        "dark": "Dark",
+        "heading": "THEME",
+        "description": "System follows this device’s light or dark setting."
+      },
+      "title": "Appearance",
+      "language": {
+        "systemWithCurrent": "System ({{language}})",
+        "heading": "LANGUAGE",
+        "description": "System follows this device’s language. Permission prompts always use the device language."
+      }
+    },
+    "aboutScreen": {
+      "title": "About",
+      "tagline": "Open-source agent IDE for 100x builders",
+      "website": "Orca website",
+      "sourceCode": "Orca source code",
+      "socialProfile": "Orca on X",
+      "openLinkFailed": "Could not open the link. Try again."
+    },
+    "appUpdateSettingsRows": {
+      "checking": "Checking…",
+      "upToDate": "Up to date",
+      "checkFailed": "Couldn't check",
+      "neverChecked": "Never",
+      "lastCheckedJustNow": "Last checked just now",
+      "lastCheckedMinutes_one": "Last checked {{count}}m ago",
+      "lastCheckedMinutes_other": "Last checked {{count}}m ago",
+      "lastCheckedHours_one": "Last checked {{count}}h ago",
+      "lastCheckedHours_other": "Last checked {{count}}h ago",
+      "lastCheckedDays_one": "Last checked {{count}}d ago",
+      "lastCheckedDays_other": "Last checked {{count}}d ago",
+      "updateToVersion": "Update to Orca {{version}}",
+      "update": "Update",
+      "installedVersion": "Version {{version}}",
+      "checkUpdatesStatus": "Check for updates, {{status}}",
+      "checkUpdates": "Check for updates"
+    },
+    "browserSettingsScreen": {
+      "desktopBrowser": "Orca browser on desktop",
+      "desktopBrowserDescription": "Open in the streamed browser from your paired desktop.",
+      "phoneBrowser": "Phone browser",
+      "phoneBrowserDescription": "Open in Safari, Chrome, or another browser on this phone.",
+      "title": "Browser",
+      "linksHeading": "LINKS",
+      "linksDescription": "Choose where HTTP(S) links tapped in terminal output open.",
+      "loadFailed": "Could not load browser preferences. Try again.",
+      "saveFailed": "Could not save browser preferences. Try again.",
+      "openTerminalLinks": "Open terminal links"
+    },
+    "menuItems": {
+      "appearance": "Appearance",
+      "terminal": "Terminal",
+      "chatUi": "Chat UI",
+      "browser": "Browser",
+      "voice": "Voice",
+      "notifications": "Notifications",
+      "troubleshooting": "Troubleshooting",
+      "about": "About"
+    },
+    "nativeChatSettingsScreen": {
+      "title": "Chat UI",
+      "defaultViewHeading": "DEFAULT VIEW",
+      "defaultViewDescription": "Choose how supported agent sessions (Claude, Codex, and other chat-capable agents) open on this device. Terminal shows the raw CLI; Chat UI shows a chat interface like the desktop app. You can still switch any individual session from its long-press menu.",
+      "openInChatUi": "Open sessions in Chat UI",
+      "on": "On",
+      "off": "Off"
+    },
+    "nativeNotificationDeliverySettings": {
+      "loadFailed": "Could not load delivery settings. Reopen this screen to retry.",
+      "saveFailed": "Could not save delivery settings. Try again.",
+      "updateDesktopHint": "Pair an updated desktop to receive notifications on this phone."
+    },
+    "notificationDisplayTest": {
+      "loadFailed": "Could not load paired desktops.",
+      "pairDesktop": "Pair a desktop and try again.",
+      "connectDesktop": "Connect a desktop and try again.",
+      "updateDesktop": "Update your desktop to run this test.",
+      "desktopUnreachable": "Could not reach the desktop. Try again.",
+      "accepted": "Accepted by Orca’s push service. Check for the notification.",
+      "reconnectPhone": "Reconnect to register this phone for notifications.",
+      "rateLimited": "Too many notifications. Try again later.",
+      "pushServiceFailed": "Could not send through Orca’s push service. Try again.",
+      "sendFailed": "Could not send push test.",
+      "troubleReceivingAlerts": "Having trouble receiving alerts?",
+      "description": "Send a test through Orca’s push service.",
+      "sending": "Sending…",
+      "sendButton": "Send test notification",
+      "troubleshooting": "Troubleshooting"
+    },
+    "notificationSettingsScreen": {
+      "loadFailed": "Could not load notification settings. Try again.",
+      "saveFailed": "Could not save notification settings. Try again.",
+      "notificationsBlocked": "Notifications are disabled in system settings.",
+      "description": "Get notified on this device when an agent needs your input or finishes a task.",
+      "title": "Notifications",
+      "enableNotifications": "Enable notifications",
+      "openSettingsFailed": "Could not open system settings. Try again.",
+      "openSettings": "Open Settings"
+    },
+    "pendingCredentialCleanupCard": {
+      "title": "Pairing credential cleanup",
+      "retryFailed": "Cleanup still couldn't be confirmed. Try again later.",
+      "cleanupUnconfirmed_one": "Couldn't confirm cleanup for {{count}} credential on this device.",
+      "cleanupUnconfirmed_other": "Couldn't confirm cleanup for {{count}} credentials on this device.",
+      "statusCheckFailed": "Couldn't check cleanup status on this device. Retry to be safe.",
+      "retryCleanup": "Retry clearing pairing credentials"
+    },
+    "menuScreen": {
+      "privacyPolicy": "Privacy Policy",
+      "support": "Support"
+    },
+    "uiLanguageSettingsSection": {
+      "pseudoLanguage": "Pseudo (en-XA)"
+    },
+    "voiceSettingsScreen": {
+      "toggleMode": "Toggle",
+      "holdMode": "Hold",
+      "loadFailed": "Failed to load voice settings",
+      "updateFailed": "Could not update",
+      "selectModelFailed": "Could not select model",
+      "downloadFailed": "Download failed",
+      "deleteFailed": "Delete failed",
+      "noneSelected": "None selected",
+      "title": "Voice",
+      "connectDesktop": "Connect to a desktop to manage voice settings.",
+      "loadFailedMessage": "Failed to load voice settings.",
+      "dictationHeading": "DICTATION",
+      "enableDictation": "Enable Voice Dictation",
+      "dictationDescription": "Dictate text into any focused pane on your desktop.",
+      "dictationMode": "Dictation Mode",
+      "dictationModeDescription": "Toggle: press once to start, again to stop. Hold: dictate while held.",
+      "speechModelHeading": "SPEECH MODEL",
+      "speechModel": "Speech Model"
+    }
+  },
+  "common": {
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "ok": "OK",
+    "retry": "Retry",
+    "copied": "Copied",
+    "remove": "Remove",
+    "settings": "Settings",
+    "delete": "Delete",
+    "unknown": "Unknown",
+    "confirm": "Confirm",
+    "copy": "Copy",
+    "done": "Done",
+    "close": "Close",
+    "edit": "Edit"
+  },
+  "host": {
+    "edit": {
+      "missingHost": "Missing host.",
+      "hostRemoved": "This host was removed from this phone.",
+      "loadFailed": "Failed to load host.",
+      "saveFailed": "Failed to save host.",
+      "title": "Edit host",
+      "saveHost": "Save host",
+      "goBack": "Go back",
+      "help": "Change the display name or connection address. Leave the name empty to use the name the desktop reports. Address edits only switch where this phone connects — they do not re-pair. Use this when the same desktop is reachable at a different IP (for example home LAN vs Tailscale).",
+      "name": "Name",
+      "hostNamePlaceholder": "Host name",
+      "address": "Address",
+      "addressHint": "Accepts IP, host:port, or ws:// / wss://. A wss:// URL without a port uses 443. Bare addresses keep the current port (or 6768).",
+      "connectionPreview": "Connects to {{endpoint}}"
+    }
+  },
+  "app": {
+    "mobileOnboarding": {
+      "saveChoiceFailed": "Your choice could not be saved. Try again.",
+      "notificationSettingsFailed": "Notification settings could not be updated. Try again.",
+      "progress": "Onboarding progress",
+      "stepProgress": "Step {{step}} of {{total}}"
+    },
+    "notifications": {
+      "description": "Get agent alerts even when the app is closed. Delivered through Orca’s push service and Apple or Google."
+    },
+    "pairConfirm": {
+      "connectTimedOut": "Couldn't connect within {{seconds}}s — see log below for where it stalled",
+      "pairingFailed": "Pairing failed: {{error}}",
+      "title": "Pair with this desktop?",
+      "description": "You opened a pairing link from your desktop. Confirm to add it to your hosts.",
+      "pairButton": "Pair",
+      "connecting": "Connecting…",
+      "pairingLog": "Pairing log",
+      "backToHome": "Back to home"
+    },
+    "pairScan": {
+      "invalidQrCode": "Not a valid Orca QR code",
+      "invalidPairingCode": "Not a valid pairing code — copy it from your computer and paste again",
+      "connectTimedOut": "Couldn't connect within {{seconds}}s — see log below for where it stalled",
+      "pairingFailed": "Pairing failed: {{error}}",
+      "title": "Pair with desktop",
+      "cameraDisabledTitle": "Camera Access Disabled",
+      "cameraPermissionDescription": "Scan the QR code from Orca on your desktop, or paste the pairing code instead.",
+      "cameraDisabledDescription": "Enable camera access in Settings, or paste the pairing code instead.",
+      "openSettings": "Open Settings",
+      "pasteInstead": "Paste code instead",
+      "pasteCodeTitle": "Paste pairing code",
+      "pasteCodeMessage": "Copy the code shown under the QR on your computer.",
+      "pasteCodePlaceholder": "orca://pair?code=... or paste the code",
+      "openDesktopStep": "Open Orca on your computer",
+      "openMobileSettingsStep": "Go to Settings → Mobile",
+      "scanCodeStep": "Scan the QR code",
+      "pastePairingCode": "Or paste pairing code",
+      "connecting": "Connecting…",
+      "pairingLog": "Pairing log",
+      "tryAgain": "Try Again"
+    },
+    "pair": {
+      "missingCode": "Missing pairing code",
+      "backToHome": "Back to home"
+    },
+    "terminalSettings": {
+      "smallestText": "Smallest (50%)",
+      "smallerText": "Smaller (75%)",
+      "defaultText": "Default (100%)",
+      "largeText": "Large (125%)",
+      "largerText": "Larger (150%)",
+      "largestText": "Largest (200%)",
+      "restoreAfterMinutes_one": "After {{count}} minute",
+      "restoreAfterMinutes_other": "After {{count}} minutes",
+      "keepPhoneSize": "Keep at phone size (default)",
+      "restoreAfterSeconds_one": "After {{count}}s",
+      "restoreAfterSeconds_other": "After {{count}}s",
+      "title": "Terminal",
+      "leaveAppHeading": "WHEN YOU LEAVE THE APP",
+      "leaveAppDescription": "While you're using a terminal on your phone, Orca shrinks it to fit your screen. When you close the app or switch away, this controls whether it stays at phone size (so interactive CLI tools don't reflow) or resizes back to your desktop. You can always use Restore on the desktop banner to resize manually.",
+      "noPairedDesktops": "No paired desktops yet. Pair one to control terminal behavior.",
+      "textSizeHeading": "TEXT SIZE",
+      "textSizeDescription": "Scale the terminal text. Smaller sizes fit more columns with side margins; larger sizes show fewer columns — drag sideways to pan. You can also pinch to zoom in the terminal itself, which updates this setting. Per-device display only; doesn't change the desktop terminal.",
+      "textSize": "Text size",
+      "keyboardInputHeading": "KEYBOARD INPUT",
+      "keyboardInputDescription": "Autocomplete, autocorrect, and spelling suggestions apply only to buffered command input. Use the double-chevron button above the keyboard to switch from live input, then edit your command before tapping Send. Off by default to avoid rewriting commands, flags, or paths.",
+      "autocomplete": "Autocomplete & autocorrect",
+      "autocompleteOn": "On",
+      "autocompleteOff": "Off",
+      "restoreHost": "Restore {{name}}",
+      "textSizePickerTitle": "Terminal text size"
+    }
+  },
+  "accounts": {
+    "screen": {
+      "invalidSnapshot": "Invalid accounts snapshot from host",
+      "hostNotFound": "Host not found",
+      "switchFailed": "Could not switch account",
+      "default": "System default",
+      "agentLogin": "Use the agent's own login",
+      "sessionWindow": "5h",
+      "weeklyWindow": "7d",
+      "title": "Accounts",
+      "refreshAccounts": "Refresh accounts",
+      "connectingTo": "Connecting to {{name}}…",
+      "connecting": "Connecting to host…",
+      "loadingAccounts": "Loading accounts…",
+      "manageAccountsHint": "Add or re-authenticate accounts from desktop Settings → Accounts.",
+      "useReset": "Use reset"
+    }
+  },
+  "agentHistory": {
+    "sessionHistoryList": {
+      "messages_one": "{{count}} message",
+      "messages_other": "{{count}} messages",
+      "currentWorktree": "current worktree",
+      "resumeSession": "Resume agent session",
+      "userRole": "user",
+      "assistantRole": "assistant"
+    },
+    "panel": {
+      "workspace": "Workspace",
+      "project": "Project",
+      "all": "All",
+      "waitingForHost": "Waiting for host...",
+      "missingResumeId": "This session is missing a resume id.",
+      "unknownHostPlatform": "Unable to determine host platform.",
+      "sessionQueued": "Agent session queued.",
+      "resumeFailed": "Failed to resume session.",
+      "title": "Agent Session History",
+      "refreshSessions": "Refresh agent sessions",
+      "unavailable": "Agent Session History Unavailable",
+      "updateHost": "Update Orca on this host to browse agent session history.",
+      "loadFailed": "Unable to Load",
+      "placeholder": "Search sessions, repo:, path:",
+      "skipped_one": "{{count}} transcript skipped",
+      "skipped_other": "{{count}} transcripts skipped",
+      "noSessions": "No agent sessions",
+      "noSearchResults": "No sessions match your search.",
+      "emptyScope": "No past agent sessions in this scope."
+    },
+    "resumeTarget": {
+      "runtimeUnavailable": "Resume from history is not available in runtime-hosted workspaces.",
+      "differentHost": "This session belongs to a different host. Open a workspace on the same host to resume it.",
+      "openWorkspace": "Open a workspace before resuming a session."
+    },
+    "sessionCard": {
+      "untitledSession": "Untitled session"
+    },
+    "useAgentHistoryState": {
+      "waitingForHost": "Waiting for host…",
+      "hostUnreachable": "Unable to reach host",
+      "loadFailed": "Unable to load agent sessions"
+    },
+    "worktreeNavigationActions": {
+      "sourceControl": "Source Control",
+      "agentSessionHistory": "Agent Session History"
+    }
+  },
+  "diagnostics": {
+    "connectionDiagnosticsView": {
+      "connecting": "connecting",
+      "handshaking": "handshaking",
+      "connected": "connected",
+      "disconnected": "disconnected",
+      "reconnecting": "reconnecting",
+      "authFailed": "auth-failed",
+      "title": "Network diagnostics",
+      "stateWithAttempt": "{{state}} · attempt {{attempts}}",
+      "copyReport": "Copy report",
+      "diagnosisHeading": "What this suggests",
+      "privacyHint": "Sends a size-limited redacted report including host name, endpoint, versions, connection state, and events—never terminal contents or credentials.",
+      "sending": "Sending…",
+      "sent": "Diagnostics sent",
+      "retrySending": "Retry sending",
+      "sendDiagnostics": "Send diagnostics to Orca",
+      "noEvents": "No connection events yet. Events appear as the app dials this host.",
+      "noHosts": "No paired hosts."
+    },
+    "mobileWebBundleProbeRow": {
+      "fetchBundle": "Fetch mobile web bundle",
+      "connecting": "Connecting…",
+      "fetching": "Fetching bundle…",
+      "bundle": "Bundle",
+      "host": "Host",
+      "build": "Build",
+      "assets": "Assets",
+      "bytes": "Bytes",
+      "elapsed": "Elapsed",
+      "elapsedMilliseconds": "{{elapsedMs}} ms",
+      "unknownHost": "unknown host"
+    },
+    "mobileWebShellUpdateFailureRow": {
+      "title": "Workspace updates"
+    },
+    "troubleshootCommonIssues": {
+      "notificationsTitle": "Push Notifications",
+      "allowNotifications": "Check that system settings allow Orca notifications and that Focus or Do Not Disturb is off.",
+      "notificationNetwork": "Try cellular or another Wi-Fi network. If alerts arrive after switching, your network may be delaying delivery.",
+      "wifiTitle": "Different WiFi Networks",
+      "sameNetwork": "Both devices must be on the same LAN (unless connected through Tailscale).",
+      "sameSubnet": "Ethernet and WiFi must share the same subnet.",
+      "reconnectWifi": "Try reconnecting WiFi on both devices.",
+      "firewallTitle": "Firewall Blocking Port 6768",
+      "macosFirewall": "macOS: System Settings → Network → Firewall — allow Orca.",
+      "windowsFirewall": "Windows: Defender Firewall → Allow app — enable Orca for Private networks.",
+      "restrictedNetwork": "Corporate/school networks may block P2P — try a personal hotspot.",
+      "desktopTitle": "Desktop App Not Running",
+      "openDesktop": "Orca must be open on your desktop to accept connections.",
+      "restartDesktop": "Try restarting Orca — the companion server starts on launch.",
+      "pairAfterUpdate": "After an update, you may need to re-pair via QR code.",
+      "timeoutTitle": "Connection Timeout",
+      "wifiSignal": "Check WiFi signal strength on your phone.",
+      "retryHost": "Go back to the host list and tap your host to retry.",
+      "restartBothApps": "Restart both apps if timeouts persist.",
+      "tailscaleTitle": "Tailscale Host Unreachable",
+      "keepTailscaleOn": "Host addresses like 100.x.x.x or *.ts.net connect through Tailscale — keep it ON.",
+      "restartTailscale": "iOS/Android can silently wedge the tunnel: toggle Tailscale off and back on in the Tailscale app.",
+      "checkTailnet": "Check the desktop is awake and shows as connected in your tailnet.",
+      "updateTailscale": "Update the Tailscale app — recent releases fix reconnect bugs.",
+      "vpnTitle": "Other VPN Interference",
+      "vpnRouting": "Non-Tailscale VPNs can route local traffic through a remote server.",
+      "disableVpn": "Disable that VPN or enable split tunneling / \"Allow LAN\"."
+    },
+    "troubleshootView": {
+      "title": "Troubleshooting",
+      "running": "Running…",
+      "runAgain": "Run again",
+      "runDiagnostics": "Run diagnostics",
+      "viewNetworkDiagnostics": "View network diagnostics",
+      "commonIssues": "Common issues"
+    },
+    "useTroubleshootDiagnostics": {
+      "pairedHosts": "Paired hosts",
+      "pairedCount": "{{count}} paired",
+      "noPairedHosts": "None — scan a QR to pair",
+      "hostDataFailed": "Could not read host data",
+      "internet": "Internet",
+      "connected": "Connected",
+      "unexpectedResponse": "Unexpected response",
+      "noConnection": "No connection",
+      "reachable": "Reachable at {{endpoint}}",
+      "hosts": "Hosts",
+      "hostTestFailed": "Could not test",
+      "platform": "Platform"
+    },
+    "webShellUpdateFailureCopy": {
+      "failedJustNow": "Last update from {{hostName}} failed just now: {{reason}}{{offered}}. {{outcome}}",
+      "failedAgo": "Last update from {{hostName}} failed {{time}} ago: {{reason}}{{offered}}. {{outcome}}"
+    }
+  },
+  "dictation": {
+    "setup": {
+      "serverUpdateRequired": "Update Orca on this server to use voice dictation.",
+      "alreadyActive": "Dictation is already in use on the computer or another phone.",
+      "repairRequired": "Re-pair this phone with the computer to use dictation.",
+      "sessionLost": "Dictation lost its connection to the computer. Try again.",
+      "desktopUpdateRequired": "Update the paired desktop Orca app to use mobile voice settings.",
+      "loadFailed": "Failed to load dictation models",
+      "downloadFailed": "Failed to start download",
+      "deleteFailed": "Failed to delete model",
+      "updateFailed": "Failed to update dictation settings",
+      "cloudModelNeedsKey": "Needs an OpenAI key"
+    }
+  },
+  "home": {
+    "appUpdateCard": {
+      "title": "Orca {{version}} is available",
+      "updateAccessibilityLabel": "Orca {{version}} is available, tap to update",
+      "updateHint": "Tap to update",
+      "dismissAccessibilityLabel": "Dismiss Orca {{version}} update"
+    },
+    "accountUsageCards": {
+      "sectionHeading": "Account usage",
+      "systemDefault": "System default",
+      "sessionWindow": "5h",
+      "weeklyWindow": "7d"
+    },
+    "emptyState": {
+      "openDesktopTitle": "Open Orca desktop",
+      "openDesktopDescription": "Go to Settings → Mobile and generate a pairing QR code.",
+      "scanCodeTitle": "Scan the code",
+      "scanCodeDescription": "Tap the button above to open the scanner. Point at the QR code on your screen.",
+      "connectedTitle": "You're connected",
+      "connectedDescription": "Your desktop will appear here. Everything is encrypted end-to-end.",
+      "title": "Connect your desktop",
+      "description": "Pair with Orca on your computer to check on your agents, jump into any terminal, and drive work from your phone.",
+      "pairDesktop": "Pair Desktop",
+      "stepsHeading": "How it works"
+    },
+    "listFooter": {
+      "resumeHeading": "Resume",
+      "tasksHeading": "Tasks",
+      "hostPickerTitle": "Open Tasks On"
+    },
+    "listHeader": {
+      "daysHours": "{{days}}d {{hours}}h",
+      "hoursMinutes": "{{hours}}h {{minutes}}m",
+      "minutes": "{{minutes}}m",
+      "title": "Welcome back",
+      "agentsSpawned": "Agents spawned",
+      "agentTime": "Agent time",
+      "prsCreated": "PRs created",
+      "desktopsHeading": "Desktops"
+    },
+    "screen": {
+      "pairingCheckFailed": "Could not check pairing",
+      "tryAgain": "Please try again.",
+      "removeHostFailed": "Could not remove host",
+      "removeHostTitle": "Remove Host",
+      "removeHostMessage": "Remove \"{{name}}\"? You can re-pair later."
+    },
+    "tasksCard": {
+      "title": "Tasks",
+      "noSources": "No task sources connected",
+      "openProviderTasks": "Open {{provider}} tasks"
+    }
+  },
+  "hooks": {
+    "dictationDesktopStart": {
+      "recordingFailed": "Failed to start microphone recording"
+    },
+    "useMobileDictation": {
+      "microphonePermissionDenied": "Microphone permission denied",
+      "microphoneInitFailed": "Failed to initialize microphone",
+      "noSpeech": "No speech detected.",
+      "microphoneInterrupted": "Voice dictation stopped because the microphone was interrupted. Try again.",
+      "inputClosed": "Voice dictation stopped because this session is no longer accepting input. Try again."
+    }
+  },
+  "hostScreen": {
+    "hostListActionSheetActions": {
+      "reconnect": "Reconnect",
+      "connect": "Connect",
+      "disconnect": "Disconnect",
+      "networkDiagnostics": "Network diagnostics",
+      "editHost": "Edit host"
+    },
+    "hostPendingCreationRow": {
+      "creatingWorkspace": "Creating workspace…"
+    },
+    "hostRailActions": {
+      "accounts": "Accounts",
+      "tasks": "Tasks",
+      "floatingWorkspace": "Floating Workspace",
+      "newWorkspace": "New workspace",
+      "closeSearch": "Close search",
+      "searchWorkspaces": "Search workspaces"
+    },
+    "hostScreenHeader": {
+      "workspaceOptions": "Workspace options",
+      "activeFilters_one": "Workspace options ({{count}} filter active)",
+      "activeFilters_other": "Workspace options ({{count}} filters active)",
+      "backToHosts": "Back to hosts",
+      "reconnect": "Reconnect",
+      "floatingWorkspace": "Floating Workspace",
+      "hideSidebar": "Hide sidebar",
+      "accounts": "Accounts",
+      "tasks": "Tasks",
+      "closeSearch": "Close search",
+      "searchWorkspaces": "Search workspaces"
+    },
+    "hostScreenOverlays": {
+      "deleteWorktree": "Delete Worktree",
+      "deleteConfirmMessage": "Delete \"{{name}}\" ({{branch}})?",
+      "sleep": "Sleep",
+      "unpin": "Unpin",
+      "pin": "Pin",
+      "primaryWorktreeDeleteHint": "Primary worktree — can't be deleted. Remove the project instead.",
+      "removeHost": "Remove Host",
+      "removeHostMessage": "Remove \"{{name}}\"? You can re-pair later."
+    },
+    "hostWorkspaceList": {
+      "searchPlaceholder": "Search workspaces…",
+      "searchWorkspaces": "Search workspaces"
+    },
+    "workspaceDetailsSheet": {
+      "merged": "Merged",
+      "closed": "Closed",
+      "draft": "Draft",
+      "checksPassing": "Checks: Passing",
+      "checksFailing": "Checks: Failing",
+      "checksPending": "Checks: Pending",
+      "createdFromCli": "Created from Orca CLI",
+      "createdByNamedAutomation": "Created by automation “{{name}}”",
+      "createdByAutomation": "Created by automation",
+      "openLinkWithTitle": "Open {{label}}, {{title}}",
+      "openLink": "Open {{label}}",
+      "prOpen": "Open"
+    },
+    "workspaceOptionControls": {
+      "none": "None",
+      "status": "Status",
+      "pr": "PR",
+      "project": "Project",
+      "name": "Name",
+      "agentActivitySort": "Agent Activity",
+      "recent": "Recent",
+      "manual": "Manual",
+      "agentActivitySortDescription": "Agents that need attention, then most recent activity.",
+      "manualWorkspaceOrderDescription": "Drag workspaces to arrange them within each group.",
+      "manualProjectOrderDescription": "Drag projects to arrange them",
+      "recentProjectOrderDescription": "Most recent workspace activity",
+      "detailed": "Detailed",
+      "compact": "Compact",
+      "fullList": "Full list",
+      "githubTicket": "GitHub ticket",
+      "linearIssue": "Linear issue",
+      "jiraIssue": "Jira issue",
+      "prMrLink": "PR/MR link",
+      "automation": "Automation",
+      "notes": "Notes",
+      "ports": "Ports",
+      "agentActivity": "Agent activity",
+      "host": "Host",
+      "githubIssues": "GitHub issues",
+      "linearIssues": "Linear issues",
+      "jiraIssues": "Jira issues",
+      "agentStatuses": "Agent statuses",
+      "branchFolderPath": "Branch / folder path",
+      "branchName": "Branch name",
+      "selectedCount": "{{count}} of {{total}}",
+      "allHosts": "All hosts",
+      "allProjects": "All projects",
+      "searchProjectsPlaceholder": "Search projects…",
+      "searchProjects": "Search projects",
+      "hover": "Hover",
+      "agentActivityLayout": "Agent activity layout"
+    },
+    "workspaceOptionsSheet": {
+      "hosts": "Hosts",
+      "projects": "Projects",
+      "groupBy": "Group by",
+      "sortBy": "Sort by",
+      "projectOrder": "Project order",
+      "cardLayout": "Card layout",
+      "showProperties": "Show properties",
+      "cardDisplay": "Card display",
+      "hideSleeping": "Hide sleeping",
+      "exceptDefaultBranch": "Except default branch",
+      "hideDefaultBranch": "Hide default branch",
+      "hideAutomationCreated": "Hide automation-created",
+      "hideCliCreated": "Hide CLI-created",
+      "hideOtherClientWorkspaces": "Hide other-client workspaces",
+      "hideDetachedHead": "Hide detached HEAD",
+      "show": "Show",
+      "filters": "Filters",
+      "localMac": "Local Mac",
+      "localWindows": "Local Windows",
+      "localLinux": "Local Linux",
+      "thisComputer": "This computer",
+      "waitingForDesktop": "Still waiting for the desktop",
+      "savingToDesktop": "Saving to the desktop",
+      "backToOptions": "Back to Workspace options",
+      "workspaceOptions": "Workspace options",
+      "syncedAcrossDevices": "Synced across your devices",
+      "clearFilters": "Clear filters"
+    }
+  },
+  "webShell": {
+    "shellStateScreen": {
+      "isolationUnavailable": "This device's WebView is too old to open the workspace safely.",
+      "downloadFailed": "The latest app could not be downloaded from this host.",
+      "hostProfileUnreadable": "Could not read this host on your device. Try again.",
+      "statusUnreadable": "Could not read this host's status. Go back and reopen it.",
+      "renderProcessGone": "The workspace stopped responding.",
+      "documentLoadFailed": "The downloaded app could not be opened.",
+      "tryAgain": "Try again",
+      "connectToDownload": "Connect to this host to download the latest app",
+      "openingWorkspace": "Opening workspace",
+      "checkingHost": "Checking host"
+    }
+  },
+  "navigation": {
+    "hostStackScreens": {
+      "host": "Host",
+      "editHost": "Edit host",
+      "accounts": "Accounts",
+      "tasks": "Tasks",
+      "terminal": "Terminal",
+      "sourceControl": "Source Control",
+      "agentSessionHistory": "Agent Session History",
+      "changes": "Changes",
+      "pullRequest": "Pull Request",
+      "workspace": "Workspace"
+    }
+  },
+  "notifications": {
+    "notificationDeliverySection": {
+      "onlyWhenAway": "Only when away from desktop",
+      "onlyWhenAwayHint": "After 3 minutes without keyboard or mouse activity, or when locked.",
+      "sound": "Notification sound",
+      "suppressWhileFocused": "Suppress while focused",
+      "suppressWhileFocusedHint": "Skip alerts for the workspace open on this phone.",
+      "footer": "Alert types follow each paired desktop’s notification settings. Notifications pause after 7 days without using this app; open it and reconnect to resume."
+    }
+  },
+  "onboarding": {
+    "onboardingPage": {
+      "sessionViewTitle": "How should sessions open?",
+      "notificationsTitle": "Don’t miss when an agent needs you",
+      "sessionViewDescription": "Choose whether supported agent sessions open in the terminal or Chat UI on this device. Press and hold a session tab to switch its view, or change the default later in Settings.",
+      "notificationsDescription": "Get a notification on this phone when an agent finishes or is waiting — even if you aren’t using the app.",
+      "notificationsDisclosure": "Delivered through Orca’s push service after your desktop has been idle for 3 minutes. Change this anytime in Settings.",
+      "useChatUi": "Use Chat UI",
+      "openInChatUi": "Open sessions in Chat UI",
+      "keepTerminal": "Keep terminal",
+      "openInTerminal": "Open sessions in the terminal",
+      "enableNotifications": "Enable notifications",
+      "enableAgentNotifications": "Enable agent notifications",
+      "notNow": "Not now",
+      "skipNotifications": "Skip notifications for now"
+    },
+    "notificationOnboardingPreview": {
+      "codexFinished": "Codex finished",
+      "testsPassing": "Tests are passing.",
+      "claudeNeedsInput": "Claude needs input",
+      "waitingOnYou": "Waiting on you.",
+      "now": "now"
+    }
+  },
+  "connection": {
+    "connectionHealth": {
+      "signInRequired": "Sign-in required on {{host}}",
+      "signInDetail": "Sign in to Orca on your desktop to reconnect",
+      "hostOffline": "{{host}} is offline",
+      "hostOfflineDetail": "Check it's awake, Orca is running, and you're signed in",
+      "relayAccessExpired": "Relay access expired for {{host}}",
+      "rePairDetail": "Re-pair with your desktop",
+      "relayUnreachable": "Can't reach Relay",
+      "checkConnection": "Check your connection",
+      "tailscaleHint": "check Tailscale",
+      "hostFallback": "Host",
+      "pairingInvalid": "Pairing invalid — re-pair with your desktop",
+      "connected": "Connected",
+      "relayConnectFailed": "Can't connect via Relay",
+      "connectingViaRelay": "Connecting via Relay…",
+      "disconnected": "Disconnected",
+      "desktopUnreachable": "Can't reach desktop",
+      "connectFailed": "Can't connect",
+      "reconnecting": "Reconnecting…",
+      "connecting": "Connecting…",
+      "labelWithHint": "{{label}} — {{hint}}"
+    },
+    "hostEndpoint": {
+      "addressRequired": "Enter a host address.",
+      "invalidPort": "Port must be 1–65535.",
+      "invalidScheme": "Use ws:// or wss:// (or host:port).",
+      "invalidAddress": "Not a valid address.",
+      "pathOrQueryNotAllowed": "Host must not include a path or query.",
+      "invalidHostname": "Not a valid hostname.",
+      "hostnameRequired": "Missing hostname."
+    },
+    "connectionPathLabel": {
+      "directTailscale": "Direct · Tailscale",
+      "directLan": "Direct · LAN",
+      "directViaTailscale": "Direct via Tailscale",
+      "directViaLan": "Direct via LAN"
+    },
+    "pairConfirmState": {
+      "missingCode": "Missing pairing code",
+      "invalidCode": "Not a valid pairing code"
+    },
+    "rpcClientStreamRegistry": {
+      "interrupted": "Connection interrupted",
+      "endedBeforeReady": "Streaming request ended before it was ready."
+    },
+    "rpcClientTerminalBinaryFrame": {
+      "unsupportedFrame": "Unsupported terminal stream frame (opcode {{opcode}})."
+    }
+  },
+  "worktree": {
+    "agentRowDisplay": {
+      "working": "Working",
+      "monitoring": "Monitoring background tasks",
+      "blocked": "Blocked",
+      "waiting": "Waiting for input",
+      "interrupted": "Interrupted",
+      "failed": "Failed",
+      "unconfirmed": "Couldn’t confirm",
+      "idle": "Idle",
+      "unverifiable": "No recent update",
+      "stopping": "Stopping…",
+      "justNow": "just now",
+      "minutes_one": "{{count}}m",
+      "minutes_other": "{{count}}m",
+      "hours_one": "{{count}}h",
+      "hours_other": "{{count}}h",
+      "days_one": "{{count}}d",
+      "days_other": "{{count}}d",
+      "done": "Done"
+    },
+    "hostWorkspaceListStates": {
+      "checkHost": "Check that your computer is awake and Orca is running",
+      "loadFailed": "Could not load workspaces from this host",
+      "retrying": "worktree.ps failed ({{error}}) — retrying automatically",
+      "noMatches": "No matching workspaces",
+      "noFilterMatches": "No workspaces match filters",
+      "empty": "No workspaces",
+      "reopen": "Reopen to update",
+      "reopenDetail": "This host lists workspaces in a way this page does not know yet."
+    },
+    "workspaceListSections": {
+      "pinned": "Pinned",
+      "all": "All",
+      "inReview": "In review",
+      "inProgress": "In progress",
+      "closed": "Closed",
+      "done": "Done"
+    }
+  },
+  "components": {
+    "agentLaunchNotice": {
+      "updateRequired": "Update Orca on your computer to start an agent from your phone.",
+      "statusUnreadable": "Could not read this host's status. Retrying…",
+      "copyFailed": "Couldn't copy",
+      "copyPrompt": "Copy prompt"
+    },
+    "agentSpinner": {
+      "monitoring": "Monitoring background tasks",
+      "unconfirmed": "Couldn’t confirm"
+    },
+    "agentStateDot": {
+      "monitoring": "Monitoring background tasks",
+      "unverifiable": "No recent update"
+    },
+    "authFailedBanner": {
+      "message": "Authentication failed — try reconnecting first; if it keeps failing, re-pair from desktop."
+    },
+    "authFailedBannerActions": {
+      "repair": "Re-pair",
+      "webNote": "Reconnect or remove this host from the Orca app."
+    },
+    "codexResetCreditAction": {
+      "earnedReset": "Earned Codex rate-limit reset",
+      "resettingLabel": "Resetting Codex rate limits",
+      "useResetLabel": "Use Codex rate-limit reset",
+      "scopedHint": "Uses one earned reset for {{scopeLabel}}",
+      "activeAccountHint": "Uses one earned reset for the active Codex account",
+      "resetting": "Resetting…",
+      "useReset": "Use reset"
+    },
+    "customKeyModal": {
+      "editing": "Editing",
+      "navigation": "Navigation",
+      "function": "Function",
+      "addShortcut": "Add Shortcut",
+      "shortcutCombo": "Shortcut Combo",
+      "pickKey": "Pick a key",
+      "textMacro": "Text Macro",
+      "shortcutComboHint": "Build Ctrl, Alt, and Shift key chords",
+      "textMacroHint": "Send custom text command",
+      "manageShortcuts": "Manage Shortcuts",
+      "manageShortcutsHint": "Show, hide, or reorder shortcut keys",
+      "modifiers": "Modifiers",
+      "key": "Key",
+      "moreKeys": "More keys — Tab, arrows, F1–F12…",
+      "add": "Add",
+      "label": "Label",
+      "labelPlaceholder": "e.g. Build",
+      "command": "Command",
+      "commandPlaceholder": "e.g. pnpm build",
+      "pressEnter": "Press Enter"
+    },
+    "dragReorderRow": {
+      "dragToReorder": "Drag to reorder",
+      "reorderHint": "Use the move up and move down actions to reorder without dragging",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
+    },
+    "hostDiagnosticsLink": {
+      "viewDiagnostics": "View network diagnostics"
+    },
+    "hostProtocolGate": {
+      "checkingCompatibility": "Checking host compatibility"
+    },
+    "hostRouteNoticeBanner": {
+      "dismissNotice": "Dismiss notice"
+    },
+    "jiraConnectPrompt": {
+      "updateDesktop": "Update Orca desktop",
+      "connectOnDesktop": "Connect Jira on your desktop",
+      "credentialUnreadable": "Jira is saved but unreadable: {{credentialError}}",
+      "connectHint": "Add your Jira site in Orca desktop under Settings → Integrations, then check again.",
+      "checkAgain": "Check again"
+    },
+    "dictationSetupSheet": {
+      "loadFailed": "Failed to load",
+      "downloadFailed": "Download failed",
+      "selectFailed": "Could not select model",
+      "updateFailed": "Could not update",
+      "modelSize": "{{size}} MB",
+      "modelProgress": "{{details}} · {{progress}}%",
+      "modelExtracting": "{{details}} · extracting…",
+      "title": "Set up voice dictation",
+      "description": "Download or pick a model and enable dictation on the paired computer — all from here.",
+      "enabled": "Dictation enabled",
+      "recommended": "Recommended",
+      "inUse": "In use",
+      "useModel": "Use {{model}}",
+      "use": "Use",
+      "downloadModel": "Download {{model}}",
+      "download": "Download"
+    },
+    "diffReviewBody": {
+      "loadingReview": "Loading review...",
+      "reviewUnavailable": "Review Unavailable",
+      "loadFailed": "Unable to Load Review",
+      "noReviewableChanges": "No Reviewable Changes",
+      "tryDifferentFilter": "Try a different review filter.",
+      "loadingDiff": "Loading diff...",
+      "diffTruncated": "Diff truncated for mobile preview.",
+      "binaryDiff": "Binary Diff",
+      "diffTooLarge": "Diff Too Large",
+      "deletedFile": "Deleted File",
+      "diffUnavailable": "Diff Unavailable",
+      "binaryMessage": "This file cannot be rendered as text on mobile.",
+      "tooLargeMessage": "This diff is too large for the mobile preview.",
+      "deletedMessage": "This file was deleted. Add a file note or mark it reviewed.",
+      "selectFile": "Select a file to review.",
+      "retryLabel": "Retry loading review"
+    },
+    "diffReviewDrawers": {
+      "discardTitle": "Discard File",
+      "discardMessage": "Discard changes to \"{{filePath}}\"? This cannot be undone.",
+      "discard": "Discard",
+      "actionsTitle": "Review Actions",
+      "stageableFiles_one": "{{count}} reviewed unstaged files can be staged",
+      "stageableFiles_other": "{{count}} reviewed unstaged files can be staged",
+      "sendNotes": "Send Notes",
+      "terminalLabel": "{{title}} ({{id}})",
+      "terminal": "Terminal",
+      "newAgentSession": "New Agent Session",
+      "updateRequired": "Update Orca on your computer",
+      "statusUnreadable": "Could not read this host's status. Retrying…",
+      "copyNotes": "Copy Notes",
+      "sendUnsentNotes": "Send Unsent Notes",
+      "clearSentNotes": "Clear Sent Notes",
+      "stageReviewedFiles": "Stage Reviewed Files",
+      "markUnreviewed": "Mark Unreviewed",
+      "openInSession": "Open in Session",
+      "loadingSessions": "Loading agent sessions...",
+      "unsentNotes_one": "{{count}} unsent notes",
+      "unsentNotes_other": "{{count}} unsent notes",
+      "editNote": "Edit Note",
+      "addNote": "Add Note",
+      "lineNumber": "Line {{lineNumber}}",
+      "fileNote": "File note",
+      "cancelNote": "Cancel note",
+      "reviewNote": "Review note",
+      "saveLineNote": "Save note on line {{lineNumber}}",
+      "deleteNote": "Delete note",
+      "completeTitle": "Review Complete",
+      "fileSummary_one": "{{fileCount}} file reviewed, {{count}} note",
+      "fileSummary_other": "{{fileCount}} file reviewed, {{count}} notes",
+      "filesSummary_one": "{{fileCount}} files reviewed, {{count}} note",
+      "filesSummary_other": "{{fileCount}} files reviewed, {{count}} notes",
+      "stageReviewedLabel": "Stage reviewed files",
+      "stageReviewed": "Stage Reviewed",
+      "sendNotesLabel": "Send notes to agent"
+    },
+    "diffReviewFileSummary": {
+      "branchFrom": "Branch from {{oldPath}}",
+      "stagedFrom": "Staged from {{oldPath}}",
+      "unstagedFrom": "Unstaged from {{oldPath}}",
+      "branch": "Branch",
+      "staged": "Staged",
+      "unstaged": "Unstaged",
+      "reviewed": "Reviewed",
+      "changed": "Changed",
+      "notes_one": "{{count}} note",
+      "notes_other": "{{count}} notes",
+      "staleCount": "{{count}} stale",
+      "editFileNote": "Edit file note",
+      "stale": "Stale",
+      "previousHunk": "Previous hunk",
+      "hunk": "Hunk",
+      "nextHunk": "Next hunk"
+    },
+    "diffReviewFooter": {
+      "stageFile": "Stage file",
+      "stage": "Stage",
+      "unstageFile": "Unstage file",
+      "unstage": "Unstage",
+      "discardFile": "Discard file",
+      "discard": "Discard",
+      "previousFile": "Previous file",
+      "addFileNote": "Add file note",
+      "note": "Note",
+      "markFileReviewed": "Mark file reviewed",
+      "reviewed": "Reviewed",
+      "markReviewed": "Mark Reviewed",
+      "nextFile": "Next file"
+    },
+    "diffReviewHeader": {
+      "filterAll": "All",
+      "showAllFiles": "Show all review files",
+      "filterUnreviewed": "Unreviewed",
+      "showUnreviewedFiles": "Show unreviewed review files",
+      "filterNotes": "Notes",
+      "showNotesFiles": "Show notes review files",
+      "filterUnstaged": "Unstaged",
+      "showUnstagedFiles": "Show unstaged review files",
+      "filterStaged": "Staged",
+      "showStagedFiles": "Show staged review files",
+      "filterBranch": "Branch",
+      "showBranchFiles": "Show branch review files",
+      "title": "Changes",
+      "openPullRequestSidebar": "Open pull request sidebar",
+      "openReviewActions": "Open review actions",
+      "reviewedProgress": "{{reviewedCount}}/{{queueLength}} reviewed",
+      "unsentNotes_one": "{{count}} unsent note",
+      "unsentNotes_other": "{{count}} unsent notes"
+    },
+    "diffReviewLine": {
+      "addedLineNumber": "Added line {{number}}",
+      "addedLine": "Added line",
+      "deletedLineNumber": "Deleted line {{number}}",
+      "deletedLine": "Deleted line",
+      "contextLineNumber": "Context line {{number}}",
+      "contextLine": "Context line",
+      "addNoteOnLine": "Add note on line {{number}}",
+      "editNoteOnLine": "Edit note on line {{number}}"
+    },
+    "homeQuickActions": {
+      "title": "Quick Actions",
+      "pairDesktop": "Pair Desktop",
+      "newWorkspace": "New Workspace"
+    },
+    "hostCard": {
+      "worktreeAccessibilitySummary": "{{summary}}, {{activeCount}} active",
+      "pairingInvalid": "Pairing invalid",
+      "pairingTemporarilyUnavailable": "Pairing temporarily unavailable",
+      "updateDesktopHint": "Update desktop Orca and sign in to connect from anywhere",
+      "repairHint": "Tap to re-pair with your desktop",
+      "unlockHint": "Unlock your phone, then tap to retry",
+      "openHost": "Open {{title}}",
+      "hostActions": "Actions for {{title}}"
+    },
+    "htmlPreview": {
+      "previewRenderedHtml": "Preview rendered HTML",
+      "preview": "Preview",
+      "viewHtmlSource": "View HTML source",
+      "source": "Source",
+      "title": "HTML preview"
+    },
+    "prSidebar": {
+      "loading": "Loading pull request…",
+      "loadFailed": "Something went wrong.",
+      "retryLoading": "Retry loading pull request",
+      "notPermitted": "Not permitted — your GitHub account is not connected."
+    },
+    "richMarkdownEditor": {
+      "linkUrl": "Link URL",
+      "imageUrl": "Image URL",
+      "insert": "Insert"
+    },
+    "richMarkdownToolbar": {
+      "body": "Body",
+      "heading1": "H1",
+      "heading2": "H2",
+      "heading3": "H3",
+      "bold": "Bold",
+      "italic": "Italic",
+      "strike": "Strike",
+      "bulletList": "Bullet list",
+      "numberedList": "Numbered list",
+      "checklist": "Checklist",
+      "quote": "Quote",
+      "link": "Link",
+      "image": "Image",
+      "inlineCode": "Inline code",
+      "codeBlock": "Code block"
+    },
+    "searchField": {
+      "clearSearch": "Clear search"
+    },
+    "sourceCopyButton": {
+      "copyFailed": "Copy failed",
+      "clipboardRejected": "The clipboard rejected the text.",
+      "failed": "Failed",
+      "copiedLoaded": "Copied loaded",
+      "copyLoaded": "Copy loaded",
+      "couldNotCopy": "Couldn't copy"
+    },
+    "workspaceNameInput": {
+      "placeholder": "Workspace name"
+    },
+    "newWorkspaceFab": {
+      "newWorkspace": "New workspace"
+    },
+    "newWorkspaceSetupScriptField": {
+      "label": "Setup script",
+      "hooks": "HOOKS",
+      "run": "Run",
+      "skip": "Skip",
+      "runSetupCommand": "Run setup command"
+    },
+    "newWorkspaceSshConnectionField": {
+      "label": "SSH Connection",
+      "connecting": "Connecting...",
+      "connect": "Connect",
+      "serverRecovery": "Its server needs recovering from the desktop: Settings → SSH hosts → Recover server."
+    },
+    "newWorktreeFormSheet": {
+      "createWorktree": "Create worktree",
+      "noProjectsFound": "No projects found",
+      "nameOrCreateFrom": "Name or 'Create From'",
+      "workspaceName": "Workspace name",
+      "agent": "Agent",
+      "connectTargetFirst": "Connect target first",
+      "advanced": "Advanced",
+      "note": "Note",
+      "notePlaceholder": "Write a note",
+      "connectTarget": "Connect target"
+    },
+    "newWorktreeModal": {
+      "remoteRepository": "Remote repository"
+    },
+    "newWorktreeModalDrawers": {
+      "project": "Project",
+      "runOn": "Run on",
+      "agent": "Agent"
+    },
+    "newWorktreeProjectTargetFields": {
+      "project": "Project",
+      "selectProject": "Select a project",
+      "runOn": "Run on",
+      "selectRunTarget": "Select a run target"
+    },
+    "protocolBlockScreen": {
+      "updateMobileTitle": "Update Orca Mobile",
+      "updateDesktopTitle": "Update Orca on your computer",
+      "refreshWorkspaceTitle": "Refresh the mobile workspace",
+      "refreshWorkspaceBody": "The workspace cached for this host is older than the desktop expects. Reconnect to this host to download the current one.",
+      "mobileTooOldAppStore": "This desktop needs a newer Orca Mobile app. Update Orca Mobile from the App Store, then try this host again.",
+      "mobileTooOldGitHubReleases": "This desktop needs a newer Orca Mobile app. Update Orca Mobile from GitHub Releases, then try this host again.",
+      "workspaceNeedsUpdateAppStore": "This desktop's mobile workspace needs a newer Orca Mobile app. Update Orca Mobile from the App Store, then try this host again.",
+      "workspaceNeedsUpdateGitHubReleases": "This desktop's mobile workspace needs a newer Orca Mobile app. Update Orca Mobile from GitHub Releases, then try this host again.",
+      "desktopTooOldBody": "This paired desktop app is too old for your current Orca Mobile app. Update Orca on your computer, then try this host again.",
+      "openAppStore": "Open App Store",
+      "openGitHubReleases": "Open GitHub Releases",
+      "getVersion": "Get Orca {{version}}",
+      "refreshRecoveryNote": "If this message stays, remove this host and pair it again.",
+      "updateRecoveryNote": "Already updated? Go back to Hosts and refresh the connection. If this message stays, remove this host and pair it again.",
+      "backToHosts": "Back to hosts"
+    },
+    "setupHookTrustDrawer": {
+      "scriptChangedTitle": "{{repoName}}'s setup script changed",
+      "runSetupTitle": "Run setup from {{repoName}}?",
+      "description": "This repository's orca.yaml runs before the workspace starts. Only run it if you trust this repository.",
+      "newScriptLabel": "New setup script",
+      "scriptLabel": "Setup script",
+      "runHooks": "Run hooks",
+      "alwaysTrustAndRun": "Always trust and run",
+      "dontRun": "Don't run"
+    },
+    "smartWorkspaceAdvancedFields": {
+      "name": "Name",
+      "workspaceName": "Workspace name",
+      "branchName": "Branch name",
+      "derivedFromName": "Derived from name",
+      "reuseBranch": "Reuse branch “{{branch}}”"
+    },
+    "smartWorkspaceSourceDrawer": {
+      "title": "Name or 'Create From'",
+      "crossRepoMessage": "This item lives in {{owner}}/{{repo}}.",
+      "switchRepo": "Switch to {{repoName}}",
+      "connectRepository": "Connect the repository to search sources.",
+      "gitHubRemoteRequired": "This SSH repo needs a GitHub remote to list issues and PRs.",
+      "noResults": "No results found.",
+      "typeWorkspaceName": "Type a workspace name in the field below.",
+      "searchPlaceholder": "Type a name or search a source"
+    },
+    "smartWorkspaceSourceField": {
+      "optional": "[Optional]",
+      "openSelectedSource": "Open selected source",
+      "searchPlaceholder": "Type a name or search a source"
+    },
+    "smartWorkspaceSourceRow": {
+      "useName": "Use \"{{name}}\"",
+      "nameWorkspace": "Name this workspace",
+      "createBranch": "Create branch \"{{name}}\"",
+      "newBranch": "New branch",
+      "pullRequest": "PR #{{number}}",
+      "issue": "Issue #{{number}}",
+      "mergeRequest": "MR !{{number}}"
+    },
+    "terminalShortcutSettings": {
+      "shortcutBar": "SHORTCUT BAR",
+      "shortcutBarDescription": "Toggle keys to show or hide them, and hold the grip to drag a key into the order you want on the terminal shortcut bar.",
+      "resetDefaults": "Reset Defaults",
+      "resetDescription": "Show every built-in shortcut key in the original order",
+      "customShortcuts": "CUSTOM SHORTCUTS",
+      "empty": "No custom shortcuts defined yet.",
+      "removeShortcut": "Remove {{label}}",
+      "addShortcut": "Add Custom Shortcut…",
+      "addDescription": "Create key combo or text macro"
+    },
+    "voiceModelList": {
+      "modelSize": "{{size}} MB",
+      "modelProgress": "{{size}} · {{progress}}%",
+      "modelExtracting": "{{size}} · extracting…",
+      "recommended": "Recommended",
+      "inUse": "In use",
+      "useModel": "Use {{label}}",
+      "use": "Use",
+      "deleteModel": "Delete {{label}}",
+      "downloadModel": "Download {{label}}"
+    },
+    "workspaceDetailPlaceholder": {
+      "title": "No workspace open",
+      "description": "Pick a workspace from the sidebar to open its terminal here."
+    },
+    "worktreeListRow": {
+      "folder": "Folder",
+      "remoteHost": "Remote host",
+      "project": "Project {{repo}}",
+      "child": "Child",
+      "children_one": "{{count}} child",
+      "children_other": "{{count}} children"
+    },
+    "accountsSnapshot": {
+      "invalidSnapshot": "Invalid accounts snapshot from host"
+    },
+    "codexResetCredit": {
+      "available_one": "{{count}} reset available",
+      "available_other": "{{count}} resets available",
+      "resetTitle": "Rate limits reset",
+      "alreadyAppliedTitle": "Reset already applied",
+      "refresh": "Codex usage has been refreshed.",
+      "nothingToResetTitle": "Nothing to reset",
+      "nothingToResetMessage": "No eligible Codex rate-limit window is exhausted.",
+      "noResetTitle": "No reset available",
+      "noResetMessage": "This account has no earned reset credits available.",
+      "invalidResponse": "Invalid reset response from host",
+      "expiryNowSingle": "Expires now",
+      "expiryNowMultiple": "Next expires now",
+      "expiryMinutesSingle": "Expires in {{minutes}}m",
+      "expiryMinutesMultiple": "Next expires in {{minutes}}m",
+      "expiryHoursMinutesSingle": "Expires in {{hours}}h {{minutes}}m",
+      "expiryHoursMinutesMultiple": "Next expires in {{hours}}h {{minutes}}m",
+      "expiryHoursSingle": "Expires in {{hours}}h",
+      "expiryHoursMultiple": "Next expires in {{hours}}h",
+      "expiryDaysHoursSingle": "Expires in {{days}}d {{hours}}h",
+      "expiryDaysHoursMultiple": "Next expires in {{days}}d {{hours}}h",
+      "expiryDaysSingle": "Expires in {{days}}d",
+      "expiryDaysMultiple": "Next expires in {{days}}d"
+    },
+    "markdownBlocks": {
+      "copyCode": "Copy code",
+      "openImage": "Open image"
+    },
+    "mountedBottomDrawer": {
+      "dismissDrawer": "Dismiss drawer"
+    },
+    "newWorktreeAgentSelection": {
+      "blankTerminal": "Blank Terminal"
+    },
+    "useCodexResetCreditAction": {
+      "hostAccount": "{{identity}} on the host",
+      "hostAccountConfirmMessage": "This spends one earned reset for {{identity}} on the host and immediately resets eligible rate-limit windows.",
+      "hostSelectedAccount": "the selected managed account on the host",
+      "hostSelectedAccountConfirmMessage": "This spends one earned reset for the selected managed account on the host and immediately resets eligible rate-limit windows.",
+      "wslAccount": "{{identity}} on WSL {{distro}}",
+      "wslAccountConfirmMessage": "This spends one earned reset for {{identity}} on WSL {{distro}} and immediately resets eligible rate-limit windows.",
+      "wslSelectedAccount": "the selected managed account on WSL {{distro}}",
+      "wslSelectedAccountConfirmMessage": "This spends one earned reset for the selected managed account on WSL {{distro}} and immediately resets eligible rate-limit windows.",
+      "detailsChanged": "Reset details changed",
+      "detailsChangedMessage": "The account or reset offer changed before the host contacted Codex. Review the updated details, then confirm again.",
+      "resetFailed": "Could not reset rate limits",
+      "confirmTitle": "Use a rate-limit reset?"
+    }
+  },
+  "pullRequest": {
+    "linkPrForm": {
+      "title": "Link existing pull request",
+      "referenceLabel": "PR number or GitHub URL",
+      "referencePlaceholder": "#123 or https://github.com/owner/repo/pull/123",
+      "linkNumber": "Link #{{number}}",
+      "linkButton": "Link pull request"
+    },
+    "prViewPanel": {
+      "providerUnavailable": "Hosted review panel unavailable for this provider.",
+      "branchUnavailable": "Current branch unavailable."
+    },
+    "prActionsSection": {
+      "unlinkFailed": "Failed to unlink pull request.",
+      "mergeConfirmTitle": "Merge pull request?",
+      "mergeButton": "Merge",
+      "closeConfirmTitle": "Close pull request?",
+      "closeConfirmMessage": "#{{number}} will be closed without merging.",
+      "reopenConfirmTitle": "Reopen pull request?",
+      "reopenConfirmMessage": "#{{number}} will be reopened.",
+      "reopenButton": "Reopen",
+      "mergeAccessibilityLabel": "Merge pull request",
+      "recheckAccessibilityLabel": "Recheck merge status",
+      "recheckButton": "Recheck",
+      "markReadyAccessibilityLabel": "Mark pull request ready for review",
+      "markReadyButton": "Ready for review",
+      "autoMergeLabel": "Auto-merge when ready",
+      "autoMergeAccessibilityLabel": "Toggle auto-merge",
+      "autoMergeOn": "On",
+      "autoMergeOff": "Off",
+      "closeAccessibilityLabel": "Close pull request",
+      "reopenAccessibilityLabel": "Reopen pull request",
+      "unlinkAccessibilityLabel": "Unlink pull request",
+      "unlinkButton": "Unlink"
+    },
+    "prCheckDetail": {
+      "noDetails": "No details available.",
+      "annotations": "Annotations",
+      "annotationsTruncated": "Showing first 20 annotations",
+      "jobsTruncated": "Showing first 100 jobs"
+    },
+    "checksSection": {
+      "unavailable": "Checks unavailable",
+      "noChecks": "No checks",
+      "failing": "{{count}} failing",
+      "pendingCount": "{{count}} pending",
+      "passed": "{{count}} passed",
+      "neutralCount": "{{count}} neutral",
+      "successful": "Successful",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "timedOut": "Timed out",
+      "actionRequired": "Action required",
+      "neutral": "Neutral",
+      "skipped": "Skipped",
+      "queued": "Queued",
+      "inProgress": "In progress",
+      "pending": "Pending",
+      "loadDetailsFailed": "Failed to load check details",
+      "title": "Checks",
+      "rerunFailing": "Rerun failing checks",
+      "failingChecks_one": "{{count}} failing check",
+      "failingChecks_other": "{{count}} failing checks",
+      "inspectOrFix": "Inspect details or start an AI fix pass.",
+      "fixFailing": "Fix failing checks with AI",
+      "fix": "Fix",
+      "checkDetails": "{{name}} check details",
+      "openOnWeb": "Open {{name}} on the web"
+    },
+    "commentCard": {
+      "justNow": "just now",
+      "minutesAgo_one": "{{count}}m ago",
+      "minutesAgo_other": "{{count}}m ago",
+      "hoursAgo_one": "{{count}}h ago",
+      "hoursAgo_other": "{{count}}h ago",
+      "daysAgo_one": "{{count}}d ago",
+      "daysAgo_other": "{{count}}d ago",
+      "monthsAgo_one": "{{count}}mo ago",
+      "monthsAgo_other": "{{count}}mo ago",
+      "yearsAgo_one": "{{count}}y ago",
+      "yearsAgo_other": "{{count}}y ago",
+      "resolved": "resolved",
+      "openOnGitHub": "Open comment on GitHub",
+      "editPlaceholder": "Edit comment…",
+      "replyToComment": "Reply to comment",
+      "reply": "Reply",
+      "editComment": "Edit comment",
+      "deleteComment": "Delete comment",
+      "unresolveThread": "Unresolve thread",
+      "resolveThread": "Resolve thread",
+      "unresolve": "Unresolve",
+      "resolve": "Resolve",
+      "replyPlaceholder": "Write a reply…",
+      "deleteConfirmTitle": "Delete comment?",
+      "deleteConfirmMessage": "This permanently deletes the comment on GitHub."
+    },
+    "commentsSection": {
+      "all": "All",
+      "humans": "Humans",
+      "bots": "Bots",
+      "noBotComments": "No bot comments.",
+      "noHumanComments": "No human comments.",
+      "noComments": "No comments yet.",
+      "description": "Description",
+      "descriptionLoadFailed": "Could not load description. Tap refresh to try again.",
+      "noDescription": "No description provided.",
+      "title": "Comments",
+      "commentsLoadFailed": "Could not load comments. Tap refresh to try again.",
+      "showMoreOf": "Show {{count}} more of {{remaining}}",
+      "showMore": "Show {{count}} more",
+      "addCommentPlaceholder": "Add a comment…",
+      "comment": "Comment",
+      "resolvedThread_one": "Resolved thread by {{author}}",
+      "resolvedThread_other": "Resolved thread by {{author}} ({{count}})",
+      "resolvedComment_one": "Resolved comment by {{author}}",
+      "resolvedComment_other": "Resolved comment by {{author}} ({{count}})"
+    },
+    "conflictingFilesSection": {
+      "detailsUnavailable": "Conflict file details are unavailable",
+      "refreshing": "Refreshing conflict details…",
+      "localMergeClean": "GitHub reports conflicts, but local Git did not reproduce them. Refresh the PR or push the branch to recalculate mergeability.",
+      "copyFailed": "Failed to copy text",
+      "copyCommands": "Copy commands",
+      "commitsBehind_one": "{{count}} commit behind (base commit: {{baseCommit}})",
+      "commitsBehind_other": "{{count}} commits behind (base commit: {{baseCommit}})",
+      "title": "Conflicts",
+      "mustResolve": "This branch has conflicts that must be resolved",
+      "runFromWorktree": "Run from this worktree",
+      "copyRefreshCommands": "Copy mergeability refresh commands",
+      "filesHeading": "Conflicting files",
+      "resolveWithAi": "Resolve conflicts with AI"
+    },
+    "reviewersSection": {
+      "requested": "Requested",
+      "approved": "Approved",
+      "changesRequested": "Changes requested",
+      "commented": "Commented",
+      "dismissed": "Dismissed",
+      "pending": "Pending",
+      "reviewed": "Reviewed",
+      "addOrRemove": "Add or remove reviewers",
+      "title": "Reviewers",
+      "loading": "Loading reviewers…",
+      "loadFailed": "Could not load reviewers. Tap refresh to try again.",
+      "noReviewers": "No reviewers requested",
+      "removeReviewer": "Remove {{login}}"
+    },
+    "prSidebarHeader": {
+      "openOnWeb": "Open pull request #{{number}} on the web",
+      "openInBrowser": "Open pull request #{{number}} in browser",
+      "cancelEditingTitle": "Cancel editing title",
+      "saveTitle": "Save title",
+      "editTitle": "Edit pull request title"
+    },
+    "prSidebarCreateEmptyState": {
+      "branchRequired": "Check out a branch before creating a pull request.",
+      "createFailed": "Failed to create pull request.",
+      "title": "Pull request",
+      "refreshPullRequest": "Refresh pull request",
+      "createPullRequest": "Create pull request",
+      "createPr": "Create PR",
+      "linkedPrUnavailable": "Linked PR #{{number}} unavailable",
+      "noOpenPullRequest": "No open pull request",
+      "refreshOrCreate": "Refresh to check again, or create a new PR for this branch.",
+      "branchNotLinked": "{{branch}} is not linked to an open PR.",
+      "currentBranchNotLinked": "The current branch is not linked to an open PR.",
+      "linkExistingPullRequest": "Link an existing pull request",
+      "linkExistingPr": "Link an existing PR"
+    },
+    "reviewerPickerDrawer": {
+      "title": "Reviewers",
+      "searchPeople": "Search people",
+      "loadFailed": "Failed to load people",
+      "noMatches": "No matching people",
+      "removeReviewer": "Remove {{login}}",
+      "requestReviewer": "Request {{login}}"
+    },
+    "markdownBlocks": {
+      "details": "Details"
+    },
+    "prActionsState": {
+      "mergedLabel": "Merged",
+      "mergedHint": "This pull request is already merged",
+      "closedLabel": "Closed",
+      "closedHint": "This pull request is closed",
+      "draftLabel": "Draft",
+      "draftHint": "This pull request is still a draft",
+      "reviewRequiredLabel": "Approval required",
+      "reviewRequiredHint": "GitHub requires review approval before this pull request can merge",
+      "changesRequestedLabel": "Changes requested",
+      "changesRequestedHint": "GitHub reports requested changes on this pull request",
+      "conflictsLabel": "Conflicts",
+      "conflictsHint": "GitHub reports merge conflicts",
+      "mergeQueueLabel": "Merge when ready",
+      "mergeQueueHint": "This base branch uses GitHub merge queue",
+      "mergeQueueAutoMergeOnLabel": "Auto-merge on",
+      "mergeQueueAutoMergeOnHint": "This base branch uses GitHub merge queue",
+      "mergeStatusUnavailableLabel": "Merge",
+      "mergeStatusUnavailableHint": "Merge status is unavailable for this PR",
+      "behindLabel": "Behind",
+      "behindHint": "Update the branch before merging",
+      "blockedLabel": "Blocked",
+      "blockedHint": "GitHub reports this pull request is blocked",
+      "mergeableChecksFailedLabel": "Checks failed",
+      "mergeableChecksFailedHint": "GitHub says this PR can merge, but some checks failed",
+      "mergeableChecksPendingLabel": "Checks pending",
+      "mergeableChecksPendingHint": "GitHub says this PR can merge, but checks are still running",
+      "mergeableChecksPassedLabel": "Able to merge",
+      "mergeableChecksPassedHint": "GitHub says this PR can merge and checks passed",
+      "mergeableLabel": "Able to merge",
+      "mergeableHint": "GitHub says this PR can merge",
+      "checksPassedLabel": "Checks passed",
+      "checksPassedHint": "Checks passed. Merge eligibility will be checked again before merging.",
+      "checkingLabel": "Checking",
+      "checkingHint": "GitHub is still computing this pull request merge status",
+      "stackDraft": "#{{number}} is still a draft.",
+      "stackClosed": "#{{number}} is closed.",
+      "stackConflicts": "#{{number}} has merge conflicts.",
+      "stackChangesRequested": "#{{number}} has requested changes.",
+      "stackReviewRequired": "#{{number}} still needs review approval.",
+      "stackBehind": "#{{number}} must be updated.",
+      "stackBlocked": "#{{number}} is blocked.",
+      "methodMerge": "Create merge commit",
+      "methodSquash": "Squash and merge",
+      "methodRebase": "Rebase and merge",
+      "mergeConfirmMessage": "This will merge #{{number}} into its base branch.",
+      "queueThrough_one": "Queue through #{{number}} · {{count}} PR",
+      "queueThrough_other": "Queue through #{{number}} · {{count}} PRs",
+      "mergeThrough_one": "Merge through #{{number}} · {{count}} PR",
+      "mergeThrough_other": "Merge through #{{number}} · {{count}} PRs",
+      "queueStackMessage": "GitHub will add this pull request and every pull request below it to the merge queue.",
+      "mergeStackMessage": "GitHub will merge this pull request and every pull request below it in the stack."
+    },
+    "prCheckDetailContent": {
+      "annotation": "Annotation",
+      "unknown": "unknown",
+      "failedJobs": "Failed jobs",
+      "jobs": "Jobs"
+    },
+    "prChecksPresentation": {
+      "noChecks": "No checks",
+      "failing_one": "{{count}} failing",
+      "failing_other": "{{count}} failing",
+      "pending_one": "{{count}} pending",
+      "pending_other": "{{count}} pending",
+      "passed_one": "{{count}} passed",
+      "passed_other": "{{count}} passed",
+      "neutral_one": "{{count}} neutral",
+      "neutral_other": "{{count}} neutral",
+      "unavailable": "Checks unavailable",
+      "stateOpen": "Open",
+      "stateMerged": "Merged",
+      "stateDraft": "Draft",
+      "stateClosed": "Closed"
+    },
+    "prCommentAudienceLabels": {
+      "all": "All",
+      "humans": "Humans",
+      "bots": "Bots",
+      "noBotComments": "No bot comments.",
+      "noHumanComments": "No human comments.",
+      "noComments": "No comments yet."
+    }
+  }
+}

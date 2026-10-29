@@ -1,4 +1,5 @@
 import { getFishClaudeShellFunction } from './claude-shell-function'
+import { FISH_WSL_CWD_REPORT_FUNCTION } from './fish-wsl-cwd-report'
 import { buildPosixStdoutFence, type PosixStdoutFence } from './posix-stdout-fence'
 import { quotePosixShell } from './shell-argument-quoting'
 
@@ -46,6 +47,11 @@ export function buildWslCapturedLoginShellCommand(
   return { ...fence, command: buildWslLoginShellCommand(fence.command) }
 }
 
+/** A bridge fish pane's `-C`: run after the user's config.fish, so it adds and never replaces. */
+export function getWslFishInitCommand(): string {
+  return `${getFishClaudeShellFunction()}\n${FISH_WSL_CWD_REPORT_FUNCTION}`
+}
+
 export function buildWslInteractiveLoginShellCommand(): string {
   return [
     '_orca_wsl_shell=$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)',
@@ -71,7 +77,7 @@ export function buildWslInteractiveLoginShellCommand(): string {
     '    ;;',
     // Why: a WSL fish pane gets no shell-ready wrapper or XDG handoff, so this is its only `claude`.
     '  fish)',
-    `    exec "$_orca_wsl_shell" -l -C ${quotePosixShell(getFishClaudeShellFunction())}`,
+    `    exec "$_orca_wsl_shell" -l -C ${quotePosixShell(getWslFishInitCommand())}`,
     '    ;;',
     '  zsh)',
     '    if [ -n "${_orca_shell_ready_root:-}" ] && [ -d "${_orca_shell_ready_root}/zsh" ]; then',

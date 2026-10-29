@@ -1,3 +1,4 @@
+import { taskProviderFailure } from '../../shared/task-provider-failure'
 import type { LinearProjectDetail, LinearProjectSummary } from '../../shared/linear/project-types'
 import type {
   LinearCollectionResult,
@@ -176,7 +177,7 @@ export async function createProject(
 ): Promise<{ ok: true; project: LinearProjectDetail } | { ok: false; error: string }> {
   const entry = getClients(workspaceId)[0]
   if (!entry) {
-    return { ok: false, error: 'Not connected to Linear' }
+    return taskProviderFailure('linear.notConnected', 'Not connected to Linear')
   }
 
   await acquire()
@@ -188,7 +189,7 @@ export async function createProject(
     const payload = result.data?.projectCreate
     const project = payload?.project
     if (!payload?.success || !project) {
-      return { ok: false, error: 'Linear project create failed' }
+      return taskProviderFailure('linear.projectCreateFailed', 'Linear project create failed')
     }
     return { ok: true, project: mapProjectDetailForWorkspace(entry, project) }
   } catch (error) {

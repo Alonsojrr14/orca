@@ -50,7 +50,7 @@ export function createNativeHostMessageReader(
 
   const readSize = (): number => {
     const head =
-      pending[0].length >= HEADER_BYTES ? pending[0] : Buffer.concat(pending, pendingBytes)
+      pending[0].length >= HEADER_BYTES ? pending[0] : Buffer.concat(pending, HEADER_BYTES)
     return littleEndian ? head.readUInt32LE(0) : head.readUInt32BE(0)
   }
 

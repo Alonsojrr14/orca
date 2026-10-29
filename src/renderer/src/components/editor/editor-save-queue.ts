@@ -24,7 +24,6 @@ import {
 } from './editor-self-write-registry'
 import { getDiskBaselineSignature } from '../../../../shared/disk-baseline-signature'
 import { editorTabFileAccess } from '@/lib/local-file-access'
-import { isEditorLargePasteInFlight } from './editor-large-paste-in-flight'
 import {
   markEditorSaveRefusal,
   settleEditorRecordAfterWrite,
@@ -35,7 +34,6 @@ import {
 import type { FileWriteResult } from '../../../../shared/file-write-disk-precondition'
 import {
   editorSavePrecondition,
-  editorTabModelUri,
   editorSaveGrant,
   writeEditorSave,
   type EditorSaveResult,
@@ -122,9 +120,7 @@ export function createEditorSaveQueue(store: AppStoreApi): EditorSaveQueue {
     // Explicit saves bypass autosave suspension but remain guarded; only Overwrite grants conflict consent.
     if (
       trigger === 'autosave' &&
-      (isAutosaveSuspendedForFile(liveFile) ||
-        isEditorLargePasteInFlight(editorTabModelUri(state, liveFile)) ||
-        holds.isHeld(state, liveFile))
+      (isAutosaveSuspendedForFile(liveFile) || holds.isHeld(state, liveFile))
     ) {
       return 'failed'
     }
