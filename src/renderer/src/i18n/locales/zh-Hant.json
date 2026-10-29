@@ -1644,7 +1644,6 @@
       "claudeAgentRowView": {
         "subagentNavigationSetup": "請先在「設定」→「代理程式」啟用 Claude 子代理程式導覽，再於 Orca 中啟動 Claude 2.1.300+。請確認 keybindings.json 仍將 Ctrl+Alt+G、H 或 V 繫結至 command:orca-agent-view。",
         "permissionPrompt": "切換代理程式前，請先回應 Claude 的權限提示。",
-        "agentUnavailable": "Claude 無法開啟此代理程式。該代理程式可能已無法使用。",
         "closeDialog": "Claude 未切換檢視。請關閉所有已開啟的對話方塊，再試一次。",
         "hostUnavailable": "此主機無法使用子代理程式導覽。請更新 Orca，並在此窗格中重新啟動 Claude。"
       },

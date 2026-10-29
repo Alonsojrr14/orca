@@ -1645,7 +1645,6 @@
       "claudeAgentRowView": {
         "subagentNavigationSetup": "Ayarlar → Ajanlar bölümünde Claude alt ajanları arasında gezinmeyi etkinleştirin, ardından Orca'da Claude 2.1.300+ sürümünü başlatın. keybindings.json dosyasında Ctrl+Alt+G, H veya V tuşlarının hâlâ command:orca-agent-view komutuna atandığını kontrol edin.",
         "permissionPrompt": "Ajanlar arasında geçiş yapmadan önce Claude'un izin istemini yanıtlayın.",
-        "agentUnavailable": "Bu ajan Claude'da açılamıyor. Artık kullanılamıyor olabilir.",
         "closeDialog": "Claude görünümü değiştirmedi. Açık iletişim kutularını kapatıp tekrar deneyin.",
         "hostUnavailable": "Bu sunucuda alt ajanlar arasında gezinme kullanılamıyor. Orca'yı güncelleyin ve bu bölmede Claude'u yeniden başlatın."
       },

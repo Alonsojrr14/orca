@@ -1667,7 +1667,6 @@
       "claudeAgentRowView": {
         "subagentNavigationSetup": "Die Navigation zwischen Claude-Subagenten unter Einstellungen → Agenten aktivieren, dann Claude 2.1.300+ in Orca starten. Prüfen, ob keybindings.json Ctrl+Alt+G, H oder V weiterhin command:orca-agent-view zuweist.",
         "permissionPrompt": "Vor dem Wechseln zwischen Agenten Claudes Berechtigungsabfrage beantworten.",
-        "agentUnavailable": "Claude kann diesen Agenten nicht öffnen. Möglicherweise ist er nicht mehr verfügbar.",
         "closeDialog": "Claude hat die Ansicht nicht gewechselt. Alle offenen Dialoge schließen und erneut versuchen.",
         "hostUnavailable": "Die Subagenten-Navigation ist auf diesem Host nicht verfügbar. Orca aktualisieren und Claude in diesem Bereich neu starten."
       },

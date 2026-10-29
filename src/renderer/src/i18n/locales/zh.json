@@ -1308,7 +1308,6 @@
       "claudeAgentRowView": {
         "subagentNavigationSetup": "请在“设置 → 智能体”中启用 Claude 子智能体导航，然后在 Orca 中启动 Claude 2.1.300+。检查 keybindings.json 是否仍将 Ctrl+Alt+G、H 或 V 绑定到 command:orca-agent-view。",
         "permissionPrompt": "请先回应 Claude 的权限提示，再切换智能体。",
-        "agentUnavailable": "Claude 无法打开此智能体。它可能已不可用。",
         "closeDialog": "Claude 未切换视图。请关闭所有打开的对话框后重试。",
         "hostUnavailable": "此主机上无法使用子智能体导航。请更新 Orca 并在此窗格中重启 Claude。"
       },
