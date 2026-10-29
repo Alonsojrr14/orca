@@ -126,7 +126,7 @@ describe('options at rest', () => {
     })
   })
 
-  it("names the saved listing's ids and model for a live child that fell back to its default", async () => {
+  it('keeps a saved Codex model when the host listing drops it', async () => {
     const record = { ...restingRecord(), options: { model: 'gpt-unlisted', effort: 'high' } }
     const listed = { id: 'gpt-5.5', label: 'GPT-5.5', isDefault: true, efforts: [] }
     let live = false
@@ -159,7 +159,11 @@ describe('options at rest', () => {
     const running = await read()
     expect(running.listedModelIds).toEqual(resting.listedModelIds)
     expect(resting.listedModelIds).toEqual(['gpt-5.5'])
+    expect(resting.current).toMatchObject({ model: 'gpt-unlisted', defaulted: [] })
     expect(running.current).toMatchObject({ model: 'gpt-unlisted', defaulted: [] })
+    for (const answer of [resting, running]) {
+      expect(answer.current.acceptedInputSources).toMatchObject({ model: 'saved', effort: 'saved' })
+    }
   })
 
   it.each(['omp', 'grok', 'opencode'] as const)(

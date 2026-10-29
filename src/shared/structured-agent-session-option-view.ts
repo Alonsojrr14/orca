@@ -13,14 +13,6 @@ import {
 } from './structured-agent-session-option-state'
 import { AGENT_CHAT_PERMISSION_MODE_OPTION_ID } from './agent-chat-permission-mode'
 
-function catalogListsSeedModel(
-  state: StructuredAgentSessionOptionState,
-  seed: Readonly<Record<string, string>>
-): boolean {
-  const model = seed.model
-  return model === undefined || Boolean(state.catalog?.models.some((entry) => entry.id === model))
-}
-
 /** Query base or immutable launch seed, with finite controller operations above it.
  *  Display provenance stays separate from accepted input while catalog labels load. */
 export function structuredAgentSessionOptionView(
@@ -71,7 +63,7 @@ function modelOptionView(
   const seeded =
     unconfirmedSeed &&
     (state.catalogSource === 'host' || state.catalogSource === 'live') &&
-    catalogListsSeedModel(state, seed)
+    (held.model === undefined || held.model === seed.model)
   if (!state.catalog || (!unconfirmedSeed && !hasHeld)) {
     return state
   }

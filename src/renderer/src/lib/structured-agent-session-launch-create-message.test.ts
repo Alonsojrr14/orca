@@ -18,6 +18,7 @@ import {
   SendParams
 } from '../../../shared/rpc-contract/structured-agent-session-params'
 import { structuredAgentSessionCreateFingerprint } from '../../../shared/structured-agent-session-mutation'
+import { registerActionEffortCreateTests } from './structured-agent-session-launch-action-effort.test-fixture'
 import { isStructuredAgentSessionMainAgentWorking } from '../../../shared/structured-agent-session-main-agent-working'
 
 import {
@@ -153,7 +154,7 @@ describe('the first message owned by create', () => {
     ['new', {}],
     ['resumed', { resumeFrom: { providerSessionId: 'provider-session-1' } }]
   ])(
-    "keeps a remembered model the host's saved list lacks, %s: create names no other",
+    "keeps a remembered model the host's saved list lacks, %s: create sends the literal saved choice",
     async (_kind, resume) => {
       mocks.exactSupport.mockResolvedValue(true)
       mocks.settings = {
@@ -176,13 +177,15 @@ describe('the first message owned by create', () => {
           ...resume
         })
         await launch.launchResult
-        expect(createParams().options?.model).toBeUndefined()
+        expect(createParams().options?.model).toBe('claude-gone')
         expect(createParams().firstMessage?.selection).toEqual({ model: 'claude-gone' })
       } finally {
         mocks.settings = {}
       }
     }
   )
+
+  registerActionEffortCreateTests(mocks, created)
 
   it.each(['codex', 'claude'] as const)(
     'creates %s on an unlisted explicit model without importing saved effort',
