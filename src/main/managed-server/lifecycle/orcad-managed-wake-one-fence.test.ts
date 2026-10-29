@@ -162,4 +162,36 @@ describe('wakeExpectedOrcadUnderOneFence', () => {
     expect(await wakeStoppedManagedOrcad(slot)).toMatchObject({ outcome: 'started' })
     expect(host.fence).toBe(false)
   })
+
+  it("forgets an interrupted token once a serving wake finds its fence gone or another owner's", async () => {
+    const dropOneFenceWake = async () => {
+      host = stoppedHost()
+      const lost = Object.assign(new Error('connection lost'), { sshChannelCloseConfirmed: false })
+      vi.mocked(execCommand).mockImplementation(async (_conn, command) => {
+        if (command.includes('nohup')) {
+          throw lost
+        }
+        return host.exec(command)
+      })
+      await expect(wakeExpectedOrcadUnderOneFence(slot, OLD)).rejects.toBe(lost)
+      vi.mocked(execCommand).mockImplementation(async (_conn, command) => host.exec(command))
+      // Another client's recovery started the slot meanwhile.
+      host.alive.add(OLD)
+    }
+    for (const [fence, owner] of [
+      [false, null],
+      [true, 'another-run']
+    ] as const) {
+      await dropOneFenceWake()
+      host.fence = fence
+      host.wakeOwner = owner
+      expect(await wakeStoppedManagedOrcad(slot)).toEqual({ outcome: 'serving' })
+      host.fence = false
+      expect(await wakeExpectedOrcadUnderOneFence(slot, OLD)).toEqual({ outcome: 'serving' })
+    }
+    // Still its own fence: the token stays, so only the full wake may reclaim it.
+    await dropOneFenceWake()
+    expect(await wakeStoppedManagedOrcad(slot)).toEqual({ outcome: 'serving' })
+    expect(await wakeExpectedOrcadUnderOneFence(slot, OLD)).toEqual({ outcome: 'fenced' })
+  })
 })

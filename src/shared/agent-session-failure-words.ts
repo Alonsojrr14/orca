@@ -193,6 +193,8 @@ const FAILURE_SENTENCES = {
     ),
   restartFailed: couldNot('couldNotRestart'),
   claudeEffortInvalid: (_context, _fact, _surface, say) => say('claudeEffortInvalid'),
+  modelUnavailable: (context, fact, _surface, say) =>
+    say('modelUnavailable', { ...agent(say, context), detail: fact.detail?.text ?? 'this model' }),
   providerRejected: (context, fact, _surface, say) =>
     quotingPersonDetail(
       say,

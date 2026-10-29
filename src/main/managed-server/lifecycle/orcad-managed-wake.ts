@@ -113,6 +113,7 @@ async function wakeAfterPrior(
   }
   const liveness = await slotLiveness(options, orcadSlotDir(options, before.active))
   if (!orcadLivenessProvenExited(liveness)) {
+    await forgetSettledInterruptedWake(options, host)
     return { outcome: liveness === 'LIVE' ? 'serving' : 'unverifiable' }
   }
   if (!(await orcadActivationFenceExists(options))) {
@@ -186,6 +187,33 @@ function wakeOwnerPath(options: OrcadSlotOptions): string {
 
 function wakeHostKey(options: OrcadSlotOptions): string {
   return `${options.conn.getTarget().id}\0${options.remoteHome}`
+}
+
+/**
+ * A serving slot skips the fence branch that clears an interrupted wake's token, which would
+ * keep the one-fence wake off until restart. Forget it once its fence is gone or another owner's;
+ * an unanswered probe proves neither, so the token stays.
+ */
+async function forgetSettledInterruptedWake(
+  options: OrcadSlotOptions,
+  host: string
+): Promise<void> {
+  const token = interruptedWakes.get(host)
+  if (!token) {
+    return
+  }
+  try {
+    const owner = (await orcadActivationFenceExists(options))
+      ? await readBoundedOrcadRemoteRecord(options, wakeOwnerPath(options), 64)
+      : null
+    if (!owner || (owner.state === 'present' && owner.raw.trim() !== token)) {
+      if (interruptedWakes.get(host) === token) {
+        interruptedWakes.delete(host)
+      }
+    }
+  } catch {
+    // Unverifiable: keep the token for the next wake.
+  }
 }
 
 /** Reclaim only this client's journal-free interrupted fence after proving slot exit. */

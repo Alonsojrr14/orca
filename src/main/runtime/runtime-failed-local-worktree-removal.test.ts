@@ -461,7 +461,14 @@ describe.skipIf(process.platform !== 'darwin')('a worktree delete Git fails part
     expect(await isRegistered(worktreePath)).toBe(true)
     expect(await git(['branch', '--list', 'feature'])).not.toBe('')
     expect(purged).toEqual([])
-    expect(await readWorktreeRemovalRecords(recordsDir)).toEqual([])
+    expect(await readWorktreeRemovalRecords(recordsDir)).toEqual([
+      expect.objectContaining({
+        worktreeId,
+        failure: expect.objectContaining({
+          message: expect.stringMatching(/A different checkout is now at/)
+        })
+      })
+    ])
   })
 
   it('never deletes a worktree Git registers inside the leftover', async () => {

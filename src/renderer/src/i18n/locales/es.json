@@ -437,6 +437,47 @@
         "conflictingOverrides": "Se ignoraron los atajos personalizados en conflicto: {{actions}}.",
         "readFailed": "No se pudo leer el archivo de combinaciones de teclas: {{reason}}"
       }
+    },
+    "network": {
+      "proxyUrlErrors": {
+        "tooLong": "La URL de proxy es demasiado larga.",
+        "invalid": "Introduce una URL de proxy válida.",
+        "unsupportedProtocol": "Usa una URL de proxy http, https, socks, socks4 o socks5.",
+        "missingHost": "La URL de proxy debe incluir un host."
+      }
+    },
+    "voice": {
+      "modelDescriptions": {
+        "parakeetV3": "Máxima precisión para 25 idiomas europeos. Puntuación, mayúsculas y minúsculas y marcas de tiempo por palabra.",
+        "parakeetV2": "Solo inglés. Más rápido que v3 con una precisión similar. Puntuación y mayúsculas y minúsculas.",
+        "zipformerBilingual": "Chino + inglés con alternancia de idiomas. Streaming en tiempo real de baja latencia.",
+        "paraformerBilingual": "Chino (mandarín + dialectos) + inglés. Buen rendimiento con acentos y variantes regionales del chino.",
+        "zipformerStreamingEn": "Solo inglés. Modelo ligero de 20 millones de parámetros, con buen equilibrio entre velocidad y tamaño.",
+        "zipformerStreamingZh": "Solo chino. Modelo ultraligero de 14 millones de parámetros, ideal para dispositivos con pocos recursos.",
+        "zipformerStreamingKo": "Solo coreano. Streaming en tiempo real de baja latencia.",
+        "parakeetJa": "Solo japonés. Entrenado con más de 35 000 horas de habla natural. Incluye puntuación.",
+        "whisperTiny": "Más de 90 idiomas. Menor precisión que Parakeet, pero con la mayor cobertura de idiomas.",
+        "senseVoice": "Chino, inglés, japonés, coreano y cantonés con detección automática de idioma.",
+        "gpt4oMiniTranscribe": "Transcripción en la nube con alta precisión y bajo coste. Requiere una clave API de OpenAI.",
+        "gpt4oTranscribe": "Transcripción en la nube con mayor precisión. Requiere una clave API de OpenAI."
+      }
+    },
+    "diagnostics": {
+      "errors": {
+        "creatingDisabled": "la creación de archivos de revisión está desactivada",
+        "sendingDisabled": "el envío de diagnósticos está desactivado",
+        "sendingNotConfigured": "el envío de diagnósticos no está configurado para esta compilación",
+        "expiredBeforeSending": "el archivo de revisión ha caducado; crea uno nuevo antes de enviarlo",
+        "expiredBeforeOpening": "el archivo de revisión ha caducado; crea uno nuevo antes de abrirlo",
+        "previewNotOpened": "abre el archivo de revisión antes de enviarlo",
+        "previewOpenFailed": "no se pudo abrir el archivo de revisión",
+        "deleteNotConfigured": "el punto de conexión para subir diagnósticos no está configurado para esta compilación",
+        "createFailed": "No se pudo crear el archivo de revisión",
+        "openFailed": "No se pudo abrir el archivo de revisión",
+        "sendFailed": "No se pudieron enviar los diagnósticos",
+        "discardFailed": "No se pudo descartar el archivo de revisión",
+        "deleteFailed": "No se pudieron eliminar los diagnósticos enviados"
+      }
     }
   },
   "menu": {
@@ -11666,9 +11707,7 @@
         },
         "pluginThemeApply": {
           "nowUsing": "Ahora usas {{value0}}",
-          "switchBack": "Volver",
-          "setAsLight": "{{value0}} es ahora tu tema claro",
-          "setAsDark": "{{value0}} es ahora tu tema oscuro"
+          "switchBack": "Volver"
         },
         "pluginError": {
           "installManifestMissing": "No se encontró un orca-plugin.json legible. Elige la carpeta raíz del plugin.",
@@ -11679,6 +11718,7 @@
           "installGit": "No se pudo obtener esta revisión de Git. Revisa la URL, el #ref y el acceso.",
           "invalidManifestMissing": "A la raíz del plugin le falta orca-plugin.json. Añádelo y actualiza los plugins.",
           "invalidManifest": "orca-plugin.json no es válido. Corrígelo y actualiza los plugins.",
+          "installedManifestUnloadable": "Esta versión no se puede cargar en este Orca. Actualízala o reinstálala.",
           "invalidArtifact": "Falta un archivo de proceso o de panel, o no es seguro. Corrígelo y actualiza.",
           "consentChanged": "Este plugin cambió mientras lo revisabas. Revísalo de nuevo."
         },
@@ -12676,6 +12716,7 @@
           "noAccessReach": "Nada fuera de sus propios archivos"
         },
         "PluginManagerRows": {
+          "reinstall": "Reinstalar",
           "crashedCount": "Falló {{value0}} veces seguidas",
           "crashed": "Falló al iniciar",
           "remove": "Quitar…",
@@ -19547,6 +19588,27 @@
         "noLiveTerminal": "No hay ningún terminal activo disponible.",
         "commandCanceled": "Se canceló el comando de Chat UI porque se cerró el editor de mensajes.",
         "commandRejected": "El terminal no aceptó el comando."
+      },
+      "sessionOptionErrors": {
+        "startOnly": "Esta opción solo se puede configurar al iniciar la sesión.",
+        "modelRejected": "Claude mantuvo el modelo actual.",
+        "modelUnverified": "No se pudo verificar el cambio de modelo; abre la terminal para comprobarlo.",
+        "unknownOption": "Opción de sesión desconocida: {{id}}",
+        "agentPickerOnly": "Esta opción debe cambiarse en el selector del agente.",
+        "toggleBaselineUnknown": "Se desconoce el valor actual; usa la acción «Alternar».",
+        "afterStartOnly": "Esta opción solo está disponible después de iniciar la sesión.",
+        "valueRequired": "Esta opción requiere un valor.",
+        "toggleValueKnown": "Esta opción tiene un valor conocido; elige «Activado» o «Desactivado»."
+      },
+      "composerErrors": {
+        "goalObjectiveMissing": "Describe el objetivo después de /goal.",
+        "commandUnavailable": "/{{name}} no está disponible en las sesiones de chat. Usa el menú de comandos / para ver los comandos disponibles.",
+        "commandTakesNoArguments": "Usa /{{name}} sin argumentos.",
+        "commandUnsupportedByHost": "Este host de chat no admite /{{name}}.",
+        "modelPickerFailed": "No se pudo abrir el selector de modelo.",
+        "effortPickerFailed": "No se pudo abrir el selector de esfuerzo.",
+        "modelApplyFailed": "No se pudo aplicar el modelo {{value}}.",
+        "effortApplyFailed": "No se pudo aplicar el esfuerzo {{value}}."
       }
     },
     "tab": {
@@ -20481,7 +20543,10 @@
       "recent3Text": "Esta es una primera versión de las notas, agrupadas por área.",
       "recent3Title": "Borrador de notas de la versión",
       "startSearching": "Empezar a buscar",
-      "changeInSettings": "Cámbialo o desactívalo cuando quieras en <link>Ajustes → Búsqueda de sesiones de agente</link>."
+      "changeInSettings": "Cámbialo o desactívalo cuando quieras en <link>Ajustes → Búsqueda de sesiones de agente</link>.",
+      "title": "Busca en todas las sesiones de agentes",
+      "description": "Encuentra cualquier conversación anterior por lo que se dijo en ella y continúa donde lo dejó el agente.",
+      "cta": "Activar la búsqueda de sesiones"
     },
     "voice": {
       "demoPrompt": "Revisa este diff en busca de casos límite y agrega pruebas para lo que encuentres.",
@@ -20490,8 +20555,23 @@
       "listening": "Escuchando...",
       "unassignedInstruction": "Asigna un atajo de dictado antes de iniciar el dictado por voz en un panel enfocado.",
       "shortcutInstruction": "Enfoca un terminal, un editor o un campo de entrada del agente y pulsa <shortcut/> para iniciar el dictado por voz. Pulsa <shortcut/> de nuevo para detenerlo.",
-      "changeInSettings": "Cambia el modelo, el modo de dictado o el atajo cuando quieras en <link>Ajustes → Voz</link>."
-    }
+      "changeInSettings": "Cambia el modelo, el modo de dictado o el atajo cuando quieras en <link>Ajustes → Voz</link>.",
+      "title": "Dicta en cualquier panel",
+      "description": "Inicia el dictado de voz en cualquier panel con el foco y vuelve a usar el atajo para detenerlo.",
+      "cta": "Configurar el dictado de voz"
+    },
+    "eyebrowNew": "Nuevo",
+    "eyebrowTip": "Consejo",
+    "orcaCli": {
+      "title": "Deja que los agentes controlen Orca con Orca CLI",
+      "description": "Permite que los agentes coordinen worktrees secundarios y se comuniquen entre worktrees.",
+      "cta": "Instalar CLI y habilidades"
+    },
+    "cmdJPalette": {
+      "title": "Ve a un worktree con <shortcut>",
+      "description": "Busca worktrees, cambia de pestaña, ajusta la configuración o crea un worktree, todo sin dejar el teclado."
+    },
+    "gotIt": "Entendido"
   },
   "fileExplorer": {
     "root": {
@@ -20569,6 +20649,12 @@
     "fileLoad": {
       "hostUnresolved": "El host no pudo encontrar el espacio de trabajo de este archivo. Puede que se haya eliminado o que el host aún no lo conozca. Reintenta o cierra esta pestaña desde la barra de pestañas.",
       "remoteTooLarge": "Este archivo es demasiado grande para abrirlo desde su host."
+    },
+    "pdfExport": {
+      "errors": {
+        "noContent": "No hay contenido para exportar",
+        "timedOut": "Se agotó el tiempo de exportación"
+      }
     }
   },
   "accounts": {
@@ -21201,6 +21287,34 @@
       "loading": "Cargando subagentes…",
       "loadError": "No se pudieron cargar todos los subagentes.",
       "empty": "No se encontraron subagentes."
+    },
+    "scanIssues": {
+      "issuesOmitted": "Se omitieron problemas adicionales del escaneo.",
+      "sessionMetadataUnreadable": "No se pudieron leer los metadatos de las sesiones en este escaneo.",
+      "openCodeScannerUnavailable": "Se omitió el historial de OpenCode porque su escáner en segundo plano no pudo iniciarse; la aplicación sigue respondiendo.",
+      "openCodeScanIncomplete": "El escaneo del historial de OpenCode no se completó: {{detail}}",
+      "openCodeWslReaderPreparing": "Preparando el lector SQLite de WSL. Actualiza Vault cuando termine la configuración.",
+      "openCodeWslReaderNotPrepared": "El lector SQLite de WSL no está preparado. Actualiza Vault para reintentarlo.",
+      "openCodeDatabaseBusy": "{{label}} está escribiendo en {{name}}, por lo que se ha omitido su historial. Se volverá a leer en la próxima actualización.",
+      "openCodeDatabaseUnreadable": "No se pudo leer el historial de {{label}} en {{name}}: {{detail}}",
+      "openCodeWslDatabaseUnsupported": "Aún no se pueden buscar sesiones de {{label}} dentro de WSL desde Windows.",
+      "openCodeWriteAheadLogUnreadable": "No se pudo leer el historial de {{label}} en {{name}}. Su registro de escritura anticipada no se puede abrir en modo de solo lectura en este sistema de archivos. Cierra {{label}} correctamente para volcar el registro.",
+      "wslTranscriptFsSlow": "Los archivos de transcripción de WSL no están disponibles temporalmente porque el acceso al sistema de archivos está tardando demasiado. Inténtalo de nuevo en breve o reinicia Orca si el problema persiste.",
+      "wslTranscriptFsCapacity": "La búsqueda de transcripciones de WSL no está disponible temporalmente porque ya hay demasiadas solicitudes al sistema de archivos en espera. Inténtalo de nuevo en breve o reinicia Orca si el problema persiste.",
+      "wslTranscriptFsProcessFailed": "Los archivos de transcripción de WSL no están disponibles temporalmente porque falló el proceso auxiliar del sistema de archivos ({{detail}}). Inténtalo de nuevo en breve o reinicia Orca si el problema persiste.",
+      "wslDistroNotRunning": "Los archivos de transcripción de WSL no están disponibles porque la distro WSL «{{distro}}» no está en ejecución. Abre un terminal en ella para iniciarla.",
+      "wslDistroUnverifiable": "Los archivos de transcripción de WSL no están disponibles porque WSL no respondió si «{{distro}}» está en ejecución. Inténtalo de nuevo en breve.",
+      "wslSessionsFromLastScan": "No se pudo comprobar WSL; sus sesiones son del último análisis.",
+      "scopePathsTruncated": "Solo se escanearon las primeras {{limit}} rutas de proyectos.",
+      "invalidResultsSkipped_one": "Se omitió {{count}} entrada de resultado no válida del historial de sesiones de agentes.",
+      "invalidResultsSkipped_other": "Se omitieron {{count}} entradas de resultado no válidas del historial de sesiones de agentes.",
+      "invalidResultsSkipped_many": "Se omitieron {{count}} entradas de resultado no válidas del historial de sesiones de agentes.",
+      "scanTimedOutOnSshHost": "El escaneo de sesiones agotó el tiempo de espera tras {{seconds}} s en este host SSH. Actualiza para reintentarlo.",
+      "scanTimedOut": "El escaneo de sesiones agotó el tiempo de espera tras {{seconds}} s — el equipo puede estar ocupado. Actualiza para reintentarlo.",
+      "scannerPaused": "El escaneo de sesiones se pausó tras varios fallos. Actualiza para reintentarlo.",
+      "scannerBusy": "Hay demasiados escaneos de sesiones en curso. Espera un momento y luego actualiza.",
+      "scannerMissing": "El escáner de sesiones no está en esta instalación de Orca. Reinstalar Orca lo restaura.",
+      "scannerStopped": "El escáner de sesiones se detuvo inesperadamente. Actualiza para reintentarlo."
     }
   },
   "fileSearch": {
@@ -21569,7 +21683,12 @@
       "dialogTitle": "Falló el nombre automático del chat",
       "dialogDescriptionStart": "Orca no pudo generar un nombre para",
       "dialogDescriptionEnd": "a partir de su primer mensaje.",
-      "settings": "Ajustes"
+      "settings": "Ajustes",
+      "errors": {
+        "noName": "El agente de nombres de chat no devolvió ningún nombre.",
+        "agentNotRun": "Orca no pudo ejecutar el agente de nombres de chat.",
+        "noAgentAvailable": "No hay ningún agente de nombres de chat que pueda ejecutarse en este espacio de trabajo."
+      }
     }
   },
   "updates": {
@@ -22436,6 +22555,22 @@
         "error": "La configuración del proyecto falló en el host seleccionado para la automatización.",
         "unsupported": "El host seleccionado para la automatización no admite este proyecto."
       }
+    },
+    "extraAgentArgs": {
+      "errors": {
+        "tooLarge": "Los argumentos adicionales no pueden superar los 4 KB.",
+        "controlCharacters": "Los argumentos adicionales no pueden contener caracteres de control ni saltos de línea.",
+        "invalid": "Los argumentos adicionales no son válidos: {{detail}}",
+        "shellSyntax": "{{text}} usa sintaxis de shell no permitida en los argumentos adicionales.",
+        "terminator": "No se permite «--» en los argumentos adicionales.",
+        "notAnOption": "«{{token}}» no es una opción. Los argumentos adicionales de {{agent}} solo aceptan: {{allowed}}.",
+        "optionNotAllowed": "No se permite «{{option}}» en los argumentos adicionales de {{agent}}. Opciones permitidas: {{allowed}}.",
+        "missingValue": "«{{option}}» necesita un valor.",
+        "valueNotAllowed": "No se permite «{{option}} {{value}}». Los argumentos adicionales de {{agent}} solo aceptan «{{option}} {{prefix}}<level>».",
+        "modelRepeated": "Los argumentos adicionales establecen el modelo más de una vez.",
+        "effortRepeated": "Los argumentos adicionales establecen el esfuerzo más de una vez."
+      },
+      "hostUpdateRequired": "Actualiza Orca en este host para usar argumentos adicionales."
     }
   },
   "codeHost": {
@@ -22502,6 +22637,176 @@
         "mrSourceBranchMissing": "La MR !{{number}} no tiene rama de origen.",
         "forkHeadUnresolved": "No se pudo resolver el head de la MR !{{number}} de un fork tras el fetch."
       }
+    }
+  },
+  "featureWall": {
+    "workflows": {
+      "workspaces": {
+        "title": "Espacios de trabajo",
+        "lede": "Orca asigna a cada tarea un espacio de trabajo aislado para que los agentes puedan trabajar en paralelo."
+      },
+      "tasks": {
+        "title": "Tareas",
+        "lede": "Empieza a trabajar directamente desde GitHub o Linear."
+      },
+      "agents": {
+        "title": "Agentes",
+        "lede": "Ejecuta varios agentes a la vez, sigue su progreso y deja que la automatización controle Orca cuando sea útil."
+      },
+      "workbench": {
+        "title": "Panel principal",
+        "lede": "Trae tu configuración de terminal a Orca y divide los paneles para ejecutar servidores, pruebas, registros y agentes en paralelo."
+      },
+      "review": {
+        "title": "Revisión de código",
+        "lede": "Revisa los cambios, deja comentarios concretos y envíaselos al agente."
+      }
+    },
+    "steps": {
+      "statuses": {
+        "name": "Visibilidad",
+        "subtitle": "Visibilidad de los agentes",
+        "description": "Consulta qué agentes están trabajando, en espera, activos o bloqueados."
+      },
+      "orchestration": {
+        "name": "Orquestación",
+        "description": "Permite que los agentes gestionen y coordinen espacios de trabajo de Orca para realizar tareas más grandes."
+      },
+      "usage": {
+        "name": "Uso",
+        "description": "Supervisa el uso y los límites de tasa de todas las cuentas conectadas para saber cuándo cambiar de cuenta."
+      },
+      "terminal": {
+        "name": "Terminal",
+        "description": "Mantén tus agentes, pruebas y registros de desarrollo a la vista a la vez."
+      },
+      "editor": {
+        "name": "Editor",
+        "description": "Usa nuestro editor de Markdown al estilo de Notion para escribir notas sin salir de Orca."
+      },
+      "browser": {
+        "name": "Navegador",
+        "description": "Ejecuta tu aplicación en el navegador de Orca, envía elementos seleccionados de la interfaz a los agentes y deja que interactúen con tu página web."
+      },
+      "notes": {
+        "name": "Notas",
+        "subtitle": "Notas y diferencias",
+        "description": "Envía notas de revisión concretas a un agente."
+      },
+      "prView": {
+        "name": "Checks de PR",
+        "subtitle": "Checks y comentarios de PR",
+        "description": "Consulta el estado del PR en la pestaña Checks."
+      },
+      "ship": {
+        "name": "Publica con IA",
+        "description": "Deja que la IA prepare borradores de commits y PR por ti."
+      }
+    },
+    "tiles": {
+      "tile01": {
+        "title": "Orquestación de espacios de trabajo en paralelo"
+      },
+      "tile02": {
+        "title": "Terminal a la altura de Ghostty"
+      },
+      "tile03": {
+        "title": "Integración nativa con GitHub y Linear"
+      },
+      "tile04": {
+        "title": "Agentes de CLI compatibles"
+      },
+      "tile05": {
+        "title": "Navegador integrado + Modo de diseño"
+      },
+      "tile06": {
+        "title": "Espacios de trabajo remotos"
+      },
+      "tile07": {
+        "title": "Editor Monaco, arrastra al agente"
+      },
+      "tile08": {
+        "title": "Revisión en el código, de vuelta al agente"
+      },
+      "tile09": {
+        "title": "Orca CLI"
+      },
+      "tile10": {
+        "title": "Diseñado para el teclado"
+      },
+      "tile11": {
+        "title": "Uso y límites de tasa bajo control"
+      },
+      "tile12": {
+        "title": "PDF, imágenes, CSV, Markdown"
+      }
+    }
+  },
+  "setupScriptPrompt": {
+    "candidateLabels": {
+      "codexEnvironment": "Entorno de Codex",
+      "packageManager": "gestor de paquetes"
+    }
+  },
+  "emulator": {
+    "errors": {
+      "disabled": "El emulador móvil está desactivado en Ajustes.",
+      "notAvailable": "El emulador móvil no está disponible.",
+      "noSession": "No hay ninguna sesión de emulador activa",
+      "noDeviceSpecified": "No se ha especificado ningún dispositivo emulador. Elige un dispositivo predeterminado en Ajustes > Emulador móvil o indica un dispositivo.",
+      "workspaceChanged": "El espacio de trabajo cambió mientras se iniciaba el emulador. Vuelve a conectar el emulador.",
+      "noIosSimulators": "No se encontraron simuladores de iOS. Añade uno en Xcode Settings > Platforms.",
+      "simctlUnavailable": "xcrun simctl no está disponible.",
+      "simulatorToolsUnavailable": "Las herramientas de Xcode Simulator no están disponibles. Instala la versión completa de Xcode, abre Xcode una vez y selecciónalo con `sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer`.",
+      "requiresMacosXcode": "iOS Simulator requiere macOS con Xcode Command Line Tools.",
+      "simulatorNotFound": "No se encontró el simulador {{udid}}. Crea uno desde Xcode > Window > Devices and Simulators.",
+      "serveSimUnavailable": "serve-sim no está disponible.",
+      "serveSimNoEndpoints": "serve-sim no devolvió puntos de conexión de transmisión.",
+      "serveSimEndpointUnreachable": "serve-sim se inició, pero no se puede acceder a su punto de conexión de transmisión.",
+      "androidSdkMissing": "No se encontró el SDK de Android. Instala Android Studio y configura ANDROID_HOME.",
+      "adbUnavailable": "adb no está disponible.",
+      "noAndroidDevices": "No se encontraron dispositivos Android ni AVD. Crea uno en Android Studio.",
+      "androidDeviceNotRunning": "El dispositivo Android \"{{device}}\" no está en ejecución. Inícialo primero.",
+      "unknownDeviceOrAvd": "\"{{device}}\" no es un dispositivo en ejecución ni un AVD conocido.",
+      "avdBootTimeout": "El AVD \"{{avdName}}\" no terminó de iniciarse a tiempo.",
+      "scrcpyDownloadFailed": "No se pudo descargar el servidor de scrcpy: {{detail}}",
+      "scrcpyServerInvalid": "El servidor de scrcpy descargado no era válido o estaba incompleto."
+    },
+    "pane": {
+      "listDevicesFailed": "No se pudieron enumerar los dispositivos emuladores.",
+      "noDevices": "No se encontraron dispositivos emuladores. Añade un simulador de iOS en Xcode o un dispositivo virtual Android en Android Studio.",
+      "startFailed": "No se pudo iniciar el emulador. Asegúrate de que Xcode (iOS) o Android Studio (Android) esté configurado y prueba con otro dispositivo.",
+      "shutdownFailed": "No se pudo apagar el emulador. Vuelve a intentarlo o detenlo desde tu gestor de emuladores."
+    },
+    "settings": {
+      "availabilityCheckFailed": "No se pudo comprobar la disponibilidad del emulador."
+    }
+  },
+  "ephemeralVm": {
+    "errors": {
+      "repoNotFound": "Repositorio no encontrado: {{repoId}}",
+      "remoteRepoUnsupported": "En v1, las recetas de VM efímeras se ejecutan en el host de escritorio local.",
+      "recipeNotFound": "Receta no encontrada: {{recipeId}}",
+      "runtimeNotFound": "Entorno de ejecución de VM efímera desconocido: {{runtimeId}}",
+      "runtimeRepoMissing": "El entorno de ejecución de VM efímera no tiene ID de repositorio: {{runtimeId}}",
+      "provisionCancelled": "Aprovisionamiento cancelado.",
+      "startRefUnresolved": "No se pudo resolver la referencia inicial de la raíz aprovisionada: {{ref}}",
+      "defaultStartRefUnresolved": "No se pudo resolver una referencia inicial predeterminada de la raíz aprovisionada.",
+      "recipeExited": "La receta finalizó con el código {{exitCode}}.",
+      "recipeResultMissing": "La receta no produjo ningún resultado JSON.",
+      "recipeResultNotJsonObject": "La salida stdout de la receta debe ser un único objeto JSON.",
+      "recipeResultPairingCodeInvalid": "El campo pairingCode del resultado de la receta no es un código de emparejamiento de Orca válido.",
+      "recipeResultProjectRootNotAbsolute": "El campo projectRoot del resultado de la receta debe ser una ruta absoluta en el entorno de ejecución.",
+      "provisionedRootResultRequired": "Las recetas de raíz aprovisionada deben devolver schemaVersion 2 con checkoutMode \"provisioned-root\".",
+      "provisionedRootNotConfigured": "El resultado de la receta solicita un checkout con raíz aprovisionada, pero la receta no está configurada para ello.",
+      "destroyExited": "La destrucción finalizó con el código {{exitCode}}.",
+      "destroyFailed": "No se pudo destruir.",
+      "destroyDisabled": "La destrucción está deshabilitada para esta receta.",
+      "cleanupStopped": "Limpieza detenida por el usuario.",
+      "cleanupInterrupted": "La limpieza se interrumpió. Vuelve a intentar la limpieza para continuar.",
+      "sshTargetRemoveFailed": "No se pudo eliminar el destino SSH oculto.",
+      "recipeExitedWithoutCode": "La receta finalizó con un código desconocido.",
+      "destroyExitedWithoutCode": "La destrucción finalizó con un código desconocido."
     }
   }
 }

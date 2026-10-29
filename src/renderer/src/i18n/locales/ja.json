@@ -433,6 +433,47 @@
         "conflictingOverrides": "競合するカスタムショートカットは無視されました: {{actions}}。",
         "readFailed": "キーバインドファイルを読み取れませんでした: {{reason}}"
       }
+    },
+    "network": {
+      "proxyUrlErrors": {
+        "tooLong": "プロキシ URL が長すぎます。",
+        "invalid": "有効なプロキシ URL を入力してください。",
+        "unsupportedProtocol": "http、https、socks、socks4、socks5 のいずれかのプロキシ URL を使用してください。",
+        "missingHost": "プロキシ URL にはホストが必要です。"
+      }
+    },
+    "voice": {
+      "modelDescriptions": {
+        "parakeetV3": "ヨーロッパの 25 言語で最高の精度。句読点、大文字・小文字、単語単位のタイムスタンプに対応。",
+        "parakeetV2": "英語のみ。v3 と同程度の精度で、より高速。句読点と大文字・小文字に対応。",
+        "zipformerBilingual": "中国語 + 英語の混在に対応。低遅延のリアルタイムストリーミング。",
+        "paraformerBilingual": "中国語（標準中国語 + 方言）+ 英語。なまりや地域ごとの中国語に強い。",
+        "zipformerStreamingEn": "英語のみ。2,000 万パラメーターの軽量モデル。速度とサイズのバランスが良好。",
+        "zipformerStreamingZh": "中国語のみ。1,400 万パラメーターの超軽量モデル。リソースの少ないデバイスに最適。",
+        "zipformerStreamingKo": "韓国語のみ。低遅延のリアルタイムストリーミング。",
+        "parakeetJa": "日本語のみ。3.5 万時間以上の自然な音声で学習。句読点に対応。",
+        "whisperTiny": "90 以上の言語に対応。Parakeet より精度は低いものの、対応言語が最も豊富。",
+        "senseVoice": "中国語、英語、日本語、韓国語、広東語に対応。言語を自動検出。",
+        "gpt4oMiniTranscribe": "高精度で低コストのクラウド文字起こし。OpenAI API キーが必要です。",
+        "gpt4oTranscribe": "より高精度なクラウド文字起こし。OpenAI API キーが必要です。"
+      }
+    },
+    "diagnostics": {
+      "errors": {
+        "creatingDisabled": "確認用ファイルの作成は無効になっています",
+        "sendingDisabled": "診断情報の送信は無効になっています",
+        "sendingNotConfigured": "このビルドでは診断情報の送信が設定されていません",
+        "expiredBeforeSending": "確認用ファイルの有効期限が切れています。送信する前に新しく作成してください",
+        "expiredBeforeOpening": "確認用ファイルの有効期限が切れています。開く前に新しく作成してください",
+        "previewNotOpened": "送信する前に確認用ファイルを開いてください",
+        "previewOpenFailed": "確認用ファイルを開けませんでした",
+        "deleteNotConfigured": "このビルドでは診断情報のアップロード先エンドポイントが設定されていません",
+        "createFailed": "確認用ファイルを作成できませんでした",
+        "openFailed": "確認用ファイルを開けませんでした",
+        "sendFailed": "診断情報を送信できませんでした",
+        "discardFailed": "確認用ファイルを破棄できませんでした",
+        "deleteFailed": "送信済みの診断情報を削除できませんでした"
+      }
     }
   },
   "menu": {
@@ -11392,9 +11433,7 @@
         },
         "pluginThemeApply": {
           "nowUsing": "{{value0}} を使用中",
-          "switchBack": "元に戻す",
-          "setAsLight": "{{value0}} をライトテーマに設定しました",
-          "setAsDark": "{{value0}} をダークテーマに設定しました"
+          "switchBack": "元に戻す"
         },
         "pluginError": {
           "installManifestMissing": "読み取り可能なorca-plugin.jsonが見つかりません。プラグインのルートフォルダーを選択してください。",
@@ -11405,6 +11444,7 @@
           "installGit": "この Git リビジョンを取得できませんでした。URL、#ref、アクセス権を確認してください。",
           "invalidManifestMissing": "プラグインルートにorca-plugin.jsonがありません。追加してからプラグインを更新してください。",
           "invalidManifest": "orca-plugin.jsonが無効です。修正してからプラグインを更新してください。",
+          "installedManifestUnloadable": "このバージョンはこの Orca では読み込めません。更新するか再インストールしてください。",
           "invalidArtifact": "ワーカーまたはパネルのファイルが見つからないか安全ではありません。修正してから更新してください。",
           "consentChanged": "確認中にこのプラグインが変更されました。もう一度確認してください。"
         },
@@ -12399,6 +12439,7 @@
           "noAccessReach": "自身のファイル以外にはアクセスしません"
         },
         "PluginManagerRows": {
+          "reinstall": "再インストール",
           "crashedCount": "{{value0}} 回連続でクラッシュしました",
           "crashed": "起動中にクラッシュしました",
           "remove": "削除…",
@@ -19032,6 +19073,27 @@
         "noLiveTerminal": "利用可能な稼働中のターミナルがありません。",
         "commandCanceled": "入力欄が閉じられたため、Chat UI コマンドはキャンセルされました。",
         "commandRejected": "ターミナルがコマンドを受け付けませんでした。"
+      },
+      "sessionOptionErrors": {
+        "startOnly": "このオプションはセッション開始時にのみ設定できます。",
+        "modelRejected": "Claude は現在のモデルを維持しました。",
+        "modelUnverified": "モデルの変更を確認できませんでした。ターミナルを開いて確認してください。",
+        "unknownOption": "不明なセッションオプション: {{id}}",
+        "agentPickerOnly": "このオプションは Agent の選択画面で変更してください。",
+        "toggleBaselineUnknown": "現在の値が不明です。代わりに「切り替える」操作を使用してください。",
+        "afterStartOnly": "このオプションはセッション開始後にのみ使用できます。",
+        "valueRequired": "このオプションには値が必要です。",
+        "toggleValueKnown": "このオプションの値は判明しています。代わりに「オン」か「オフ」を選択してください。"
+      },
+      "composerErrors": {
+        "goalObjectiveMissing": "/goal の後に目標を記述してください。",
+        "commandUnavailable": "/{{name}} はチャットセッションでは使用できません。使用可能なコマンドはスラッシュメニューで確認してください。",
+        "commandTakesNoArguments": "/{{name}} は引数なしで使用してください。",
+        "commandUnsupportedByHost": "このチャットホストは /{{name}} に対応していません。",
+        "modelPickerFailed": "モデル選択画面を開けませんでした。",
+        "effortPickerFailed": "推論レベル選択画面を開けませんでした。",
+        "modelApplyFailed": "モデル {{value}} を適用できませんでした。",
+        "effortApplyFailed": "推論レベル {{value}} を適用できませんでした。"
       }
     },
     "tab": {
@@ -19948,6 +20010,12 @@
       "searching": "検索中…",
       "searchFailed": "検索を完了できませんでした。もう一度お試しください。",
       "refreshFailed": "プレビューの更新に失敗しました。以前のバージョンを表示しています。現在の内容はソース表示で確認してください。"
+    },
+    "pdfExport": {
+      "errors": {
+        "noContent": "エクスポートする内容がありません",
+        "timedOut": "エクスポートがタイムアウトしました"
+      }
     }
   },
   "featureTips": {
@@ -19970,7 +20038,10 @@
       "listening": "リスニング…",
       "unassignedInstruction": "フォーカスされたペインで音声ディクテーションを開始する前に、ディクテーションショートカットを割り当てます。",
       "shortcutInstruction": "ターミナル、エディター、または Agent のプロンプトにフォーカスし、<shortcut/> を押すと音声入力を開始します。もう一度 <shortcut/> を押すと停止します。",
-      "changeInSettings": "モデル、ディクテーションモード、ショートカットは、<link>設定 → 音声</link>でいつでも変更できます。"
+      "changeInSettings": "モデル、ディクテーションモード、ショートカットは、<link>設定 → 音声</link>でいつでも変更できます。",
+      "title": "どのペインでも音声入力",
+      "description": "フォーカス中のペインで音声ディクテーションを開始し、停止するには同じショートカットをもう一度押します。",
+      "cta": "音声ディクテーションを設定"
     },
     "sessionSearch": {
       "ageHours": "2時間前",
@@ -20015,8 +20086,23 @@
       "recent3Text": "メモの初版です。分野別にまとめています。",
       "recent3Title": "リリースノートの下書き",
       "startSearching": "検索を開始",
-      "changeInSettings": "<link>設定 → Agent セッションの検索</link>でいつでも変更または無効化できます。"
-    }
+      "changeInSettings": "<link>設定 → Agent セッションの検索</link>でいつでも変更または無効化できます。",
+      "title": "すべての Agent セッションを検索",
+      "description": "過去の会話を内容から見つけて、Agent が中断したところから再開できます。",
+      "cta": "セッション検索を有効にする"
+    },
+    "eyebrowNew": "新機能",
+    "eyebrowTip": "ヒント",
+    "orcaCli": {
+      "title": "Orca CLI で Agent に Orca を操作させる",
+      "description": "Agent が子ワークツリーを連携させ、ワークツリー間で通信できるようにします。",
+      "cta": "CLI とスキルをインストール"
+    },
+    "cmdJPalette": {
+      "title": "<shortcut> でワークツリーに移動",
+      "description": "ワークツリーの検索、タブの切り替え、設定の調整、新しいワークツリーの作成を、すべてキーボードだけで行えます。"
+    },
+    "gotIt": "了解"
   },
   "quickOpen": {
     "moreMatchesAvailable": "さらに多くの一致が利用可能になる可能性があります。検索を絞り込んで結果を絞り込みます。",
@@ -20299,7 +20385,33 @@
     "antigravityIdeToCli": "IDE → CLI",
     "antigravity2ToCli": "2.0 → CLI",
     "continueInCli": "CLIで続行",
-    "continueInCliNewTab": "新規タブで CLI を続行する"
+    "continueInCliNewTab": "新規タブで CLI を続行する",
+    "scanIssues": {
+      "issuesOmitted": "その他のスキャンの問題は省略されました。",
+      "sessionMetadataUnreadable": "今回のスキャンではセッションのメタデータを読み取れませんでした。",
+      "openCodeScannerUnavailable": "バックグラウンドスキャナーを起動できなかったため、OpenCode の履歴をスキップしました。アプリの応答性は保たれています。",
+      "openCodeScanIncomplete": "OpenCode の履歴スキャンが完了しませんでした: {{detail}}",
+      "openCodeWslReaderPreparing": "WSL 用 SQLite リーダーを準備しています。セットアップ完了後に Vault を更新してください。",
+      "openCodeWslReaderNotPrepared": "WSL 用 SQLite リーダーの準備ができていません。Vault を更新して再試行してください。",
+      "openCodeDatabaseBusy": "{{label}} が現在 {{name}} に書き込み中のため、履歴をスキップしました。次回の更新時に再度読み取ります。",
+      "openCodeDatabaseUnreadable": "{{name}} 内の {{label}} の履歴を読み取れませんでした: {{detail}}",
+      "openCodeWslDatabaseUnsupported": "WSL 内の {{label}} セッションを Windows から検索することはまだできません。",
+      "openCodeWriteAheadLogUnreadable": "{{name}} 内の {{label}} の履歴を読み取れませんでした。このファイルシステムでは先行書き込みログを読み取り専用で開けません。ログを書き出すには {{label}} を正常に終了してください。",
+      "wslTranscriptFsSlow": "ファイルシステムへのアクセスに時間がかかりすぎているため、WSL のセッション記録ファイルを一時的に利用できません。少し待ってから再試行するか、問題が続く場合は Orca を再起動してください。",
+      "wslTranscriptFsCapacity": "ファイルシステムへのリクエストがすでに多数待機しているため、WSL のセッション記録を一時的に検出できません。少し待ってから再試行するか、問題が続く場合は Orca を再起動してください。",
+      "wslTranscriptFsProcessFailed": "ファイルシステムの補助プロセスで障害が発生したため、WSL のセッション記録ファイルを一時的に利用できません（{{detail}}）。少し待ってから再試行するか、問題が続く場合は Orca を再起動してください。",
+      "wslDistroNotRunning": "WSL ディストリビューション「{{distro}}」が実行されていないため、WSL のセッション記録ファイルを利用できません。起動するには、そのディストリビューションでターミナルを開いてください。",
+      "wslDistroUnverifiable": "「{{distro}}」が実行中かどうか WSL から応答がなかったため、WSL のセッション記録ファイルを利用できません。少し待ってから再試行してください。",
+      "wslSessionsFromLastScan": "WSL を確認できませんでした。セッションは前回のスキャン時のものです。",
+      "scopePathsTruncated": "最初の {{limit}} 件のプロジェクトパスのみをスキャンしました。",
+      "invalidResultsSkipped_other": "Agent セッション履歴の無効な結果項目 {{count}} 件をスキップしました。",
+      "scanTimedOutOnSshHost": "この SSH ホストでセッションスキャンが {{seconds}} 秒後にタイムアウトしました。更新して再試行してください。",
+      "scanTimedOut": "セッションスキャンが {{seconds}} 秒後にタイムアウトしました。マシンがビジー状態の可能性があります。更新して再試行してください。",
+      "scannerPaused": "繰り返し失敗したため、セッションのスキャンを一時停止しました。更新して再試行してください。",
+      "scannerBusy": "実行中のセッションスキャンが多すぎます。少し待ってから更新してください。",
+      "scannerMissing": "この Orca にはセッションスキャナーが含まれていません。Orca を再インストールすると復元されます。",
+      "scannerStopped": "セッションスキャナーが予期せず停止しました。更新して再試行してください。"
+    }
   },
   "common": {
     "retry": "再試行",
@@ -20913,7 +21025,12 @@
       "dialogTitle": "チャットの自動命名に失敗しました",
       "dialogDescriptionStart": "Orca は",
       "dialogDescriptionEnd": "の名前を最初のメッセージから生成できませんでした。",
-      "settings": "設定"
+      "settings": "設定",
+      "errors": {
+        "noName": "チャット名 Agent から名前が返されませんでした。",
+        "agentNotRun": "Orca はチャット名 Agent を実行できませんでした。",
+        "noAgentAvailable": "このワークスペースで実行できるチャット名 Agent はありません。"
+      }
     }
   },
   "jira": {
@@ -21822,6 +21939,22 @@
         "error": "選択したオートメーションのホストで、プロジェクトのセットアップに失敗しました。",
         "unsupported": "選択したオートメーションのホストは、このプロジェクトをサポートしていません。"
       }
+    },
+    "extraAgentArgs": {
+      "errors": {
+        "tooLarge": "追加の引数は 4 KB 以下にしてください。",
+        "controlCharacters": "追加の引数に制御文字や改行は使用できません。",
+        "invalid": "追加の引数が無効です: {{detail}}",
+        "shellSyntax": "{{text}} には、追加の引数では許可されていないシェル構文が使われています。",
+        "terminator": "追加の引数に「--」は使用できません。",
+        "notAnOption": "「{{token}}」はオプションではありません。{{agent}} の追加の引数で使用できるのは次のものだけです: {{allowed}}。",
+        "optionNotAllowed": "{{agent}} の追加の引数に「{{option}}」は使用できません。使用可能: {{allowed}}。",
+        "missingValue": "「{{option}}」には値が必要です。",
+        "valueNotAllowed": "「{{option}} {{value}}」は使用できません。{{agent}} の追加の引数で使用できるのは「{{option}} {{prefix}}<level>」だけです。",
+        "modelRepeated": "追加の引数でモデルが複数回指定されています。",
+        "effortRepeated": "追加の引数で推論レベルが複数回指定されています。"
+      },
+      "hostUpdateRequired": "追加の引数を使用するには、このホストの Orca を更新してください。"
     }
   },
   "codeHost": {
@@ -21888,6 +22021,176 @@
         "mrSourceBranchMissing": "MR !{{number}} にソースブランチがありません。",
         "forkHeadUnresolved": "フェッチ後にフォークの MR !{{number}} のヘッドを解決できませんでした。"
       }
+    }
+  },
+  "featureWall": {
+    "workflows": {
+      "workspaces": {
+        "title": "ワークスペース",
+        "lede": "Orca はタスクごとに独立したワークスペースを用意し、Agent が並行して作業できるようにします。"
+      },
+      "tasks": {
+        "title": "タスク",
+        "lede": "GitHub や Linear から直接作業を開始できます。"
+      },
+      "agents": {
+        "title": "Agent",
+        "lede": "複数の Agent を同時に実行し、進捗を追跡。必要に応じて自動化で Orca を操作できます。"
+      },
+      "workbench": {
+        "title": "ワークベンチ",
+        "lede": "使い慣れたターミナル環境を Orca に取り込み、ペインを分割してサーバー、テスト、ログ、Agent を並べて実行できます。"
+      },
+      "review": {
+        "title": "コードレビュー",
+        "lede": "変更内容を確認し、的確なフィードバックを Agent に返せます。"
+      }
+    },
+    "steps": {
+      "statuses": {
+        "name": "可視性",
+        "subtitle": "Agent の可視性",
+        "description": "どの Agent が作業中、待機中、稼働中、ブロック中かを把握できます。"
+      },
+      "orchestration": {
+        "name": "オーケストレーション",
+        "description": "Agent が Orca のワークスペースを管理・連携させ、より大きなタスクを実行できるようにします。"
+      },
+      "usage": {
+        "name": "使用量",
+        "description": "接続済みの全アカウントの使用量とレート制限を確認し、切り替え時を把握できます。"
+      },
+      "terminal": {
+        "name": "ターミナル",
+        "description": "Agent、テスト、開発ログを同時に確認できます。"
+      },
+      "editor": {
+        "name": "エディター",
+        "description": "Notion スタイルの Markdown エディターで、Orca を離れずにノートを書けます。"
+      },
+      "browser": {
+        "name": "ブラウザ",
+        "description": "Orca のブラウザでアプリを実行し、選択した UI 要素を Agent に送信。Agent にウェブページを操作させることもできます。"
+      },
+      "notes": {
+        "name": "ノート",
+        "subtitle": "ノートと差分",
+        "description": "要点を絞ったレビューコメントを Agent に送信できます。"
+      },
+      "prView": {
+        "name": "PR チェック",
+        "subtitle": "PR チェックとコメント",
+        "description": "「チェック」タブで PR のステータスを確認できます。"
+      },
+      "ship": {
+        "name": "AI でリリース",
+        "description": "AI にコミットと PR の下書きを作成させることができます。"
+      }
+    },
+    "tiles": {
+      "tile01": {
+        "title": "ワークスペースの並列オーケストレーション"
+      },
+      "tile02": {
+        "title": "Ghostty クラスのターミナル"
+      },
+      "tile03": {
+        "title": "GitHub・Linear とネイティブ連携"
+      },
+      "tile04": {
+        "title": "対応する CLI Agent"
+      },
+      "tile05": {
+        "title": "内蔵ブラウザ + デザインモード"
+      },
+      "tile06": {
+        "title": "リモートワークスペース"
+      },
+      "tile07": {
+        "title": "Monaco エディターから Agent へドラッグ"
+      },
+      "tile08": {
+        "title": "インラインレビューを Agent にフィードバック"
+      },
+      "tile09": {
+        "title": "Orca CLI"
+      },
+      "tile10": {
+        "title": "キーボード中心の操作"
+      },
+      "tile11": {
+        "title": "使用量とレート制限を把握"
+      },
+      "tile12": {
+        "title": "PDF、画像、CSV、Markdown"
+      }
+    }
+  },
+  "setupScriptPrompt": {
+    "candidateLabels": {
+      "codexEnvironment": "Codex 環境",
+      "packageManager": "パッケージマネージャー"
+    }
+  },
+  "emulator": {
+    "errors": {
+      "disabled": "モバイルエミュレータは設定で無効になっています。",
+      "notAvailable": "モバイルエミュレータは利用できません。",
+      "noSession": "アクティブなエミュレータセッションがありません",
+      "noDeviceSpecified": "エミュレータのデバイスが指定されていません。設定 > モバイルエミュレータでデフォルトのデバイスを選択するか、デバイスを指定してください。",
+      "workspaceChanged": "エミュレータの起動中にワークスペースが変更されました。エミュレータを再接続してください。",
+      "noIosSimulators": "iOS シミュレーターが見つかりません。Xcode Settings > Platforms で追加してください。",
+      "simctlUnavailable": "xcrun simctl を利用できません。",
+      "simulatorToolsUnavailable": "Xcode Simulator のツールを利用できません。Xcode の完全版をインストールし、一度開いてから `sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer` で選択してください。",
+      "requiresMacosXcode": "iOS シミュレーターには、Xcode Command Line Tools をインストールした macOS が必要です。",
+      "simulatorNotFound": "シミュレーター {{udid}} が見つかりません。Xcode > Window > Devices and Simulators で作成してください。",
+      "serveSimUnavailable": "serve-sim を利用できません。",
+      "serveSimNoEndpoints": "serve-sim からストリームのエンドポイントが返されませんでした。",
+      "serveSimEndpointUnreachable": "serve-sim は起動しましたが、ストリームのエンドポイントにアクセスできません。",
+      "androidSdkMissing": "Android SDK が見つかりません。Android Studio をインストールし、ANDROID_HOME を設定してください。",
+      "adbUnavailable": "adb を利用できません。",
+      "noAndroidDevices": "Android デバイスも AVD も見つかりません。Android Studio で作成してください。",
+      "androidDeviceNotRunning": "Android デバイス「{{device}}」は起動していません。先に起動してください。",
+      "unknownDeviceOrAvd": "「{{device}}」は起動中のデバイスでも既知の AVD でもありません。",
+      "avdBootTimeout": "AVD「{{avdName}}」の起動が時間内に完了しませんでした。",
+      "scrcpyDownloadFailed": "scrcpy サーバーをダウンロードできませんでした: {{detail}}",
+      "scrcpyServerInvalid": "ダウンロードした scrcpy サーバーは無効または不完全でした。"
+    },
+    "pane": {
+      "listDevicesFailed": "エミュレータのデバイス一覧を取得できませんでした。",
+      "noDevices": "エミュレータのデバイスが見つかりません。Xcode で iOS シミュレーターを追加するか、Android Studio で Android 仮想デバイスを追加してください。",
+      "startFailed": "エミュレータを起動できませんでした。Xcode（iOS）または Android Studio（Android）が設定されていることを確認してから、別のデバイスを試してください。",
+      "shutdownFailed": "エミュレータを終了できませんでした。再試行するか、エミュレータマネージャーから停止してください。"
+    },
+    "settings": {
+      "availabilityCheckFailed": "エミュレータが利用可能か確認できませんでした。"
+    }
+  },
+  "ephemeralVm": {
+    "errors": {
+      "repoNotFound": "リポジトリが見つかりません: {{repoId}}",
+      "remoteRepoUnsupported": "v1 では、一時的な VM のレシピはローカルのデスクトップホストで実行されます。",
+      "recipeNotFound": "レシピが見つかりません: {{recipeId}}",
+      "runtimeNotFound": "不明な一時 VM ランタイム: {{runtimeId}}",
+      "runtimeRepoMissing": "一時 VM ランタイムにリポジトリ ID がありません: {{runtimeId}}",
+      "provisionCancelled": "プロビジョニングがキャンセルされました。",
+      "startRefUnresolved": "プロビジョニングされたルートの開始参照を解決できませんでした: {{ref}}",
+      "defaultStartRefUnresolved": "プロビジョニングされたルートのデフォルトの開始参照を解決できませんでした。",
+      "recipeExited": "レシピはコード {{exitCode}} で終了しました。",
+      "recipeResultMissing": "レシピが JSON の結果を出力しませんでした。",
+      "recipeResultNotJsonObject": "レシピの stdout は単一の JSON オブジェクトである必要があります。",
+      "recipeResultPairingCodeInvalid": "レシピの結果の pairingCode は有効な Orca ペアリングコードではありません。",
+      "recipeResultProjectRootNotAbsolute": "レシピの結果の projectRoot はランタイム内の絶対パスである必要があります。",
+      "provisionedRootResultRequired": "プロビジョニングされたルートレシピは、schemaVersion 2 と checkoutMode \"provisioned-root\" を返す必要があります。",
+      "provisionedRootNotConfigured": "レシピの結果はプロビジョニングされたルートでのチェックアウトを要求していますが、レシピはそのように設定されていません。",
+      "destroyExited": "破棄処理はコード {{exitCode}} で終了しました。",
+      "destroyFailed": "破棄に失敗しました。",
+      "destroyDisabled": "このレシピでは破棄が無効になっています。",
+      "cleanupStopped": "ユーザーがクリーンアップを停止しました。",
+      "cleanupInterrupted": "クリーンアップが中断されました。続行するにはクリーンアップを再試行してください。",
+      "sshTargetRemoveFailed": "非表示の SSH ターゲットを削除できませんでした。",
+      "recipeExitedWithoutCode": "レシピは不明なコードで終了しました。",
+      "destroyExitedWithoutCode": "破棄処理は不明なコードで終了しました。"
     }
   }
 }

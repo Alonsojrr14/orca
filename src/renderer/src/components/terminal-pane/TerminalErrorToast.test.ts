@@ -210,6 +210,15 @@ describe('humanizeTerminalError', () => {
     expect(humanizeTerminalError('Paste failed.')).toBe('Paste failed.')
   })
 
+  it("drops Electron's IPC wrapper from a refusal main threw, keeping other lines as they are", () => {
+    const wrapped =
+      "Error invoking remote method 'runtimeEnvironments:call': Error: Ubuntu was stopped. Start it again."
+    expect(humanizeTerminalError(wrapped)).toBe('Ubuntu was stopped. Start it again.')
+    expect(humanizeTerminalError(`Paste failed.\n${wrapped}\n  indented detail`)).toBe(
+      'Paste failed.\nUbuntu was stopped. Start it again.\n  indented detail'
+    )
+  })
+
   it('replaces the terminal-host-gone code with copy that explains the loss', () => {
     const humanized = humanizeTerminalError('terminal_host_gone')
     expect(humanized).not.toContain('terminal_host_gone')
