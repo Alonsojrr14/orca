@@ -33,7 +33,7 @@ export function countStatusCutWork() {
   function watchItems(items: readonly AgentJournalRenderItem[]) {
     let iterators = 0
     return new Proxy(items, {
-      get(target, property, receiver) {
+      get(target, property) {
         if (property === 'map') {
           return function map<U>(
             callback: (
@@ -59,16 +59,23 @@ export function countStatusCutWork() {
             return undefined
           }
         }
-        if (typeof property === 'string' && /^\d+$/.test(property)) {
-          counts.backward++
+        if (property === 'length') {
+          return target.length
         }
-        return Reflect.get(target, property, receiver)
+        if (typeof property === 'string' && /^(0|[1-9]\d*)$/.test(property)) {
+          const index = Number(property)
+          if (Number.isSafeInteger(index)) {
+            counts.backward++
+            return target[index]
+          }
+        }
+        throw new Error(`Uncounted status-cut item property: ${String(property)}`)
       }
     })
   }
   function watchSubmissions(submissions: readonly Pick<AgentJournalSubmission, 'dispatchState'>[]) {
     return new Proxy(submissions, {
-      get(target, property, receiver) {
+      get(target, property) {
         if (property === 'some') {
           return (predicate: Parameters<typeof target.some>[0], thisArg?: unknown) =>
             target.some((item, i, rows) => {
@@ -76,7 +83,7 @@ export function countStatusCutWork() {
               return predicate.call(thisArg, item, i, rows)
             })
         }
-        return Reflect.get(target, property, receiver)
+        throw new Error(`Uncounted status-cut submission property: ${String(property)}`)
       }
     })
   }
